@@ -1,7 +1,8 @@
 # vpy_slideshow
 ### a python/vapoursynth script consumed by ffmpeg
+### to produce an .mp4 slideshow from images and video clips.
 
-It works, after a fashion.  As an example.
+It works, after a fashion.  As an example only.
 
 But don't use this as it's a terrible hack-up of good stuff proivded by __AI__ in thread   
 https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio 
