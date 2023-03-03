@@ -13,4 +13,4 @@ python "\path_to\main_encode.py" "\path_to\sources_script.vpy" "\path_to\slidesh
 ```
 Note:   
 - temporary audio and video files are created in the current-working-folder
-- under development, it may only create the intermedia videop/audio file(s) and not the fial "\path_to\slideshow.mp4"
+- under development, it may only create the intermedia videop/audio file(s) and not the final "\path_to\slideshow.mp4"
