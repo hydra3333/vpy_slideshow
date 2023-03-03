@@ -14,7 +14,7 @@ which caused me to change my thinking and not use .vpy directly into standalone 
 For info only, after we install python, pip is missing.   
 Depending on the o/s and whatnot that can be difficult to fix.   
 We get around it by first uising portable pip to install real pip and then we're away.   
-We ALWAYS ALWAYS ONLY run the stuff below as Administrator to ensure it all gets installed into a global place, otherwise it will be installed on a per-user basis into temporary per-user folders :(
+We **ALWAYS ALWAYS ONLY** run the stuff below as Administrator to ensure it all gets installed into a global place, otherwise it will be installed on a per-user basis into temporary per-user folders :(
 ```
 ECHO ONLY ONLY ONLY EVER RUN THIS AS ADMIN !!!!
 ECHO ONLY ONLY ONLY EVER RUN THIS AS ADMIN !!!!
