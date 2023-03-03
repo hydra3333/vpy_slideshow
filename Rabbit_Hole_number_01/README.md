@@ -4,7 +4,7 @@
 It works, after a fashion.  As an example only.    
 
 
-It partially got around this:
+It partially got around this:   
 The exercise failed miserably with native ffmpeg "-f concat" using the "scale" and "pad" filters ... 
 as soon as it saw an odd dimension then the image was stretched either horizontally or vertically 
 no matter what options I tried ... and I tried a lot.   
