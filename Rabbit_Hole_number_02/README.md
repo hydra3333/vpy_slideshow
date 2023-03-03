@@ -18,4 +18,4 @@ May even end up like that in a batch script which we usually create, it allows f
 Note:   
 - temporary audio and video files are created in the current-working-folder
 - under development, it may only create the intermediate video/audio file(s) and not the final "\path_to\slideshow.mp4"
-- the load thingy has a gui ... we aren't into that, only cli, so will look at fiddling with that later ... a pity about all the great workl that went into that
+- the load thingy has a gui ... we aren't into that, only cli, so will look at fiddling with that later ... a pity about all the great work that went into that
