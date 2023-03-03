@@ -26,9 +26,10 @@ def main(script, output_path):
 	# this ONLY works if VSPip.exe and FFMPEG are in the same folder as portable vapoursynth
 	# however the .py and .vpy scripts can be of other folders
 	#
-    PATH        = Path(os.getcwd())			#??? #Path(sys._MEIPASS) #if frozen
+    PATH        = Path(os.getcwd())				#??? #Path(sys._MEIPASS) #if frozen
     #script      = str(PATH / 'python_modules' / f'{script}')	# {script} is the SOURCES script
-    script      = str(PATH / f'{script}')	# {script} is the SOURCES script in the current folder
+    #script      = str(PATH / f'{script}')		# {script} is the SOURCES script in the current folder
+    script      = str(f'{script}')				# {script} is the fully qualified SOURCES script filename
     VSPipe      = str(r'C:\SOFTWARE\Vapoursynth-x64\VSPipe.exe')
     ffmpeg      = str(r'C:\SOFTWARE\Vapoursynth-x64\ffmpeg_OpenCL.exe')
     x264        = str(r'C:\SOFTWARE\ffmpeg\0-homebuilt-x64\x264.exe')

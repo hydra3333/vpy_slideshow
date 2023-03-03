@@ -5,3 +5,12 @@
 See these from \_AI\_   
 https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio/page2#post2678789   
 https://github.com/UniversalAl/load    
+
+
+For now, perhaps use something like:
+```
+python "\path_to\main_encode.py" "\path_to\sources_script.vpy" "\path_to\slideshow.mp4"
+```
+Note:   
+- temporary audio and video files are created in the current-working-folder
+- under development, it may only create the intermedia videop/audio file(s) and not the fial "\path_to\slideshow.mp4"
