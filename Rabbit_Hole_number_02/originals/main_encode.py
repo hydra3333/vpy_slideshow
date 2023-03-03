@@ -1,0 +1,168 @@
+'''
+	encode.py
+	
+	https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio/page2#post2678789
+	use this script to encode output video, where it mixed images, mp4 and m2ts videos and rotated images, so this was encode.py:
+
+	Depends on code from:
+		Class_Clip.py
+		load.py
+		load_viewfunc.py
+		get_clip.py
+
+	Also see:
+		example_main_loop_code.py
+'''
+
+import vapoursynth as vs
+from vapoursynth import core
+from subprocess import Popen, PIPE
+from pathlib import Path
+import sys
+import os
+
+def main(script, output_path):
+	#
+	# this ONLY works if VSPip.exe and FFMPEG are in the same folder as portable vapoursynth
+	# however the .py and .vpy scripts can be of other folders
+	#
+    PATH        = Path(os.getcwd())				#??? #Path(sys._MEIPASS) #if frozen
+    #script      = str(PATH / 'python_modules' / f'{script}')	# {script} is the SOURCES script
+    #script      = str(PATH / f'{script}')		# {script} is the SOURCES script in the current folder
+    script      = str(f'{script}')				# {script} is the fully qualified SOURCES script filename
+    VSPipe      = str(r'C:\SOFTWARE\Vapoursynth-x64\VSPipe.exe')
+    ffmpeg      = str(r'C:\SOFTWARE\Vapoursynth-x64\ffmpeg_OpenCL.exe')
+    x264        = str(r'C:\SOFTWARE\ffmpeg\0-homebuilt-x64\x264.exe')
+    neroAacEnc  = str(r'C:\SOFTWARE\NeroAAC\neroAacEnc.exe')
+    Mp4box      = str(r'C:\SOFTWARE\mp4box\MP4Box.exe')
+    #
+	##import loadDLL #if frozen
+    ##VS_PLUGINS_DIR = PATH / 'vapoursynth64/plugins'
+    ##isDLLS_LOADED, DLLS_LOG = loadDLL.vapoursynth_dlls(core, VS_PLUGINS_DIR)
+    #
+	path       = Path(output_path)						# TURN A filename STRING INTO A PATH without the filename
+    #temp_video = str(path.parent / f'{path.stem}.264')
+    temp_video = str(path.parent / f'{path.stem}.tmp.mp4')
+    temp_audio = str(path.parent / f'{path.stem}.tmp.m4a')
+
+    vspipe_video = [VSPipe, '--container',  		'y4m',
+                            script,
+                            '-']
+
+    x264_cmd = [x264,       #'--frames',           f'{len(video)}',
+                            '--demuxer',           'y4m',  
+                            '--crf',               '18',
+                            '--vbv-maxrate',       '30000',
+                            '--vbv-bufsize',       '30000',
+                            '--keyint',            '60',
+                            '--tune',              'film',
+                            '--colorprim',         'bt709',
+                            '--transfer',          'bt709',
+                            '--colormatrix',       'bt709',
+                            '--output',             temp_video,
+                            '-']
+	ffmpeg_vid_HQ_cmd = [ffmpeg
+							'-hide_banner',			'',
+							'-v',					'info',
+							'-stats',				'',
+							'-f',					'yuv4mpegpipe',
+							'-i',					'pipe:',
+							'-probesize',			'200M',
+							'-analyzeduration',		'200M',
+							'-sws_flags',			'lanczos+accurate_rnd+full_chroma_int+full_chroma_inp',
+							'-filter_complex',		'"colorspace=all=bt709:space=bt709:trc=bt709:primaries=bt709:range=pc:format=yuv420p:fast=0,format=yuv420p,setdar=16/9"',
+							# SD DVD is -colorspace bt470bg -color_primaries bt470bg -color_trc gamma28 -color_range tv
+							'-colorspace',			'bt709',
+							'-color_primaries',		'bt709',
+							'-color_trc',			'bt709',
+							'-color_range',			'pc',		# use tv or mpeg for limited range
+							'-strict experimental',	'',
+							'c:v',					'h264_nvenc',
+							'-preset',				'p7',
+							'-multipass',			'fullres',
+							'-forced-idr',			'1',
+							'-g',					'25',		# based on 25 fps
+							'-coder:v',				'cabac',
+							'-spatial-aq',			'1',		# 3900x with nvidia 2060 Super uses -spatial-aq 1 -temporal-aq 1 -dpb_size 0 -bf:v 3 -b_ref_mode:v 0 # otherwise omit these 5 parameters
+							'-temporal-aq',			'1',		# 3900x with nvidia 2060 Super uses -spatial-aq 1 -temporal-aq 1 -dpb_size 0 -bf:v 3 -b_ref_mode:v 0 # otherwise omit these 5 parameters
+							'-dpb_size',			'0',		# 3900x with nvidia 2060 Super uses -spatial-aq 1 -temporal-aq 1 -dpb_size 0 -bf:v 3 -b_ref_mode:v 0 # otherwise omit these 5 parameters
+							'-bf:v',				'3',		# 3900x with nvidia 2060 Super uses -spatial-aq 1 -temporal-aq 1 -dpb_size 0 -bf:v 3 -b_ref_mode:v 0 # otherwise omit these 5 parameters
+							'-b_ref_mode:v',		'0',		# 3900x with nvidia 2060 Super uses -spatial-aq 1 -temporal-aq 1 -dpb_size 0 -bf:v 3 -b_ref_mode:v 0 # otherwise omit these 5 parameters
+							'-rc:v',				'vbr',
+							'-b:v',					'9000000',
+							'-minrate:v',			'3000000',
+							'-maxrate:v',			'15000000',
+							'-bufsize',				'15000000',
+							'-profile:v',			'high',
+							'-level',				'5.2',
+							'-movflags',			'+faststart+write_colr',
+							'-an',					'',	# NO AUDIO, ELSE USE AAC: -c:a libfdk_aac -ac 2 -b:a 224K -ar 44100 -cutoff 18000
+							'-y',					temp_video]
+
+    vspipe_audio = [VSPipe, '--outputindex', '1',
+                            '--container',  'wav',
+                            script,
+                            '-']
+
+    aac_cmd = [neroAacEnc,  '-ignorelength',
+                            '-lc',
+                            '-cbr', '96000',
+                            '-if', '-',
+                            '-of', temp_audio]
+
+    ffmpeg_aac_cmd = [ffmpeg
+							'-hide_banner',			'',
+							'-v',					'info',
+							'-stats',				'',
+							'-f',					'yuv4mpegpipe',
+							'-i',					'pipe:',
+							'-vn',					'',
+							'-c:a',					'libfdk_aac',
+							'-ac',					'2',
+							'-b:a',					'224K',
+							'-ar',					'44100',
+							'-cutoff',				'18000',
+							'-y',					temp_audio]
+
+    mp4box_cmd = [Mp4box,	'-add' , f'{temp_video}',
+                            '-add',  f'{temp_audio}#audio',
+                            '-new',  output_path]
+
+    ffmpeg_mux_cmd = [ffmpeg,
+							'-hide_banner',			'',
+							'-v',					'info',
+							'-stats',				'',
+							'-i',					f'{temp_video}',
+							'-c:v',					'copy',
+                            '-i',					f'{temp_audio}',
+							'-c:a',					'copy',
+							'-movflags',			'+faststart+write_colr',
+                            '-y',					output_path]
+
+    p1 = Popen(vspipe_video, stdout=PIPE, stderr=PIPE)
+    #p2 = Popen(x264_cmd, stdin=p1.stdout, stdout=PIPE, stderr=PIPE)
+    p2 = Popen(ffmpeg_vid_HQ_cmd, stdin=p1.stdout, stdout=PIPE, stderr=PIPE)
+    p1.stdout.close()
+    p2.communicate()
+
+# wait a minute, the audio is obtained from the same script as the video ?
+# for the time being, comment these out.
+'''
+    p1 = Popen(vspipe_audio, stdout=PIPE, stderr=PIPE)
+    #p2 = Popen(aac_cmd, stdin=p1.stdout, stdout=PIPE, stderr=PIPE)
+    p2 = Popen(ffmpeg_aac_cmd, stdin=p1.stdout, stdout=PIPE, stderr=PIPE)
+    p1.stdout.close()
+    p2.communicate()
+
+    #p1 = Popen(mp4box_cmd)
+    p1 = Popen(ffmpeg_mux_cmd)
+    p1.communicate()
+'''
+
+if __name__=='__main__':
+    #scripts and outputs have full paths
+	#called like:
+    #	python "this_script_encoder.py" "media_to_show.vpy" "output.mp4"
+	#
+    if len(sys.argv) > 2: 
+        main(sys.argv[1], sys.argv[2])	# argv[0]=???, argv[1]=script of sources, argv[2]=output .mp4 filename
