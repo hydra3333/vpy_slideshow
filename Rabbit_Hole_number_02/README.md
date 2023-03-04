@@ -1,5 +1,5 @@
 # MORE Good Stuff #2 from \_AI\_   
-## to produce an .mp4 slideshow from a python script and ffmpeg   
+## to produce an .mp4 slideshow from a vapoursynth script and ffmpeg   
 ### A work in progress.   
 
 See these from \_AI\_   
