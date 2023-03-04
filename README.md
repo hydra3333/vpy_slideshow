@@ -4,6 +4,8 @@
 
 It works, after a fashion.  As an example only.
 
+### under development: https://github.com/hydra3333/vpy_slideshow/tree/main/Rabbit_Hole_number_02
+
 But don't use this as it's a terrible hack-up of good stuff provided by \_AI\_ in thread   
 https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio 
 
