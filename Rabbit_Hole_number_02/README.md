@@ -9,7 +9,7 @@ https://github.com/UniversalAl/load
 
 For now, perhaps use something like:   
 ```
-python "\path_to\main_encode.py" "\path_to\sources_script.vpy" "\path_to\slideshow.mp4"
+python "\path_to\main_encode.py" "\path_to\video_script.vpy" "\path_to\audio_script_or_file.vpy" "\path_to\slideshow.mp4"
 ```
 
 We could, of course, forego the `main_encode.py` thing and just use vspipe/ffmpeg directly ourselves.   
