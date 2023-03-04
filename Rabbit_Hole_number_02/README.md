@@ -1,4 +1,4 @@
-# Good Stuff #2 from \_AI\_   
+# MORE Good Stuff #2 from \_AI\_   
 ## to produce an .mp4 slideshow from a python script and ffmpeg   
 ### A work in progress.   
 
