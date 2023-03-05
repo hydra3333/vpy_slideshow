@@ -282,7 +282,10 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
 		print(f'DEBUG: clip.format.color_family==vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB}\n',flush=True)
-		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+
+		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'], transfer=calc_ini['TARGET_COLOR_TRANSFER_S'], primaries=calc_ini['TARGET_COLOR_PRIMARIES_S'], range=calc_ini['TARGET_COLOR_RANGE_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+
 		return c
 	elif clip.format.color_family==vs.YUV:
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
@@ -290,7 +293,11 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
 		print(f'DEBUG: clip.format.color_family==vs.YUV: clip.format.color_family={clip.format.color_family} vs.YUV={vs.YUV}\n',flush=True)
-		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+
+		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'], transfer=calc_ini['TARGET_COLOR_TRANSFER'], primaries=calc_ini['TARGET_COLOR_PRIMARIES_S'], range=calc_ini['TARGET_COLOR_RANGE_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'], transfer_s=calc_ini['TARGET_COLOR_TRANSFER'], primaries_s=calc_ini['TARGET_COLOR_PRIMARIES_S'], range_s=calc_ini['TARGET_COLOR_RANGE_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+
 		# AH !!! the above line with matrix_s='709' can cause this error:
 		# If you get an error like:
 		# 		Resize error 3074: no path between colorspaces (2/2/2 => 1/1/1). May need to specify additional colorspace parameters.
@@ -304,7 +311,10 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
 		print(f'DEBUG: NEITHER vs.RGB nor vs.YUV ? clip.format.color_family!=vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB} vs.YUV={vs.YUV}\n',flush=True)
-		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+
+		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'], transfer=calc_ini['TARGET_COLOR_TRANSFER'], primaries=calc_ini['TARGET_COLOR_PRIMARIES_S'], range=calc_ini['TARGET_COLOR_RANGE_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+
 		# AH !!! the avove line with matrix_s='709' can cause this error:
 		# If you get an error like:
 		# 		Resize error 3074: no path between colorspaces (2/2/2 => 1/1/1). May need to specify additional colorspace parameters.
@@ -556,9 +566,13 @@ if __name__=='__main__':
 								'CROSSFADE_DURATION':			1,
 								'TARGET_COLORSPACE' : 			r'BT.709',			# colorspace Rec2020, BT.2020 Rec709, BT.709, Rec601, BT.601, PC.709, PC.601, TV.fcc, PC.fcc, TV.240m, PC.240m; When no hint found in ASS script and colorspace parameter is empty then the default is BT.601
 								'TARGET_COLORSPACE_MATRIX' :	r'BT.709',
-								'TARGET_COLORSPACE_MATRIX_S' :	r'709',				# resize, shortened name for bt.709 (not "BT.709" nor "BT709")
-								'TARGET_TRC' :					r'BT.709',	
-								'TARGET_RANGE' :				r'pc',	
+								'TARGET_COLORSPACE_MATRIX_S' :	r'709',				# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
+								'TARGET_COLOR_TRANSFER' :		r'BT.709',
+								'TARGET_COLOR_TRANSFER_S' :		r'709',				# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
+								'TARGET_COLOR_PRIMARIES' :		r'BT.709',
+								'TARGET_COLOR_PRIMARIES_S' :	r'709',				# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
+								'TARGET_COLOR_RANGE' :			r'pc',	
+								'TARGET_COLOR_RANGE_S' :		r'pc',				# for resize
 								'TARGET_WIDTH' :				1920,
 								'TARGET_HEIGHT' :				1080,
 								'TARGET_FPSNUM' :				25,					# for fps numerator		... PAL world bias
@@ -593,8 +607,12 @@ if __name__=='__main__':
 		ini_values[ini_section_name]['TARGET_COLORSPACE'] = config.get(ini_section_name, 'TARGET_COLORSPACE')
 		ini_values[ini_section_name]['TARGET_COLORSPACE_MATRIX'] = config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX')
 		ini_values[ini_section_name]['TARGET_COLORSPACE_MATRIX_S'] = config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX_S')
-		ini_values[ini_section_name]['TARGET_TRC'] = config.get(ini_section_name, 'TARGET_TRC')
-		ini_values[ini_section_name]['TARGET_RANGE'] = config.get(ini_section_name, 'TARGET_RANGE')
+		ini_values[ini_section_name]['TARGET_COLOR_TRANSFER'] = config.get(ini_section_name, 'TARGET_COLOR_TRANSFER')
+		ini_values[ini_section_name]['TARGET_COLOR_TRANSFER_S'] = config.get(ini_section_name, 'TARGET_COLOR_TRANSFER_S')
+		ini_values[ini_section_name]['TARGET_COLOR_PRIMARIES'] = config.get(ini_section_name, 'TARGET_COLOR_PRIMARIES')
+		ini_values[ini_section_name]['TARGET_COLOR_PRIMARIES_S'] = config.get(ini_section_name, 'TARGET_COLOR_PRIMARIES_S')
+		ini_values[ini_section_name]['TARGET_COLOR_RANGE'] = config.get(ini_section_name, 'TARGET_COLOR_RANGE')
+		ini_values[ini_section_name]['TARGET_COLOR_RANGE_S'] = config.get(ini_section_name, 'TARGET_COLOR_RANGE_S')
 		ini_values[ini_section_name]['TARGET_WIDTH'] = config.getint(ini_section_name, 'TARGET_WIDTH')
 		ini_values[ini_section_name]['TARGET_HEIGHT'] = config.getint(ini_section_name, 'TARGET_HEIGHT')
 		ini_values[ini_section_name]['TARGET_FPSNUM'] = config.getint(ini_section_name, 'TARGET_FPSNUM')
