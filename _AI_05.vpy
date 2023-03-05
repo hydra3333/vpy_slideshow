@@ -255,7 +255,7 @@ def boxing(clip, W, H):	# was def boxing(clip, W=TARGET_WIDTH, H=TARGET_HEIGHT):
 	if W/H > source_width/source_height:
 		w = source_width*H/source_height
 		x = int((W-w)/2)
-		x = x - x%MODX
+		x = x - x%calc_ini['MODX']
 		x = max(0, min(x,W))
 		clip = resize_clip(clip, W-2*x, H)
 		if x: return clip.std.AddBorders(left=x, right=x, color=(16,128,128))  #RGB is out then (16,16,16)
@@ -263,7 +263,7 @@ def boxing(clip, W, H):	# was def boxing(clip, W=TARGET_WIDTH, H=TARGET_HEIGHT):
 	else:
 		h = source_height*W/source_width
 		y = int((H-h)/2)
-		y = y - y%MODY
+		y = y - y%calc_ini['MODY']
 		y = max(0, min(y,H))
 		clip = resize_clip(clip, W, H-2*y)
 		if y: return clip.std.AddBorders(top=y, bottom=y, color=(16,128,128))
@@ -273,21 +273,44 @@ def boxing(clip, W, H):	# was def boxing(clip, W=TARGET_WIDTH, H=TARGET_HEIGHT):
 def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET_HEIGHT):
 	W = calc_ini['TARGET_WIDTH']
 	H = calc_ini['TARGET_HEIGHT']
-	if w>W or h>H:	resize = getattr(clip.resize, DOWNSIZE_KERNEL)	# get the resize function object ?handle? with the nominated kernel
-	else:			resize = getattr(clip.resize, UPSIZE_KERNEL)	# get the resize function object ?handle? with the nominated kernel
+	if w>W or h>H:	resize = getattr(clip.resize, calc_ini['DOWNSIZE_KERNEL'])	# get the resize function object ?handle? with the nominated kernel
+	else:			resize = getattr(clip.resize, calc_ini['UPSIZE_KERNEL'])	# get the resize function object ?handle? with the nominated kernel
 	if clip.format.color_family==vs.RGB:
 		#rgb to YUV, perhaps only for png images, figure out what matrix out is needed ... use the HD one REC.709
-		#print(f'DEBUG: clip.format.color_family==vs.RGB',flush=True)
-		c =  resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s='709')
+		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
+		#			enum chromaloc, enum matrix_in, enum transfer_in, enum primaries_in, enum range_in, enum chromaloc_in, 
+		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
+		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
+		print(f'DEBUG: clip.format.color_family==vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB}\n',flush=True)
+		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+		return c
+	elif clip.format.color_family==vs.YUV:
+		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
+		#			enum chromaloc, enum matrix_in, enum transfer_in, enum primaries_in, enum range_in, enum chromaloc_in, 
+		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
+		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
+		print(f'DEBUG: clip.format.color_family==vs.YUV: clip.format.color_family={clip.format.color_family} vs.YUV={vs.YUV}\n',flush=True)
+		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+		# AH !!! the above line with matrix_s='709' can cause this error:
+		# If you get an error like:
+		# 		Resize error 3074: no path between colorspaces (2/2/2 => 1/1/1). May need to specify additional colorspace parameters.
+		# It usually means the matrix/transfer/primaries are unknown 
+		# *** and you have to specify the input colorspace parameters yourself. *** Note: 2 means “unspecified” according to the ITU-T recommendation.
+		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'])
 		return c
 	else:
-		#YUV to YUV
-		#print(f'DEBUG: clip.format.color_family==vs.YUV?',flush=True)
-		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'])
-		# AH !!! the next line with matrix_s='709' can cause this:
-		#		Error getting frame: Resize error: Resize error 3074: no path between colorspaces (2/2/2 => 1/2/2).
-		# it seems missing "Matrix coefficients" metadata in the source may be the culprit
-		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s='709')
+		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
+		#			enum chromaloc, enum matrix_in, enum transfer_in, enum primaries_in, enum range_in, enum chromaloc_in, 
+		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
+		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
+		print(f'DEBUG: NEITHER vs.RGB nor vs.YUV ? clip.format.color_family!=vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB} vs.YUV={vs.YUV}\n',flush=True)
+		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+		# AH !!! the avove line with matrix_s='709' can cause this error:
+		# If you get an error like:
+		# 		Resize error 3074: no path between colorspaces (2/2/2 => 1/1/1). May need to specify additional colorspace parameters.
+		# It usually means the matrix/transfer/primaries are unknown 
+		# *** and you have to specify the input colorspace parameters yourself. *** Note: 2 means “unspecified” according to the ITU-T recommendation.
+		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'])
 		return c
 
 ###
@@ -333,13 +356,13 @@ def get_clip(path):
 		source_width, source_height = clip.width, clip.height
 		#print(f'DEBUG: get_clip: {source_width}x{source_height}\nsource_fpsnum:{source_fpsnum} source_fpsden:{source_fpsden}\nsource_fps:{source_fps}\nsource_duration_frames:{source_duration_frames}\nsource_duration_secs:{source_duration_secs}',flush=True)
 		# change framerate ? too hard for a small simple video sample, just "assume" target fps and ignore consequences of speed-up or slow-down or VFR
-		clip = clip.std.AssumeFPS(fpsnum=TARGET_FPSNUM, fpsden=TARGET_FPSDEN)
+		clip = clip.std.AssumeFPS(fpsnum=calc_ini['TARGET_FPSNUM'], fpsden=calc_ini['TARGET_FPSDEN'])
 		# if duration greater than out review maximum, clip it
 		if source_duration_frames>(MAX_DURATION_FRAMES-1):
 			clip = core.std.Trim(clip, first=0, last=(MAX_DURATION_FRAMES-1))
 		# denoise ANY "small" dimension video clips, older videos likely to be noisy
 		if source_width<calc_ini['TARGET_WIDTH'] or source_height<calc_ini['TARGET_HEIGHT']:	 
-			#print(f'INFO: applying DGDenoise to small {source_width}x{source_height} video {path.name}',flush=True)
+			#print(f'DEBUG: applying DGDenoise to small {source_width}x{source_height} video {path.name}',flush=True)
 			# clip must be YUV420P16 for DGDenoise etc
 			clip = clip.resize.Point(format=DG_PIXEL_FORMAT)		# convert to DG_PIXEL_FORMAT via resizer which does no resizing
 			#clip = core.avs.DGDenoise(clip, strength=0.06, cstrength=0.06)
@@ -347,26 +370,30 @@ def get_clip(path):
 			clip = clip.resize.Point(format=calc_ini['TARGET_PIXEL_FORMAT'])	# convert to calc_ini['TARGET_PIXEL_FORMAT'] via resizer which does no resizing
 	else: # source is not a video type, i.e. an image
 		# extend duration of a clip of an image
-		clip = clip[0]*MIN_DURATION_FRAMES if len(clip)<MIN_DURATION_FRAMES else clip # make clip at least MIN_DURATION_FRAMES frames long if less than MIN_DURATION_FRAMES frames
+		clip = clip[0]*calc_ini['MIN_DURATION_FRAMES'] if len(clip)<calc_ini['MIN_DURATION_FRAMES'] else clip # make clip at least calc_ini['MIN_DURATION_FRAMES'] frames long if less than MIN_DURATION_FRAMES frames
 	
 	# either add borders to maintain aspect ratio (boxing), or just stretch to fit (yuk)
-	if BOX:
+	if calc_ini['BOX']:
 		clip = boxing(clip, calc_ini['TARGET_WIDTH'], calc_ini['TARGET_HEIGHT'])
 	else:
 		clip = resize_clip(clip, calc_ini['TARGET_WIDTH'], calc_ini['TARGET_HEIGHT'])
 
 	# Add a subtitle being the trailing 3 parts of the path
-	if ADD_SUBTITLE:	# Add a subtitle being the trailing 3 parts of the path
+	if calc_ini['ADD_SUBTITLE']:	# Add a subtitle being the trailing 3 parts of the path
 		pwp = PureWindowsPath(path)
 		n = len(pwp.parts)
-		text_subpath_for_subtitles = "/" + pwp.parts[n-3] + "/" + pwp.parts[n-2] + "/" +  pwp.parts[n-1]
+		#text_subpath_for_subtitles = "/" + pwp.parts[n-3] + "/" + pwp.parts[n-2] + "/" +  pwp.parts[n-1]
+		text_subpath_for_subtitles = "/" + pwp.parts[n-2] + "/" +  pwp.parts[n-1]
 		# To tinker with .ass subs, see https://snapcraft.io/install/aegisub-procles/ubuntu
 		# Also note from an aegisub created .ass file
 		#	Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 		#	Style: h3333,Arial,18,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0.9,0.5,3,2,2,2,1
 		# whereas default .assrender.Subtitle style="sans-serif,18,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,7,10,10,10,1"
-		clip = core.assrender.Subtitle(clip, text_subpath_for_subtitles, style="sans-serif,18,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0.9,0.5,3,2,2,2,1", colorspace=TARGET_COLOURSPACE) # frame_width=calc_ini['TARGET_WIDTH'], frame_height=calc_ini['TARGET_HEIGHT'], 
-
+		# https://github.com/AmusementClub/assrender
+		# assrender.Subtitle(clip clip, string[] text, [string style="sans-serif,20,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,7,10,10,10,1", int[] start, int[] end, string vfr, int hinting=0, float scale=1.0, float line_spacing=1.0, float dar, float sar, bool set_default_storage_size=True, int top=0, int bottom=0, int left=0, int right=0, string charset, int debuglevel, string fontdir="", string srt_font="sans-serif", string colorspace])
+		#	colorspace Rec2020, BT.2020 Rec709, BT.709, Rec601, BT.601, PC.709, PC.601, TV.fcc, PC.fcc, TV.240m, PC.240m
+		#	When no hint found in ASS script and colorspace parameter is empty then the default is BT.601
+		clip = core.assrender.Subtitle(clip, text_subpath_for_subtitles, style="sans-serif,18,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0.9,0.5,3,2,2,2,1", colorspace=calc_ini['TARGET_COLORSPACE'])
 	return clip
 
 ###
@@ -443,13 +470,13 @@ def rotation_check_PIL(clip, path, save_rotated_image=False):
 		return clip
 	else:
 		if   value == 3:
-			print(f'INFO: PIL says auto-Rotating by 180 degrees {path}',flush=True)
+			print(f'DEBUG: PIL says auto-Rotating by 180 degrees {path}',flush=True)
 			clip = clip.std.Turn180()
 		elif value == 8:
-			print(f'INFO: PIL says auto-Rotating by  90 degrees {path}',flush=True)
+			print(f'DEBUG: PIL says auto-Rotating by  90 degrees {path}',flush=True)
 			clip = clip.std.Transpose().std.FlipVertical()
 		elif value == 6:
-			print(f'INFO: PIL says auto-Rotating by 270 degrees {path}',flush=True)
+			print(f'DEBUG: PIL says auto-Rotating by 270 degrees {path}',flush=True)
 			clip = clip.std.Transpose().std.FlipHorizontal()
 		if save_rotated_image and value in [3,8,6]:
 			#rotation degrees are in counterclockwise direction!
@@ -457,7 +484,7 @@ def rotation_check_PIL(clip, path, save_rotated_image=False):
 			image = image.transpose(rotate[value])
 			path2 = path.parent / f'{path.stem}_rotated{path.suffix}'
 			##image.save(str(path2))	# comment this out ... no writing new images, please
-			#print(f'INFO: Rotated image {path} was NOT saved as requested into {path2}',flush=True)
+			#print(f'DEBUG: Rotated image {path} was NOT saved as requested into {path2}',flush=True)
 	#exif = image.getexif()
 	#print_exif_data(exif,flush=True)
 	#print('',flush=True)
@@ -483,13 +510,13 @@ def rotation_check_MediaInfo(clip, path, save_rotated_image=False):
 			value = int(float(value)) # for some reason Rotation value type mediainfo carries as a string,  like: '180.00'
 	#print(f'DEBUG: rotation_check_MediaInfo: value={value} for {path}',flush=True)
 	if   value == 180:
-		print(f'INFO: MediaInfo says auto-Rotating by 180 degrees {path}',flush=True)
+		print(f'DEBUG: MediaInfo says auto-Rotating by 180 degrees {path}',flush=True)
 		clip = clip.std.Turn180()
 	elif value == 90:
-		print(f'INFO: MediaInfo says auto-Rotating by 90 degrees {path}',flush=True)
+		print(f'DEBUG: MediaInfo says auto-Rotating by 90 degrees {path}',flush=True)
 		clip = clip.std.Transpose().std.FlipVertical()
 	elif value == 270:
-		print(f'INFO: MediaInfo says auto-Rotating by 270 degrees {path}',flush=True)
+		print(f'DEBUG: MediaInfo says auto-Rotating by 270 degrees {path}',flush=True)
 		clip = clip.std.Transpose().std.FlipHorizontal()
 	else:
 		clip = clip
@@ -522,14 +549,14 @@ if __name__=='__main__':
 
 	ini_section_name = 'slideshow'
 	default_ini_values =	{ ini_section_name : {
-								#'DIRECTORY' :					fully_qualified_folder_no_trailing_backslash(r'.\ '.strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
-								'DIRECTORY' :					fully_qualified_folder_no_trailing_backslash(os.getcwd().strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
+								#'DIRECTORY' :					fully_qualified_folder_no_trailing_backslash(os.getcwd().strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
+								'DIRECTORY' :					fully_qualified_folder_no_trailing_backslash(r'G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\ '.strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
 								'TEMP_DIRECTORY' :				fully_qualified_folder_no_trailing_backslash(r'D:\TEMP\ '.strip()),	# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
 								'RECURSIVE' :					True,
 								'CROSSFADE_DURATION':			1,
-								'TARGET_COLOURSPACE' : 			r'BT.709',			# HD, used by assrender.Subtitle filter
-								#'TARGET_COLOURSPACE_MATRIX' :	r'709'
-								'TARGET_COLOURSPACE_MATRIX' :	r'BT.709',			# HD, used by assrender.Subtitle filter or is it r'709' ???
+								'TARGET_COLORSPACE' : 			r'BT.709',			# colorspace Rec2020, BT.2020 Rec709, BT.709, Rec601, BT.601, PC.709, PC.601, TV.fcc, PC.fcc, TV.240m, PC.240m; When no hint found in ASS script and colorspace parameter is empty then the default is BT.601
+								'TARGET_COLORSPACE_MATRIX' :	r'BT.709',
+								'TARGET_COLORSPACE_MATRIX_S' :	r'709',				# resize, shortened name for bt.709 (not "BT.709" nor "BT709")
 								'TARGET_TRC' :					r'BT.709',	
 								'TARGET_RANGE' :				r'pc',	
 								'TARGET_WIDTH' :				1920,
@@ -538,6 +565,7 @@ if __name__=='__main__':
 								'TARGET_FPSDEN' :				1,					# for fps denominator	... PAL world bias
 								'MIN_DURATION_SEC' :			0.5,				### MINIMUM duration of display of an image, in seconds
 								'MAX_DURATION_SEC' :			4,					### MAXIMUM duration of display of an image, in seconds
+								'MAX_VIDEO_CLIP_DURATION' :		10,					# Maximum diraction of a video clip in seconds
 								'BOX' :							True,				# True would initiate letterboxing or pillarboxing. False fills to TARGET_WIDTH,TARGET_HEIGHT
 								'ADD_SUBTITLE' :				True,				# True adds a subtitle in the bottom right corner containing the last few parts of the path to the image/video
 								'UPSIZE_KERNEL' :				r'Lanczos',
@@ -562,8 +590,9 @@ if __name__=='__main__':
 		ini_values[ini_section_name]['TEMP_DIRECTORY'] = fully_qualified_folder_no_trailing_backslash(config.get(ini_section_name, 'TEMP_DIRECTORY'))
 		ini_values[ini_section_name]['RECURSIVE'] = config.getboolean(ini_section_name, 'RECURSIVE')
 		ini_values[ini_section_name]['CROSSFADE_DURATION'] = config.getint(ini_section_name, 'CROSSFADE_DURATION')
-		ini_values[ini_section_name]['TARGET_COLOURSPACE'] = config.get(ini_section_name, 'TARGET_COLOURSPACE')
-		ini_values[ini_section_name]['TARGET_COLOURSPACE_MATRIX'] = config.get(ini_section_name, 'TARGET_COLOURSPACE_MATRIX')
+		ini_values[ini_section_name]['TARGET_COLORSPACE'] = config.get(ini_section_name, 'TARGET_COLORSPACE')
+		ini_values[ini_section_name]['TARGET_COLORSPACE_MATRIX'] = config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX')
+		ini_values[ini_section_name]['TARGET_COLORSPACE_MATRIX_S'] = config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX_S')
 		ini_values[ini_section_name]['TARGET_TRC'] = config.get(ini_section_name, 'TARGET_TRC')
 		ini_values[ini_section_name]['TARGET_RANGE'] = config.get(ini_section_name, 'TARGET_RANGE')
 		ini_values[ini_section_name]['TARGET_WIDTH'] = config.getint(ini_section_name, 'TARGET_WIDTH')
@@ -572,10 +601,11 @@ if __name__=='__main__':
 		ini_values[ini_section_name]['TARGET_FPSDEN'] = config.getint(ini_section_name, 'TARGET_FPSDEN')
 		ini_values[ini_section_name]['MIN_DURATION_SEC'] = config.getfloat(ini_section_name, 'MIN_DURATION_SEC')
 		ini_values[ini_section_name]['MAX_DURATION_SEC'] = config.getint(ini_section_name, 'MAX_DURATION_SEC')
+		ini_values[ini_section_name]['MAX_VIDEO_CLIP_DURATION'] = config.getint(ini_section_name, 'MAX_VIDEO_CLIP_DURATION')
 		ini_values[ini_section_name]['BOX'] = config.getboolean(ini_section_name, 'BOX')
 		ini_values[ini_section_name]['ADD_SUBTITLE'] = config.getboolean(ini_section_name, 'ADD_SUBTITLE')
 		ini_values[ini_section_name]['UPSIZE_KERNEL'] = config.get(ini_section_name, 'UPSIZE_KERNEL')
-		ini_values[ini_section_name]['UPSIZE_KERNEL'] = config.get(ini_section_name, 'UPSIZE_KERNEL')
+		ini_values[ini_section_name]['DOWNSIZE_KERNEL'] = config.get(ini_section_name, 'DOWNSIZE_KERNEL')
 	else:
 		print(f'ERROR: .ini file unable to be read or recreated properly',flush=True)
 		sys.exit(1)
@@ -583,7 +613,7 @@ if __name__=='__main__':
 		update_config =  configparser.ConfigParser(allow_no_value=True)
 		update_config[ini_section_name] = default_ini_values[ini_section_name]
 		update_config.write(configfile)
-	#print(f'INFO: ini values used:\n{objPrettyPrint.pformat(ini_values)}',flush=True)
+	#print(f'DEBUG: ini values used:\n{objPrettyPrint.pformat(ini_values)}',flush=True)
 	# calculate some values and create an ini and calculated values dict
 	calc_ini = ini_values[ini_section_name]
 	calc_ini['PIC_EXTENSIONS']		= [".png", ".jpg", ".jpeg", ".gif", ".pdf"]								# always lower case
@@ -594,7 +624,7 @@ if __name__=='__main__':
 	calc_ini['TARGET_PIXEL_FORMAT']	= vs.YUV420P8				# pixel format of the target video
 	calc_ini['DG_PIXEL_FORMAT']		= vs.YUV420P16				# pixel format of the video for use by DG tools
 	calc_ini['TARGET_FPS']			= round(calc_ini['TARGET_FPSNUM'] / calc_ini['TARGET_FPSDEN'], 3)
-	calc_ini['BLANK_CLIP_LENGTH']	= int(math.ceil(0.1*calc_ini['TARGET_FPS']))	# leading and trailing blank clip duration in frames with round-up. int(round(0.1*TARGET_FPS)) will round up/down
+	calc_ini['BLANK_CLIP_LENGTH']	= int(math.ceil(0.1*calc_ini['TARGET_FPS']))	# leading and trailing blank clip duration in frames with round-up. int(round(0.1*calc_ini['TARGET_FPS'])) will round up/down
 	calc_ini['MIN_DURATION_FRAMES']	= int(math.ceil(calc_ini['MIN_DURATION_SEC'] * calc_ini['TARGET_FPS']))	### duration of display of an image, in frames
 	calc_ini['MAX_DURATION_FRAMES']	= int(math.ceil(calc_ini['MAX_DURATION_SEC'] * calc_ini['TARGET_FPS']))	### max duration of display of a video, in frames
 	calc_ini['DOT_FFINDEX']			= ".ffindex".lower()		# for removing temporary *.ffindex files at the end
@@ -625,12 +655,12 @@ if __name__=='__main__':
 	blank_clip = core.std.BlankClip(format=calc_ini['TARGET_PIXEL_FORMAT'], width=calc_ini['TARGET_WIDTH'], height=calc_ini['TARGET_HEIGHT'], length=calc_ini['BLANK_CLIP_LENGTH'], color=(16,128,128))	 # notice no colorspace,"range" etc can be specified
 	clips = blank_clip	# initialize the accumulated clips with a starting small blank clip
 	if calc_ini['CROSSFADE_DURATION']>0:	
-		crossfade_blank_clip = blank_clip[0]*MIN_DURATION_FRAMES if len(blank_clip)<MIN_DURATION_FRAMES else blank_clip
+		crossfade_blank_clip = blank_clip[0]*calc_ini['MIN_DURATION_FRAMES'] if len(blank_clip)<calc_ini['MIN_DURATION_FRAMES'] else blank_clip
 		prior_clip_for_crossfade = crossfade_blank_clip
 	#---
 	while not (path is None):	# first clip already pre-retrieved ready for this while loop
 		Count_of_files = Count_of_files + 1
-		print(f'INFO: processing {Count_of_files} {str(path)}',flush=True)
+		print(f'DEBUG: processing {Count_of_files} {str(path)}',flush=True)
 		#if (Count_of_files % 10)==0:
 		#	print(f'{Count_of_files},',end="",flush=True)
 		#	if (Count_of_files % (10*10*3))==0:
@@ -657,19 +687,19 @@ if __name__=='__main__':
 		# for now, don't do equivalent of this from _AI_ ... right  = right_clip[calc_ini['CROSSFADE_DURATION']:-calc_ini['CROSSFADE_DURATION']]
 		clips = clips + crossfade_clip + this_clip
 	clips = clips + blank_clip		# end the accumulated clips with a finishing small blank clip
-	clips = clips.std.AssumeFPS(fpsnum=TARGET_FPSNUM, fpsden=TARGET_FPSDEN)
+	clips = clips.std.AssumeFPS(fpsnum=calc_ini['TARGET_FPSNUM'], fpsden=calc_ini['TARGET_FPSDEN'])
 	print(f'',flush=True)
-	print(f'INFO: Finished processing {Count_of_files} image/video files.',flush=True)
+	print(f'DEBUG: Finished processing {Count_of_files} image/video files.',flush=True)
 	# Cleanup any temporary .ffindex files created by ffms2
-	print(f'INFO: Removing temporary *.ffindex files from folder "{calc_ini["DIRECTORY"]}" with recursive="{calc_ini["RECURSIVE"]}" ...',flush=True)
+	print(f'DEBUG: Removing temporary *.ffindex files from folder "{calc_ini["DIRECTORY"]}" with recursive="{calc_ini["RECURSIVE"]}" ...',flush=True)
 	pp = calc_ini['DIRECTORY'] + "/" + ff_glob_var
 	ffindex_files = glob.glob(pp, recursive=calc_ini['RECURSIVE'])
 	Count_of_files_removed = 0
 	for ff in ffindex_files:
-		if ff.lower()[-len(DOT_FFINDEX):] == DOT_FFINDEX:	# double check the file really does have ext .ffindex
+		if ff.lower()[-len(calc_ini['DOT_FFINDEX']):] == calc_ini['DOT_FFINDEX']:	# double check the file really does have ext .ffindex
 			try:
 				Count_of_files_removed = Count_of_files_removed + 1
-				print(f'INFO: removing {Count_of_files_removed} {ff}',flush=True)
+				print(f'DEBUG: removing {Count_of_files_removed} {ff}',flush=True)
 				os.remove(ff)
 				#if (Count_of_files_removed % (10))==0:
 				#	print(f'{Count_of_files_removed},',end="",flush=True)
@@ -678,8 +708,8 @@ if __name__=='__main__':
 			except OSError as ee:
 				print(f'Error: %s : %s' % (ff, ee.strerror),flush=True)
 	print(f'',flush=True)
-	print(f'INFO: Finished removing {Count_of_files_removed} .ffindex files.',flush=True)
+	print(f'DEBUG: Finished removing {Count_of_files_removed} .ffindex files.',flush=True)
 	# hmm, audio ? maybe later using source filter "bas" ?
-	print(f'INFO: Done.',flush=True)
+	print(f'DEBUG: Done.',flush=True)
 	clips.set_output()
 	#------
