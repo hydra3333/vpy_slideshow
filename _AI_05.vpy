@@ -657,28 +657,39 @@ if __name__=='__main__':
 	else:
 		print(f'ERROR: .ini file unable to be read or recreated properly',flush=True)
 		sys.exit(1)
+	# save the updated set of .ini values over the top of the existing set
 	with open(ini_file_speciying_parameters, 'w') as configfile:
+		# add the new set of .ini value to be saved
 		update_config =  configparser.ConfigParser(allow_no_value=True)
 		update_config[ini_section_name] = default_ini_values[ini_section_name]
+		# add example values to make it easier for a human reader of the .ini file
+		tmp_name = 'Enum_vs.MatrixCoefficients'
+		tmp_dict = { tmp_name : {}}
 		for v in vs.MatrixCoefficients:
-			print(f'DEBUG: vs.MatrixCoefficients: {v} {objPrettyPrint.pformat(v)}',flush=True)
-			#update_config['Enum_vs.MatrixCoefficients'][vs.MatrixCoefficients] = objPrettyPrint.pformat(v)
+			tmp_dict[tmp_name][str(v)] = int(v)+0
 			pass
+		update_config[tmp_name] = tmp_dict[tmp_name]
+		tmp_name = 'Enum_vs.TransferCharacteristics'
+		tmp_dict = { tmp_name : {}}
 		for v in vs.TransferCharacteristics:
-			#print(f'DEBUG: vs.TransferCharacteristics: {v} {objPrettyPrint.pformat(v)}',flush=True)
-			#update_config['Enum_vs.TransferCharacteristics'][vs.TransferCharacteristics] = objPrettyPrint.pformat(v)
+			tmp_dict[tmp_name][str(v)] = int(v)+0
 			pass
+		update_config[tmp_name] = tmp_dict[tmp_name]
+		tmp_name = 'Enum_vs.ColorPrimaries'
+		tmp_dict = { tmp_name : {}}
 		for v in vs.ColorPrimaries:
-			#print(f'DEBUG: vs.ColorPrimaries: {v} {objPrettyPrint.pformat(v)}',flush=True)
-			#update_config['Enum_vs.ColorPrimaries'][vs.ColorPrimaries] = objPrettyPrint.pformat(v)
+			tmp_dict[tmp_name][str(v)] = int(v)+0
 			pass
+		update_config[tmp_name] = tmp_dict[tmp_name]
+		tmp_name = 'Enum_vs.ColorRange'
+		tmp_dict = { tmp_name : {}}
 		for v in vs.ColorRange:
-			#print(f'DEBUG: vs.ColorRange: {v} {objPrettyPrint.pformat(v)}',flush=True)
-			#update_config['Enum_vs.ColorRange'][vs.ColorRange] = objPrettyPrint.pformat(v)
+			tmp_dict[tmp_name][str(v)] = int(v)+0
 			pass
+		update_config[tmp_name] = tmp_dict[tmp_name]
+		# update the .ini file
 		update_config.write(configfile)
-	#print(f'DEBUG: ini values used:\n{objPrettyPrint.pformat(ini_values)}',flush=True)
-	# calculate some values and create an ini and calculated values dict
+	# calculate some values and create a new updated calculated values dict
 	calc_ini = ini_values[ini_section_name]
 	calc_ini['PIC_EXTENSIONS']		= [".png", ".jpg", ".jpeg", ".gif", ".pdf"]								# always lower case
 	calc_ini['VID_EXTENSIONS']		= [".mp4", ".mpeg4", ".mpg", ".mpeg", ".avi", ".mjpeg", ".3gp", ".mov"]	# always lower case
