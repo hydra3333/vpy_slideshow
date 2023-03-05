@@ -278,6 +278,8 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 	
 	# check the READERS to see if we can affect this .....
 	# in YUV processing ...
+
+
 	with clip.get_frame(0) as f:
 		print(f'DEBUG: incoming frame properties before resize=\n{objPrettyPrint.pformat(f.props)}\n',flush=True)
 		print(f'DEBUG: f.props["_Matrix"] = {f.props["_Matrix"]}',flush=True)
@@ -285,7 +287,6 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		print(f'DEBUG: f.props["_Primaries"] = {f.props["_Primaries"]}',flush=True)
 		print(f'DEBUG: f.props["_ColorRange"] = {f.props["_ColorRange"]}',flush=True)
 		print(f'DEBUG: f.props["_ChromaLocation"] = {f.props["_ChromaLocation"]}',flush=True)
-		
 		#DEBUG: incoming frame properties before resize=
 		#<vapoursynth.FrameProps {'_AbsoluteTime': 0.0, '_PictType': b'I', 
 		#'_Transfer': 2, = transfercharacteristics.transfer_unspecified = 2
@@ -305,7 +306,9 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		#		colorprimaries = colorprimaries.primaries_bt470_bg
 		#	if transfercharacteristics  = transfercharacteristics.transfer_unspecified
 		#		transfercharacteristics = transfercharacteristics.transfer_bt470_bg
-	
+
+
+
 	if clip.format.color_family==vs.RGB:
 		#rgb to YUV, perhaps only for png images, figure out what matrix out is needed ... use the HD one REC.709
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
@@ -365,17 +368,17 @@ def get_clip(path):
 	if path.suffix.lower()   in calc_ini['EEK_EXTENSIONS']:
 		#print(f'DEBUG: get_clip: lsmas Video: {path.name},flush=True')
 		clip = core.lsmas.LWLibavSource(str(path))
-		#print(f'DEBUG: get_clip: Video info:\n{clip}',flush=True)
+		print(f'DEBUG: get_clip: lsmas Video info:\n{clip}',flush=True)
 	elif path.suffix.lower() in calc_ini['VID_EXTENSIONS']:
 		#print(f'DEBUG: get_clip: ffms2 Video: {path.name}',flush=True)
 		clip = core.ffms2.Source(str(path))	#ffms2 leaves *.ffindex files everywhere in folders.
 		#clip = core.lsmas.LibavSMASHSource(str(path))
-		#print(f'DEBUG: get_clip: Video info:\n{clip}',flush=True)
+		print(f'DEBUG: get_clip: ffms2 Video info:\n{clip}',flush=True)
 	elif path.suffix.lower() in calc_ini['PIC_EXTENSIONS']:
 		#print(f'DEBUG: get_clip: ffms2 Video: {path.name}',flush=True)
 		clip = core.ffms2.Source(str(path))
 	#	clip = core.imwri.Read(str(path)) # ImageWriter, if installed into vapoursynth folder
-		#print(f'DEBUG: get_clip: Video info:\n{clip}',flush=True)
+		print(f'DEBUG: get_clip: ffms2 Video info:\n{clip}',flush=True)
 	else:
 		#print(f'DEBUG: get_clip: ffms2 Video: {path.name}',flush=True)
 		clip = core.ffms2.Source(str(path))	# if file extension not recognised, use this reader
