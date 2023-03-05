@@ -564,6 +564,8 @@ if __name__=='__main__':
 	MI = MediaInfo()	# initialize per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
 	
 	ini_file_speciying_parameters = r'.\SLIDESHOW_PARAMETERS.ini'.strip() # r prefix means the string is treated as a raw string so all escape codes will be ignored.EPT IF THE \ is the last character in the string !
+	ini_file_speciying_parameters = fully_qualified_folder_no_trailing_backslash(ini_file_speciying_parameters)
+	
 	#print(f'DEBUG: ini_file_speciying_parameters="{ini_file_speciying_parameters}"',flush=True)
 
 	#for v in vs.MatrixCoefficients:
@@ -689,6 +691,7 @@ if __name__=='__main__':
 		update_config[tmp_name] = tmp_dict[tmp_name]
 		# update the .ini file
 		update_config.write(configfile)
+	print(f'INFO: Saved updated .ini "{ini_file_speciying_parameters}"')
 	# calculate some values and create a new updated calculated values dict
 	calc_ini = ini_values[ini_section_name]
 	calc_ini['PIC_EXTENSIONS']		= [".png", ".jpg", ".jpeg", ".gif", ".pdf"]								# always lower case
@@ -714,15 +717,10 @@ if __name__=='__main__':
 		glob_var="*.*"				# non-recursive
 		ff_glob_var="*.ffindex"		# for .ffindex file deletion non-recursive
 	# glob : with DIRECTORY not having a trailing slash !!!
-	print(f'DEBUG: Processing "{calc_ini["DIRECTORY"]}" recursive="{calc_ini["RECURSIVE"]}" glob_var="{glob_var}" \n      with Extensions={objPrettyPrint.pformat(calc_ini["EXTENSIONS"])}',flush=True)
-
-
-
+	print(f'INFO: Processing "{calc_ini["DIRECTORY"]}" recursive="{calc_ini["RECURSIVE"]}" glob_var="{glob_var}" \n      with Extensions={objPrettyPrint.pformat(calc_ini["EXTENSIONS"])}',flush=True)
 	Count_of_files = 0
 	# NOTE: calc_ini['DIRECTORY'] MUST NOT have a trailing backslash ... remove during ini setup
 	paths = Path(calc_ini['DIRECTORY']).glob(glob_var) # generator of all paths in a directory, files starting with . won't be matched by default
-
-
 	path = get_path(paths)	#pre-fetch first path
 	if path is None:
 		raise ValueError(f'Extensions: {calc_ini["EXTENSIONS"]}, not found in "{calc_ini["DIRECTORY"]}"')
@@ -763,7 +761,7 @@ if __name__=='__main__':
 	clips = clips + blank_clip		# end the accumulated clips with a finishing small blank clip
 	clips = clips.std.AssumeFPS(fpsnum=calc_ini['TARGET_FPSNUM'], fpsden=calc_ini['TARGET_FPSDEN'])
 	print(f'',flush=True)
-	print(f'DEBUG: Finished processing {Count_of_files} image/video files.',flush=True)
+	print(f'INFO: Finished processing {Count_of_files} image/video files.',flush=True)
 	# Cleanup any temporary .ffindex files created by ffms2
 	print(f'DEBUG: Removing temporary *.ffindex files from folder "{calc_ini["DIRECTORY"]}" with recursive="{calc_ini["RECURSIVE"]}" ...',flush=True)
 	pp = calc_ini['DIRECTORY'] + "/" + ff_glob_var
@@ -782,8 +780,8 @@ if __name__=='__main__':
 			except OSError as ee:
 				print(f'Error: %s : %s' % (ff, ee.strerror),flush=True)
 	print(f'',flush=True)
-	print(f'DEBUG: Finished removing {Count_of_files_removed} .ffindex files.',flush=True)
+	print(f'INFO: Finished removing {Count_of_files_removed} .ffindex files.',flush=True)
 	# hmm, audio ? maybe later using source filter "bas" ?
-	print(f'DEBUG: Done.',flush=True)
+	#print(f'DEBUG: Done.',flush=True)
 	clips.set_output()
 	#------
