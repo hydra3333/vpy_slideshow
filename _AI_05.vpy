@@ -275,28 +275,33 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 	H = calc_ini['TARGET_HEIGHT']
 	if w>W or h>H:	resize = getattr(clip.resize, calc_ini['DOWNSIZE_KERNEL'])	# get the resize function object ?handle? with the nominated kernel
 	else:			resize = getattr(clip.resize, calc_ini['UPSIZE_KERNEL'])	# get the resize function object ?handle? with the nominated kernel
+	
+	#with clip.get_frame(0) as f:
+	#	print(f'DEBUG: incoming frame properties before resize=\n{objPrettyPrint.pformat(f.props)}\n',flush=True)
+	
 	if clip.format.color_family==vs.RGB:
 		#rgb to YUV, perhaps only for png images, figure out what matrix out is needed ... use the HD one REC.709
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
 		#			enum chromaloc, enum matrix_in, enum transfer_in, enum primaries_in, enum range_in, enum chromaloc_in, 
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
-		print(f'DEBUG: clip.format.color_family==vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB}\n',flush=True)
+		#print(f'DEBUG: clip.format.color_family==vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB}\n',flush=True)
 
 		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
-		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'], transfer=calc_ini['TARGET_COLOR_TRANSFER_S'], primaries=calc_ini['TARGET_COLOR_PRIMARIES_S'], range=calc_ini['TARGET_COLOR_RANGE_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix=calc_ini['TARGET_COLORSPACE_MATRIX_I'], transfer=calc_ini['TARGET_COLOR_TRANSFER_I'], primaries=calc_ini['TARGET_COLOR_PRIMARIES_I'], range=calc_ini['TARGET_COLOR_RANGE_I'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 
+		#with clip.get_frame(0) as f:
+		#	print(f'DEBUG: outgoing frame properties after resize=\n{objPrettyPrint.pformat(f.props)}\n',flush=True)
 		return c
 	elif clip.format.color_family==vs.YUV:
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
 		#			enum chromaloc, enum matrix_in, enum transfer_in, enum primaries_in, enum range_in, enum chromaloc_in, 
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
-		print(f'DEBUG: clip.format.color_family==vs.YUV: clip.format.color_family={clip.format.color_family} vs.YUV={vs.YUV}\n',flush=True)
+		#print(f'DEBUG: clip.format.color_family==vs.YUV: clip.format.color_family={clip.format.color_family} vs.YUV={vs.YUV}\n',flush=True)
 
 		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
-		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'], transfer=calc_ini['TARGET_COLOR_TRANSFER'], primaries=calc_ini['TARGET_COLOR_PRIMARIES_S'], range=calc_ini['TARGET_COLOR_RANGE_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
-		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'], transfer_s=calc_ini['TARGET_COLOR_TRANSFER'], primaries_s=calc_ini['TARGET_COLOR_PRIMARIES_S'], range_s=calc_ini['TARGET_COLOR_RANGE_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix=calc_ini['TARGET_COLORSPACE_MATRIX_I'], transfer=calc_ini['TARGET_COLOR_TRANSFER_I'], primaries=calc_ini['TARGET_COLOR_PRIMARIES_I'], range=calc_ini['TARGET_COLOR_RANGE_I'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 
 		# AH !!! the above line with matrix_s='709' can cause this error:
 		# If you get an error like:
@@ -304,16 +309,18 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		# It usually means the matrix/transfer/primaries are unknown 
 		# *** and you have to specify the input colorspace parameters yourself. *** Note: 2 means “unspecified” according to the ITU-T recommendation.
 		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'])
+		#with clip.get_frame(0) as f:
+		#	print(f'DEBUG: outgoing frame properties after resize=\n{objPrettyPrint.pformat(f.props)}\n',flush=True)
 		return c
 	else:
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
 		#			enum chromaloc, enum matrix_in, enum transfer_in, enum primaries_in, enum range_in, enum chromaloc_in, 
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
-		print(f'DEBUG: NEITHER vs.RGB nor vs.YUV ? clip.format.color_family!=vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB} vs.YUV={vs.YUV}\n',flush=True)
+		#print(f'DEBUG: NEITHER vs.RGB nor vs.YUV ? clip.format.color_family!=vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB} vs.YUV={vs.YUV}\n',flush=True)
 
 		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
-		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'], transfer=calc_ini['TARGET_COLOR_TRANSFER'], primaries=calc_ini['TARGET_COLOR_PRIMARIES_S'], range=calc_ini['TARGET_COLOR_RANGE_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix=calc_ini['TARGET_COLORSPACE_MATRIX_I'], transfer=calc_ini['TARGET_COLOR_TRANSFER_I'], primaries=calc_ini['TARGET_COLOR_PRIMARIES_I'], range=calc_ini['TARGET_COLOR_RANGE_I'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 
 		# AH !!! the avove line with matrix_s='709' can cause this error:
 		# If you get an error like:
@@ -321,6 +328,8 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		# It usually means the matrix/transfer/primaries are unknown 
 		# *** and you have to specify the input colorspace parameters yourself. *** Note: 2 means “unspecified” according to the ITU-T recommendation.
 		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'])
+		#with clip.get_frame(0) as f:
+		#	print(f'DEBUG: outgoing frame properties after resize=\n{objPrettyPrint.pformat(f.props)}\n',flush=True)
 		return c
 
 ###
@@ -557,33 +566,50 @@ if __name__=='__main__':
 	ini_file_speciying_parameters = r'.\SLIDESHOW_PARAMETERS.ini'.strip() # r prefix means the string is treated as a raw string so all escape codes will be ignored.EPT IF THE \ is the last character in the string !
 	#print(f'DEBUG: ini_file_speciying_parameters="{ini_file_speciying_parameters}"',flush=True)
 
+	#for v in vs.MatrixCoefficients:
+	#	print(f'DEBUG: vs.MatrixCoefficients: {v} {objPrettyPrint.pformat(v)}',flush=True)
+	#for v in vs.TransferCharacteristics:
+	#	print(f'DEBUG: vs.TransferCharacteristics: {v} {objPrettyPrint.pformat(v)}',flush=True)
+	#for v in vs.ColorPrimaries:
+	#	print(f'DEBUG: vs.ColorPrimaries: {v} {objPrettyPrint.pformat(v)}',flush=True)
+	#for v in vs.ColorRange:
+	#	print(f'DEBUG: vs.ColorRange: {v} {objPrettyPrint.pformat(v)}',flush=True)
+
 	ini_section_name = 'slideshow'
 	default_ini_values =	{ ini_section_name : {
-								#'DIRECTORY' :					fully_qualified_folder_no_trailing_backslash(os.getcwd().strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
-								'DIRECTORY' :					fully_qualified_folder_no_trailing_backslash(r'G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\ '.strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
-								'TEMP_DIRECTORY' :				fully_qualified_folder_no_trailing_backslash(r'D:\TEMP\ '.strip()),	# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
-								'RECURSIVE' :					True,
-								'CROSSFADE_DURATION':			1,
-								'TARGET_COLORSPACE' : 			r'BT.709',			# colorspace Rec2020, BT.2020 Rec709, BT.709, Rec601, BT.601, PC.709, PC.601, TV.fcc, PC.fcc, TV.240m, PC.240m; When no hint found in ASS script and colorspace parameter is empty then the default is BT.601
-								'TARGET_COLORSPACE_MATRIX' :	r'BT.709',
-								'TARGET_COLORSPACE_MATRIX_S' :	r'709',				# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
-								'TARGET_COLOR_TRANSFER' :		r'BT.709',
-								'TARGET_COLOR_TRANSFER_S' :		r'709',				# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
-								'TARGET_COLOR_PRIMARIES' :		r'BT.709',
-								'TARGET_COLOR_PRIMARIES_S' :	r'709',				# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
-								'TARGET_COLOR_RANGE' :			r'pc',	
-								'TARGET_COLOR_RANGE_S' :		r'pc',				# for resize
-								'TARGET_WIDTH' :				1920,
-								'TARGET_HEIGHT' :				1080,
-								'TARGET_FPSNUM' :				25,					# for fps numerator		... PAL world bias
-								'TARGET_FPSDEN' :				1,					# for fps denominator	... PAL world bias
-								'MIN_DURATION_SEC' :			0.5,				### MINIMUM duration of display of an image, in seconds
-								'MAX_DURATION_SEC' :			4,					### MAXIMUM duration of display of an image, in seconds
-								'MAX_VIDEO_CLIP_DURATION' :		10,					# Maximum diraction of a video clip in seconds
-								'BOX' :							True,				# True would initiate letterboxing or pillarboxing. False fills to TARGET_WIDTH,TARGET_HEIGHT
-								'ADD_SUBTITLE' :				True,				# True adds a subtitle in the bottom right corner containing the last few parts of the path to the image/video
-								'UPSIZE_KERNEL' :				r'Lanczos',
-								'DOWNSIZE_KERNEL' :				r'Spline36',
+								#'DIRECTORY' :						fully_qualified_folder_no_trailing_backslash(os.getcwd().strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
+								'DIRECTORY' :						fully_qualified_folder_no_trailing_backslash(r'G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\ '.strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
+								'TEMP_DIRECTORY' :					fully_qualified_folder_no_trailing_backslash(r'D:\TEMP\ '.strip()),	# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
+								'RECURSIVE' :						True,
+								'CROSSFADE_DURATION':				1,
+								'TARGET_COLORSPACE' : 				r'BT.709',											# colorspace Rec2020, BT.2020 Rec709, BT.709, Rec601, BT.601, PC.709, PC.601, TV.fcc, PC.fcc, TV.240m, PC.240m; When no hint found in ASS script and colorspace parameter is empty then the default is BT.601
+								'TARGET_COLORSPACE_MATRIX' :		r'BT.709',
+								'TARGET_COLORSPACE_MATRIX_S' :		r'709',												# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
+								#'TARGET_COLORSPACE_MATRIX_I' :		int(vs.MatrixCoefficients.MATRIX_BT709)+0,			# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+								'TARGET_COLORSPACE_MATRIX_I' :		int(vs.MATRIX_BT709)+0,								# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+								'TARGET_COLOR_TRANSFER' :			r'BT.709',
+								'TARGET_COLOR_TRANSFER_S' :			r'BT.709',											# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
+								#'TARGET_COLOR_TRANSFER_I' :		int(vs.TransferCharacteristics.TRANSFER_BT709)+0,	# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+								'TARGET_COLOR_TRANSFER_I' :			int(vs.TRANSFER_BT709)+0,							# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+								'TARGET_COLOR_PRIMARIES' :			r'BT.709',
+								'TARGET_COLOR_PRIMARIES_S' :		r'BT.709',											# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
+								#'TARGET_COLOR_PRIMARIES_I' :		int(vs.ColorPrimaries.PRIMARIES_BT709)+0,			# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+								'TARGET_COLOR_PRIMARIES_I' :		int(vs.PRIMARIES_BT709)+0,							# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+								'TARGET_COLOR_RANGE' :				r'pc',	
+								'TARGET_COLOR_RANGE_S' :			r'pc',											# for resize
+								#'TARGET_COLOR_RANGE_I' :			int(vs.ColorRange.RANGE_FULL)+0,					# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+								'TARGET_COLOR_RANGE_I' :			int(vs.RANGE_FULL)+0,								# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+								'TARGET_WIDTH' :					1920,
+								'TARGET_HEIGHT' :					1080,
+								'TARGET_FPSNUM' :					25,													# for fps numerator		... PAL world bias
+								'TARGET_FPSDEN' :					1,													# for fps denominator	... PAL world bias
+								'MIN_DURATION_SEC' :				0.5,												### MINIMUM duration of display of an image, in seconds
+								'MAX_DURATION_SEC' :				4,													### MAXIMUM duration of display of an image, in seconds
+								'MAX_VIDEO_CLIP_DURATION' :			10,													# Maximum diraction of a video clip in seconds
+								'BOX' :								True,												# True would initiate letterboxing or pillarboxing. False fills to TARGET_WIDTH,TARGET_HEIGHT
+								'ADD_SUBTITLE' :					True,												# True adds a subtitle in the bottom right corner containing the last few parts of the path to the image/video
+								'UPSIZE_KERNEL' :					r'Lanczos',
+								'DOWNSIZE_KERNEL' :					r'Spline36',
 								}
 							}
 	ini_values = default_ini_values
@@ -607,12 +633,16 @@ if __name__=='__main__':
 		ini_values[ini_section_name]['TARGET_COLORSPACE'] = config.get(ini_section_name, 'TARGET_COLORSPACE')
 		ini_values[ini_section_name]['TARGET_COLORSPACE_MATRIX'] = config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX')
 		ini_values[ini_section_name]['TARGET_COLORSPACE_MATRIX_S'] = config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX_S')
+		ini_values[ini_section_name]['TARGET_COLORSPACE_MATRIX_I'] = config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX_I')
 		ini_values[ini_section_name]['TARGET_COLOR_TRANSFER'] = config.get(ini_section_name, 'TARGET_COLOR_TRANSFER')
 		ini_values[ini_section_name]['TARGET_COLOR_TRANSFER_S'] = config.get(ini_section_name, 'TARGET_COLOR_TRANSFER_S')
+		ini_values[ini_section_name]['TARGET_COLOR_TRANSFER_I'] = config.get(ini_section_name, 'TARGET_COLOR_TRANSFER_I')
 		ini_values[ini_section_name]['TARGET_COLOR_PRIMARIES'] = config.get(ini_section_name, 'TARGET_COLOR_PRIMARIES')
 		ini_values[ini_section_name]['TARGET_COLOR_PRIMARIES_S'] = config.get(ini_section_name, 'TARGET_COLOR_PRIMARIES_S')
+		ini_values[ini_section_name]['TARGET_COLOR_PRIMARIES_I'] = config.get(ini_section_name, 'TARGET_COLOR_PRIMARIES_I')
 		ini_values[ini_section_name]['TARGET_COLOR_RANGE'] = config.get(ini_section_name, 'TARGET_COLOR_RANGE')
 		ini_values[ini_section_name]['TARGET_COLOR_RANGE_S'] = config.get(ini_section_name, 'TARGET_COLOR_RANGE_S')
+		ini_values[ini_section_name]['TARGET_COLOR_RANGE_I'] = config.get(ini_section_name, 'TARGET_COLOR_RANGE_I')
 		ini_values[ini_section_name]['TARGET_WIDTH'] = config.getint(ini_section_name, 'TARGET_WIDTH')
 		ini_values[ini_section_name]['TARGET_HEIGHT'] = config.getint(ini_section_name, 'TARGET_HEIGHT')
 		ini_values[ini_section_name]['TARGET_FPSNUM'] = config.getint(ini_section_name, 'TARGET_FPSNUM')
@@ -630,6 +660,22 @@ if __name__=='__main__':
 	with open(ini_file_speciying_parameters, 'w') as configfile:
 		update_config =  configparser.ConfigParser(allow_no_value=True)
 		update_config[ini_section_name] = default_ini_values[ini_section_name]
+		for v in vs.MatrixCoefficients:
+			print(f'DEBUG: vs.MatrixCoefficients: {v} {objPrettyPrint.pformat(v)}',flush=True)
+			#update_config['Enum_vs.MatrixCoefficients'][vs.MatrixCoefficients] = objPrettyPrint.pformat(v)
+			pass
+		for v in vs.TransferCharacteristics:
+			#print(f'DEBUG: vs.TransferCharacteristics: {v} {objPrettyPrint.pformat(v)}',flush=True)
+			#update_config['Enum_vs.TransferCharacteristics'][vs.TransferCharacteristics] = objPrettyPrint.pformat(v)
+			pass
+		for v in vs.ColorPrimaries:
+			#print(f'DEBUG: vs.ColorPrimaries: {v} {objPrettyPrint.pformat(v)}',flush=True)
+			#update_config['Enum_vs.ColorPrimaries'][vs.ColorPrimaries] = objPrettyPrint.pformat(v)
+			pass
+		for v in vs.ColorRange:
+			#print(f'DEBUG: vs.ColorRange: {v} {objPrettyPrint.pformat(v)}',flush=True)
+			#update_config['Enum_vs.ColorRange'][vs.ColorRange] = objPrettyPrint.pformat(v)
+			pass
 		update_config.write(configfile)
 	#print(f'DEBUG: ini values used:\n{objPrettyPrint.pformat(ini_values)}',flush=True)
 	# calculate some values and create an ini and calculated values dict
@@ -648,7 +694,6 @@ if __name__=='__main__':
 	calc_ini['DOT_FFINDEX']			= ".ffindex".lower()		# for removing temporary *.ffindex files at the end
 	calc_ini['MODX']				= 2	   # mods for letterboxing calculations, example, for 411 YUV as an extreme
 	calc_ini['MODY']				= 2	   # mods would have to be MODX=4, MODY=1 as minimum
-	print(f'DEBUG: ini and calculated values used:\n{objPrettyPrint.pformat(calc_ini)}',flush=True)
 
 	########################################################################################################################################################
 	if calc_ini['RECURSIVE']:
