@@ -278,30 +278,30 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 	if clip.format.color_family==vs.RGB:
 		#rgb to YUV, perhaps only for png images, figure out what matrix out is needed ... use the HD one REC.709
 		#print(f'DEBUG: clip.format.color_family==vs.RGB',flush=True)
-		c =  resize(width=w, height=h, format=TARGET_PIXEL_FORMAT, matrix_s='709')
+		c =  resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s='709')
 		return c
 	else:
 		#YUV to YUV
 		#print(f'DEBUG: clip.format.color_family==vs.YUV?',flush=True)
-		c = resize(width=w, height=h, format=TARGET_PIXEL_FORMAT)
+		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'])
 		# AH !!! the next line with matrix_s='709' can cause this:
 		#		Error getting frame: Resize error: Resize error 3074: no path between colorspaces (2/2/2 => 1/2/2).
 		# it seems missing "Matrix coefficients" metadata in the source may be the culprit
-		#c = resize(width=w, height=h, format=TARGET_PIXEL_FORMAT, matrix_s='709')
+		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s='709')
 		return c
 
 ###
 def get_clip(path):
-	if path.suffix.lower()   in EEK_EXTENSIONS:
+	if path.suffix.lower()   in calc_ini['EEK_EXTENSIONS']:
 		#print(f'DEBUG: get_clip: lsmas Video: {path.name},flush=True')
 		clip = core.lsmas.LWLibavSource(str(path))
 		#print(f'DEBUG: get_clip: Video info:\n{clip}',flush=True)
-	elif path.suffix.lower() in VID_EXTENSIONS:
+	elif path.suffix.lower() in calc_ini['VID_EXTENSIONS']:
 		#print(f'DEBUG: get_clip: ffms2 Video: {path.name}',flush=True)
 		clip = core.ffms2.Source(str(path))	#ffms2 leaves *.ffindex files everywhere in folders.
 		#clip = core.lsmas.LibavSMASHSource(str(path))
 		#print(f'DEBUG: get_clip: Video info:\n{clip}',flush=True)
-	elif path.suffix.lower() in PIC_EXTENSIONS:
+	elif path.suffix.lower() in calc_ini['PIC_EXTENSIONS']:
 		#print(f'DEBUG: get_clip: ffms2 Video: {path.name}',flush=True)
 		clip = core.ffms2.Source(str(path))
 	#	clip = core.imwri.Read(str(path)) # ImageWriter, if installed into vapoursynth folder
@@ -312,13 +312,13 @@ def get_clip(path):
 		#print(f'DEBUG: get_clip: Video info:\n{clip}',flush=True)
 
 	# check for and picture/video rotation specified perhaps in EXIF but not auto-processed here by the file openers
-	if path.suffix.lower()   in VID_EEK_EXTENSIONS:
+	if path.suffix.lower()   in calc_ini['VID_EEK_EXTENSIONS']:
 		clip = rotation_check_MediaInfo(clip, path, save_rotated_image=False)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
 	else: # source is not a video type, i.e. an image
 		clip = rotation_check_PIL(clip, path, save_rotated_image=False)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
 
 	# do video-specific or picture-specific changes
-	if path.suffix.lower()   in VID_EEK_EXTENSIONS:	#if any sort of video, probably an old hand-held camera or phone, sometimes variable fps ...
+	if path.suffix.lower()   in calc_ini['VID_EEK_EXTENSIONS']:	#if any sort of video, probably an old hand-held camera or phone, sometimes variable fps ...
 		#print(f'DEBUG: get_clip: opened Video: {path.name}',flush=True)
 		#print(f'DEBUG: get_clip: opened Video: {path.name}\nVideo info:\n{clip}',flush=True)
 		#clip = core.text.Text(clip, path.name, alignment=3, scale=1)
@@ -344,7 +344,7 @@ def get_clip(path):
 			clip = clip.resize.Point(format=DG_PIXEL_FORMAT)		# convert to DG_PIXEL_FORMAT via resizer which does no resizing
 			#clip = core.avs.DGDenoise(clip, strength=0.06, cstrength=0.06)
 			clip = core.avs.DGDenoise(clip, strength=0.15, cstrength=0.15)
-			clip = clip.resize.Point(format=TARGET_PIXEL_FORMAT)	# convert to TARGET_PIXEL_FORMAT via resizer which does no resizing
+			clip = clip.resize.Point(format=calc_ini['TARGET_PIXEL_FORMAT'])	# convert to calc_ini['TARGET_PIXEL_FORMAT'] via resizer which does no resizing
 	else: # source is not a video type, i.e. an image
 		# extend duration of a clip of an image
 		clip = clip[0]*MIN_DURATION_FRAMES if len(clip)<MIN_DURATION_FRAMES else clip # make clip at least MIN_DURATION_FRAMES frames long if less than MIN_DURATION_FRAMES frames
@@ -378,8 +378,8 @@ def get_path(path_generator):
 			#print(f'DEBUG: get_path: get success, path.name=' + path.name,flush=True)
 		except StopIteration:
 			return None
-		if path.suffix.lower() in EXTENSIONS:	# only return files which are in known extensions
-			#print(f'DEBUG: get_path: in EXTENSIONS success, path.name=' + path.name,flush=True)
+		if path.suffix.lower() in calc_ini['EXTENSIONS']:	# only return files which are in known extensions
+			#print(f'DEBUG: get_path: in calc_ini["EXTENSIONS"] success, path.name=' + path.name,flush=True)
 			return path
 		  
 ###
@@ -610,20 +610,21 @@ if __name__=='__main__':
 		glob_var="*.*"				# non-recursive
 		ff_glob_var="*.ffindex"		# for .ffindex file deletion non-recursive
 	# glob : with DIRECTORY not having a trailing slash !!!
-	#print(f'DEBUG: Processing "{calc_ini["DIRECTORY"]}" recursive="{calc_ini["RECURSIVE"]}" glob_var="{glob_var}" \n      with Extensions={objPrettyPrint.pformat(calc_ini["EXTENSIONS"])}',flush=True)
+	print(f'DEBUG: Processing "{calc_ini["DIRECTORY"]}" recursive="{calc_ini["RECURSIVE"]}" glob_var="{glob_var}" \n      with Extensions={objPrettyPrint.pformat(calc_ini["EXTENSIONS"])}',flush=True)
 
-	sys.exit()
+
 
 	Count_of_files = 0
 	# NOTE: calc_ini['DIRECTORY'] MUST NOT have a trailing backslash ... remove during ini setup
 	paths = Path(calc_ini['DIRECTORY']).glob(glob_var) # generator of all paths in a directory, files starting with . won't be matched by default
-	#sys.exit(0)
+
+
 	path = get_path(paths)	#pre-fetch first path
 	if path is None:
-		raise ValueError(f'Extensions: {EXTENSIONS}, not found in "{calc_ini["DIRECTORY"]}"')
-	blank_clip = core.std.BlankClip(format=TARGET_PIXEL_FORMAT, width=calc_ini['TARGET_WIDTH'], height=calc_ini['TARGET_HEIGHT'], length=BLANK_CLIP_LENGTH, color=(16,128,128))	 # notice no colorspace,"range" etc can be specified
+		raise ValueError(f'Extensions: {calc_ini["EXTENSIONS"]}, not found in "{calc_ini["DIRECTORY"]}"')
+	blank_clip = core.std.BlankClip(format=calc_ini['TARGET_PIXEL_FORMAT'], width=calc_ini['TARGET_WIDTH'], height=calc_ini['TARGET_HEIGHT'], length=calc_ini['BLANK_CLIP_LENGTH'], color=(16,128,128))	 # notice no colorspace,"range" etc can be specified
 	clips = blank_clip	# initialize the accumulated clips with a starting small blank clip
-	if CROSSFADE_DURATION>0:	
+	if calc_ini['CROSSFADE_DURATION']>0:	
 		crossfade_blank_clip = blank_clip[0]*MIN_DURATION_FRAMES if len(blank_clip)<MIN_DURATION_FRAMES else blank_clip
 		prior_clip_for_crossfade = crossfade_blank_clip
 	#---
@@ -639,10 +640,10 @@ if __name__=='__main__':
 		#this_clip = core.text.FrameNum(this_clip, alignment=2, scale=1)
 		#this_clip = core.text.ClipInfo(this_clip, alignment=8, scale=1)
 		#this_clip = core.text.FrameProps(this_clip, alignment=2, scale=1)
-		if CROSSFADE_DURATION>0:	
+		if calc_ini['CROSSFADE_DURATION']>0:	
 			#print(f'DEBUG: doing crossfade in while loop',flush=True)
-			crossfade_clip = crossfade(prior_clip_for_crossfade, this_clip, CROSSFADE_DURATION)
-			# for now, don't do equivalent of this from _AI_ ... right  = right_clip[CROSSFADE_DURATION:-CROSSFADE_DURATION]
+			crossfade_clip = crossfade(prior_clip_for_crossfade, this_clip, calc_ini['CROSSFADE_DURATION'])
+			# for now, don't do equivalent of this from _AI_ ... right  = right_clip[calc_ini['CROSSFADE_DURATION']:-calc_ini['CROSSFADE_DURATION']]
 			clips = clips + crossfade_clip + this_clip
 			prior_clip_for_crossfade = this_clip
 		else:
@@ -650,9 +651,9 @@ if __name__=='__main__':
 		path = get_path(paths)		# get next path to process in this while loop
 	#---
 	# perhaps a finishing crossfade to black ?
-	if CROSSFADE_DURATION>0:	
+	if calc_ini['CROSSFADE_DURATION']>0:	
 		#print(f'DEBUG: doing final crossfade after while loop',flush=True)
-		crossfade_clip = crossfade(prior_clip_for_crossfade, crossfade_blank_clip, CROSSFADE_DURATION)
+		crossfade_clip = crossfade(prior_clip_for_crossfade, crossfade_blank_clip, calc_ini['CROSSFADE_DURATION'])
 		# for now, don't do equivalent of this from _AI_ ... right  = right_clip[CROSSFADE_DURATION:-CROSSFADE_DURATION]
 		clips = clips + crossfade_clip + this_clip
 	clips = clips + blank_clip		# end the accumulated clips with a finishing small blank clip
