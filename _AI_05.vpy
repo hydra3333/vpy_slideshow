@@ -276,8 +276,35 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 	if w>W or h>H:	resize = getattr(clip.resize, calc_ini['DOWNSIZE_KERNEL'])	# get the resize function object ?handle? with the nominated kernel
 	else:			resize = getattr(clip.resize, calc_ini['UPSIZE_KERNEL'])	# get the resize function object ?handle? with the nominated kernel
 	
-	#with clip.get_frame(0) as f:
-	#	print(f'DEBUG: incoming frame properties before resize=\n{objPrettyPrint.pformat(f.props)}\n',flush=True)
+	# check the READERS to see if we can affect this .....
+	# in YUV processing ...
+	with clip.get_frame(0) as f:
+		print(f'DEBUG: incoming frame properties before resize=\n{objPrettyPrint.pformat(f.props)}\n',flush=True)
+		print(f'DEBUG: f.props["_Matrix"] = {f.props["_Matrix"]}',flush=True)
+		print(f'DEBUG: f.props["_Transfer"] = {f.props["_Transfer"]}',flush=True)
+		print(f'DEBUG: f.props["_Primaries"] = {f.props["_Primaries"]}',flush=True)
+		print(f'DEBUG: f.props["_ColorRange"] = {f.props["_ColorRange"]}',flush=True)
+		print(f'DEBUG: f.props["_ChromaLocation"] = {f.props["_ChromaLocation"]}',flush=True)
+		
+		#DEBUG: incoming frame properties before resize=
+		#<vapoursynth.FrameProps {'_AbsoluteTime': 0.0, '_PictType': b'I', 
+		#'_Transfer': 2, = transfercharacteristics.transfer_unspecified = 2
+		#'_DurationDen': 25, 
+		#'_ChromaLocation': 1, 
+		#'_DurationNum': 1, 
+		#'_FieldBased': 0, 
+		#'_ColorRange': 0, = colorrange.range_full = 0
+		#'_Primaries': 2, = colorprimaries.primaries_unspecified = 2
+		#'_Matrix': 5} = matrixcoefficients.matrix_bt470_bg = 5
+		#
+		#if not known, guess at bt470_bg (rec.601)
+		#if matrixcoefficients = matrixcoefficients.matrix_unspecified
+		#	matrixcoefficients = matrixcoefficients.matrix_bt470_bg
+		#it is a fair bet that if INCOMING prop matrixcoefficients.matrix_bt470_bg then 
+		#	if colorprimaries  = colorprimaries.primaries_unspecified
+		#		colorprimaries = colorprimaries.primaries_bt470_bg
+		#	if transfercharacteristics  = transfercharacteristics.transfer_unspecified
+		#		transfercharacteristics = transfercharacteristics.transfer_bt470_bg
 	
 	if clip.format.color_family==vs.RGB:
 		#rgb to YUV, perhaps only for png images, figure out what matrix out is needed ... use the HD one REC.709
@@ -298,8 +325,9 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		#			enum chromaloc, enum matrix_in, enum transfer_in, enum primaries_in, enum range_in, enum chromaloc_in, 
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
-		#print(f'DEBUG: clip.format.color_family==vs.YUV: clip.format.color_family={clip.format.color_family} vs.YUV={vs.YUV}\n',flush=True)
-
+		
+		print(f'DEBUG: clip.format.color_family==vs.YUV: clip.format.color_family={clip.format.color_family} vs.YUV={vs.YUV}\n',flush=True)
+		
 		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix=calc_ini['TARGET_COLORSPACE_MATRIX_I'], transfer=calc_ini['TARGET_COLOR_TRANSFER_I'], primaries=calc_ini['TARGET_COLOR_PRIMARIES_I'], range=calc_ini['TARGET_COLOR_RANGE_I'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 
@@ -553,235 +581,232 @@ def fully_qualified_folder_no_trailing_backslash(folder_name):
 ###################################################################################################################################################
 ###################################################################################################################################################
 
-if __name__=='__main__':
-	#if DIRECTORY[-1:] == "\\"[-1:]:
-	#	DIRECTORY = DIRECTORY[:-1]	# remove any trailing backslash
-	#else:
-	#	DIRECTORY = DIRECTORY
-	#
-	TERMINAL_WIDTH = 132
-	objPrettyPrint = pprint.PrettyPrinter(width=TERMINAL_WIDTH, compact=False, sort_dicts=False)	# facilitates formatting and printing of text and dicts etc
-	MI = MediaInfo()	# initialize per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
-	
-	ini_file_speciying_parameters = r'.\SLIDESHOW_PARAMETERS.ini'.strip() # r prefix means the string is treated as a raw string so all escape codes will be ignored.EPT IF THE \ is the last character in the string !
-	ini_file_speciying_parameters = fully_qualified_folder_no_trailing_backslash(ini_file_speciying_parameters)
-	
-	#print(f'DEBUG: ini_file_speciying_parameters="{ini_file_speciying_parameters}"',flush=True)
+### NEVER EVER hide .vpy behind "if __name__=='__main__':"
+### BECAUSE IT NEVER GETS RUN BY VSPIPE NOR FFMPEG
 
-	#for v in vs.MatrixCoefficients:
-	#	print(f'DEBUG: vs.MatrixCoefficients: {v} {objPrettyPrint.pformat(v)}',flush=True)
-	#for v in vs.TransferCharacteristics:
-	#	print(f'DEBUG: vs.TransferCharacteristics: {v} {objPrettyPrint.pformat(v)}',flush=True)
-	#for v in vs.ColorPrimaries:
-	#	print(f'DEBUG: vs.ColorPrimaries: {v} {objPrettyPrint.pformat(v)}',flush=True)
-	#for v in vs.ColorRange:
-	#	print(f'DEBUG: vs.ColorRange: {v} {objPrettyPrint.pformat(v)}',flush=True)
+TERMINAL_WIDTH = 132
+objPrettyPrint = pprint.PrettyPrinter(width=TERMINAL_WIDTH, compact=False, sort_dicts=False)	# facilitates formatting and printing of text and dicts etc
+MI = MediaInfo()	# initialize per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
+	
+ini_file_speciying_parameters = r'.\SLIDESHOW_PARAMETERS.ini'.strip() # r prefix means the string is treated as a raw string so all escape codes will be ignored.EPT IF THE \ is the last character in the string !
+ini_file_speciying_parameters = fully_qualified_folder_no_trailing_backslash(ini_file_speciying_parameters)
+	
+#print(f'DEBUG: ini_file_speciying_parameters="{ini_file_speciying_parameters}"',flush=True)
 
-	ini_section_name = 'slideshow'
-	default_ini_values =	{ ini_section_name : {
-								#'DIRECTORY' :						fully_qualified_folder_no_trailing_backslash(os.getcwd().strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
-								'DIRECTORY' :						fully_qualified_folder_no_trailing_backslash(r'G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\ '.strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
-								'TEMP_DIRECTORY' :					fully_qualified_folder_no_trailing_backslash(r'D:\TEMP\ '.strip()),	# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
-								'RECURSIVE' :						True,
-								'CROSSFADE_DURATION':				1,
-								'TARGET_COLORSPACE' : 				r'BT.709',											# colorspace Rec2020, BT.2020 Rec709, BT.709, Rec601, BT.601, PC.709, PC.601, TV.fcc, PC.fcc, TV.240m, PC.240m; When no hint found in ASS script and colorspace parameter is empty then the default is BT.601
-								'TARGET_COLORSPACE_MATRIX' :		r'BT.709',
-								'TARGET_COLORSPACE_MATRIX_S' :		r'709',												# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
-								#'TARGET_COLORSPACE_MATRIX_I' :		int(vs.MatrixCoefficients.MATRIX_BT709)+0,			# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
-								'TARGET_COLORSPACE_MATRIX_I' :		int(vs.MATRIX_BT709)+0,								# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
-								'TARGET_COLOR_TRANSFER' :			r'BT.709',
-								'TARGET_COLOR_TRANSFER_S' :			r'BT.709',											# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
-								#'TARGET_COLOR_TRANSFER_I' :		int(vs.TransferCharacteristics.TRANSFER_BT709)+0,	# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
-								'TARGET_COLOR_TRANSFER_I' :			int(vs.TRANSFER_BT709)+0,							# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
-								'TARGET_COLOR_PRIMARIES' :			r'BT.709',
-								'TARGET_COLOR_PRIMARIES_S' :		r'BT.709',											# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
-								#'TARGET_COLOR_PRIMARIES_I' :		int(vs.ColorPrimaries.PRIMARIES_BT709)+0,			# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
-								'TARGET_COLOR_PRIMARIES_I' :		int(vs.PRIMARIES_BT709)+0,							# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
-								'TARGET_COLOR_RANGE' :				r'pc',	
-								'TARGET_COLOR_RANGE_S' :			r'pc',											# for resize
-								#'TARGET_COLOR_RANGE_I' :			int(vs.ColorRange.RANGE_FULL)+0,					# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
-								'TARGET_COLOR_RANGE_I' :			int(vs.RANGE_FULL)+0,								# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
-								'TARGET_WIDTH' :					1920,
-								'TARGET_HEIGHT' :					1080,
-								'TARGET_FPSNUM' :					25,													# for fps numerator		... PAL world bias
-								'TARGET_FPSDEN' :					1,													# for fps denominator	... PAL world bias
-								'MIN_DURATION_SEC' :				0.5,												### MINIMUM duration of display of an image, in seconds
-								'MAX_DURATION_SEC' :				4,													### MAXIMUM duration of display of an image, in seconds
-								'MAX_VIDEO_CLIP_DURATION' :			10,													# Maximum diraction of a video clip in seconds
-								'BOX' :								True,												# True would initiate letterboxing or pillarboxing. False fills to TARGET_WIDTH,TARGET_HEIGHT
-								'ADD_SUBTITLE' :					True,												# True adds a subtitle in the bottom right corner containing the last few parts of the path to the image/video
-								'UPSIZE_KERNEL' :					r'Lanczos',
-								'DOWNSIZE_KERNEL' :					r'Spline36',
-								}
+#for v in vs.MatrixCoefficients:
+#	print(f'DEBUG: vs.MatrixCoefficients: {v} {objPrettyPrint.pformat(v)}',flush=True)
+#for v in vs.TransferCharacteristics:
+#	print(f'DEBUG: vs.TransferCharacteristics: {v} {objPrettyPrint.pformat(v)}',flush=True)
+#for v in vs.ColorPrimaries:
+#	print(f'DEBUG: vs.ColorPrimaries: {v} {objPrettyPrint.pformat(v)}',flush=True)
+#for v in vs.ColorRange:
+#	print(f'DEBUG: vs.ColorRange: {v} {objPrettyPrint.pformat(v)}',flush=True)
+
+ini_section_name = 'slideshow'
+default_ini_values =	{ ini_section_name : {
+							#'DIRECTORY' :						fully_qualified_folder_no_trailing_backslash(os.getcwd().strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
+							'DIRECTORY' :						fully_qualified_folder_no_trailing_backslash(r'G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\ '.strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
+							'TEMP_DIRECTORY' :					fully_qualified_folder_no_trailing_backslash(r'D:\TEMP\ '.strip()),	# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
+							'RECURSIVE' :						True,
+							'CROSSFADE_DURATION':				1,
+							'TARGET_COLORSPACE' : 				r'BT.709',											# colorspace Rec2020, BT.2020 Rec709, BT.709, Rec601, BT.601, PC.709, PC.601, TV.fcc, PC.fcc, TV.240m, PC.240m; When no hint found in ASS script and colorspace parameter is empty then the default is BT.601
+							'TARGET_COLORSPACE_MATRIX' :		r'BT.709',
+							'TARGET_COLORSPACE_MATRIX_S' :		r'709',												# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
+							#'TARGET_COLORSPACE_MATRIX_I' :		int(vs.MatrixCoefficients.MATRIX_BT709)+0,			# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+							'TARGET_COLORSPACE_MATRIX_I' :		int(vs.MATRIX_BT709)+0,								# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+							'TARGET_COLOR_TRANSFER' :			r'BT.709',
+							'TARGET_COLOR_TRANSFER_S' :			r'BT.709',											# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
+							#'TARGET_COLOR_TRANSFER_I' :		int(vs.TransferCharacteristics.TRANSFER_BT709)+0,	# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+							'TARGET_COLOR_TRANSFER_I' :			int(vs.TRANSFER_BT709)+0,							# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+							'TARGET_COLOR_PRIMARIES' :			r'BT.709',
+							'TARGET_COLOR_PRIMARIES_S' :		r'BT.709',											# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
+							#'TARGET_COLOR_PRIMARIES_I' :		int(vs.ColorPrimaries.PRIMARIES_BT709)+0,			# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+							'TARGET_COLOR_PRIMARIES_I' :		int(vs.PRIMARIES_BT709)+0,							# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+							'TARGET_COLOR_RANGE' :				r'pc',	
+							'TARGET_COLOR_RANGE_S' :			r'pc',											# for resize
+							#'TARGET_COLOR_RANGE_I' :			int(vs.ColorRange.RANGE_FULL)+0,					# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+							'TARGET_COLOR_RANGE_I' :			int(vs.RANGE_FULL)+0,								# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+							'TARGET_WIDTH' :					1920,
+							'TARGET_HEIGHT' :					1080,
+							'TARGET_FPSNUM' :					25,													# for fps numerator		... PAL world bias
+							'TARGET_FPSDEN' :					1,													# for fps denominator	... PAL world bias
+							'MIN_DURATION_SEC' :				0.5,												### MINIMUM duration of display of an image, in seconds
+							'MAX_DURATION_SEC' :				4,													### MAXIMUM duration of display of an image, in seconds
+							'MAX_VIDEO_CLIP_DURATION' :			10,													# Maximum diraction of a video clip in seconds
+							'BOX' :								True,												# True would initiate letterboxing or pillarboxing. False fills to TARGET_WIDTH,TARGET_HEIGHT
+							'ADD_SUBTITLE' :					True,												# True adds a subtitle in the bottom right corner containing the last few parts of the path to the image/video
+							'UPSIZE_KERNEL' :					r'Lanczos',
+							'DOWNSIZE_KERNEL' :					r'Spline36',
 							}
-	ini_values = default_ini_values
+						}
+ini_values = default_ini_values
+config = configparser.ConfigParser(default_ini_values[ini_section_name], allow_no_value=True)
+config.read(ini_file_speciying_parameters)
+# if a missing not badly formatted .ini, save and use default ini valies
+if not config.has_section(ini_section_name):
+	config = configparser.ConfigParser(allow_no_value=True)
+	config.read_dict(default_ini_values)
+	with open(ini_file_speciying_parameters, 'w') as configfile:
+		config.write(configfile)
 	config = configparser.ConfigParser(default_ini_values[ini_section_name], allow_no_value=True)
 	config.read(ini_file_speciying_parameters)
-	# if a missing not badly formatted .ini, save and use default ini valies
-	if not config.has_section(ini_section_name):
-		config = configparser.ConfigParser(allow_no_value=True)
-		config.read_dict(default_ini_values)
-		with open(ini_file_speciying_parameters, 'w') as configfile:
-			config.write(configfile)
-		config = configparser.ConfigParser(default_ini_values[ini_section_name], allow_no_value=True)
-		config.read(ini_file_speciying_parameters)
-		print(f'WARNING: default values applied due to missing or invalid .ini file\n{objPrettyPrint.pformat(default_ini_values)}',flush=True)
-	# if using ini values fails, even after trying to use default values, exit
-	if config.has_section(ini_section_name):
-		ini_values[ini_section_name]['DIRECTORY'] = fully_qualified_folder_no_trailing_backslash(config.get(ini_section_name, 'DIRECTORY'))
-		ini_values[ini_section_name]['TEMP_DIRECTORY'] = fully_qualified_folder_no_trailing_backslash(config.get(ini_section_name, 'TEMP_DIRECTORY'))
-		ini_values[ini_section_name]['RECURSIVE'] = config.getboolean(ini_section_name, 'RECURSIVE')
-		ini_values[ini_section_name]['CROSSFADE_DURATION'] = config.getint(ini_section_name, 'CROSSFADE_DURATION')
-		ini_values[ini_section_name]['TARGET_COLORSPACE'] = config.get(ini_section_name, 'TARGET_COLORSPACE')
-		ini_values[ini_section_name]['TARGET_COLORSPACE_MATRIX'] = config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX')
-		ini_values[ini_section_name]['TARGET_COLORSPACE_MATRIX_S'] = config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX_S')
-		ini_values[ini_section_name]['TARGET_COLORSPACE_MATRIX_I'] = config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX_I')
-		ini_values[ini_section_name]['TARGET_COLOR_TRANSFER'] = config.get(ini_section_name, 'TARGET_COLOR_TRANSFER')
-		ini_values[ini_section_name]['TARGET_COLOR_TRANSFER_S'] = config.get(ini_section_name, 'TARGET_COLOR_TRANSFER_S')
-		ini_values[ini_section_name]['TARGET_COLOR_TRANSFER_I'] = config.get(ini_section_name, 'TARGET_COLOR_TRANSFER_I')
-		ini_values[ini_section_name]['TARGET_COLOR_PRIMARIES'] = config.get(ini_section_name, 'TARGET_COLOR_PRIMARIES')
-		ini_values[ini_section_name]['TARGET_COLOR_PRIMARIES_S'] = config.get(ini_section_name, 'TARGET_COLOR_PRIMARIES_S')
-		ini_values[ini_section_name]['TARGET_COLOR_PRIMARIES_I'] = config.get(ini_section_name, 'TARGET_COLOR_PRIMARIES_I')
-		ini_values[ini_section_name]['TARGET_COLOR_RANGE'] = config.get(ini_section_name, 'TARGET_COLOR_RANGE')
-		ini_values[ini_section_name]['TARGET_COLOR_RANGE_S'] = config.get(ini_section_name, 'TARGET_COLOR_RANGE_S')
-		ini_values[ini_section_name]['TARGET_COLOR_RANGE_I'] = config.get(ini_section_name, 'TARGET_COLOR_RANGE_I')
-		ini_values[ini_section_name]['TARGET_WIDTH'] = config.getint(ini_section_name, 'TARGET_WIDTH')
-		ini_values[ini_section_name]['TARGET_HEIGHT'] = config.getint(ini_section_name, 'TARGET_HEIGHT')
-		ini_values[ini_section_name]['TARGET_FPSNUM'] = config.getint(ini_section_name, 'TARGET_FPSNUM')
-		ini_values[ini_section_name]['TARGET_FPSDEN'] = config.getint(ini_section_name, 'TARGET_FPSDEN')
-		ini_values[ini_section_name]['MIN_DURATION_SEC'] = config.getfloat(ini_section_name, 'MIN_DURATION_SEC')
-		ini_values[ini_section_name]['MAX_DURATION_SEC'] = config.getint(ini_section_name, 'MAX_DURATION_SEC')
-		ini_values[ini_section_name]['MAX_VIDEO_CLIP_DURATION'] = config.getint(ini_section_name, 'MAX_VIDEO_CLIP_DURATION')
-		ini_values[ini_section_name]['BOX'] = config.getboolean(ini_section_name, 'BOX')
-		ini_values[ini_section_name]['ADD_SUBTITLE'] = config.getboolean(ini_section_name, 'ADD_SUBTITLE')
-		ini_values[ini_section_name]['UPSIZE_KERNEL'] = config.get(ini_section_name, 'UPSIZE_KERNEL')
-		ini_values[ini_section_name]['DOWNSIZE_KERNEL'] = config.get(ini_section_name, 'DOWNSIZE_KERNEL')
-	else:
-		print(f'ERROR: .ini file unable to be read or recreated properly',flush=True)
-		sys.exit(1)
-	# save the updated set of .ini values over the top of the existing set
-	with open(ini_file_speciying_parameters, 'w') as configfile:
-		# add the new set of .ini value to be saved
-		update_config =  configparser.ConfigParser(allow_no_value=True)
-		update_config[ini_section_name] = default_ini_values[ini_section_name]
-		# add example values to make it easier for a human reader of the .ini file
-		tmp_name = 'Enum_vs.MatrixCoefficients'
-		tmp_dict = { tmp_name : {}}
-		for v in vs.MatrixCoefficients:
-			tmp_dict[tmp_name][str(v)] = int(v)+0
-			pass
-		update_config[tmp_name] = tmp_dict[tmp_name]
-		tmp_name = 'Enum_vs.TransferCharacteristics'
-		tmp_dict = { tmp_name : {}}
-		for v in vs.TransferCharacteristics:
-			tmp_dict[tmp_name][str(v)] = int(v)+0
-			pass
-		update_config[tmp_name] = tmp_dict[tmp_name]
-		tmp_name = 'Enum_vs.ColorPrimaries'
-		tmp_dict = { tmp_name : {}}
-		for v in vs.ColorPrimaries:
-			tmp_dict[tmp_name][str(v)] = int(v)+0
-			pass
-		update_config[tmp_name] = tmp_dict[tmp_name]
-		tmp_name = 'Enum_vs.ColorRange'
-		tmp_dict = { tmp_name : {}}
-		for v in vs.ColorRange:
-			tmp_dict[tmp_name][str(v)] = int(v)+0
-			pass
-		update_config[tmp_name] = tmp_dict[tmp_name]
-		# update the .ini file
-		update_config.write(configfile)
-	print(f'INFO: Saved updated .ini "{ini_file_speciying_parameters}"')
-	# calculate some values and create a new updated calculated values dict
-	calc_ini = ini_values[ini_section_name]
-	calc_ini['PIC_EXTENSIONS']		= [".png", ".jpg", ".jpeg", ".gif", ".pdf"]								# always lower case
-	calc_ini['VID_EXTENSIONS']		= [".mp4", ".mpeg4", ".mpg", ".mpeg", ".avi", ".mjpeg", ".3gp", ".mov"]	# always lower case
-	calc_ini['EEK_EXTENSIONS']		= [".m2ts"]														# always lower case
-	calc_ini['VID_EEK_EXTENSIONS']	= calc_ini['VID_EXTENSIONS'] + calc_ini['EEK_EXTENSIONS']
-	calc_ini['EXTENSIONS']			= calc_ini['PIC_EXTENSIONS'] + calc_ini['VID_EXTENSIONS'] + calc_ini['EEK_EXTENSIONS']
-	calc_ini['TARGET_PIXEL_FORMAT']	= vs.YUV420P8				# pixel format of the target video
-	calc_ini['DG_PIXEL_FORMAT']		= vs.YUV420P16				# pixel format of the video for use by DG tools
-	calc_ini['TARGET_FPS']			= round(calc_ini['TARGET_FPSNUM'] / calc_ini['TARGET_FPSDEN'], 3)
-	calc_ini['BLANK_CLIP_LENGTH']	= int(math.ceil(0.1*calc_ini['TARGET_FPS']))	# leading and trailing blank clip duration in frames with round-up. int(round(0.1*calc_ini['TARGET_FPS'])) will round up/down
-	calc_ini['MIN_DURATION_FRAMES']	= int(math.ceil(calc_ini['MIN_DURATION_SEC'] * calc_ini['TARGET_FPS']))	### duration of display of an image, in frames
-	calc_ini['MAX_DURATION_FRAMES']	= int(math.ceil(calc_ini['MAX_DURATION_SEC'] * calc_ini['TARGET_FPS']))	### max duration of display of a video, in frames
-	calc_ini['DOT_FFINDEX']			= ".ffindex".lower()		# for removing temporary *.ffindex files at the end
-	calc_ini['MODX']				= 2	   # mods for letterboxing calculations, example, for 411 YUV as an extreme
-	calc_ini['MODY']				= 2	   # mods would have to be MODX=4, MODY=1 as minimum
+	print(f'WARNING: default values applied due to missing or invalid .ini file\n{objPrettyPrint.pformat(default_ini_values)}',flush=True)
+# if using ini values fails, even after trying to use default values, exit
+if config.has_section(ini_section_name):
+	ini_values[ini_section_name]['DIRECTORY'] = fully_qualified_folder_no_trailing_backslash(config.get(ini_section_name, 'DIRECTORY'))
+	ini_values[ini_section_name]['TEMP_DIRECTORY'] = fully_qualified_folder_no_trailing_backslash(config.get(ini_section_name, 'TEMP_DIRECTORY'))
+	ini_values[ini_section_name]['RECURSIVE'] = config.getboolean(ini_section_name, 'RECURSIVE')
+	ini_values[ini_section_name]['CROSSFADE_DURATION'] = config.getint(ini_section_name, 'CROSSFADE_DURATION')
+	ini_values[ini_section_name]['TARGET_COLORSPACE'] = config.get(ini_section_name, 'TARGET_COLORSPACE')
+	ini_values[ini_section_name]['TARGET_COLORSPACE_MATRIX'] = config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX')
+	ini_values[ini_section_name]['TARGET_COLORSPACE_MATRIX_S'] = config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX_S')
+	ini_values[ini_section_name]['TARGET_COLORSPACE_MATRIX_I'] = config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX_I')
+	ini_values[ini_section_name]['TARGET_COLOR_TRANSFER'] = config.get(ini_section_name, 'TARGET_COLOR_TRANSFER')
+	ini_values[ini_section_name]['TARGET_COLOR_TRANSFER_S'] = config.get(ini_section_name, 'TARGET_COLOR_TRANSFER_S')
+	ini_values[ini_section_name]['TARGET_COLOR_TRANSFER_I'] = config.get(ini_section_name, 'TARGET_COLOR_TRANSFER_I')
+	ini_values[ini_section_name]['TARGET_COLOR_PRIMARIES'] = config.get(ini_section_name, 'TARGET_COLOR_PRIMARIES')
+	ini_values[ini_section_name]['TARGET_COLOR_PRIMARIES_S'] = config.get(ini_section_name, 'TARGET_COLOR_PRIMARIES_S')
+	ini_values[ini_section_name]['TARGET_COLOR_PRIMARIES_I'] = config.get(ini_section_name, 'TARGET_COLOR_PRIMARIES_I')
+	ini_values[ini_section_name]['TARGET_COLOR_RANGE'] = config.get(ini_section_name, 'TARGET_COLOR_RANGE')
+	ini_values[ini_section_name]['TARGET_COLOR_RANGE_S'] = config.get(ini_section_name, 'TARGET_COLOR_RANGE_S')
+	ini_values[ini_section_name]['TARGET_COLOR_RANGE_I'] = config.get(ini_section_name, 'TARGET_COLOR_RANGE_I')
+	ini_values[ini_section_name]['TARGET_WIDTH'] = config.getint(ini_section_name, 'TARGET_WIDTH')
+	ini_values[ini_section_name]['TARGET_HEIGHT'] = config.getint(ini_section_name, 'TARGET_HEIGHT')
+	ini_values[ini_section_name]['TARGET_FPSNUM'] = config.getint(ini_section_name, 'TARGET_FPSNUM')
+	ini_values[ini_section_name]['TARGET_FPSDEN'] = config.getint(ini_section_name, 'TARGET_FPSDEN')
+	ini_values[ini_section_name]['MIN_DURATION_SEC'] = config.getfloat(ini_section_name, 'MIN_DURATION_SEC')
+	ini_values[ini_section_name]['MAX_DURATION_SEC'] = config.getint(ini_section_name, 'MAX_DURATION_SEC')
+	ini_values[ini_section_name]['MAX_VIDEO_CLIP_DURATION'] = config.getint(ini_section_name, 'MAX_VIDEO_CLIP_DURATION')
+	ini_values[ini_section_name]['BOX'] = config.getboolean(ini_section_name, 'BOX')
+	ini_values[ini_section_name]['ADD_SUBTITLE'] = config.getboolean(ini_section_name, 'ADD_SUBTITLE')
+	ini_values[ini_section_name]['UPSIZE_KERNEL'] = config.get(ini_section_name, 'UPSIZE_KERNEL')
+	ini_values[ini_section_name]['DOWNSIZE_KERNEL'] = config.get(ini_section_name, 'DOWNSIZE_KERNEL')
+else:
+	print(f'ERROR: .ini file unable to be read or recreated properly',flush=True)
+	sys.exit(1)
+# save the updated set of .ini values over the top of the existing set
+with open(ini_file_speciying_parameters, 'w') as configfile:
+	# add the new set of .ini value to be saved
+	update_config =  configparser.ConfigParser(allow_no_value=True)
+	update_config[ini_section_name] = default_ini_values[ini_section_name]
+	# add example values to make it easier for a human reader of the .ini file
+	tmp_name = 'Enum_vs.MatrixCoefficients'
+	tmp_dict = { tmp_name : {}}
+	for v in vs.MatrixCoefficients:
+		tmp_dict[tmp_name][str(v)] = int(v)+0
+		pass
+	update_config[tmp_name] = tmp_dict[tmp_name]
+	tmp_name = 'Enum_vs.TransferCharacteristics'
+	tmp_dict = { tmp_name : {}}
+	for v in vs.TransferCharacteristics:
+		tmp_dict[tmp_name][str(v)] = int(v)+0
+		pass
+	update_config[tmp_name] = tmp_dict[tmp_name]
+	tmp_name = 'Enum_vs.ColorPrimaries'
+	tmp_dict = { tmp_name : {}}
+	for v in vs.ColorPrimaries:
+		tmp_dict[tmp_name][str(v)] = int(v)+0
+		pass
+	update_config[tmp_name] = tmp_dict[tmp_name]
+	tmp_name = 'Enum_vs.ColorRange'
+	tmp_dict = { tmp_name : {}}
+	for v in vs.ColorRange:
+		tmp_dict[tmp_name][str(v)] = int(v)+0
+		pass
+	update_config[tmp_name] = tmp_dict[tmp_name]
+	# update the .ini file
+	update_config.write(configfile)
+print(f'INFO: Saved updated .ini "{ini_file_speciying_parameters}"')
+# calculate some values and create a new updated calculated values dict
+calc_ini = ini_values[ini_section_name]
+calc_ini['PIC_EXTENSIONS']		= [".png", ".jpg", ".jpeg", ".gif", ".pdf"]								# always lower case
+calc_ini['VID_EXTENSIONS']		= [".mp4", ".mpeg4", ".mpg", ".mpeg", ".avi", ".mjpeg", ".3gp", ".mov"]	# always lower case
+calc_ini['EEK_EXTENSIONS']		= [".m2ts"]														# always lower case
+calc_ini['VID_EEK_EXTENSIONS']	= calc_ini['VID_EXTENSIONS'] + calc_ini['EEK_EXTENSIONS']
+calc_ini['EXTENSIONS']			= calc_ini['PIC_EXTENSIONS'] + calc_ini['VID_EXTENSIONS'] + calc_ini['EEK_EXTENSIONS']
+calc_ini['TARGET_PIXEL_FORMAT']	= vs.YUV420P8				# pixel format of the target video
+calc_ini['DG_PIXEL_FORMAT']		= vs.YUV420P16				# pixel format of the video for use by DG tools
+calc_ini['TARGET_FPS']			= round(calc_ini['TARGET_FPSNUM'] / calc_ini['TARGET_FPSDEN'], 3)
+calc_ini['BLANK_CLIP_LENGTH']	= int(math.ceil(0.1*calc_ini['TARGET_FPS']))	# leading and trailing blank clip duration in frames with round-up. int(round(0.1*calc_ini['TARGET_FPS'])) will round up/down
+calc_ini['MIN_DURATION_FRAMES']	= int(math.ceil(calc_ini['MIN_DURATION_SEC'] * calc_ini['TARGET_FPS']))	### duration of display of an image, in frames
+calc_ini['MAX_DURATION_FRAMES']	= int(math.ceil(calc_ini['MAX_DURATION_SEC'] * calc_ini['TARGET_FPS']))	### max duration of display of a video, in frames
+calc_ini['DOT_FFINDEX']			= ".ffindex".lower()		# for removing temporary *.ffindex files at the end
+calc_ini['MODX']				= 2	   # mods for letterboxing calculations, example, for 411 YUV as an extreme
+calc_ini['MODY']				= 2	   # mods would have to be MODX=4, MODY=1 as minimum
 
-	########################################################################################################################################################
-	if calc_ini['RECURSIVE']:
-		glob_var="**/*.*"			# recursive
-		ff_glob_var="**/*.ffindex"	# for .ffindex file deletion recursive
-	else:
-		glob_var="*.*"				# non-recursive
-		ff_glob_var="*.ffindex"		# for .ffindex file deletion non-recursive
-	# glob : with DIRECTORY not having a trailing slash !!!
-	print(f'INFO: Processing "{calc_ini["DIRECTORY"]}" recursive="{calc_ini["RECURSIVE"]}" glob_var="{glob_var}" \n      with Extensions={objPrettyPrint.pformat(calc_ini["EXTENSIONS"])}',flush=True)
-	Count_of_files = 0
-	# NOTE: calc_ini['DIRECTORY'] MUST NOT have a trailing backslash ... remove during ini setup
-	paths = Path(calc_ini['DIRECTORY']).glob(glob_var) # generator of all paths in a directory, files starting with . won't be matched by default
-	path = get_path(paths)	#pre-fetch first path
-	if path is None:
-		raise ValueError(f'Extensions: {calc_ini["EXTENSIONS"]}, not found in "{calc_ini["DIRECTORY"]}"')
-	blank_clip = core.std.BlankClip(format=calc_ini['TARGET_PIXEL_FORMAT'], width=calc_ini['TARGET_WIDTH'], height=calc_ini['TARGET_HEIGHT'], length=calc_ini['BLANK_CLIP_LENGTH'], color=(16,128,128))	 # notice no colorspace,"range" etc can be specified
-	clips = blank_clip	# initialize the accumulated clips with a starting small blank clip
+########################################################################################################################################################
+if calc_ini['RECURSIVE']:
+	glob_var="**/*.*"			# recursive
+	ff_glob_var="**/*.ffindex"	# for .ffindex file deletion recursive
+else:
+	glob_var="*.*"				# non-recursive
+	ff_glob_var="*.ffindex"		# for .ffindex file deletion non-recursive
+# glob : with DIRECTORY not having a trailing slash !!!
+print(f'INFO: Processing "{calc_ini["DIRECTORY"]}" recursive="{calc_ini["RECURSIVE"]}" glob_var="{glob_var}" \n      with Extensions={objPrettyPrint.pformat(calc_ini["EXTENSIONS"])}',flush=True)
+Count_of_files = 0
+# NOTE: calc_ini['DIRECTORY'] MUST NOT have a trailing backslash ... remove during ini setup
+paths = Path(calc_ini['DIRECTORY']).glob(glob_var) # generator of all paths in a directory, files starting with . won't be matched by default
+path = get_path(paths)	#pre-fetch first path
+if path is None:
+	raise ValueError(f'Extensions: {calc_ini["EXTENSIONS"]}, not found in "{calc_ini["DIRECTORY"]}"')
+blank_clip = core.std.BlankClip(format=calc_ini['TARGET_PIXEL_FORMAT'], width=calc_ini['TARGET_WIDTH'], height=calc_ini['TARGET_HEIGHT'], length=calc_ini['BLANK_CLIP_LENGTH'], color=(16,128,128))	 # notice no colorspace,"range" etc can be specified
+clips = blank_clip	# initialize the accumulated clips with a starting small blank clip
+if calc_ini['CROSSFADE_DURATION']>0:	
+	crossfade_blank_clip = blank_clip[0]*calc_ini['MIN_DURATION_FRAMES'] if len(blank_clip)<calc_ini['MIN_DURATION_FRAMES'] else blank_clip
+	prior_clip_for_crossfade = crossfade_blank_clip
+#---
+while not (path is None):	# first clip already pre-retrieved ready for this while loop
+	Count_of_files = Count_of_files + 1
+	print(f'DEBUG: processing {Count_of_files} {str(path)}',flush=True)
+	#if (Count_of_files % 10)==0:
+	#	print(f'{Count_of_files},',end="",flush=True)
+	#	if (Count_of_files % (10*10*3))==0:
+	#		print(f'',flush=True)
+	this_clip = get_clip(path)
+	#this_clip = core.text.Text(this_clip, text_subpath_for_subtitles, alignment=9, scale=1)
+	#this_clip = core.text.FrameNum(this_clip, alignment=2, scale=1)
+	#this_clip = core.text.ClipInfo(this_clip, alignment=8, scale=1)
+	#this_clip = core.text.FrameProps(this_clip, alignment=2, scale=1)
 	if calc_ini['CROSSFADE_DURATION']>0:	
-		crossfade_blank_clip = blank_clip[0]*calc_ini['MIN_DURATION_FRAMES'] if len(blank_clip)<calc_ini['MIN_DURATION_FRAMES'] else blank_clip
-		prior_clip_for_crossfade = crossfade_blank_clip
-	#---
-	while not (path is None):	# first clip already pre-retrieved ready for this while loop
-		Count_of_files = Count_of_files + 1
-		print(f'DEBUG: processing {Count_of_files} {str(path)}',flush=True)
-		#if (Count_of_files % 10)==0:
-		#	print(f'{Count_of_files},',end="",flush=True)
-		#	if (Count_of_files % (10*10*3))==0:
-		#		print(f'',flush=True)
-		this_clip = get_clip(path)
-		#this_clip = core.text.Text(this_clip, text_subpath_for_subtitles, alignment=9, scale=1)
-		#this_clip = core.text.FrameNum(this_clip, alignment=2, scale=1)
-		#this_clip = core.text.ClipInfo(this_clip, alignment=8, scale=1)
-		#this_clip = core.text.FrameProps(this_clip, alignment=2, scale=1)
-		if calc_ini['CROSSFADE_DURATION']>0:	
-			#print(f'DEBUG: doing crossfade in while loop',flush=True)
-			crossfade_clip = crossfade(prior_clip_for_crossfade, this_clip, calc_ini['CROSSFADE_DURATION'])
-			# for now, don't do equivalent of this from _AI_ ... right  = right_clip[calc_ini['CROSSFADE_DURATION']:-calc_ini['CROSSFADE_DURATION']]
-			clips = clips + crossfade_clip + this_clip
-			prior_clip_for_crossfade = this_clip
-		else:
-			clips = clips + this_clip
-		path = get_path(paths)		# get next path to process in this while loop
-	#---
-	# perhaps a finishing crossfade to black ?
-	if calc_ini['CROSSFADE_DURATION']>0:	
-		#print(f'DEBUG: doing final crossfade after while loop',flush=True)
-		crossfade_clip = crossfade(prior_clip_for_crossfade, crossfade_blank_clip, calc_ini['CROSSFADE_DURATION'])
+		#print(f'DEBUG: doing crossfade in while loop',flush=True)
+		crossfade_clip = crossfade(prior_clip_for_crossfade, this_clip, calc_ini['CROSSFADE_DURATION'])
 		# for now, don't do equivalent of this from _AI_ ... right  = right_clip[calc_ini['CROSSFADE_DURATION']:-calc_ini['CROSSFADE_DURATION']]
 		clips = clips + crossfade_clip + this_clip
-	clips = clips + blank_clip		# end the accumulated clips with a finishing small blank clip
-	clips = clips.std.AssumeFPS(fpsnum=calc_ini['TARGET_FPSNUM'], fpsden=calc_ini['TARGET_FPSDEN'])
-	print(f'',flush=True)
-	print(f'INFO: Finished processing {Count_of_files} image/video files.',flush=True)
-	# Cleanup any temporary .ffindex files created by ffms2
-	print(f'DEBUG: Removing temporary *.ffindex files from folder "{calc_ini["DIRECTORY"]}" with recursive="{calc_ini["RECURSIVE"]}" ...',flush=True)
-	pp = calc_ini['DIRECTORY'] + "/" + ff_glob_var
-	ffindex_files = glob.glob(pp, recursive=calc_ini['RECURSIVE'])
-	Count_of_files_removed = 0
-	for ff in ffindex_files:
-		if ff.lower()[-len(calc_ini['DOT_FFINDEX']):] == calc_ini['DOT_FFINDEX']:	# double check the file really does have ext .ffindex
-			try:
-				Count_of_files_removed = Count_of_files_removed + 1
-				print(f'DEBUG: removing {Count_of_files_removed} {ff}',flush=True)
-				os.remove(ff)
-				#if (Count_of_files_removed % (10))==0:
-				#	print(f'{Count_of_files_removed},',end="",flush=True)
-				#	if (Count_of_files_removed % (10*10*3))==0:
-				#		print(f'',flush=True)
-			except OSError as ee:
-				print(f'Error: %s : %s' % (ff, ee.strerror),flush=True)
-	print(f'',flush=True)
-	print(f'INFO: Finished removing {Count_of_files_removed} .ffindex files.',flush=True)
-	# hmm, audio ? maybe later using source filter "bas" ?
-	#print(f'DEBUG: Done.',flush=True)
-	clips.set_output()
-	#------
+		prior_clip_for_crossfade = this_clip
+	else:
+		clips = clips + this_clip
+	path = get_path(paths)		# get next path to process in this while loop
+#---
+# perhaps a finishing crossfade to black ?
+if calc_ini['CROSSFADE_DURATION']>0:	
+	#print(f'DEBUG: doing final crossfade after while loop',flush=True)
+	crossfade_clip = crossfade(prior_clip_for_crossfade, crossfade_blank_clip, calc_ini['CROSSFADE_DURATION'])
+	# for now, don't do equivalent of this from _AI_ ... right  = right_clip[calc_ini['CROSSFADE_DURATION']:-calc_ini['CROSSFADE_DURATION']]
+	clips = clips + crossfade_clip + this_clip
+clips = clips + blank_clip		# end the accumulated clips with a finishing small blank clip
+clips = clips.std.AssumeFPS(fpsnum=calc_ini['TARGET_FPSNUM'], fpsden=calc_ini['TARGET_FPSDEN'])
+print(f'',flush=True)
+print(f'INFO: Finished processing {Count_of_files} image/video files.',flush=True)
+# Cleanup any temporary .ffindex files created by ffms2
+print(f'DEBUG: Removing temporary *.ffindex files from folder "{calc_ini["DIRECTORY"]}" with recursive="{calc_ini["RECURSIVE"]}" ...',flush=True)
+pp = calc_ini['DIRECTORY'] + "/" + ff_glob_var
+ffindex_files = glob.glob(pp, recursive=calc_ini['RECURSIVE'])
+Count_of_files_removed = 0
+for ff in ffindex_files:
+	if ff.lower()[-len(calc_ini['DOT_FFINDEX']):] == calc_ini['DOT_FFINDEX']:	# double check the file really does have ext .ffindex
+		try:
+			Count_of_files_removed = Count_of_files_removed + 1
+			print(f'DEBUG: removing {Count_of_files_removed} {ff}',flush=True)
+			os.remove(ff)
+			#if (Count_of_files_removed % (10))==0:
+			#	print(f'{Count_of_files_removed},',end="",flush=True)
+			#	if (Count_of_files_removed % (10*10*3))==0:
+			#		print(f'',flush=True)
+		except OSError as ee:
+			print(f'Error: %s : %s' % (ff, ee.strerror),flush=True)
+print(f'',flush=True)
+print(f'INFO: Finished removing {Count_of_files_removed} .ffindex files.',flush=True)
+# hmm, audio ? maybe later using source filter "bas" ?
+#print(f'DEBUG: Done.',flush=True)
+clips.set_output()
+#------
