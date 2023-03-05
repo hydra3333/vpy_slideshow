@@ -654,7 +654,7 @@ if __name__=='__main__':
 	if calc_ini['CROSSFADE_DURATION']>0:	
 		#print(f'DEBUG: doing final crossfade after while loop',flush=True)
 		crossfade_clip = crossfade(prior_clip_for_crossfade, crossfade_blank_clip, calc_ini['CROSSFADE_DURATION'])
-		# for now, don't do equivalent of this from _AI_ ... right  = right_clip[CROSSFADE_DURATION:-CROSSFADE_DURATION]
+		# for now, don't do equivalent of this from _AI_ ... right  = right_clip[calc_ini['CROSSFADE_DURATION']:-calc_ini['CROSSFADE_DURATION']]
 		clips = clips + crossfade_clip + this_clip
 	clips = clips + blank_clip		# end the accumulated clips with a finishing small blank clip
 	clips = clips.std.AssumeFPS(fpsnum=TARGET_FPSNUM, fpsden=TARGET_FPSDEN)
