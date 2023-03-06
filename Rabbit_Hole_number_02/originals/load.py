@@ -5,7 +5,7 @@ Indexing of files is automatic, if needed. d2vwitch for mpeg2 files and ffmsinde
 
 Vapoursynth clip could be obtained:
 1. Using Sources().get_data, that inputs list of sources/filepaths and returns a list of Clip_data dataclasses
-2. Using Sources{}.load_source, that inputs one source/filepath and returns a clip (no logging)
+2. Using Sources().load_source, that inputs one source/filepath and returns a clip (no logging)
 
     To change settings use GUI:
     import load
@@ -74,7 +74,7 @@ D2VWITCH_OPTIONS = '--input-range "limited"  --single-input'
 D2VSOURCE_KWARGS = dict(rff=True, threads=0)
 
 DEFAULT_PLUGIN_MAP = {
-    'mpeg2_Source':           ['m2t mp2 vob mpg mpv m2v'
+    'mpeg2_Source':           ['m2t mp2 vob mpg mpv m2v',
                                dict(d2vwitch_options=D2VWITCH_OPTIONS)],
     'd2v.Source':             ['d2v',
                                D2VSOURCE_KWARGS],
@@ -87,9 +87,9 @@ DEFAULT_PLUGIN_MAP = {
     'avs_Source':             ['avs',
                                {}],
     'avisource.AVISource':    ['',
-                               {}]
+                               {}],
     'ffms2.Source':           ['',
-                               {}]
+                               {}],
     'imwri.Read':             ['png jpg jpeg tif tiff exr',
                                dict(mismatch=False, alpha=False, float_output=False)],
     'lsmas.LibavSMASHSource': ['mp4 mov m4v 3gp 3g2 mj2 dvb dcf m21',

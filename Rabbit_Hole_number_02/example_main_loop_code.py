@@ -1,4 +1,5 @@
 import load
+import get_clip
 '''
 Then tha main loop code to work with clips, you had it a bit different, but just how it works with that class Clip():
 
