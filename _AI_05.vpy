@@ -283,26 +283,23 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 #### ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
 	print(f'DEBUG: resize_clip: clip=\n{clip}',flush=True)
-	#clip VideoNode
-	#    Format: YUV420P8
-	#    Width: 1354
-	#    Height: 2032
-	#    Num Frames: 13
-	#    FPS: 25
+
+	# https://www.vapoursynth.com/doc/pythonreference.html
+	#
+
+
 	print(f'DEBUG: resize_clip: clip.format=\n{clip.format}',flush=True)
-	
 	print(f'DEBUG: resize_clip: clip.width={clip.width}',flush=True)
 	print(f'DEBUG: resize_clip: clip.height={clip.height}',flush=True)
 	print(f'DEBUG: resize_clip: clip.num_frames={clip.num_frames}',flush=True)
 	print(f'DEBUG: resize_clip: clip.fps={clip.fps}',flush=True)
-
 	
-	print(f'DEBUG: resize_clip: clip.format.name={clip.format.name}',flush=True)
+	print(f'DEBUG: resize_clip: clip.format.name={clip.format.name} clip.format.id={clip.format.id}',flush=True)
 	print(f'DEBUG: resize_clip: clip.format.color_family={clip.format.color_family}',flush=True)
 	print(f'DEBUG: resize_clip: clip.format.sample_type={clip.format.sample_type}',flush=True)
 	print(f'DEBUG: resize_clip: clip.format.bits_per_sample={clip.format.bits_per_sample}',flush=True)
 	print(f'DEBUG: resize_clip: clip.format.bytes_per_sample={clip.format.bytes_per_sample}',flush=True)
-	#print(f'DEBUG: resize_clip: clip.format.planes={clip.format.planes}',flush=True)
+	print(f'DEBUG: resize_clip: clip.format.num_planes={clip.format.num_planes}',flush=True) # per https://www.vapoursynth.com/doc/pythonreference.html
 	print(f'DEBUG: resize_clip: clip.format.subsampling_w={clip.format.subsampling_w}',flush=True)
 	print(f'DEBUG: resize_clip: clip.format.subsampling_h={clip.format.subsampling_h}',flush=True)
 
@@ -317,7 +314,11 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		print(f'DEBUG: resize_clip: frame properties f.props["_DurationNum"] = {f.props["_DurationNum"]}',flush=True)
 		print(f'DEBUG: resize_clip: frame properties f.props["_FieldBased"] = {f.props["_FieldBased"]}',flush=True)
 		print(f'DEBUG: resize_clip: frame properties f.props["_PictType"] = {f.props["_PictType"]}',flush=True) # a byte character eg 'I'
-		
+	
+	# https://www.vapoursynth.com/doc/pythonreference.html
+	#for v in vs.ColorFormat:	# eg vs.YUV420P8
+	#	print(f'DEBUG: resize_clip: vs.ColorFormat ENUM: {str(v)} = {int(v)+0}',flush=True)
+	print(f'DEBUG: missing: something like vs.FormatName eg vs.vs.YUV420P8',flush=True)
 	for v in vs.MatrixCoefficients:
 		print(f'DEBUG: resize_clip: vs.MatrixCoefficients ENUM: {str(v)} = {int(v)+0}',flush=True)
 	for v in vs.TransferCharacteristics:
@@ -326,12 +327,24 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		print(f'DEBUG: resize_clip: vs.ColorPrimaries ENUM: {str(v)} = {int(v)+0}',flush=True)
 	for v in vs.ColorRange:
 		print(f'DEBUG: resize_clip: vs.ColorRange ENUM: {str(v)} = {int(v)+0}',flush=True)
+	for v in vs.ColorFamily:
+		print(f'DEBUG: resize_clip: vs.ColorFamily ENUM: {str(v)} = {int(v)+0}',flush=True)
+	for v in vs.ChromaLocation:
+		print(f'DEBUG: resize_clip: vs.ChromaLocation ENUM: {str(v)} = {int(v)+0}',flush=True)
+	for v in vs.FieldBased:
+		print(f'DEBUG: resize_clip: vs.FieldBased ENUM: {str(v)} = {int(v)+0}',flush=True)
+
+	#vs.Format none
+	#print(f'DEBUG: resize_clip: vs.Format=\n {objPrettyPrint.pformat(vs.Format)}',flush=True)
+	#print(f'DEBUG: resize_clip: vs.Format.Name=\n {objPrettyPrint.pformat(vs.Format)}',flush=True)
+
 
 	print(f'DEBUG: *** resize_clip: int(vs.ColorRange.RANGE_FULL)+0 = {int(vs.ColorRange.RANGE_FULL)+0}',flush=True)
 	print(f'DEBUG: *** resize_clip: int(vs.RANGE_FULL)+0 = {int(vs.RANGE_FULL)+0}',flush=True)
 	print(f'DEBUG: *** resize_clip: int(vs.ColorRange.RANGE_LIMITED)+0 = {int(vs.ColorRange.RANGE_LIMITED)+0}',flush=True)
 	print(f'DEBUG: *** resize_clip: int(vs.RANGE_LIMITED)+0 = {int(vs.RANGE_LIMITED)+0}',flush=True)
-		
+	
+	
 		#
 		#if not known, guess at bt470_bg (rec.601)
 		#if matrixcoefficients = matrixcoefficients.matrix_unspecified
@@ -756,6 +769,23 @@ with open(ini_file_speciying_parameters, 'w') as configfile:
 		tmp_dict[tmp_name][str(v)] = int(v)+0
 		pass
 	update_config[tmp_name] = tmp_dict[tmp_name]
+	tmp_name = 'Enum_vs.ColorFamily'
+	tmp_dict = { tmp_name : {}}
+	for v in vs.ColorFamily:
+		tmp_dict[tmp_name][str(v)] = int(v)+0
+		pass
+	tmp_name = 'Enum_vs.ChromaLocation'
+	tmp_dict = { tmp_name : {}}
+	for v in vs.ChromaLocation:
+		tmp_dict[tmp_name][str(v)] = int(v)+0
+		pass
+	tmp_name = 'Enum_vs.FieldBased'
+	tmp_dict = { tmp_name : {}}
+	for v in vs.FieldBased:
+		tmp_dict[tmp_name][str(v)] = int(v)+0
+		pass
+
+	
 	# update the .ini file
 	update_config.write(configfile)
 print(f'INFO: Saved updated .ini "{ini_file_speciying_parameters}"')
