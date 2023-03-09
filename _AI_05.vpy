@@ -276,92 +276,6 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 	if w>W or h>H:	resize = getattr(clip.resize, calc_ini['DOWNSIZE_KERNEL'])	# get the resize function object ?handle? with the nominated kernel
 	else:			resize = getattr(clip.resize, calc_ini['UPSIZE_KERNEL'])	# get the resize function object ?handle? with the nominated kernel
 	
-	# check the READERS to see if we can affect this .....
-	# in YUV processing ...
-
-
-#### ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
-	print(f'DEBUG: resize_clip: clip=\n{clip}',flush=True)
-
-	# https://www.vapoursynth.com/doc/pythonreference.html
-	#
-
-
-	print(f'DEBUG: resize_clip: clip.format=\n{clip.format}',flush=True)
-	print(f'DEBUG: resize_clip: clip.width={clip.width}',flush=True)
-	print(f'DEBUG: resize_clip: clip.height={clip.height}',flush=True)
-	print(f'DEBUG: resize_clip: clip.num_frames={clip.num_frames}',flush=True)
-	print(f'DEBUG: resize_clip: clip.fps={clip.fps}',flush=True)
-	
-	print(f'DEBUG: resize_clip: clip.format.name={clip.format.name} clip.format.id={clip.format.id}',flush=True)
-	print(f'DEBUG: resize_clip: clip.format.color_family={clip.format.color_family}',flush=True)
-	print(f'DEBUG: resize_clip: clip.format.sample_type={clip.format.sample_type}',flush=True)
-	print(f'DEBUG: resize_clip: clip.format.bits_per_sample={clip.format.bits_per_sample}',flush=True)
-	print(f'DEBUG: resize_clip: clip.format.bytes_per_sample={clip.format.bytes_per_sample}',flush=True)
-	print(f'DEBUG: resize_clip: clip.format.num_planes={clip.format.num_planes}',flush=True) # per https://www.vapoursynth.com/doc/pythonreference.html
-	print(f'DEBUG: resize_clip: clip.format.subsampling_w={clip.format.subsampling_w}',flush=True)
-	print(f'DEBUG: resize_clip: clip.format.subsampling_h={clip.format.subsampling_h}',flush=True)
-
-	with clip.get_frame(0) as f:
-		print(f'DEBUG: resize_clip: incoming frame properties before resize=\n{f.props}',flush=True)
-		print(f'DEBUG: resize_clip: frame properties f.props["_Matrix"] = {f.props["_Matrix"]}',flush=True)
-		print(f'DEBUG: resize_clip: frame properties f.props["_Transfer"] = {f.props["_Transfer"]}',flush=True)
-		print(f'DEBUG: resize_clip: frame properties f.props["_Primaries"] = {f.props["_Primaries"]}',flush=True)
-		print(f'DEBUG: resize_clip: frame properties f.props["_ColorRange"] = {f.props["_ColorRange"]}',flush=True)
-		print(f'DEBUG: resize_clip: frame properties f.props["_ChromaLocation"] = {f.props["_ChromaLocation"]}',flush=True)
-		print(f'DEBUG: resize_clip: frame properties f.props["_DurationDen"] = {f.props["_DurationDen"]}',flush=True)
-		print(f'DEBUG: resize_clip: frame properties f.props["_DurationNum"] = {f.props["_DurationNum"]}',flush=True)
-		print(f'DEBUG: resize_clip: frame properties f.props["_FieldBased"] = {f.props["_FieldBased"]}',flush=True)
-		print(f'DEBUG: resize_clip: frame properties f.props["_PictType"] = {f.props["_PictType"]}',flush=True) # a byte character eg 'I'
-	
-	# https://www.vapoursynth.com/doc/pythonreference.html
-	#for v in vs.ColorFormat:	# eg vs.YUV420P8
-	#	print(f'DEBUG: resize_clip: vs.ColorFormat ENUM: {str(v)} = {int(v)+0}',flush=True)
-	print(f'DEBUG: missing: something like vs.FormatName eg vs.vs.YUV420P8',flush=True)
-	for v in vs.MatrixCoefficients:
-		print(f'DEBUG: resize_clip: vs.MatrixCoefficients ENUM: {str(v)} = {int(v)+0}',flush=True)
-	for v in vs.TransferCharacteristics:
-		print(f'DEBUG: resize_clip: vs.TransferCharacteristics ENUM: {str(v)} = {int(v)+0}',flush=True)
-	for v in vs.ColorPrimaries:
-		print(f'DEBUG: resize_clip: vs.ColorPrimaries ENUM: {str(v)} = {int(v)+0}',flush=True)
-	for v in vs.ColorRange:
-		print(f'DEBUG: resize_clip: vs.ColorRange ENUM: {str(v)} = {int(v)+0}',flush=True)
-	for v in vs.ColorFamily:
-		print(f'DEBUG: resize_clip: vs.ColorFamily ENUM: {str(v)} = {int(v)+0}',flush=True)
-	for v in vs.ChromaLocation:
-		print(f'DEBUG: resize_clip: vs.ChromaLocation ENUM: {str(v)} = {int(v)+0}',flush=True)
-	for v in vs.FieldBased:
-		print(f'DEBUG: resize_clip: vs.FieldBased ENUM: {str(v)} = {int(v)+0}',flush=True)
-
-	#vs.Format none
-	#print(f'DEBUG: resize_clip: vs.Format=\n {objPrettyPrint.pformat(vs.Format)}',flush=True)
-	#print(f'DEBUG: resize_clip: vs.Format.Name=\n {objPrettyPrint.pformat(vs.Format)}',flush=True)
-
-
-	print(f'DEBUG: *** resize_clip: int(vs.ColorRange.RANGE_FULL)+0 = {int(vs.ColorRange.RANGE_FULL)+0}',flush=True)
-	print(f'DEBUG: *** resize_clip: int(vs.RANGE_FULL)+0 = {int(vs.RANGE_FULL)+0}',flush=True)
-	print(f'DEBUG: *** resize_clip: int(vs.ColorRange.RANGE_LIMITED)+0 = {int(vs.ColorRange.RANGE_LIMITED)+0}',flush=True)
-	print(f'DEBUG: *** resize_clip: int(vs.RANGE_LIMITED)+0 = {int(vs.RANGE_LIMITED)+0}',flush=True)
-	
-	
-		#
-		#if not known, guess at bt470_bg (rec.601)
-		#if matrixcoefficients = matrixcoefficients.matrix_unspecified
-		#	matrixcoefficients = matrixcoefficients.matrix_bt470_bg
-		#it is a fair bet that if INCOMING prop matrixcoefficients.matrix_bt470_bg then 
-		#	if colorprimaries  = colorprimaries.primaries_unspecified
-		#		colorprimaries = colorprimaries.primaries_bt470_bg
-		#	if transfercharacteristics  = transfercharacteristics.transfer_unspecified
-		#		transfercharacteristics = transfercharacteristics.transfer_bt470_bg
-	print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
-
-
-#### https://forum.selur.net/thread-2597.html set frame properties
-#### ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-
 	if clip.format.color_family==vs.RGB:
 		#rgb to YUV, perhaps only for png images, figure out what matrix out is needed ... use the HD one REC.709
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
@@ -436,6 +350,87 @@ def get_clip(path):
 		#print(f'DEBUG: get_clip: ffms2 Video: {path.name}',flush=True)
 		clip = core.ffms2.Source(str(path))	# if file extension not recognised, use this reader
 		#print(f'DEBUG: get_clip: ffms2 Video info:\n{clip}',flush=True)
+
+
+	#### ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
+
+	# https://www.vapoursynth.com/doc/api/vapoursynth.h.html#enum-vspresetformat
+	for v in vs.PresetFormat:	# eg vs.YUV420P8
+		print(f'DEBUG: get_clip: vs.PresetFormat ENUM: {str(v)} = {int(v)+0}',flush=True)
+	for v in vs.MatrixCoefficients:
+		print(f'DEBUG: get_clip: vs.MatrixCoefficients ENUM: {str(v)} = {int(v)+0}',flush=True)
+	for v in vs.TransferCharacteristics:
+		print(f'DEBUG: get_clip: vs.TransferCharacteristics ENUM: {str(v)} = {int(v)+0}',flush=True)
+	for v in vs.ColorPrimaries:
+		print(f'DEBUG: get_clip: vs.ColorPrimaries ENUM: {str(v)} = {int(v)+0}',flush=True)
+	for v in vs.ColorRange:
+		print(f'DEBUG: get_clip: vs.ColorRange ENUM: {str(v)} = {int(v)+0}',flush=True)
+	for v in vs.ColorFamily:
+		print(f'DEBUG: get_clip: vs.ColorFamily ENUM: {str(v)} = {int(v)+0}',flush=True)
+	for v in vs.ChromaLocation:
+		print(f'DEBUG: get_clip: vs.ChromaLocation ENUM: {str(v)} = {int(v)+0}',flush=True)
+	for v in vs.FieldBased:
+		print(f'DEBUG: get_clip: vs.FieldBased ENUM: {str(v)} = {int(v)+0}',flush=True)
+	print(f'DEBUG: can use both: resize_clip: int(vs.ColorRange.RANGE_FULL)+0 = {int(vs.ColorRange.RANGE_FULL)+0}',flush=True)
+	print(f'DEBUG: can use both: resize_clip: int(vs.RANGE_FULL)+0 = {int(vs.RANGE_FULL)+0}',flush=True)
+	print(f'DEBUG: can use both: resize_clip: int(vs.ColorRange.RANGE_LIMITED)+0 = {int(vs.ColorRange.RANGE_LIMITED)+0}',flush=True)
+	print(f'DEBUG: can use both: resize_clip: int(vs.RANGE_LIMITED)+0 = {int(vs.RANGE_LIMITED)+0}',flush=True)
+	#
+	#
+	print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
+	print(f'DEBUG: get_clip: clip=\n{clip}',flush=True)
+	#
+	# https://www.vapoursynth.com/doc/pythonreference.html
+	#
+	print(f'DEBUG: get_clip: clip.format=\n{clip.format}',flush=True)
+	print(f'DEBUG: get_clip: clip.width={clip.width}',flush=True)
+	print(f'DEBUG: get_clip: clip.height={clip.height}',flush=True)
+	print(f'DEBUG: get_clip: clip.num_frames={clip.num_frames}',flush=True)
+	print(f'DEBUG: get_clip: clip.fps={clip.fps}',flush=True)
+	print(f'DEBUG: get_clip: clip.format.name={clip.format.name} clip.format.id={clip.format.id} (see enum vs.PresetFormat',flush=True)
+	print(f'DEBUG: get_clip: clip.format.color_family={clip.format.color_family}',flush=True)
+	print(f'DEBUG: get_clip: clip.format.sample_type={clip.format.sample_type}',flush=True)
+	print(f'DEBUG: get_clip: clip.format.bits_per_sample={clip.format.bits_per_sample}',flush=True)
+	print(f'DEBUG: get_clip: clip.format.bytes_per_sample={clip.format.bytes_per_sample}',flush=True)
+	print(f'DEBUG: get_clip: clip.format.num_planes={clip.format.num_planes}',flush=True) # per https://www.vapoursynth.com/doc/pythonreference.html
+	print(f'DEBUG: get_clip: clip.format.subsampling_w={clip.format.subsampling_w}',flush=True)
+	print(f'DEBUG: get_clip: clip.format.subsampling_h={clip.format.subsampling_h}',flush=True)
+
+	with clip.get_frame(0) as f:
+		print(f'DEBUG: get_clip: incoming frame properties before resize=\n{f.props}',flush=True)
+		print(f'DEBUG: get_clip: frame properties f.props["_Matrix"] = {f.props["_Matrix"]}',flush=True)
+		print(f'DEBUG: get_clip: frame properties f.props["_Transfer"] = {f.props["_Transfer"]}',flush=True)
+		print(f'DEBUG: get_clip: frame properties f.props["_Primaries"] = {f.props["_Primaries"]}',flush=True)
+		print(f'DEBUG: get_clip: frame properties f.props["_ColorRange"] = {f.props["_ColorRange"]}',flush=True)
+		print(f'DEBUG: get_clip: frame properties f.props["_ChromaLocation"] = {f.props["_ChromaLocation"]}',flush=True)
+		print(f'DEBUG: get_clip: frame properties f.props["_DurationDen"] = {f.props["_DurationDen"]}',flush=True)
+		print(f'DEBUG: get_clip: frame properties f.props["_DurationNum"] = {f.props["_DurationNum"]}',flush=True)
+		print(f'DEBUG: get_clip: frame properties f.props["_FieldBased"] = {f.props["_FieldBased"]}',flush=True)
+		print(f'DEBUG: get_clip: frame properties f.props["_PictType"] = {f.props["_PictType"]}',flush=True) # a byte character eg 'I'
+	
+	#
+	#if not known, guess at bt470_bg (rec.601)
+	#if matrixcoefficients = matrixcoefficients.matrix_unspecified
+	#	matrixcoefficients = matrixcoefficients.matrix_bt470_bg
+	#it is a fair bet that if INCOMING prop matrixcoefficients.matrix_bt470_bg then 
+	#	if colorprimaries  = colorprimaries.primaries_unspecified
+	#		colorprimaries = colorprimaries.primaries_bt470_bg
+	#	if transfercharacteristics  = transfercharacteristics.transfer_unspecified
+	#		transfercharacteristics = transfercharacteristics.transfer_bt470_bg
+		
+	##clip = core.std.SetFrameProps(clip, _Matrix=1)
+	##clip = clip if not core.text.FrameProps(clip,'_Transfer') else core.std.SetFrameProps(clip, _Transfer=1)
+	##clip = clip if not core.text.FrameProps(clip,'_Primaries') else core.std.SetFrameProps(clip, _Primaries=1)
+	##clip = core.std.SetFrameProp(clip, prop="_ColorRange", intval=1)
+	#clip = core.std.SetFrameProps(clip, _Matrix=1)
+	#clip = core.std.SetFrameProps(clip, _Transfer=1)
+	#clip = core.std.SetFrameProps(clip, _Primaries=1)
+	#clip = core.std.SetFrameProps(clip, _ColorRange=1)
+	print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
+	
+	#### https://forum.selur.net/thread-2597.html set frame properties
+	#### ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	# check for and picture/video rotation specified perhaps in EXIF but not auto-processed here by the file openers
 	if path.suffix.lower()   in calc_ini['VID_EEK_EXTENSIONS']:
@@ -769,6 +764,12 @@ with open(ini_file_speciying_parameters, 'w') as configfile:
 		tmp_dict[tmp_name][str(v)] = int(v)+0
 		pass
 	update_config[tmp_name] = tmp_dict[tmp_name]
+
+	tmp_name = 'Enum_vs.PresetFormat'
+	tmp_dict = { tmp_name : {}}
+	for v in vs.PresetFormat:
+		tmp_dict[tmp_name][str(v)] = int(v)+0
+		pass
 	tmp_name = 'Enum_vs.ColorFamily'
 	tmp_dict = { tmp_name : {}}
 	for v in vs.ColorFamily:
