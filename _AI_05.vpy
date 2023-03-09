@@ -332,70 +332,74 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		return c
 
 ###
-def get_clip_characteristics(clip=None):
+def get_clip_specs(clip=None, path=None, ext=None):
 	if clip is None:
-		raise ValueError(f'get_clip_characteristics: clip not passed as an argument to get_clip_characteristics')
+		raise ValueError(f'get_clip_specs: "clip" not passed as an argument to get_clip_specs')
+	if path is None:
+		raise ValueError(f'get_clip_specs: "path" not passed as an argument to get_clip_specs')
+	if ext is None:
+		raise ValueError(f'get_clip_specs: "ext" not passed as an argument to get_clip_specs')
+	#
 	# https://www.vapoursynth.com/doc/api/vapoursynth.h.html#enum-vspresetformat
 	#print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
 	#for v in vs.PresetFormat:	# eg vs.YUV420P8
-	#	print(f'DEBUG: get_clip_characteristics: vs.PresetFormat ENUM: {str(v)} = {v.value}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: vs.PresetFormat ENUM: {str(v)} = {v.value}',flush=True)
 	#for v in vs.MatrixCoefficients:
-	#	print(f'DEBUG: get_clip_characteristics: vs.MatrixCoefficients ENUM: {str(v)} = {v.value}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: vs.MatrixCoefficients ENUM: {str(v)} = {v.value}',flush=True)
 	#for v in vs.TransferCharacteristics:
-	#	print(f'DEBUG: get_clip_characteristics: vs.TransferCharacteristics ENUM: {str(v)} = {v.value}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: vs.TransferCharacteristics ENUM: {str(v)} = {v.value}',flush=True)
 	#for v in vs.ColorPrimaries:
-	#	print(f'DEBUG: get_clip_characteristics: vs.ColorPrimaries ENUM: {str(v)} = {v.value}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: vs.ColorPrimaries ENUM: {str(v)} = {v.value}',flush=True)
 	#for v in vs.ColorRange:
-	#	print(f'DEBUG: get_clip_characteristics: vs.ColorRange ENUM: {str(v)} = {v.value}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: vs.ColorRange ENUM: {str(v)} = {v.value}',flush=True)
 	#for v in vs.ColorFamily:
-	#	print(f'DEBUG: get_clip_characteristics: vs.ColorFamily ENUM: {str(v)} = {v.value}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: vs.ColorFamily ENUM: {str(v)} = {v.value}',flush=True)
 	#for v in vs.ChromaLocation:
-	#	print(f'DEBUG: get_clip_characteristics: vs.ChromaLocation ENUM: {str(v)} = {v.value}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: vs.ChromaLocation ENUM: {str(v)} = {v.value}',flush=True)
 	#for v in vs.FieldBased:
-	#	print(f'DEBUG: get_clip_characteristics: vs.FieldBased ENUM: {str(v)} = {v.value}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: vs.FieldBased ENUM: {str(v)} = {v.value}',flush=True)
 	#print(f'DEBUG: NOTE can use both: resize_clip: vs.ColorRange.RANGE_FULL.value = {vs.ColorRange.RANGE_FULL.value}',flush=True)
 	#print(f'DEBUG: NOTE can use both: resize_clip: vs.RANGE_FULL.value = {vs.RANGE_FULL.value}',flush=True)
 	#print(f'DEBUG: NOTE can use both: resize_clip: vs.ColorRange.RANGE_LIMITED.value = {vs.ColorRange.RANGE_LIMITED.value}',flush=True)
 	#print(f'DEBUG: NOTE can use both: resize_clip: vs.RANGE_LIMITED.value = {vs.RANGE_LIMITED.value}',flush=True)
 	#print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
-	#print(f'DEBUG: get_clip_characteristics: clip=\n{clip}',flush=True)
+	#print(f'DEBUG: get_clip_specs: clip=\n{clip}',flush=True)
 	#
 	# https://www.vapoursynth.com/doc/pythonreference.html
 	#
-	#print(f'DEBUG: get_clip_characteristics: clip.format=\n{clip.format}',flush=True)
-	#print(f'DEBUG: get_clip_characteristics: clip.width={clip.width}',flush=True)
-	#print(f'DEBUG: get_clip_characteristics: clip.height={clip.height}',flush=True)
-	#print(f'DEBUG: get_clip_characteristics: clip.num_frames={clip.num_frames}',flush=True)
-	#print(f'DEBUG: get_clip_characteristics: clip.fps={clip.fps}',flush=True)
-	#print(f'DEBUG: get_clip_characteristics: clip.format.name={clip.format.name} clip.format.id={clip.format.id} (see enum vs.PresetFormat',flush=True)
-	#print(f'DEBUG: get_clip_characteristics: clip.format.color_family={clip.format.color_family}',flush=True)
-	#print(f'DEBUG: get_clip_characteristics: clip.format.sample_type={clip.format.sample_type}',flush=True)
-	#print(f'DEBUG: get_clip_characteristics: clip.format.bits_per_sample={clip.format.bits_per_sample}',flush=True)
-	#print(f'DEBUG: get_clip_characteristics: clip.format.bytes_per_sample={clip.format.bytes_per_sample}',flush=True)
-	#print(f'DEBUG: get_clip_characteristics: clip.format.num_planes={clip.format.num_planes}',flush=True) # per https://www.vapoursynth.com/doc/pythonreference.html
-	#print(f'DEBUG: get_clip_characteristics: clip.format.subsampling_w={clip.format.subsampling_w}',flush=True)
-	#print(f'DEBUG: get_clip_characteristics: clip.format.subsampling_h={clip.format.subsampling_h}',flush=True)
+	#print(f'DEBUG: get_clip_specs: clip.format=\n{clip.format}',flush=True)
+	#print(f'DEBUG: get_clip_specs: clip.width={clip.width}',flush=True)
+	#print(f'DEBUG: get_clip_specs: clip.height={clip.height}',flush=True)
+	#print(f'DEBUG: get_clip_specs: clip.num_frames={clip.num_frames}',flush=True)
+	#print(f'DEBUG: get_clip_specs: clip.fps={clip.fps}',flush=True)
+	#print(f'DEBUG: get_clip_specs: clip.format.name={clip.format.name} clip.format.id={clip.format.id} (see enum vs.PresetFormat',flush=True)
+	#print(f'DEBUG: get_clip_specs: clip.format.color_family={clip.format.color_family}',flush=True)
+	#print(f'DEBUG: get_clip_specs: clip.format.sample_type={clip.format.sample_type}',flush=True)
+	#print(f'DEBUG: get_clip_specs: clip.format.bits_per_sample={clip.format.bits_per_sample}',flush=True)
+	#print(f'DEBUG: get_clip_specs: clip.format.bytes_per_sample={clip.format.bytes_per_sample}',flush=True)
+	#print(f'DEBUG: get_clip_specs: clip.format.num_planes={clip.format.num_planes}',flush=True) # per https://www.vapoursynth.com/doc/pythonreference.html
+	#print(f'DEBUG: get_clip_specs: clip.format.subsampling_w={clip.format.subsampling_w}',flush=True)
+	#print(f'DEBUG: get_clip_specs: clip.format.subsampling_h={clip.format.subsampling_h}',flush=True)
 	#with clip.get_frame(0) as f:
-	#	print(f'DEBUG: get_clip_characteristics: incoming frame properties before resize=\n{f.props}',flush=True)
-	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_Matrix"] = {f.props["_Matrix"]}',flush=True)
-	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_Transfer"] = {f.props["_Transfer"]}',flush=True)
-	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_Primaries"] = {f.props["_Primaries"]}',flush=True)
-	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_ColorRange"] = {f.props["_ColorRange"]}',flush=True)
-	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_ChromaLocation"] = {f.props["_ChromaLocation"]}',flush=True)
-	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_DurationDen"] = {f.props["_DurationDen"]}',flush=True)
-	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_DurationNum"] = {f.props["_DurationNum"]}',flush=True)
-	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_FieldBased"] = {f.props["_FieldBased"]}',flush=True)
-	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_PictType"] = {f.props["_PictType"]}',flush=True) # a byte character eg 'I'
+	#	print(f'DEBUG: get_clip_specs: incoming frame properties before resize=\n{f.props}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_Matrix"] = {f.props["_Matrix"]}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_Transfer"] = {f.props["_Transfer"]}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_Primaries"] = {f.props["_Primaries"]}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_ColorRange"] = {f.props["_ColorRange"]}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_ChromaLocation"] = {f.props["_ChromaLocation"]}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_DurationDen"] = {f.props["_DurationDen"]}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_DurationNum"] = {f.props["_DurationNum"]}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_FieldBased"] = {f.props["_FieldBased"]}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_PictType"] = {f.props["_PictType"]}',flush=True) # a byte character eg 'I'
 	#
-
 	a_dict = {}
 	a_dict["width"] = clip.width
 	a_dict["height"] = clip.height
 	a_dict["num_frames"] = clip.num_frames
 	a_dict["fps"] = clip.fps
 	a_dict["format_name"] = clip.format.name
-	a_dict["color_family"] = clip.format.color_family.value
-	a_dict["sample_type"] = clip.format.sample_type.value
+	a_dict["color_family"] = clip.format.color_family.value		# .value
+	a_dict["sample_type"] = clip.format.sample_type.value		# .value
 	a_dict["bits_per_sample"] = clip.format.bits_per_sample
 	a_dict["bytes_per_sample"] = clip.format.bytes_per_sample
 	a_dict["num_planes"] = clip.format.num_planes
@@ -411,9 +415,15 @@ def get_clip_characteristics(clip=None):
 		a_dict["_DurationNum"] = f.props["_DurationNum"]
 		a_dict["_FieldBased"] = f.props["_FieldBased"]
 		a_dict["_PictType"] = f.props["_PictType"]
-
-	print(f'a_dict={objPrettyPrint.pformat(a_dict)}')
-
+	#
+	# check for picture/video rotation specified perhaps in EXIF but not auto-processed here by the file openers
+	if ext in calc_ini['VID_EEK_EXTENSIONS']:
+		rotation_valie = auto_rotation_value_MediaInfo(clip, path)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
+	else: # source is not a video type, i.e. an image
+		rotation_valie = clip = auto_rotation_value_PIL(clip, path)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
+	a_dict["auto_rotation_degrees"] = rotation_valie
+	#
+	print(f'DEBUG: get_clip_specs: a_dict={objPrettyPrint.pformat(a_dict)}')
 	#
 	#if not known, guess at bt470_bg (rec.601)
 	#if matrixcoefficients = matrixcoefficients.matrix_unspecified
@@ -432,11 +442,12 @@ def get_clip_characteristics(clip=None):
 	#clip = core.std.SetFrameProps(clip, _Transfer=1)
 	#clip = core.std.SetFrameProps(clip, _Primaries=1)
 	#clip = core.std.SetFrameProps(clip, _ColorRange=1)
-	print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
+	#print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
 	
 	#### https://forum.selur.net/thread-2597.html set frame properties
 	#### ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+	#
+	return a_dict
 
 ###
 def get_clip(path):
@@ -459,13 +470,18 @@ def get_clip(path):
 		clip = core.ffms2.Source(str(path))	# if file extension not recognised, use this reader
 		#print(f'DEBUG: get_clip: ffms2 Video info:\n{clip}',flush=True)
 
-	x = get_clip_characteristics(clip)
+	clip_specs = get_clip_specs(clip, path, ext=path.suffix.lower())
 
+	#++++++++++++++++++++
+	if clip_specs["auto_rotation_degrees"] != 0:
+		pass
+	#????????????????? replace next bit
 	# check for and picture/video rotation specified perhaps in EXIF but not auto-processed here by the file openers
 	if path.suffix.lower()   in calc_ini['VID_EEK_EXTENSIONS']:
-		clip = rotation_check_MediaInfo(clip, path, save_rotated_image=False)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
+		clip = perform_rotation_MediaInfo(clip, path, save_rotated_image=False)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
 	else: # source is not a video type, i.e. an image
-		clip = rotation_check_PIL(clip, path, save_rotated_image=False)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
+		clip = perform_rotation_PIL(clip, path, save_rotated_image=False)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
+	#++++++++++++++++++++
 
 	# do video-specific or picture-specific changes
 	if path.suffix.lower()   in calc_ini['VID_EEK_EXTENSIONS']:	#if any sort of video, probably an old hand-held camera or phone, sometimes variable fps ...
@@ -566,26 +582,90 @@ def print_exif_data2(exif_data):
 	print('',flush=True)
 
 ###
-def rotation_check_PIL(clip, path, save_rotated_image=False):
+def auto_rotation_value_PIL(clip, path):
 	# from PIL import Image, ExifTags, UnidentifiedImageError   # pip install Pillow, or equivalent
 	# PIL Pillow module loads an image, checks if EXIF data, checks for 'Orientation'
 	# The Python Pillow library is a fork of an older library called PIL. 
 	# Older PIL stands for Python Imaging Library, and it's the original library that enabled Python to deal with images. 
 	# PIL was discontinued in 2011 (that author died) and only supports Python 2.23 ... so use Pillow instead.
 	# https://python-pillow.org/
-	#print(f'DEBUG: rotation_check_PIL entered',flush=True)
+	rotation_degrees = 0
 	try:
 		image = Image.open(str(path))
 	except UnidentifiedImageError:
-		#print(f'DEBUG: rotation_check_PIL except UnidentifiedImageError immediate return now',flush=True)
+		#print(f'DEBUG: auto_rotation_value_PIL: except UnidentifiedImageError immediate return now',flush=True)
+		return rotation_degrees
+	except PermissionError:
+		#print(f'DEBUG: auto_rotation_value_PIL: except PermissionError Permission denied to load: {path} immediate return now',flush=True)
+		return rotation_degrees
+	except Exception as e:
+		#print(f'DEBUG: auto_rotation_value_PIL: except Exception {e} immediate return now',flush=True)
+		return rotation_degrees
+	#print(f'DEBUG: auto_rotation_value_PIL: try on Image.open succeeded',flush=True)
+	rotation_value = 0
+	try:		
+		for key in ExifTags.TAGS.keys():
+			if ExifTags.TAGS[key] == 'Orientation':
+				break
+		exif = dict(image.getexif().items())
+		if ExifTags.TAGS[key] == 'Orientation':
+			value = exif[key]
+		else:
+			value = 0
+	except (AttributeError, KeyError, IndexError):
+		#print(f'DEBUG: auto_rotation_value_PIL: except AttributeError during for key in ExifTags.TAGS.keys(), immediate return now',flush=True)
+		return rotation_degrees
+	else:
+		if   value == 0:
+			rotation_degrees = 0
+			##print(f'DEBUG: auto_rotation_value_PIL: PIL says auto-Rotating by 0 degrees {path}',flush=True)
+		elif   value == 3:
+			rotation_degrees = 180
+			##print(f'DEBUG: auto_rotation_value_PIL: PIL says auto-Rotating by 180 degrees {path}',flush=True)
+		elif value == 8:
+			rotation_degrees = 90
+			##print(f'DEBUG: auto_rotation_value_PIL: PIL says auto-Rotating by  90 degrees {path}',flush=True)
+		elif value == 6:
+			rotation_degrees = 270
+			##print(f'DEBUG: auto_rotation_value_PIL: PIL says auto-Rotating by 270 degrees {path}',flush=True)
+	image.close()	
+	#print(f'DEBUG: auto_rotation_value_PIL: PIL says auto-Rotating by {rotation_degrees} degrees {path}',flush=True)
+	return rotation_degrees
+
+###
+def auto_rotation_value_MediaInfo(clip, path):
+	rotation_degrees = 0
+	param = 'Rotation'
+	value = mediainfo_value(Stream.Video, 0, param, path)
+	if param == 'Rotation':
+		if value is None:
+			rotation_degrees = 0
+		else:
+			rotation_degrees = int(float(value)) # for some reason Rotation value type mediainfo carries as a string,  like: '180.00'
+	#print(f'DEBUG: auto_rotation_value_MediaInfo: MediaInfo says auto-Rotating by {rotation_degrees} degrees {path}',flush=True)
+	return rotation_degrees
+
+###
+def perform_rotation_PIL(clip, path, save_rotated_image=False):
+	# from PIL import Image, ExifTags, UnidentifiedImageError   # pip install Pillow, or equivalent
+	# PIL Pillow module loads an image, checks if EXIF data, checks for 'Orientation'
+	# The Python Pillow library is a fork of an older library called PIL. 
+	# Older PIL stands for Python Imaging Library, and it's the original library that enabled Python to deal with images. 
+	# PIL was discontinued in 2011 (that author died) and only supports Python 2.23 ... so use Pillow instead.
+	# https://python-pillow.org/
+	#print(f'DEBUG: perform_rotation_PIL entered',flush=True)
+	try:
+		image = Image.open(str(path))
+	except UnidentifiedImageError:
+		#print(f'DEBUG: perform_rotation_PIL except UnidentifiedImageError immediate return now',flush=True)
 		return clip
 	except PermissionError:
-		#print(f'DEBUG: rotation_check_PIL except PermissionError Permission denied to load: {path} immediate return now',flush=True)
+		#print(f'DEBUG: perform_rotation_PIL except PermissionError Permission denied to load: {path} immediate return now',flush=True)
 		return clip
 	except Exception as e:
-		#print(f'DEBUG: rotation_check_PIL except Exception {e} immediate return now',flush=True)
+		#print(f'DEBUG: perform_rotation_PIL except Exception {e} immediate return now',flush=True)
 		return clip
-	#print(f'DEBUG: rotation_check_PIL try on Image.open succeeded',flush=True)
+	#print(f'DEBUG: perform_rotation_PIL try on Image.open succeeded',flush=True)
 	try:		
 		for key in ExifTags.TAGS.keys():
 			if ExifTags.TAGS[key] == 'Orientation':
@@ -593,7 +673,7 @@ def rotation_check_PIL(clip, path, save_rotated_image=False):
 		exif = dict(image.getexif().items())
 		value = exif[key]
 	except (AttributeError, KeyError, IndexError):
-		#print(f'DEBUG: rotation_check_PIL except AttributeError during for key in ExifTags.TAGS.keys(), immediate return now',flush=True)
+		#print(f'DEBUG: perform_rotation_PIL except AttributeError during for key in ExifTags.TAGS.keys(), immediate return now',flush=True)
 		return clip
 	else:
 		if   value == 3:
@@ -626,8 +706,8 @@ def rotation_check_PIL(clip, path, save_rotated_image=False):
 	return clip
 
 ###
-def rotation_check_MediaInfo(clip, path, save_rotated_image=False):
-	#print(f'DEBUG: rotation_check_MediaInfo entered',flush=True)
+def perform_rotation_MediaInfo(clip, path, save_rotated_image=False):
+	#print(f'DEBUG: perform_rotation_MediaInfo entered',flush=True)
 	param = 'Rotation'
 	value = mediainfo_value(Stream.Video, 0, param, path)
 	if param == 'Rotation':
@@ -635,7 +715,7 @@ def rotation_check_MediaInfo(clip, path, save_rotated_image=False):
 			value = 0
 		else:
 			value = int(float(value)) # for some reason Rotation value type mediainfo carries as a string,  like: '180.00'
-	#print(f'DEBUG: rotation_check_MediaInfo: value={value} for {path}',flush=True)
+	#print(f'DEBUG: perform_rotation_MediaInfo: value={value} for {path}',flush=True)
 	if   value == 180:
 		print(f'DEBUG: MediaInfo says auto-Rotating by 180 degrees {path}',flush=True)
 		clip = clip.std.Turn180()
