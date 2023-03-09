@@ -357,25 +357,25 @@ def get_clip(path):
 
 	# https://www.vapoursynth.com/doc/api/vapoursynth.h.html#enum-vspresetformat
 	for v in vs.PresetFormat:	# eg vs.YUV420P8
-		print(f'DEBUG: get_clip: vs.PresetFormat ENUM: {str(v)} = {int(v)+0}',flush=True)
+		print(f'DEBUG: get_clip: vs.PresetFormat ENUM: {str(v)} = {v.value}',flush=True)
 	for v in vs.MatrixCoefficients:
-		print(f'DEBUG: get_clip: vs.MatrixCoefficients ENUM: {str(v)} = {int(v)+0}',flush=True)
+		print(f'DEBUG: get_clip: vs.MatrixCoefficients ENUM: {str(v)} = {v.value}',flush=True)
 	for v in vs.TransferCharacteristics:
-		print(f'DEBUG: get_clip: vs.TransferCharacteristics ENUM: {str(v)} = {int(v)+0}',flush=True)
+		print(f'DEBUG: get_clip: vs.TransferCharacteristics ENUM: {str(v)} = {v.value}',flush=True)
 	for v in vs.ColorPrimaries:
-		print(f'DEBUG: get_clip: vs.ColorPrimaries ENUM: {str(v)} = {int(v)+0}',flush=True)
+		print(f'DEBUG: get_clip: vs.ColorPrimaries ENUM: {str(v)} = {v.value}',flush=True)
 	for v in vs.ColorRange:
-		print(f'DEBUG: get_clip: vs.ColorRange ENUM: {str(v)} = {int(v)+0}',flush=True)
+		print(f'DEBUG: get_clip: vs.ColorRange ENUM: {str(v)} = {v.value}',flush=True)
 	for v in vs.ColorFamily:
-		print(f'DEBUG: get_clip: vs.ColorFamily ENUM: {str(v)} = {int(v)+0}',flush=True)
+		print(f'DEBUG: get_clip: vs.ColorFamily ENUM: {str(v)} = {v.value}',flush=True)
 	for v in vs.ChromaLocation:
-		print(f'DEBUG: get_clip: vs.ChromaLocation ENUM: {str(v)} = {int(v)+0}',flush=True)
+		print(f'DEBUG: get_clip: vs.ChromaLocation ENUM: {str(v)} = {v.value}',flush=True)
 	for v in vs.FieldBased:
-		print(f'DEBUG: get_clip: vs.FieldBased ENUM: {str(v)} = {int(v)+0}',flush=True)
-	print(f'DEBUG: can use both: resize_clip: int(vs.ColorRange.RANGE_FULL)+0 = {int(vs.ColorRange.RANGE_FULL)+0}',flush=True)
-	print(f'DEBUG: can use both: resize_clip: int(vs.RANGE_FULL)+0 = {int(vs.RANGE_FULL)+0}',flush=True)
-	print(f'DEBUG: can use both: resize_clip: int(vs.ColorRange.RANGE_LIMITED)+0 = {int(vs.ColorRange.RANGE_LIMITED)+0}',flush=True)
-	print(f'DEBUG: can use both: resize_clip: int(vs.RANGE_LIMITED)+0 = {int(vs.RANGE_LIMITED)+0}',flush=True)
+		print(f'DEBUG: get_clip: vs.FieldBased ENUM: {str(v)} = {v.value}',flush=True)
+	print(f'DEBUG: can use both: resize_clip: vs.ColorRange.RANGE_FULL.value = {vs.ColorRange.RANGE_FULL.value}',flush=True)
+	print(f'DEBUG: can use both: resize_clip: vs.RANGE_FULL.value = {vs.RANGE_FULL.value}',flush=True)
+	print(f'DEBUG: can use both: resize_clip: vs.ColorRange.RANGE_LIMITED.value = {vs.ColorRange.RANGE_LIMITED.value}',flush=True)
+	print(f'DEBUG: can use both: resize_clip: vs.RANGE_LIMITED.value = {vs.RANGE_LIMITED.value}',flush=True)
 	#
 	#
 	print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
@@ -662,20 +662,20 @@ default_ini_values =	{ ini_section_name : {
 							'TARGET_COLORSPACE' : 				r'BT.709',											# colorspace Rec2020, BT.2020 Rec709, BT.709, Rec601, BT.601, PC.709, PC.601, TV.fcc, PC.fcc, TV.240m, PC.240m; When no hint found in ASS script and colorspace parameter is empty then the default is BT.601
 							'TARGET_COLORSPACE_MATRIX' :		r'BT.709',
 							'TARGET_COLORSPACE_MATRIX_S' :		r'709',												# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
-							#'TARGET_COLORSPACE_MATRIX_I' :		int(vs.MatrixCoefficients.MATRIX_BT709)+0,			# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
-							'TARGET_COLORSPACE_MATRIX_I' :		int(vs.MATRIX_BT709)+0,								# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+							'TARGET_COLORSPACE_MATRIX_I' :		vs.MatrixCoefficients.MATRIX_BT709.value,			
+							#'TARGET_COLORSPACE_MATRIX_I' :		vs.MATRIX_BT709,								
 							'TARGET_COLOR_TRANSFER' :			r'BT.709',
 							'TARGET_COLOR_TRANSFER_S' :			r'BT.709',											# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
-							#'TARGET_COLOR_TRANSFER_I' :		int(vs.TransferCharacteristics.TRANSFER_BT709)+0,	# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
-							'TARGET_COLOR_TRANSFER_I' :			int(vs.TRANSFER_BT709)+0,							# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+							'TARGET_COLOR_TRANSFER_I' :			vs.TransferCharacteristics.TRANSFER_BT709.value,	
+							#'TARGET_COLOR_TRANSFER_I' :		vs.TRANSFER_BT709.value,							
 							'TARGET_COLOR_PRIMARIES' :			r'BT.709',
 							'TARGET_COLOR_PRIMARIES_S' :		r'BT.709',											# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
-							#'TARGET_COLOR_PRIMARIES_I' :		int(vs.ColorPrimaries.PRIMARIES_BT709)+0,			# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
-							'TARGET_COLOR_PRIMARIES_I' :		int(vs.PRIMARIES_BT709)+0,							# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+							'TARGET_COLOR_PRIMARIES_I' :		vs.ColorPrimaries.PRIMARIES_BT709.value,			
+							#'TARGET_COLOR_PRIMARIES_I' :		vs.PRIMARIES_BT709.value,							
 							'TARGET_COLOR_RANGE' :				r'pc',	
 							'TARGET_COLOR_RANGE_S' :			r'pc',												# for resize
-							#'TARGET_COLOR_RANGE_I' :			int(vs.ColorRange.RANGE_FULL)+0,					# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
-							'TARGET_COLOR_RANGE_I' :			int(vs.RANGE_FULL)+0,								# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
+							'TARGET_COLOR_RANGE_I' :			vs.ColorRange.RANGE_FULL.value,					
+							#'TARGET_COLOR_RANGE_I' :			vs.RANGE_FULL.value,								
 							'TARGET_WIDTH' :					1920,
 							'TARGET_HEIGHT' :					1080,
 							'TARGET_FPSNUM' :					25,													# for fps numerator		... PAL world bias
@@ -743,49 +743,49 @@ with open(ini_file_speciying_parameters, 'w') as configfile:
 	tmp_name = 'Enum_vs.MatrixCoefficients'
 	tmp_dict = { tmp_name : {}}
 	for v in vs.MatrixCoefficients:
-		tmp_dict[tmp_name][str(v)] = int(v)+0
+		tmp_dict[tmp_name][str(v)] = v.value
 		pass
 	update_config[tmp_name] = tmp_dict[tmp_name]
 	tmp_name = 'Enum_vs.TransferCharacteristics'
 	tmp_dict = { tmp_name : {}}
 	for v in vs.TransferCharacteristics:
-		tmp_dict[tmp_name][str(v)] = int(v)+0
+		tmp_dict[tmp_name][str(v)] = v.value
 		pass
 	update_config[tmp_name] = tmp_dict[tmp_name]
 	tmp_name = 'Enum_vs.ColorPrimaries'
 	tmp_dict = { tmp_name : {}}
 	for v in vs.ColorPrimaries:
-		tmp_dict[tmp_name][str(v)] = int(v)+0
+		tmp_dict[tmp_name][str(v)] = v.value
 		pass
 	update_config[tmp_name] = tmp_dict[tmp_name]
 	tmp_name = 'Enum_vs.ColorRange'
 	tmp_dict = { tmp_name : {}}
 	for v in vs.ColorRange:
-		tmp_dict[tmp_name][str(v)] = int(v)+0
+		tmp_dict[tmp_name][str(v)] = v.value
 		pass
 	update_config[tmp_name] = tmp_dict[tmp_name]
 	tmp_name = 'Enum_vs.PresetFormat'
 	tmp_dict = { tmp_name : {}}
 	for v in vs.PresetFormat:
-		tmp_dict[tmp_name][str(v)] = int(v)+0
+		tmp_dict[tmp_name][str(v)] = v.value
 		pass
 	update_config[tmp_name] = tmp_dict[tmp_name]
 	tmp_name = 'Enum_vs.ColorFamily'
 	tmp_dict = { tmp_name : {}}
 	for v in vs.ColorFamily:
-		tmp_dict[tmp_name][str(v)] = int(v)+0
+		tmp_dict[tmp_name][str(v)] = v.value
 		pass
 	update_config[tmp_name] = tmp_dict[tmp_name]
 	tmp_name = 'Enum_vs.ChromaLocation'
 	tmp_dict = { tmp_name : {}}
 	for v in vs.ChromaLocation:
-		tmp_dict[tmp_name][str(v)] = int(v)+0
+		tmp_dict[tmp_name][str(v)] = v.value
 		pass
 	update_config[tmp_name] = tmp_dict[tmp_name]
 	tmp_name = 'Enum_vs.FieldBased'
 	tmp_dict = { tmp_name : {}}
 	for v in vs.FieldBased:
-		tmp_dict[tmp_name][str(v)] = int(v)+0
+		tmp_dict[tmp_name][str(v)] = v.value
 		pass
 	update_config[tmp_name] = tmp_dict[tmp_name]
 	# update the .ini file
