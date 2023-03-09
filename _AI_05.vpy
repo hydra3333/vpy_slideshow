@@ -327,7 +327,10 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 	for v in vs.ColorRange:
 		print(f'DEBUG: resize_clip: vs.ColorRange ENUM: {str(v)} = {int(v)+0}',flush=True)
 
-
+	print(f'DEBUG: *** resize_clip: int(vs.ColorRange.RANGE_FULL)+0 = {int(vs.ColorRange.RANGE_FULL)+0}',flush=True)
+	print(f'DEBUG: *** resize_clip: int(vs.RANGE_FULL)+0 = {int(vs.RANGE_FULL)+0}',flush=True)
+	print(f'DEBUG: *** resize_clip: int(vs.ColorRange.RANGE_LIMITED)+0 = {int(vs.ColorRange.RANGE_LIMITED)+0}',flush=True)
+	print(f'DEBUG: *** resize_clip: int(vs.RANGE_LIMITED)+0 = {int(vs.RANGE_LIMITED)+0}',flush=True)
 		
 		#
 		#if not known, guess at bt470_bg (rec.601)
@@ -632,7 +635,6 @@ ini_file_speciying_parameters = r'.\SLIDESHOW_PARAMETERS.ini'.strip() # r prefix
 ini_file_speciying_parameters = fully_qualified_folder_no_trailing_backslash(ini_file_speciying_parameters)
 	
 #print(f'DEBUG: ini_file_speciying_parameters="{ini_file_speciying_parameters}"',flush=True)
-
 #for v in vs.MatrixCoefficients:
 #	print(f'DEBUG: vs.MatrixCoefficients: {v} {objPrettyPrint.pformat(v)}',flush=True)
 #for v in vs.TransferCharacteristics:
@@ -663,7 +665,7 @@ default_ini_values =	{ ini_section_name : {
 							#'TARGET_COLOR_PRIMARIES_I' :		int(vs.ColorPrimaries.PRIMARIES_BT709)+0,			# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
 							'TARGET_COLOR_PRIMARIES_I' :		int(vs.PRIMARIES_BT709)+0,							# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
 							'TARGET_COLOR_RANGE' :				r'pc',	
-							'TARGET_COLOR_RANGE_S' :			r'pc',											# for resize
+							'TARGET_COLOR_RANGE_S' :			r'pc',												# for resize
 							#'TARGET_COLOR_RANGE_I' :			int(vs.ColorRange.RANGE_FULL)+0,					# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
 							'TARGET_COLOR_RANGE_I' :			int(vs.RANGE_FULL)+0,								# ugh, "+0" trick to force an integer stored !  https://www.vapoursynth.com/doc/pythonreference.html
 							'TARGET_WIDTH' :					1920,
