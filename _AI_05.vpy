@@ -25,7 +25,7 @@
 #
 #	One has to setup a suitable environment ... eg
 #		portable python into a nominated folder
-#		portable vapoursynth overlaid in the same folder
+#		portable vapoursynth overlaid in the same folder ... Assume vapoursynth API4 using release >= R60
 #		an ffmpeg build with options for vapoursynth and NVenc enabled, copied into the same folder
 #		portable pip downloaded into the same folder
 #		a pip install of Pillow etc (refer below)
@@ -280,23 +280,55 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 	# in YUV processing ...
 
 
+#### ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
+	print(f'DEBUG: resize_clip: clip=\n{clip}',flush=True)
+	#clip VideoNode
+	#    Format: YUV420P8
+	#    Width: 1354
+	#    Height: 2032
+	#    Num Frames: 13
+	#    FPS: 25
+	print(f'DEBUG: resize_clip: clip.format=\n{clip.format}',flush=True)
+	
+	print(f'DEBUG: resize_clip: clip.width={clip.width}',flush=True)
+	print(f'DEBUG: resize_clip: clip.height={clip.height}',flush=True)
+	print(f'DEBUG: resize_clip: clip.num_frames={clip.num_frames}',flush=True)
+	print(f'DEBUG: resize_clip: clip.fps={clip.fps}',flush=True)
+
+	
+	print(f'DEBUG: resize_clip: clip.format.name={clip.format.name}',flush=True)
+	print(f'DEBUG: resize_clip: clip.format.color_family={clip.format.color_family}',flush=True)
+	print(f'DEBUG: resize_clip: clip.format.sample_type={clip.format.sample_type}',flush=True)
+	print(f'DEBUG: resize_clip: clip.format.bits_per_sample={clip.format.bits_per_sample}',flush=True)
+	print(f'DEBUG: resize_clip: clip.format.bytes_per_sample={clip.format.bytes_per_sample}',flush=True)
+	#print(f'DEBUG: resize_clip: clip.format.planes={clip.format.planes}',flush=True)
+	print(f'DEBUG: resize_clip: clip.format.subsampling_w={clip.format.subsampling_w}',flush=True)
+	print(f'DEBUG: resize_clip: clip.format.subsampling_h={clip.format.subsampling_h}',flush=True)
+
 	with clip.get_frame(0) as f:
-		print(f'DEBUG: incoming frame properties before resize=\n{objPrettyPrint.pformat(f.props)}\n',flush=True)
-		print(f'DEBUG: f.props["_Matrix"] = {f.props["_Matrix"]}',flush=True)
-		print(f'DEBUG: f.props["_Transfer"] = {f.props["_Transfer"]}',flush=True)
-		print(f'DEBUG: f.props["_Primaries"] = {f.props["_Primaries"]}',flush=True)
-		print(f'DEBUG: f.props["_ColorRange"] = {f.props["_ColorRange"]}',flush=True)
-		print(f'DEBUG: f.props["_ChromaLocation"] = {f.props["_ChromaLocation"]}',flush=True)
-		#DEBUG: incoming frame properties before resize=
-		#<vapoursynth.FrameProps {'_AbsoluteTime': 0.0, '_PictType': b'I', 
-		#'_Transfer': 2, = transfercharacteristics.transfer_unspecified = 2
-		#'_DurationDen': 25, 
-		#'_ChromaLocation': 1, 
-		#'_DurationNum': 1, 
-		#'_FieldBased': 0, 
-		#'_ColorRange': 0, = colorrange.range_full = 0
-		#'_Primaries': 2, = colorprimaries.primaries_unspecified = 2
-		#'_Matrix': 5} = matrixcoefficients.matrix_bt470_bg = 5
+		print(f'DEBUG: resize_clip: incoming frame properties before resize=\n{f.props}',flush=True)
+		print(f'DEBUG: resize_clip: frame properties f.props["_Matrix"] = {f.props["_Matrix"]}',flush=True)
+		print(f'DEBUG: resize_clip: frame properties f.props["_Transfer"] = {f.props["_Transfer"]}',flush=True)
+		print(f'DEBUG: resize_clip: frame properties f.props["_Primaries"] = {f.props["_Primaries"]}',flush=True)
+		print(f'DEBUG: resize_clip: frame properties f.props["_ColorRange"] = {f.props["_ColorRange"]}',flush=True)
+		print(f'DEBUG: resize_clip: frame properties f.props["_ChromaLocation"] = {f.props["_ChromaLocation"]}',flush=True)
+		print(f'DEBUG: resize_clip: frame properties f.props["_DurationDen"] = {f.props["_DurationDen"]}',flush=True)
+		print(f'DEBUG: resize_clip: frame properties f.props["_DurationNum"] = {f.props["_DurationNum"]}',flush=True)
+		print(f'DEBUG: resize_clip: frame properties f.props["_FieldBased"] = {f.props["_FieldBased"]}',flush=True)
+		print(f'DEBUG: resize_clip: frame properties f.props["_PictType"] = {f.props["_PictType"]}',flush=True) # a byte character eg 'I'
+		
+	for v in vs.MatrixCoefficients:
+		print(f'DEBUG: resize_clip: vs.MatrixCoefficients ENUM: {str(v)} = {int(v)+0}',flush=True)
+	for v in vs.TransferCharacteristics:
+		print(f'DEBUG: resize_clip: vs.TransferCharacteristics ENUM: {str(v)} = {int(v)+0}',flush=True)
+	for v in vs.ColorPrimaries:
+		print(f'DEBUG: resize_clip: vs.ColorPrimaries ENUM: {str(v)} = {int(v)+0}',flush=True)
+	for v in vs.ColorRange:
+		print(f'DEBUG: resize_clip: vs.ColorRange ENUM: {str(v)} = {int(v)+0}',flush=True)
+
+
+		
 		#
 		#if not known, guess at bt470_bg (rec.601)
 		#if matrixcoefficients = matrixcoefficients.matrix_unspecified
@@ -306,6 +338,11 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		#		colorprimaries = colorprimaries.primaries_bt470_bg
 		#	if transfercharacteristics  = transfercharacteristics.transfer_unspecified
 		#		transfercharacteristics = transfercharacteristics.transfer_bt470_bg
+	print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
+
+
+#### https://forum.selur.net/thread-2597.html set frame properties
+#### ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -315,13 +352,13 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		#			enum chromaloc, enum matrix_in, enum transfer_in, enum primaries_in, enum range_in, enum chromaloc_in, 
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
-		#print(f'DEBUG: clip.format.color_family==vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB}\n',flush=True)
+		print(f'DEBUG: resize_clip: clip.format.color_family==vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB}',flush=True)
 
 		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix=calc_ini['TARGET_COLORSPACE_MATRIX_I'], transfer=calc_ini['TARGET_COLOR_TRANSFER_I'], primaries=calc_ini['TARGET_COLOR_PRIMARIES_I'], range=calc_ini['TARGET_COLOR_RANGE_I'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 
-		#with clip.get_frame(0) as f:
-		#	print(f'DEBUG: outgoing frame properties after resize=\n{objPrettyPrint.pformat(f.props)}\n',flush=True)
+		with clip.get_frame(0) as f:
+			print(f'DEBUG: resize_clip: outgoing frame properties after RGB resize=\n{objPrettyPrint.pformat(f.props)}',flush=True)
 		return c
 	elif clip.format.color_family==vs.YUV:
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
@@ -329,7 +366,7 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
 		
-		print(f'DEBUG: clip.format.color_family==vs.YUV: clip.format.color_family={clip.format.color_family} vs.YUV={vs.YUV}\n',flush=True)
+		print(f'DEBUG: resize_clip: clip.format.color_family==vs.YUV: clip.format.color_family={clip.format.color_family} vs.YUV={vs.YUV}',flush=True)
 		
 		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix=calc_ini['TARGET_COLORSPACE_MATRIX_I'], transfer=calc_ini['TARGET_COLOR_TRANSFER_I'], primaries=calc_ini['TARGET_COLOR_PRIMARIES_I'], range=calc_ini['TARGET_COLOR_RANGE_I'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
@@ -340,15 +377,15 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		# It usually means the matrix/transfer/primaries are unknown 
 		# *** and you have to specify the input colorspace parameters yourself. *** Note: 2 means “unspecified” according to the ITU-T recommendation.
 		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'])
-		#with clip.get_frame(0) as f:
-		#	print(f'DEBUG: outgoing frame properties after resize=\n{objPrettyPrint.pformat(f.props)}\n',flush=True)
+		with clip.get_frame(0) as f:
+			print(f'DEBUG: resize_clip: outgoing frame properties after YUV resize=\n{objPrettyPrint.pformat(f.props)}',flush=True)
 		return c
 	else:
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
 		#			enum chromaloc, enum matrix_in, enum transfer_in, enum primaries_in, enum range_in, enum chromaloc_in, 
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
-		#print(f'DEBUG: NEITHER vs.RGB nor vs.YUV ? clip.format.color_family!=vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB} vs.YUV={vs.YUV}\n',flush=True)
+		print(f'DEBUG: resize_clip: non-vs.RGB,non-vs.YUV clip.format.color_family!=vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB} vs.YUV={vs.YUV}',flush=True)
 
 		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix=calc_ini['TARGET_COLORSPACE_MATRIX_I'], transfer=calc_ini['TARGET_COLOR_TRANSFER_I'], primaries=calc_ini['TARGET_COLOR_PRIMARIES_I'], range=calc_ini['TARGET_COLOR_RANGE_I'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
@@ -359,8 +396,8 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		# It usually means the matrix/transfer/primaries are unknown 
 		# *** and you have to specify the input colorspace parameters yourself. *** Note: 2 means “unspecified” according to the ITU-T recommendation.
 		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'])
-		#with clip.get_frame(0) as f:
-		#	print(f'DEBUG: outgoing frame properties after resize=\n{objPrettyPrint.pformat(f.props)}\n',flush=True)
+		with clip.get_frame(0) as f:
+			print(f'DEBUG: resize_clip: outgoing frame properties after non-vs.RGB,non-vs.YUV resize=\n{objPrettyPrint.pformat(f.props)}',flush=True)
 		return c
 
 ###
@@ -368,7 +405,7 @@ def get_clip(path):
 	if path.suffix.lower()   in calc_ini['EEK_EXTENSIONS']:
 		#print(f'DEBUG: get_clip: lsmas Video: {path.name},flush=True')
 		clip = core.lsmas.LWLibavSource(str(path))
-		print(f'DEBUG: get_clip: lsmas Video info:\n{clip}',flush=True)
+		#print(f'DEBUG: get_clip: lsmas Video info:\n{clip}',flush=True)
 	elif path.suffix.lower() in calc_ini['VID_EXTENSIONS']:
 		#print(f'DEBUG: get_clip: ffms2 Video: {path.name}',flush=True)
 		clip = core.ffms2.Source(str(path))	#ffms2 leaves *.ffindex files everywhere in folders.
@@ -377,12 +414,12 @@ def get_clip(path):
 	elif path.suffix.lower() in calc_ini['PIC_EXTENSIONS']:
 		#print(f'DEBUG: get_clip: ffms2 Video: {path.name}',flush=True)
 		clip = core.ffms2.Source(str(path))
-	#	clip = core.imwri.Read(str(path)) # ImageWriter, if installed into vapoursynth folder
-		print(f'DEBUG: get_clip: ffms2 Video info:\n{clip}',flush=True)
+		#clip = core.imwri.Read(str(path)) # ImageWriter, if installed into vapoursynth folder
+		#print(f'DEBUG: get_clip: ffms2 Video info:\n{clip}',flush=True)
 	else:
 		#print(f'DEBUG: get_clip: ffms2 Video: {path.name}',flush=True)
 		clip = core.ffms2.Source(str(path))	# if file extension not recognised, use this reader
-		#print(f'DEBUG: get_clip: Video info:\n{clip}',flush=True)
+		#print(f'DEBUG: get_clip: ffms2 Video info:\n{clip}',flush=True)
 
 	# check for and picture/video rotation specified perhaps in EXIF but not auto-processed here by the file openers
 	if path.suffix.lower()   in calc_ini['VID_EEK_EXTENSIONS']:
@@ -760,7 +797,7 @@ if calc_ini['CROSSFADE_DURATION']>0:
 #---
 while not (path is None):	# first clip already pre-retrieved ready for this while loop
 	Count_of_files = Count_of_files + 1
-	print(f'DEBUG: processing {Count_of_files} {str(path)}',flush=True)
+	print(f'\nDEBUG: processing {Count_of_files} {str(path)}',flush=True)
 	#if (Count_of_files % 10)==0:
 	#	print(f'{Count_of_files},',end="",flush=True)
 	#	if (Count_of_files % (10*10*3))==0:
