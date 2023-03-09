@@ -764,29 +764,30 @@ with open(ini_file_speciying_parameters, 'w') as configfile:
 		tmp_dict[tmp_name][str(v)] = int(v)+0
 		pass
 	update_config[tmp_name] = tmp_dict[tmp_name]
-
 	tmp_name = 'Enum_vs.PresetFormat'
 	tmp_dict = { tmp_name : {}}
 	for v in vs.PresetFormat:
 		tmp_dict[tmp_name][str(v)] = int(v)+0
 		pass
+	update_config[tmp_name] = tmp_dict[tmp_name]
 	tmp_name = 'Enum_vs.ColorFamily'
 	tmp_dict = { tmp_name : {}}
 	for v in vs.ColorFamily:
 		tmp_dict[tmp_name][str(v)] = int(v)+0
 		pass
+	update_config[tmp_name] = tmp_dict[tmp_name]
 	tmp_name = 'Enum_vs.ChromaLocation'
 	tmp_dict = { tmp_name : {}}
 	for v in vs.ChromaLocation:
 		tmp_dict[tmp_name][str(v)] = int(v)+0
 		pass
+	update_config[tmp_name] = tmp_dict[tmp_name]
 	tmp_name = 'Enum_vs.FieldBased'
 	tmp_dict = { tmp_name : {}}
 	for v in vs.FieldBased:
 		tmp_dict[tmp_name][str(v)] = int(v)+0
 		pass
-
-	
+	update_config[tmp_name] = tmp_dict[tmp_name]
 	# update the .ini file
 	update_config.write(configfile)
 print(f'INFO: Saved updated .ini "{ini_file_speciying_parameters}"')
