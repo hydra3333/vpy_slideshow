@@ -203,6 +203,7 @@
 #
 import vapoursynth as vs
 from vapoursynth import core
+from fractions import Fraction
 from functools import partial
 from pathlib import Path, PureWindowsPath
 from ctypes import *		# for mediainfo ... load via ctypes.CDLL(r'.\MediaInfo.dll')
@@ -331,84 +332,88 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		return c
 
 ###
-def get_clip(path):
-	if path.suffix.lower()   in calc_ini['EEK_EXTENSIONS']:
-		#print(f'DEBUG: get_clip: lsmas Video: {path.name},flush=True')
-		clip = core.lsmas.LWLibavSource(str(path))
-		#print(f'DEBUG: get_clip: lsmas Video info:\n{clip}',flush=True)
-	elif path.suffix.lower() in calc_ini['VID_EXTENSIONS']:
-		#print(f'DEBUG: get_clip: ffms2 Video: {path.name}',flush=True)
-		clip = core.ffms2.Source(str(path))	#ffms2 leaves *.ffindex files everywhere in folders.
-		#clip = core.lsmas.LibavSMASHSource(str(path))
-		print(f'DEBUG: get_clip: ffms2 Video info:\n{clip}',flush=True)
-	elif path.suffix.lower() in calc_ini['PIC_EXTENSIONS']:
-		#print(f'DEBUG: get_clip: ffms2 Video: {path.name}',flush=True)
-		clip = core.ffms2.Source(str(path))
-		#clip = core.imwri.Read(str(path)) # ImageWriter, if installed into vapoursynth folder
-		#print(f'DEBUG: get_clip: ffms2 Video info:\n{clip}',flush=True)
-	else:
-		#print(f'DEBUG: get_clip: ffms2 Video: {path.name}',flush=True)
-		clip = core.ffms2.Source(str(path))	# if file extension not recognised, use this reader
-		#print(f'DEBUG: get_clip: ffms2 Video info:\n{clip}',flush=True)
-
-
-	#### ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
-
+def get_clip_characteristics(clip=None):
+	if clip is None:
+		raise ValueError(f'get_clip_characteristics: clip not passed as an argument to get_clip_characteristics')
 	# https://www.vapoursynth.com/doc/api/vapoursynth.h.html#enum-vspresetformat
-	for v in vs.PresetFormat:	# eg vs.YUV420P8
-		print(f'DEBUG: get_clip: vs.PresetFormat ENUM: {str(v)} = {v.value}',flush=True)
-	for v in vs.MatrixCoefficients:
-		print(f'DEBUG: get_clip: vs.MatrixCoefficients ENUM: {str(v)} = {v.value}',flush=True)
-	for v in vs.TransferCharacteristics:
-		print(f'DEBUG: get_clip: vs.TransferCharacteristics ENUM: {str(v)} = {v.value}',flush=True)
-	for v in vs.ColorPrimaries:
-		print(f'DEBUG: get_clip: vs.ColorPrimaries ENUM: {str(v)} = {v.value}',flush=True)
-	for v in vs.ColorRange:
-		print(f'DEBUG: get_clip: vs.ColorRange ENUM: {str(v)} = {v.value}',flush=True)
-	for v in vs.ColorFamily:
-		print(f'DEBUG: get_clip: vs.ColorFamily ENUM: {str(v)} = {v.value}',flush=True)
-	for v in vs.ChromaLocation:
-		print(f'DEBUG: get_clip: vs.ChromaLocation ENUM: {str(v)} = {v.value}',flush=True)
-	for v in vs.FieldBased:
-		print(f'DEBUG: get_clip: vs.FieldBased ENUM: {str(v)} = {v.value}',flush=True)
-	print(f'DEBUG: can use both: resize_clip: vs.ColorRange.RANGE_FULL.value = {vs.ColorRange.RANGE_FULL.value}',flush=True)
-	print(f'DEBUG: can use both: resize_clip: vs.RANGE_FULL.value = {vs.RANGE_FULL.value}',flush=True)
-	print(f'DEBUG: can use both: resize_clip: vs.ColorRange.RANGE_LIMITED.value = {vs.ColorRange.RANGE_LIMITED.value}',flush=True)
-	print(f'DEBUG: can use both: resize_clip: vs.RANGE_LIMITED.value = {vs.RANGE_LIMITED.value}',flush=True)
-	#
-	#
-	print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
-	print(f'DEBUG: get_clip: clip=\n{clip}',flush=True)
+	#print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
+	#for v in vs.PresetFormat:	# eg vs.YUV420P8
+	#	print(f'DEBUG: get_clip_characteristics: vs.PresetFormat ENUM: {str(v)} = {v.value}',flush=True)
+	#for v in vs.MatrixCoefficients:
+	#	print(f'DEBUG: get_clip_characteristics: vs.MatrixCoefficients ENUM: {str(v)} = {v.value}',flush=True)
+	#for v in vs.TransferCharacteristics:
+	#	print(f'DEBUG: get_clip_characteristics: vs.TransferCharacteristics ENUM: {str(v)} = {v.value}',flush=True)
+	#for v in vs.ColorPrimaries:
+	#	print(f'DEBUG: get_clip_characteristics: vs.ColorPrimaries ENUM: {str(v)} = {v.value}',flush=True)
+	#for v in vs.ColorRange:
+	#	print(f'DEBUG: get_clip_characteristics: vs.ColorRange ENUM: {str(v)} = {v.value}',flush=True)
+	#for v in vs.ColorFamily:
+	#	print(f'DEBUG: get_clip_characteristics: vs.ColorFamily ENUM: {str(v)} = {v.value}',flush=True)
+	#for v in vs.ChromaLocation:
+	#	print(f'DEBUG: get_clip_characteristics: vs.ChromaLocation ENUM: {str(v)} = {v.value}',flush=True)
+	#for v in vs.FieldBased:
+	#	print(f'DEBUG: get_clip_characteristics: vs.FieldBased ENUM: {str(v)} = {v.value}',flush=True)
+	#print(f'DEBUG: NOTE can use both: resize_clip: vs.ColorRange.RANGE_FULL.value = {vs.ColorRange.RANGE_FULL.value}',flush=True)
+	#print(f'DEBUG: NOTE can use both: resize_clip: vs.RANGE_FULL.value = {vs.RANGE_FULL.value}',flush=True)
+	#print(f'DEBUG: NOTE can use both: resize_clip: vs.ColorRange.RANGE_LIMITED.value = {vs.ColorRange.RANGE_LIMITED.value}',flush=True)
+	#print(f'DEBUG: NOTE can use both: resize_clip: vs.RANGE_LIMITED.value = {vs.RANGE_LIMITED.value}',flush=True)
+	#print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
+	#print(f'DEBUG: get_clip_characteristics: clip=\n{clip}',flush=True)
 	#
 	# https://www.vapoursynth.com/doc/pythonreference.html
 	#
-	print(f'DEBUG: get_clip: clip.format=\n{clip.format}',flush=True)
-	print(f'DEBUG: get_clip: clip.width={clip.width}',flush=True)
-	print(f'DEBUG: get_clip: clip.height={clip.height}',flush=True)
-	print(f'DEBUG: get_clip: clip.num_frames={clip.num_frames}',flush=True)
-	print(f'DEBUG: get_clip: clip.fps={clip.fps}',flush=True)
-	print(f'DEBUG: get_clip: clip.format.name={clip.format.name} clip.format.id={clip.format.id} (see enum vs.PresetFormat',flush=True)
-	print(f'DEBUG: get_clip: clip.format.color_family={clip.format.color_family}',flush=True)
-	print(f'DEBUG: get_clip: clip.format.sample_type={clip.format.sample_type}',flush=True)
-	print(f'DEBUG: get_clip: clip.format.bits_per_sample={clip.format.bits_per_sample}',flush=True)
-	print(f'DEBUG: get_clip: clip.format.bytes_per_sample={clip.format.bytes_per_sample}',flush=True)
-	print(f'DEBUG: get_clip: clip.format.num_planes={clip.format.num_planes}',flush=True) # per https://www.vapoursynth.com/doc/pythonreference.html
-	print(f'DEBUG: get_clip: clip.format.subsampling_w={clip.format.subsampling_w}',flush=True)
-	print(f'DEBUG: get_clip: clip.format.subsampling_h={clip.format.subsampling_h}',flush=True)
+	#print(f'DEBUG: get_clip_characteristics: clip.format=\n{clip.format}',flush=True)
+	#print(f'DEBUG: get_clip_characteristics: clip.width={clip.width}',flush=True)
+	#print(f'DEBUG: get_clip_characteristics: clip.height={clip.height}',flush=True)
+	#print(f'DEBUG: get_clip_characteristics: clip.num_frames={clip.num_frames}',flush=True)
+	#print(f'DEBUG: get_clip_characteristics: clip.fps={clip.fps}',flush=True)
+	#print(f'DEBUG: get_clip_characteristics: clip.format.name={clip.format.name} clip.format.id={clip.format.id} (see enum vs.PresetFormat',flush=True)
+	#print(f'DEBUG: get_clip_characteristics: clip.format.color_family={clip.format.color_family}',flush=True)
+	#print(f'DEBUG: get_clip_characteristics: clip.format.sample_type={clip.format.sample_type}',flush=True)
+	#print(f'DEBUG: get_clip_characteristics: clip.format.bits_per_sample={clip.format.bits_per_sample}',flush=True)
+	#print(f'DEBUG: get_clip_characteristics: clip.format.bytes_per_sample={clip.format.bytes_per_sample}',flush=True)
+	#print(f'DEBUG: get_clip_characteristics: clip.format.num_planes={clip.format.num_planes}',flush=True) # per https://www.vapoursynth.com/doc/pythonreference.html
+	#print(f'DEBUG: get_clip_characteristics: clip.format.subsampling_w={clip.format.subsampling_w}',flush=True)
+	#print(f'DEBUG: get_clip_characteristics: clip.format.subsampling_h={clip.format.subsampling_h}',flush=True)
+	#with clip.get_frame(0) as f:
+	#	print(f'DEBUG: get_clip_characteristics: incoming frame properties before resize=\n{f.props}',flush=True)
+	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_Matrix"] = {f.props["_Matrix"]}',flush=True)
+	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_Transfer"] = {f.props["_Transfer"]}',flush=True)
+	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_Primaries"] = {f.props["_Primaries"]}',flush=True)
+	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_ColorRange"] = {f.props["_ColorRange"]}',flush=True)
+	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_ChromaLocation"] = {f.props["_ChromaLocation"]}',flush=True)
+	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_DurationDen"] = {f.props["_DurationDen"]}',flush=True)
+	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_DurationNum"] = {f.props["_DurationNum"]}',flush=True)
+	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_FieldBased"] = {f.props["_FieldBased"]}',flush=True)
+	#	print(f'DEBUG: get_clip_characteristics: frame properties f.props["_PictType"] = {f.props["_PictType"]}',flush=True) # a byte character eg 'I'
+	#
 
+	a_dict = {}
+	a_dict["width"] = clip.width
+	a_dict["height"] = clip.height
+	a_dict["num_frames"] = clip.num_frames
+	a_dict["fps"] = clip.fps
+	a_dict["format_name"] = clip.format.name
+	a_dict["color_family"] = clip.format.color_family.value
+	a_dict["sample_type"] = clip.format.sample_type.value
+	a_dict["bits_per_sample"] = clip.format.bits_per_sample
+	a_dict["bytes_per_sample"] = clip.format.bytes_per_sample
+	a_dict["num_planes"] = clip.format.num_planes
+	a_dict["subsampling_w"] = clip.format.subsampling_w
+	a_dict["subsampling_h"] = clip.format.subsampling_h
 	with clip.get_frame(0) as f:
-		print(f'DEBUG: get_clip: incoming frame properties before resize=\n{f.props}',flush=True)
-		print(f'DEBUG: get_clip: frame properties f.props["_Matrix"] = {f.props["_Matrix"]}',flush=True)
-		print(f'DEBUG: get_clip: frame properties f.props["_Transfer"] = {f.props["_Transfer"]}',flush=True)
-		print(f'DEBUG: get_clip: frame properties f.props["_Primaries"] = {f.props["_Primaries"]}',flush=True)
-		print(f'DEBUG: get_clip: frame properties f.props["_ColorRange"] = {f.props["_ColorRange"]}',flush=True)
-		print(f'DEBUG: get_clip: frame properties f.props["_ChromaLocation"] = {f.props["_ChromaLocation"]}',flush=True)
-		print(f'DEBUG: get_clip: frame properties f.props["_DurationDen"] = {f.props["_DurationDen"]}',flush=True)
-		print(f'DEBUG: get_clip: frame properties f.props["_DurationNum"] = {f.props["_DurationNum"]}',flush=True)
-		print(f'DEBUG: get_clip: frame properties f.props["_FieldBased"] = {f.props["_FieldBased"]}',flush=True)
-		print(f'DEBUG: get_clip: frame properties f.props["_PictType"] = {f.props["_PictType"]}',flush=True) # a byte character eg 'I'
-	
+		a_dict["_Matrix"] = f.props["_Matrix"]
+		a_dict["_Transfer"] = f.props["_Transfer"]
+		a_dict["_Primaries"] = f.props["_Primaries"]
+		a_dict["_ColorRange"] = f.props["_ColorRange"]
+		a_dict["_ChromaLocation"] = f.props["_ChromaLocation"]
+		a_dict["_DurationDen"] = f.props["_DurationDen"]
+		a_dict["_DurationNum"] = f.props["_DurationNum"]
+		a_dict["_FieldBased"] = f.props["_FieldBased"]
+		a_dict["_PictType"] = f.props["_PictType"]
+
+	print(f'a_dict={objPrettyPrint.pformat(a_dict)}')
+
 	#
 	#if not known, guess at bt470_bg (rec.601)
 	#if matrixcoefficients = matrixcoefficients.matrix_unspecified
@@ -431,6 +436,30 @@ def get_clip(path):
 	
 	#### https://forum.selur.net/thread-2597.html set frame properties
 	#### ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+###
+def get_clip(path):
+	if path.suffix.lower()   in calc_ini['EEK_EXTENSIONS']:
+		#print(f'DEBUG: get_clip: lsmas Video: {path.name},flush=True')
+		clip = core.lsmas.LWLibavSource(str(path))
+		#print(f'DEBUG: get_clip: lsmas Video info:\n{clip}',flush=True)
+	elif path.suffix.lower() in calc_ini['VID_EXTENSIONS']:
+		#print(f'DEBUG: get_clip: ffms2 Video: {path.name}',flush=True)
+		clip = core.ffms2.Source(str(path))	#ffms2 leaves *.ffindex files everywhere in folders.
+		#clip = core.lsmas.LibavSMASHSource(str(path))
+		print(f'DEBUG: get_clip: ffms2 Video info:\n{clip}',flush=True)
+	elif path.suffix.lower() in calc_ini['PIC_EXTENSIONS']:
+		#print(f'DEBUG: get_clip: ffms2 Video: {path.name}',flush=True)
+		clip = core.ffms2.Source(str(path))
+		#clip = core.imwri.Read(str(path)) # ImageWriter, if installed into vapoursynth folder
+		#print(f'DEBUG: get_clip: ffms2 Video info:\n{clip}',flush=True)
+	else:
+		#print(f'DEBUG: get_clip: ffms2 Video: {path.name}',flush=True)
+		clip = core.ffms2.Source(str(path))	# if file extension not recognised, use this reader
+		#print(f'DEBUG: get_clip: ffms2 Video info:\n{clip}',flush=True)
+
+	x = get_clip_characteristics(clip)
 
 	# check for and picture/video rotation specified perhaps in EXIF but not auto-processed here by the file openers
 	if path.suffix.lower()   in calc_ini['VID_EEK_EXTENSIONS']:
