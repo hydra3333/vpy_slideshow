@@ -377,7 +377,7 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	#print(f'DEBUG: NOTE can use both: resize_clip: vs.ColorRange.RANGE_LIMITED.value = {vs.ColorRange.RANGE_LIMITED.value}',flush=True)
 	#print(f'DEBUG: NOTE can use both: resize_clip: vs.RANGE_LIMITED.value = {vs.RANGE_LIMITED.value}',flush=True)
 	#print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
-	#print(f'DEBUG: get_clip_specs: clip=\n{clip}',flush=True)
+	print(f'DEBUG: get_clip_specs: clip=\n{clip}',flush=True)
 	## https://www.vapoursynth.com/doc/pythonreference.html
 	#print(f'DEBUG: get_clip_specs: clip.format=\n{clip.format}',flush=True)
 	#print(f'DEBUG: get_clip_specs: clip.width={clip.width}',flush=True)
@@ -392,8 +392,8 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	#print(f'DEBUG: get_clip_specs: clip.format.num_planes={clip.format.num_planes}',flush=True) # per https://www.vapoursynth.com/doc/pythonreference.html
 	#print(f'DEBUG: get_clip_specs: clip.format.subsampling_w={clip.format.subsampling_w}',flush=True)
 	#print(f'DEBUG: get_clip_specs: clip.format.subsampling_h={clip.format.subsampling_h}',flush=True)
-	#with clip.get_frame(0) as f:
-	#	print(f'DEBUG: get_clip_specs: incoming frame properties =\n{f.props}',flush=True)
+	with clip.get_frame(0) as f:
+		print(f'DEBUG: get_clip_specs: incoming frame properties =\n{f.props}',flush=True)
 	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_Matrix"] = {f.props["_Matrix"]}',flush=True)
 	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_Transfer"] = {f.props["_Transfer"]}',flush=True)
 	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_Primaries"] = {f.props["_Primaries"]}',flush=True)
@@ -456,10 +456,12 @@ def get_clip_specs(clip=None, path=None, ext=None):
 				print(f'DEBUG: get_clip_specs: PIC: MatrixCoefficients.MATRIX_UNSPECIFIED in PIC, opened by non-ffms2',flush=True)
 				#### This is a poor guess, last resort, if there is no other way to deduce matrix.
 				# NOTE: ffms2 usually yields MATRIX_BT470_BG for IMAGES regardless of what width/height they may be.
-				if  clip_specs["width"] <= 1024 and clip_specs["height"] <= 480:				# Likely NTSC SD
+				if  clip_specs["width"] <= 720 and clip_specs["height"] <= 480:				# Likely NTSC SD
 					clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_ST170_M
-				elif clip_specs["width"]  <= 1024 and clip_specs["height"] <= 576:				# Likely PAL SD
+				elif clip_specs["width"]  <= 720 and clip_specs["height"] <= 576:				# Likely PAL SD
 					clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT470_BG
+				elif clip_specs["width"]  <= 1280 and clip_specs["height"] <= 720:				# Likely PAL HD
+					clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT709
 				elif clip_specs["width"]  <= 1920 and clip_specs["height"] <= 1088:				# Likely PAL HD
 					clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT709
 				elif clip_specs["width"]  <= 3840 and clip_specs["height"] <= 2160:				# Likely UHD
@@ -475,10 +477,12 @@ def get_clip_specs(clip=None, path=None, ext=None):
 			print(f'DEBUG: get_clip_specs: VID: MatrixCoefficients.MATRIX_UNSPECIFIED in VID',flush=True)
 			#### This is a poor guess, last resort, if there is no other way to deduce matrix.
 			# NOTE: ffms2 usually yields MATRIX_BT470_BG for IMAGES regardless of what width/height they may be.
-			if  clip_specs["width"] <= 1024 and clip_specs["height"] <= 480:	# Likely NTSC SD
+			if  clip_specs["width"] <= 720 and clip_specs["height"] <= 480:	# Likely NTSC SD
 				clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_ST170_M
-			elif clip_specs["width"]  <= 1024 and clip_specs["height"] <= 576:				# Likely PAL SD
+			elif clip_specs["width"]  <= 720 and clip_specs["height"] <= 576:				# Likely PAL SD
 				clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT470_BG
+			elif clip_specs["width"]  <= 1280 and clip_specs["height"] <= 720:				# Likely PAL HD
+				clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT709						# HD
 			elif clip_specs["width"]  <= 1920 and clip_specs["height"] <= 1088:				# Likely PAL HD
 				clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT709						# HD
 			elif clip_specs["width"]  <= 3840 and clip_specs["height"] <= 2160:				# Likely UHD
