@@ -290,13 +290,13 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
 		#print(f'DEBUG: resize_clip: clip.format.color_family==vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB}',flush=True)
-		with clip.get_frame(0) as f:
-			print(f'DEBUG: resize_clip: incoming frame properties after RGB resize={objPrettyPrint.pformat(f.props)}',flush=True)
-		print(f'DEBUG: resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, range={calc_ini["TARGET_COLOR_RANGE_I"]}, primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}',flush=True)
+		#with clip.get_frame(0) as f:
+		#	print(f'DEBUG: resize_clip: incoming frame properties after RGB resize={objPrettyPrint.pformat(f.props)}',flush=True)
+		#print(f'DEBUG: resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, range={calc_ini["TARGET_COLOR_RANGE_I"]}, primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}',flush=True)
 		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix=calc_ini['TARGET_COLORSPACE_MATRIX_I'], transfer=calc_ini['TARGET_COLOR_TRANSFER_I'], primaries=calc_ini['TARGET_COLOR_PRIMARIES_I'], range=calc_ini['TARGET_COLOR_RANGE_I'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
-		with c.get_frame(0) as f:
-			print(f'DEBUG: resize_clip: outgoing frame properties after RGB resize={objPrettyPrint.pformat(f.props)}',flush=True)
+		#with c.get_frame(0) as f:
+		#	print(f'DEBUG: resize_clip: outgoing frame properties after RGB resize={objPrettyPrint.pformat(f.props)}',flush=True)
 		return c
 	elif clip.format.color_family==vs.YUV:
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
@@ -305,9 +305,9 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
 		
 		#print(f'DEBUG: resize_clip: clip.format.color_family==vs.YUV: clip.format.color_family={clip.format.color_family} vs.YUV={vs.YUV}',flush=True)
-		with clip.get_frame(0) as f:
-			print(f'DEBUG: resize_clip: incoming frame properties after RGB resize={objPrettyPrint.pformat(f.props)}',flush=True)
-		print(f'DEBUG: resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, range={calc_ini["TARGET_COLOR_RANGE_I"]}, primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}',flush=True)
+		#with clip.get_frame(0) as f:
+		#	print(f'DEBUG: resize_clip: incoming frame properties after RGB resize={objPrettyPrint.pformat(f.props)}',flush=True)
+		#print(f'DEBUG: resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, range={calc_ini["TARGET_COLOR_RANGE_I"]}, primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}',flush=True)
 		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix=calc_ini['TARGET_COLORSPACE_MATRIX_I'], transfer=calc_ini['TARGET_COLOR_TRANSFER_I'], primaries=calc_ini['TARGET_COLOR_PRIMARIES_I'], range=calc_ini['TARGET_COLOR_RANGE_I'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 		# AH !!! the above line with matrix_s='709' can cause this error:
@@ -316,8 +316,8 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		# It usually means the matrix/transfer/primaries are unknown 
 		# *** and you have to specify the input colorspace parameters yourself. *** Note: 2 means “unspecified” according to the ITU-T recommendation.
 		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'])
-		with c.get_frame(0) as f:
-			print(f'DEBUG: resize_clip: outgoing frame properties after YUV resize={objPrettyPrint.pformat(f.props)}',flush=True)
+		#with c.get_frame(0) as f:
+		#	print(f'DEBUG: resize_clip: outgoing frame properties after YUV resize={objPrettyPrint.pformat(f.props)}',flush=True)
 		return c
 	else:
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
@@ -325,9 +325,9 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
 		#print(f'DEBUG: resize_clip: non-vs.RGB,non-vs.YUV clip.format.color_family!=vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB} vs.YUV={vs.YUV}',flush=True)
-		with clip.get_frame(0) as f:
-			print(f'DEBUG: resize_clip: incoming frame properties after RGB resize={objPrettyPrint.pformat(f.props)}',flush=True)
-		print(f'DEBUG: resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, range={calc_ini["TARGET_COLOR_RANGE_I"]}, primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}',flush=True)
+		#with clip.get_frame(0) as f:
+		#	print(f'DEBUG: resize_clip: incoming frame properties after RGB resize={objPrettyPrint.pformat(f.props)}',flush=True)
+		#print(f'DEBUG: resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, range={calc_ini["TARGET_COLOR_RANGE_I"]}, primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}',flush=True)
 		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix_s=calc_ini['TARGET_COLORSPACE_MATRIX_S'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 		c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'], matrix=calc_ini['TARGET_COLORSPACE_MATRIX_I'], transfer=calc_ini['TARGET_COLOR_TRANSFER_I'], primaries=calc_ini['TARGET_COLOR_PRIMARIES_I'], range=calc_ini['TARGET_COLOR_RANGE_I'])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 		# AH !!! the avove line with matrix_s='709' can cause this error:
@@ -336,8 +336,8 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		# It usually means the matrix/transfer/primaries are unknown 
 		# *** and you have to specify the input colorspace parameters yourself. *** Note: 2 means “unspecified” according to the ITU-T recommendation.
 		#c = resize(width=w, height=h, format=calc_ini['TARGET_PIXEL_FORMAT'])
-		with c.get_frame(0) as f:
-			print(f'DEBUG: resize_clip: outgoing frame properties after non-vs.RGB,non-vs.YUV resize={objPrettyPrint.pformat(f.props)}',flush=True)
+		#with c.get_frame(0) as f:
+		#	print(f'DEBUG: resize_clip: outgoing frame properties after non-vs.RGB,non-vs.YUV resize={objPrettyPrint.pformat(f.props)}',flush=True)
 		return c
 
 ###
@@ -441,26 +441,27 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	
 	# **********
 	# if not already specified, guess a new _Matrix
+	# explainer https://docs.rs/av-data/0.4.1/av_data/pixel/index.html https://docs.rs/av-data/0.4.1/av_data/pixel/enum.MatrixCoefficients.html
 	clip_specs["guessed_Matrix"] = False
 	clip_specs["proposed_Matrix"] = clip_specs["_Matrix"]
 	if  clip_specs["_Matrix"] == vs.MatrixCoefficients.MATRIX_UNSPECIFIED:	# _Matrix is usually defined and the rest may not be. (ffms2 usually yields MATRIX_BT470_BG)
-		print(f'DEBUG: get_clip_specs: MatrixCoefficients.MATRIX_UNSPECIFIED: incoming clip_specs=\n{objPrettyPrint.pformat(clip_specs)}',flush=True)
+		#print(f'DEBUG: get_clip_specs: MatrixCoefficients.MATRIX_UNSPECIFIED: incoming clip_specs=\n{objPrettyPrint.pformat(clip_specs)}',flush=True)
 		clip_specs["guessed_Matrix"] = True
 		if ext in calc_ini['PIC_EXTENSIONS']:	#PIC # assume opened by ffms2 (ffms2 usually yields MATRIX_BT470_BG for images)
 			print(f'DEBUG: get_clip_specs: PIC: MatrixCoefficients.MATRIX_UNSPECIFIED in PIC, choosing a default',flush=True)
 			if last_file_opened_with_ffms2:
 				clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT470_BG
-				print(f'DEBUG: get_clip_specs: PIC: MatrixCoefficients.MATRIX_UNSPECIFIED in PIC, opened by ffms2, replacement _Matrix={clip_specs["proposed_Matrix"]}',flush=True)
+				#print(f'DEBUG: get_clip_specs: PIC: MatrixCoefficients.MATRIX_UNSPECIFIED in PIC, opened by ffms2, replacement _Matrix={clip_specs["proposed_Matrix"]}',flush=True)
 			else:
 				print(f'DEBUG: get_clip_specs: PIC: MatrixCoefficients.MATRIX_UNSPECIFIED in PIC, opened by non-ffms2',flush=True)
 				#### This is a poor guess, last resort, if there is no other way to deduce matrix.
 				# NOTE: ffms2 usually yields MATRIX_BT470_BG for IMAGES regardless of what width/height they may be.
-				if  clip_specs["width"] <= 1024 and clip_specs["height"] <= 480:	# Likely NTSC SD
+				if  clip_specs["width"] <= 1024 and clip_specs["height"] <= 480:				# Likely NTSC SD
 					clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_ST170_M
 				elif clip_specs["width"]  <= 1024 and clip_specs["height"] <= 576:				# Likely PAL SD
 					clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT470_BG
 				elif clip_specs["width"]  <= 1920 and clip_specs["height"] <= 1088:				# Likely PAL HD
-					clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT709						# HD
+					clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT709
 				elif clip_specs["width"]  <= 3840 and clip_specs["height"] <= 2160:				# Likely UHD
 					clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_CL					#     Constant Luminance
 					#clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_NCL				# Non-Constant Luminance
@@ -469,7 +470,7 @@ def get_clip_specs(clip=None, path=None, ext=None):
 					#clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_NCL 				# Non-Constant Luminance
 				else:
 					raise ValueError(f'ERROR: get_clip_specs: PIC: unable to guess default _Matrix in PIC to replace MatrixCoefficients.MATRIX_UNSPECIFIED')
-				print(f'DEBUG: get_clip_specs: PIC: MatrixCoefficients.MATRIX_UNSPECIFIED ({vs.MatrixCoefficients.MATRIX_UNSPECIFIED}) in PIC, opened by non-ffms2, replacement _Matrix={clip_specs["proposed_Matrix"]}',flush=True)
+				#print(f'DEBUG: get_clip_specs: PIC: MatrixCoefficients.MATRIX_UNSPECIFIED ({vs.MatrixCoefficients.MATRIX_UNSPECIFIED}) in PIC, opened by non-ffms2, replacement _Matrix={clip_specs["proposed_Matrix"]}',flush=True)
 		elif ext in calc_ini['VID_EEK_EXTENSIONS']:	#VID 
 			print(f'DEBUG: get_clip_specs: VID: MatrixCoefficients.MATRIX_UNSPECIFIED in VID',flush=True)
 			#### This is a poor guess, last resort, if there is no other way to deduce matrix.
@@ -488,136 +489,63 @@ def get_clip_specs(clip=None, path=None, ext=None):
 				#clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_NCL 				# Non-Constant Luminance
 			else:
 				raise ValueError(f'ERROR: get_clip_specs: VID: unable to guess default _Matrix in PIC to replace MatrixCoefficients.MATRIX_UNSPECIFIED')
-			print(f'DEBUG: get_clip_specs: VID: MatrixCoefficients.MATRIX_UNSPECIFIED ({vs.MatrixCoefficients.MATRIX_UNSPECIFIED}) in VID, replacement _Matrix={new_Matrix}',flush=True)
+			#print(f'DEBUG: get_clip_specs: VID: MatrixCoefficients.MATRIX_UNSPECIFIED ({vs.MatrixCoefficients.MATRIX_UNSPECIFIED}) in VID, replacement _Matrix={clip_specs["proposed_Matrix"]}',flush=True)
 		else:
 			raise ValueError(f'ERROR: get_clip_specs: VID: ext "{ext}" not recognised in VID to replace MatrixCoefficients.MATRIX_UNSPECIFIED')
-	#
+	
+	# **********
+	# if not already specified, guess new _Primaries
+	# explainer https://docs.rs/av-data/0.4.1/av_data/pixel/index.html https://docs.rs/av-data/0.4.1/av_data/pixel/enum.ColorPrimaries.html
 	clip_specs["guessed_Primaries"] = False
 	clip_specs["proposed_Primaries"] = clip_specs["_Primaries"]
-
+	if  clip_specs["_Primaries"] == vs.ColorPrimaries.PRIMARIES_UNSPECIFIED:
+		#print(f'DEBUG: get_clip_specs: ColorPrimaries.PRIMARIES_UNSPECIFIED: incoming clip_specs=\n{objPrettyPrint.pformat(clip_specs)}',flush=True)
+		clip_specs["guessed_Primaries"] = True
+		if clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_ST170_M:
+			clip_specs["proposed_Primaries"] = vs.ColorPrimaries.PRIMARIES_ST170_M
+		elif clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_BT470_BG:
+			clip_specs["proposed_Primaries"] = vs.ColorPrimaries.PRIMARIES_BT470_BG
+		elif clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_BT709:
+			clip_specs["proposed_Primaries"] = vs.ColorPrimaries.PRIMARIES_BT709
+		elif clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_BT2020_CL:
+			clip_specs["proposed_Primaries"] = vs.ColorPrimaries.PRIMARIES_BT2020
+		else:
+			raise ValueError(f'ERROR: get_clip_specs: unable to guess default _Primaries to replace ColorPrimaries.PRIMARIES_UNSPECIFIED')
+		#print(f'DEBUG: get_clip_specs: ColorPrimaries.PRIMARIES_UNSPECIFIED ({vs.ColorPrimaries.PRIMARIES_UNSPECIFIED}), replacement _Primaries={clip_specs["proposed_Primaries"]}',flush=True)
+		
+	# **********
+	# if not already specified, guess new _Transfer
+	# explainer https://docs.rs/av-data/0.4.1/av_data/pixel/index.html https://docs.rs/av-data/0.4.1/av_data/pixel/enum.TransferCharacteristic.html
 	clip_specs["guessed_Transfer"] = False
 	clip_specs["proposed_Transfer"] = clip_specs["_Transfer"]
-
+	if  clip_specs["_Transfer"] == vs.TransferCharacteristics.TRANSFER_UNSPECIFIED:
+		#print(f'DEBUG: get_clip_specs: ColorPrimaries.PRIMARIES_UNSPECIFIED: incoming clip_specs=\n{objPrettyPrint.pformat(clip_specs)}',flush=True)
+		clip_specs["guessed_Transfer"] = True
+		if clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_ST170_M:
+			clip_specs["proposed_Transfer"] = TransferCharacteristics.TRANSFER_BT601
+		elif clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_BT470_BG:
+			clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT470_BG
+		elif clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_BT709:
+			clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT709
+		elif clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_BT2020_CL:
+			if clip_specs["bits_per_sample"] == 10:
+				clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT2020_10
+			elif clip_specs["bits_per_sample"] == 12:
+				clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT2020_12
+			else:
+				raise ValueError(f'ERROR: get_clip_specs: unable to guess {clip_specs["bits_per_sample"]}-bit default _Transfer to replace TransferCharacteristics.TRANSFER_UNSPECIFIED')
+		else:
+			raise ValueError(f'ERROR: get_clip_specs: unable to guess default _Transfer to replace TransferCharacteristics.TRANSFER_UNSPECIFIED')
+		#print(f'DEBUG: get_clip_specs: TransferCharacteristics.TRANSFER_UNSPECIFIED ({vs.TransferCharacteristics.TRANSFER_UNSPECIFIED}), replacement _Transfer={clip_specs["proposed_Transfer"]}',flush=True)
+	
+	# **********
+	# if not already specified, guess new _ColorRange
+	# explainer https://docs.rs/av-data/0.4.1/av_data/pixel/index.html https://docs.rs/av-data/0.4.1/av_data/pixel/enum.YUVRange.html
 	clip_specs["guessed_ColorRange"] = False
 	clip_specs["proposed_ColorRange"] = clip_specs["_ColorRange"]
+	#clip_specs["proposed_ColorRange"] = vs.ColorRange.RANGE_FULL
 
-
-
-
-	'''
-
-	new_Transfer = clip_specs["_Transfer"] 
-	updated_Transfer = False
-	if  clip_specs["_Transfer"] == vs.TransferCharacteristics.TRANSFER_UNSPECIFIED:
-		
-		#### nope needs checking
-		updated_Transfer = True
-		if new_Matrix == vs.MatrixCoefficients.MATRIX_BT470_BG:
-			new_Transfer = vs.TransferCharacteristics.TRANSFER_BT470_BG
-
-		elif new_Matrix == vs.MatrixCoefficients.MATRIX_BT709:
-			new_Transfer = vs.TransferCharacteristics.TRANSFER_BT709
-
-		elif new_Matrix == vs.MatrixCoefficients.MATRIX_BT2020_NCL:
-			new_Transfer = vs.TransferCharacteristics.TRANSFER_BT2020_10 #???????
-
-		elif new_Matrix == vs.MatrixCoefficients.MATRIX_BT2020_CL:
-			new_Transfer = vs.TransferCharacteristics.TRANSFER_BT2020_12 #???????
-
-		elif new_Matrix == vs.MatrixCoefficients.MATRIX_RGB
-		elif new_Matrix == vs.MatrixCoefficients.MATRIX_FCC
-		elif new_Matrix == vs.MatrixCoefficients.MATRIX_ST170_M
-		elif new_Matrix == vs.MatrixCoefficients.MATRIX_YCGCO
-		elif new_Matrix == vs.MatrixCoefficients.MATRIX_CHROMATICITY_DERIVED_NCL
-		elif new_Matrix == vs.MatrixCoefficients.MATRIX_CHROMATICITY_DERIVED_CL
-		elif new_Matrix == vs.MatrixCoefficients.MATRIX_ICTCP
-		elif new_Matrix == vs.MatrixCoefficients.MATRIX_UNSPECIFIED
-		else:
-			raise ValueError(f'ERROR: get_clip: invalid MatrixCoefficients detected  whilst fixing unspecified _Transfer. _Matrix="{new_Matrix}"')
-
-	??? check viewfunc to see if it does something like this
-
-	DEBUG: get_clip_specs: vs.MatrixCoefficients ENUM: MatrixCoefficients.MATRIX_RGB = 0
-	DEBUG: get_clip_specs: vs.MatrixCoefficients ENUM: MatrixCoefficients.MATRIX_BT709 = 1
-	DEBUG: get_clip_specs: vs.MatrixCoefficients ENUM: MatrixCoefficients.MATRIX_UNSPECIFIED = 2
-	DEBUG: get_clip_specs: vs.MatrixCoefficients ENUM: MatrixCoefficients.MATRIX_FCC = 4
-	DEBUG: get_clip_specs: vs.MatrixCoefficients ENUM: MatrixCoefficients.MATRIX_BT470_BG = 5
-	DEBUG: get_clip_specs: vs.MatrixCoefficients ENUM: MatrixCoefficients.MATRIX_ST170_M = 6
-	DEBUG: get_clip_specs: vs.MatrixCoefficients ENUM: MatrixCoefficients.MATRIX_YCGCO = 8
-	DEBUG: get_clip_specs: vs.MatrixCoefficients ENUM: MatrixCoefficients.MATRIX_BT2020_NCL = 9
-	DEBUG: get_clip_specs: vs.MatrixCoefficients ENUM: MatrixCoefficients.MATRIX_BT2020_CL = 10
-	DEBUG: get_clip_specs: vs.MatrixCoefficients ENUM: MatrixCoefficients.MATRIX_CHROMATICITY_DERIVED_NCL = 12
-	DEBUG: get_clip_specs: vs.MatrixCoefficients ENUM: MatrixCoefficients.MATRIX_CHROMATICITY_DERIVED_CL = 13
-	DEBUG: get_clip_specs: vs.MatrixCoefficients ENUM: MatrixCoefficients.MATRIX_ICTCP = 14
-
-	DEBUG: get_clip_specs: vs.TransferCharacteristics ENUM: TransferCharacteristics.TRANSFER_BT709 = 1
-	DEBUG: get_clip_specs: vs.TransferCharacteristics ENUM: TransferCharacteristics.TRANSFER_UNSPECIFIED = 2
-	DEBUG: get_clip_specs: vs.TransferCharacteristics ENUM: TransferCharacteristics.TRANSFER_BT470_M = 4
-	DEBUG: get_clip_specs: vs.TransferCharacteristics ENUM: TransferCharacteristics.TRANSFER_BT470_BG = 5
-	DEBUG: get_clip_specs: vs.TransferCharacteristics ENUM: TransferCharacteristics.TRANSFER_BT601 = 6
-	DEBUG: get_clip_specs: vs.TransferCharacteristics ENUM: TransferCharacteristics.TRANSFER_ST240_M = 7
-	DEBUG: get_clip_specs: vs.TransferCharacteristics ENUM: TransferCharacteristics.TRANSFER_LINEAR = 8
-	DEBUG: get_clip_specs: vs.TransferCharacteristics ENUM: TransferCharacteristics.TRANSFER_LOG_100 = 9
-	DEBUG: get_clip_specs: vs.TransferCharacteristics ENUM: TransferCharacteristics.TRANSFER_LOG_316 = 10
-	DEBUG: get_clip_specs: vs.TransferCharacteristics ENUM: TransferCharacteristics.TRANSFER_IEC_61966_2_4 = 11
-	DEBUG: get_clip_specs: vs.TransferCharacteristics ENUM: TransferCharacteristics.TRANSFER_IEC_61966_2_1 = 13
-	DEBUG: get_clip_specs: vs.TransferCharacteristics ENUM: TransferCharacteristics.TRANSFER_BT2020_10 = 14
-	DEBUG: get_clip_specs: vs.TransferCharacteristics ENUM: TransferCharacteristics.TRANSFER_BT2020_12 = 15
-	DEBUG: get_clip_specs: vs.TransferCharacteristics ENUM: TransferCharacteristics.TRANSFER_ST2084 = 16
-	DEBUG: get_clip_specs: vs.TransferCharacteristics ENUM: TransferCharacteristics.TRANSFER_ARIB_B67 = 18
-
-	DEBUG: get_clip_specs: vs.ColorPrimaries ENUM: ColorPrimaries.PRIMARIES_BT709 = 1
-	DEBUG: get_clip_specs: vs.ColorPrimaries ENUM: ColorPrimaries.PRIMARIES_UNSPECIFIED = 2
-	DEBUG: get_clip_specs: vs.ColorPrimaries ENUM: ColorPrimaries.PRIMARIES_BT470_M = 4
-	DEBUG: get_clip_specs: vs.ColorPrimaries ENUM: ColorPrimaries.PRIMARIES_BT470_BG = 5
-	DEBUG: get_clip_specs: vs.ColorPrimaries ENUM: ColorPrimaries.PRIMARIES_ST170_M = 6
-	DEBUG: get_clip_specs: vs.ColorPrimaries ENUM: ColorPrimaries.PRIMARIES_ST240_M = 7
-	DEBUG: get_clip_specs: vs.ColorPrimaries ENUM: ColorPrimaries.PRIMARIES_FILM = 8
-	DEBUG: get_clip_specs: vs.ColorPrimaries ENUM: ColorPrimaries.PRIMARIES_BT2020 = 9
-	DEBUG: get_clip_specs: vs.ColorPrimaries ENUM: ColorPrimaries.PRIMARIES_ST428 = 10
-	DEBUG: get_clip_specs: vs.ColorPrimaries ENUM: ColorPrimaries.PRIMARIES_ST431_2 = 11
-	DEBUG: get_clip_specs: vs.ColorPrimaries ENUM: ColorPrimaries.PRIMARIES_ST432_1 = 12
-	DEBUG: get_clip_specs: vs.ColorPrimaries ENUM: ColorPrimaries.PRIMARIES_EBU3213_E = 22
-
-	DEBUG: get_clip_specs: vs.ColorRange ENUM: ColorRange.RANGE_FULL = 0
-	DEBUG: get_clip_specs: vs.ColorRange ENUM: ColorRange.RANGE_LIMITED = 1
-
-
-	
-	new_Primaries = clip_specs["_Primaries"] 
-	updated_Primaries
-	if  clip_specs["_Primaries"] == vs.ColorPrimaries.PRIMARIES_UNSPECIFIED
-		updated_Primaries = True
-		new_Transfer = vs.ColorPrimaries.
-	
-	#if not known, guess at bt470_bg (rec.601)
-	#if matrixcoefficients = matrixcoefficients.matrix_unspecified
-	#	matrixcoefficients = matrixcoefficients.matrix_bt470_bg
-	#it is a fair bet that if INCOMING prop matrixcoefficients.matrix_bt470_bg then 
-	#	if colorprimaries  = colorprimaries.primaries_unspecified
-	#		colorprimaries = colorprimaries.primaries_bt470_bg
-	#	if transfercharacteristics  = transfercharacteristics.transfer_unspecified
-	#		transfercharacteristics = transfercharacteristics.transfer_bt470_bg
-		
-	##clip = core.std.SetFrameProps(clip, _Matrix=1)
-	##clip = clip if not core.text.FrameProps(clip,'_Transfer') else core.std.SetFrameProps(clip, _Transfer=1)
-	##clip = clip if not core.text.FrameProps(clip,'_Primaries') else core.std.SetFrameProps(clip, _Primaries=1)
-	##clip = core.std.SetFrameProp(clip, prop="_ColorRange", intval=1)
-	#clip = core.std.SetFrameProps(clip, _Matrix=1)
-	#clip = core.std.SetFrameProps(clip, _Transfer=1)
-	#clip = core.std.SetFrameProps(clip, _Primaries=1)
-	#clip = core.std.SetFrameProps(clip, _ColorRange=1)
-	#print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
-	
-	#### https://forum.selur.net/thread-2597.html set frame properties
-	#### ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	#
-	'''
-
-
-	#if clip_specs["_Matrix"] != vs.MatrixCoefficients.MATRIX_BT470_BG:
-	#	print(f'DEBUG: get_clip_specs: clip_specs=\n{objPrettyPrint.pformat(clip_specs)}',flush=True)
-	print(f'DEBUG: get_clip_specs: clip_specs=\n{objPrettyPrint.pformat(clip_specs)}',flush=True)
+	#print(f'DEBUG: get_clip_specs: clip_specs=\n{objPrettyPrint.pformat(clip_specs)}',flush=True)
 	return clip_specs
 
 ###
@@ -663,30 +591,31 @@ def get_clip(path):
 	#
 	#++++++++++++++++++++
 	if clip_specs["guessed_Matrix"]:
-		print(f'DEBUG: get_clip: SetFrameProps _Matrix from existing "{clip_specs["_Matrix"]}" to guessed "{clip_specs["proposed_Matrix"]}"',flush=True)
+		#print(f'DEBUG: get_clip: SetFrameProps _Matrix from existing "{clip_specs["_Matrix"]}" to guessed "{clip_specs["proposed_Matrix"]}"',flush=True)
 		clip = core.std.SetFrameProps(clip, _Matrix=clip_specs["proposed_Matrix"])
 	if clip_specs["guessed_Primaries"]:
-		print(f'DEBUG: get_clip: SetFrameProps _Primaries from existing "{clip_specs["_Primaries"]}" to guessed "{clip_specs["proposed_Primaries"]}"',flush=True)
+		#print(f'DEBUG: get_clip: SetFrameProps _Primaries from existing "{clip_specs["_Primaries"]}" to guessed "{clip_specs["proposed_Primaries"]}"',flush=True)
 		clip = core.std.SetFrameProps(clip, _Primaries=clip_specs["proposed_Primaries"])
 	if clip_specs["guessed_Transfer"]:
-		print(f'DEBUG: get_clip: SetFrameProps _Transfer from existing "{clip_specs["_Transfer"]}" to guessed "{clip_specs["proposed_Transfer"]}"',flush=True)
+		#print(f'DEBUG: get_clip: SetFrameProps _Transfer from existing "{clip_specs["_Transfer"]}" to guessed "{clip_specs["proposed_Transfer"]}"',flush=True)
 		clip = core.std.SetFrameProps(clip, _Transfer=clip_specs["proposed_Transfer"])
 	if clip_specs["guessed_ColorRange"]:
-		print(f'DEBUG: get_clip: SetFrameProps _ColorRange from existing "{clip_specs["_ColorRange"]}" to guessed "{clip_specs["proposed_ColorRange"]}"',flush=True)
+		#print(f'DEBUG: get_clip: SetFrameProps _ColorRange from existing "{clip_specs["_ColorRange"]}" to guessed "{clip_specs["proposed_ColorRange"]}"',flush=True)
 		clip = core.std.SetFrameProps(clip, _Transfer=clip_specs["proposed_Transfer"])
+	#
 	#++++++++++++++++++++
 	# Apply an auto-rotate if specified in the source file (perhaps in an image, some do, if at all)
 	if clip_specs["auto_rotation_degrees"] == 0:
 		#print(f'DEBUG: get_clip: zero auto-rotation of clip {path}',flush=True)
 		pass
 	elif clip_specs["auto_rotation_degrees"] == 90:
-		print(f'DEBUG: get_clip: auto-Rotating by 90 degrees {path}',flush=True)
+		#print(f'DEBUG: get_clip: auto-Rotating by 90 degrees {path}',flush=True)
 		clip = clip.std.Transpose().std.FlipVertical()
 	elif clip_specs["auto_rotation_degrees"] == 180:
-		print(f'DEBUG: get_clip: auto-Rotating by 180 degrees {path}',flush=True)
+		#print(f'DEBUG: get_clip: auto-Rotating by 180 degrees {path}',flush=True)
 		clip = clip.std.Turn180()
 	elif clip_specs["auto_rotation_degrees"] == 270:
-		print(f'DEBUG: get_clip: auto-Rotating by 270 degrees {path}',flush=True)
+		#print(f'DEBUG: get_clip: auto-Rotating by 270 degrees {path}',flush=True)
 		clip = clip.std.Transpose().std.FlipHorizontal()
 	else:
 		raise ValueError('ERROR: get_clip: auto_rotation_degrees "{clip_specs["auto_rotation_degrees"]}" unable to be processed for "{path}" : only 0,90,180,270 are valid')
