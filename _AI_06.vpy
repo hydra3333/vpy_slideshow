@@ -465,11 +465,17 @@ def get_clip_specs(clip=None, path=None, ext=None):
 				elif clip_specs["width"]  <= 1920 and clip_specs["height"] <= 1088:				# Likely PAL HD
 					clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT709
 				elif clip_specs["width"]  <= 3840 and clip_specs["height"] <= 2160:				# Likely UHD
-					clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_CL					#     Constant Luminance
-					#clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_NCL				# Non-Constant Luminance
+					# https://www.benq.com/en-us/knowledge-center/knowledge/bt2020.html
+					# HDR is defined by contrast/brightness enhancements which are not explicitly outlined in BT.2020’s package of specifications
+					# To address this gap, the ITU in 2016 released its newest recommendations, BT.2100, to include HDR in its specifications, essentially making BT.2100 just BT.2020 plus HDR
+					#clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_CL					#     Constant Luminance
+					clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_NCL				# Non-Constant Luminance
 				elif clip_specs["width"]  <= 7680 and clip_specs["height"] <= 4320:				# Likely 8K
-					clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_CL					#     Constant Luminance
-					#clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_NCL 				# Non-Constant Luminance
+					# https://www.benq.com/en-us/knowledge-center/knowledge/bt2020.html
+					# HDR is defined by contrast/brightness enhancements which are not explicitly outlined in BT.2020’s package of specifications
+					# To address this gap, the ITU in 2016 released its newest recommendations, BT.2100, to include HDR in its specifications, essentially making BT.2100 just BT.2020 plus HDR
+					#clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_CL					#     Constant Luminance
+					clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_NCL 				# Non-Constant Luminance
 				else:
 					raise ValueError(f'ERROR: get_clip_specs: PIC: unable to guess default _Matrix in PIC to replace MatrixCoefficients.MATRIX_UNSPECIFIED')
 				#print(f'DEBUG: get_clip_specs: PIC: MatrixCoefficients.MATRIX_UNSPECIFIED ({vs.MatrixCoefficients.MATRIX_UNSPECIFIED}) in PIC, opened by non-ffms2, replacement _Matrix={clip_specs["proposed_Matrix"]}',flush=True)
@@ -486,9 +492,15 @@ def get_clip_specs(clip=None, path=None, ext=None):
 			elif clip_specs["width"]  <= 1920 and clip_specs["height"] <= 1088:				# Likely PAL HD
 				clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT709						# HD
 			elif clip_specs["width"]  <= 3840 and clip_specs["height"] <= 2160:				# Likely UHD
+				# https://www.benq.com/en-us/knowledge-center/knowledge/bt2020.html
+				# HDR is defined by contrast/brightness enhancements which are not explicitly outlined in BT.2020’s package of specifications
+				# To address this gap, the ITU in 2016 released its newest recommendations, BT.2100, to include HDR in its specifications, essentially making BT.2100 just BT.2020 plus HDR
 				clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_CL					#     Constant Luminance
 				#clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_NCL				# Non-Constant Luminance
 			elif clip_specs["width"]  <= 7680 and clip_specs["height"] <= 4320:				# Likely 8K
+				# https://www.benq.com/en-us/knowledge-center/knowledge/bt2020.html
+				# HDR is defined by contrast/brightness enhancements which are not explicitly outlined in BT.2020’s package of specifications
+				# To address this gap, the ITU in 2016 released its newest recommendations, BT.2100, to include HDR in its specifications, essentially making BT.2100 just BT.2020 plus HDR
 				clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_CL					#     Constant Luminance
 				#clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_NCL 				# Non-Constant Luminance
 			else:
@@ -511,7 +523,7 @@ def get_clip_specs(clip=None, path=None, ext=None):
 			clip_specs["proposed_Primaries"] = vs.ColorPrimaries.PRIMARIES_BT470_BG
 		elif clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_BT709:
 			clip_specs["proposed_Primaries"] = vs.ColorPrimaries.PRIMARIES_BT709
-		elif clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_BT2020_CL:
+		elif clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_BT2020_CL or clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_BT2020_NCL:
 			clip_specs["proposed_Primaries"] = vs.ColorPrimaries.PRIMARIES_BT2020
 		else:
 			raise ValueError(f'ERROR: get_clip_specs: unable to guess default _Primaries to replace ColorPrimaries.PRIMARIES_UNSPECIFIED')
@@ -531,10 +543,16 @@ def get_clip_specs(clip=None, path=None, ext=None):
 			clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT470_BG
 		elif clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_BT709:
 			clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT709
-		elif clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_BT2020_CL:
+		elif clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_BT2020_CL or clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_BT2020_NCL:
 			if clip_specs["bits_per_sample"] == 10:
+				# https://www.benq.com/en-us/knowledge-center/knowledge/bt2020.html
+				# HDR is defined by contrast/brightness enhancements which are not explicitly outlined in BT.2020’s package of specifications
+				# To address this gap, the ITU in 2016 released its newest recommendations, BT.2100, to include HDR in its specifications, essentially making BT.2100 just BT.2020 plus HDR
 				clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT2020_10
 			elif clip_specs["bits_per_sample"] == 12:
+				# https://www.benq.com/en-us/knowledge-center/knowledge/bt2020.html
+				# HDR is defined by contrast/brightness enhancements which are not explicitly outlined in BT.2020’s package of specifications
+				# To address this gap, the ITU in 2016 released its newest recommendations, BT.2100, to include HDR in its specifications, essentially making BT.2100 just BT.2020 plus HDR
 				clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT2020_12
 			else:
 				raise ValueError(f'ERROR: get_clip_specs: unable to guess {clip_specs["bits_per_sample"]}-bit default _Transfer to replace TransferCharacteristics.TRANSFER_UNSPECIFIED')
