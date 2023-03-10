@@ -393,7 +393,7 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	#print(f'DEBUG: get_clip_specs: clip.format.subsampling_w={clip.format.subsampling_w}',flush=True)
 	#print(f'DEBUG: get_clip_specs: clip.format.subsampling_h={clip.format.subsampling_h}',flush=True)
 	#with clip.get_frame(0) as f:
-	#	print(f'DEBUG: get_clip_specs: incoming frame properties before resize=\n{f.props}',flush=True)
+	#	print(f'DEBUG: get_clip_specs: incoming frame properties =\n{f.props}',flush=True)
 	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_Matrix"] = {f.props["_Matrix"]}',flush=True)
 	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_Transfer"] = {f.props["_Transfer"]}',flush=True)
 	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_Primaries"] = {f.props["_Primaries"]}',flush=True)
@@ -419,15 +419,15 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	clip_specs["subsampling_w"] = clip.format.subsampling_w
 	clip_specs["subsampling_h"] = clip.format.subsampling_h
 	with clip.get_frame(0) as f:
-		clip_specs["_Matrix"] = f.props["_Matrix"]
-		clip_specs["_Transfer"] = f.props["_Transfer"]
-		clip_specs["_Primaries"] = f.props["_Primaries"]
-		clip_specs["_ColorRange"] = f.props["_ColorRange"]
-		clip_specs["_ChromaLocation"] = f.props["_ChromaLocation"]
-		clip_specs["_DurationDen"] = f.props["_DurationDen"]
-		clip_specs["_DurationNum"] = f.props["_DurationNum"]
-		clip_specs["_FieldBased"] = f.props["_FieldBased"]
-		clip_specs["_PictType"] = f.props["_PictType"]
+		clip_specs["_Matrix"] = f.props["_Matrix"] if "_Matrix" in f.props else None
+		clip_specs["_Transfer"] = f.props["_Transfer"] if "_Transfer" in f.props else None
+		clip_specs["_Primaries"] = f.props["_Primaries"] if "_Primaries" in f.props else None
+		clip_specs["_ColorRange"] = f.props["_ColorRange"] if "_ColorRange" in f.props else None
+		clip_specs["_ChromaLocation"] = f.props["_ChromaLocation"] if  "_ChromaLocation" in f.props else None
+		clip_specs["_DurationDen"] = f.props["_DurationDen"] if "_DurationDen" in f.props else None
+		clip_specs["_DurationNum"] = f.props["_DurationNum"] if "_DurationNum" in f.props else None
+		clip_specs["_FieldBased"] = f.props["_FieldBased"] if "_FieldBased" in f.props else None
+		clip_specs["_PictType"] = f.props["_PictType"] if "_PictType" in f.props else None
 	# check for picture/video rotation specified perhaps in EXIF but not auto-processed here by the file openers
 	if ext in calc_ini['VID_EEK_EXTENSIONS']:
 		rotation_value = auto_rotation_value_MediaInfo(clip, path)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
@@ -591,16 +591,16 @@ def get_clip(path):
 	#
 	#++++++++++++++++++++
 	if clip_specs["guessed_Matrix"]:
-		#print(f'DEBUG: get_clip: SetFrameProps _Matrix from existing "{clip_specs["_Matrix"]}" to guessed "{clip_specs["proposed_Matrix"]}"',flush=True)
+		print(f'DEBUG: get_clip: SetFrameProps _Matrix from existing "{clip_specs["_Matrix"]}" to guessed "{clip_specs["proposed_Matrix"]}"',flush=True)
 		clip = core.std.SetFrameProps(clip, _Matrix=clip_specs["proposed_Matrix"])
 	if clip_specs["guessed_Primaries"]:
-		#print(f'DEBUG: get_clip: SetFrameProps _Primaries from existing "{clip_specs["_Primaries"]}" to guessed "{clip_specs["proposed_Primaries"]}"',flush=True)
+		print(f'DEBUG: get_clip: SetFrameProps _Primaries from existing "{clip_specs["_Primaries"]}" to guessed "{clip_specs["proposed_Primaries"]}"',flush=True)
 		clip = core.std.SetFrameProps(clip, _Primaries=clip_specs["proposed_Primaries"])
 	if clip_specs["guessed_Transfer"]:
-		#print(f'DEBUG: get_clip: SetFrameProps _Transfer from existing "{clip_specs["_Transfer"]}" to guessed "{clip_specs["proposed_Transfer"]}"',flush=True)
+		print(f'DEBUG: get_clip: SetFrameProps _Transfer from existing "{clip_specs["_Transfer"]}" to guessed "{clip_specs["proposed_Transfer"]}"',flush=True)
 		clip = core.std.SetFrameProps(clip, _Transfer=clip_specs["proposed_Transfer"])
 	if clip_specs["guessed_ColorRange"]:
-		#print(f'DEBUG: get_clip: SetFrameProps _ColorRange from existing "{clip_specs["_ColorRange"]}" to guessed "{clip_specs["proposed_ColorRange"]}"',flush=True)
+		print(f'DEBUG: get_clip: SetFrameProps _ColorRange from existing "{clip_specs["_ColorRange"]}" to guessed "{clip_specs["proposed_ColorRange"]}"',flush=True)
 		clip = core.std.SetFrameProps(clip, _Transfer=clip_specs["proposed_Transfer"])
 	#
 	#++++++++++++++++++++
@@ -621,21 +621,6 @@ def get_clip(path):
 		raise ValueError('ERROR: get_clip: auto_rotation_degrees "{clip_specs["auto_rotation_degrees"]}" unable to be processed for "{path}" : only 0,90,180,270 are valid')
 	#++++++++++++++++++++
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	# do video-specific or picture-specific changes
 	if path.suffix.lower()   in calc_ini['VID_EEK_EXTENSIONS']:	#if any sort of video, probably an old hand-held camera or phone, sometimes variable fps ...
 		#print(f'DEBUG: get_clip: opened Video: {path.name}',flush=True)
@@ -654,13 +639,13 @@ def get_clip(path):
 		# change framerate ? too hard for a small simple video sample, just "assume" target fps and ignore consequences of speed-up or slow-down or VFR
 		clip = clip.std.AssumeFPS(fpsnum=calc_ini['TARGET_FPSNUM'], fpsden=calc_ini['TARGET_FPSDEN'])
 		# if duration greater than out review maximum, clip it
-		if source_duration_frames>(MAX_DURATION_FRAMES-1):
-			clip = core.std.Trim(clip, first=0, last=(MAX_DURATION_FRAMES-1))
+		if source_duration_frames>(calc_ini['MAX_DURATION_FRAMES']-1):
+			clip = core.std.Trim(clip, first=0, last=(calc_ini['MAX_DURATION_FRAMES']-1))
 		# denoise ANY "small" dimension video clips, older videos likely to be noisy
 		if source_width<calc_ini['TARGET_WIDTH'] or source_height<calc_ini['TARGET_HEIGHT']:	 
 			#print(f'DEBUG: applying DGDenoise to small {source_width}x{source_height} video {path.name}',flush=True)
 			# clip must be YUV420P16 for DGDenoise etc
-			clip = clip.resize.Point(format=DG_PIXEL_FORMAT)		# convert to DG_PIXEL_FORMAT via resizer which does no resizing
+			clip = clip.resize.Point(format=calc_ini['DG_PIXEL_FORMAT'])		# convert to DG_PIXEL_FORMAT via resizer which does no resizing
 			#clip = core.avs.DGDenoise(clip, strength=0.06, cstrength=0.06)
 			clip = core.avs.DGDenoise(clip, strength=0.15, cstrength=0.15)
 			clip = clip.resize.Point(format=calc_ini['TARGET_PIXEL_FORMAT'])	# convert to calc_ini['TARGET_PIXEL_FORMAT'] via resizer which does no resizing
@@ -1055,7 +1040,7 @@ with open(ini_file_speciying_parameters, 'w') as configfile:
 print(f'INFO: Saved updated .ini "{ini_file_speciying_parameters}"',flush=True)
 # calculate some values and create a new updated calculated values dict
 calc_ini = ini_values[ini_section_name]
-calc_ini['PIC_EXTENSIONS']		= [".png", ".jpg", ".jpeg", ".gif", ".pdf"]								# always lower case
+calc_ini['PIC_EXTENSIONS']		= [".png", ".jpg", ".jpeg", ".gif"]								# always lower case
 calc_ini['VID_EXTENSIONS']		= [".mp4", ".mpeg4", ".mpg", ".mpeg", ".avi", ".mjpeg", ".3gp", ".mov"]	# always lower case
 calc_ini['EEK_EXTENSIONS']		= [".m2ts"]														# always lower case
 calc_ini['VID_EEK_EXTENSIONS']	= calc_ini['VID_EXTENSIONS'] + calc_ini['EEK_EXTENSIONS']
