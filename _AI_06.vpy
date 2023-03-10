@@ -468,12 +468,20 @@ def get_clip_specs(clip=None, path=None, ext=None):
 					# https://www.benq.com/en-us/knowledge-center/knowledge/bt2020.html
 					# HDR is defined by contrast/brightness enhancements which are not explicitly outlined in BT.2020’s package of specifications
 					# To address this gap, the ITU in 2016 released its newest recommendations, BT.2100, to include HDR in its specifications, essentially making BT.2100 just BT.2020 plus HDR
+					# https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-BT.2390-1-2016-PDF-E.pdf
+					# The constant luminance (CL) method specified in Recommendation ITU-R BT.2020 helps reduce Error propagation from chroma to luma channels 
+					# BUT THIS SOLUTION IS NOT BEING WIDELY ADOPTED 
+					# because the benefits are considered modest and entail some additional complexity
 					#clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_CL					#     Constant Luminance
 					clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_NCL				# Non-Constant Luminance
 				elif clip_specs["width"]  <= 7680 and clip_specs["height"] <= 4320:				# Likely 8K
 					# https://www.benq.com/en-us/knowledge-center/knowledge/bt2020.html
 					# HDR is defined by contrast/brightness enhancements which are not explicitly outlined in BT.2020’s package of specifications
 					# To address this gap, the ITU in 2016 released its newest recommendations, BT.2100, to include HDR in its specifications, essentially making BT.2100 just BT.2020 plus HDR
+					# https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-BT.2390-1-2016-PDF-E.pdf
+					# The constant luminance (CL) method specified in Recommendation ITU-R BT.2020 helps reduce Error propagation from chroma to luma channels 
+					# BUT THIS SOLUTION IS NOT BEING WIDELY ADOPTED 
+					# because the benefits are considered modest and entail some additional complexity
 					#clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_CL					#     Constant Luminance
 					clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_NCL 				# Non-Constant Luminance
 				else:
@@ -495,12 +503,20 @@ def get_clip_specs(clip=None, path=None, ext=None):
 				# https://www.benq.com/en-us/knowledge-center/knowledge/bt2020.html
 				# HDR is defined by contrast/brightness enhancements which are not explicitly outlined in BT.2020’s package of specifications
 				# To address this gap, the ITU in 2016 released its newest recommendations, BT.2100, to include HDR in its specifications, essentially making BT.2100 just BT.2020 plus HDR
+				# https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-BT.2390-1-2016-PDF-E.pdf
+				# The constant luminance (CL) method specified in Recommendation ITU-R BT.2020 helps reduce Error propagation from chroma to luma channels 
+				# BUT THIS SOLUTION IS NOT BEING WIDELY ADOPTED 
+				# because the benefits are considered modest and entail some additional complexity
 				clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_CL					#     Constant Luminance
 				#clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_NCL				# Non-Constant Luminance
 			elif clip_specs["width"]  <= 7680 and clip_specs["height"] <= 4320:				# Likely 8K
 				# https://www.benq.com/en-us/knowledge-center/knowledge/bt2020.html
 				# HDR is defined by contrast/brightness enhancements which are not explicitly outlined in BT.2020’s package of specifications
 				# To address this gap, the ITU in 2016 released its newest recommendations, BT.2100, to include HDR in its specifications, essentially making BT.2100 just BT.2020 plus HDR
+				# https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-BT.2390-1-2016-PDF-E.pdf
+				# The constant luminance (CL) method specified in Recommendation ITU-R BT.2020 helps reduce Error propagation from chroma to luma channels 
+				# BUT THIS SOLUTION IS NOT BEING WIDELY ADOPTED 
+				# because the benefits are considered modest and entail some additional complexity
 				clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_CL					#     Constant Luminance
 				#clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_NCL 				# Non-Constant Luminance
 			else:
@@ -548,11 +564,19 @@ def get_clip_specs(clip=None, path=None, ext=None):
 				# https://www.benq.com/en-us/knowledge-center/knowledge/bt2020.html
 				# HDR is defined by contrast/brightness enhancements which are not explicitly outlined in BT.2020’s package of specifications
 				# To address this gap, the ITU in 2016 released its newest recommendations, BT.2100, to include HDR in its specifications, essentially making BT.2100 just BT.2020 plus HDR
+				# https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-BT.2390-1-2016-PDF-E.pdf
+				# The constant luminance (CL) method specified in Recommendation ITU-R BT.2020 helps reduce Error propagation from chroma to luma channels 
+				# BUT THIS SOLUTION IS NOT BEING WIDELY ADOPTED 
+				# because the benefits are considered modest and entail some additional complexity
 				clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT2020_10
 			elif clip_specs["bits_per_sample"] == 12:
 				# https://www.benq.com/en-us/knowledge-center/knowledge/bt2020.html
 				# HDR is defined by contrast/brightness enhancements which are not explicitly outlined in BT.2020’s package of specifications
 				# To address this gap, the ITU in 2016 released its newest recommendations, BT.2100, to include HDR in its specifications, essentially making BT.2100 just BT.2020 plus HDR
+				# https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-BT.2390-1-2016-PDF-E.pdf
+				# The constant luminance (CL) method specified in Recommendation ITU-R BT.2020 helps reduce Error propagation from chroma to luma channels 
+				# BUT THIS SOLUTION IS NOT BEING WIDELY ADOPTED 
+				# because the benefits are considered modest and entail some additional complexity
 				clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT2020_12
 			else:
 				raise ValueError(f'ERROR: get_clip_specs: unable to guess {clip_specs["bits_per_sample"]}-bit default _Transfer to replace TransferCharacteristics.TRANSFER_UNSPECIFIED')
