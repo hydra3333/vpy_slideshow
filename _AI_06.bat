@@ -22,32 +22,67 @@ set bv_min=3000000
 set bv_max=15000000
 set bv_buf=15000000
 
+REM DEL "%ini_file%">NUL 2>&1
 IF NOT EXIST "%ini_file%" (
 	REM DEL "%ini_file%">NUL 2>&1
 	echo [slideshow]>>"%ini_file%"
 	echo directory = G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST>>"%ini_file%"
 	echo temp_directory = D:\TEMP>>"%ini_file%"
-	echo recursive = True>>"%ini_file%"
+	echo recursive = False>>"%ini_file%"
 	echo debug_mode = False>>"%ini_file%"
 	REM type "%ini_file%"
 )
 
 
-call :using_vspipe_input
+call :like_04
+PAUSE
+goto :eof 
+
+REM call :using_python_only
+REM goto :eof
+
+REM call :using_vspipe_input
+REM goto :eof
+
+REM call :using_vapoursynth_input
+REM goto :eof
+
+REM call :convert_to_dvd_mpg
+REM goto :eof
+
+pause
 goto :eof
 
-call :using_vapoursynth_input
+
+:like_04
+@ECHO ON
+@setlocal ENABLEDELAYEDEXPANSION
+@setlocal enableextensions
+set "fol_images=G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST"
+set "fol=.\_AI_folder_to_process.txt"
+DEL "%fol%"
+echo %fol_images%>"%fol%"
+TYPE "%fol%"
+
+set "mp4_file=G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\_AI_06.mp4"
+set  "script=G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\_AI_06.vpy"
+
+"C:\SOFTWARE\Vapoursynth-x64\ffmpeg_OpenCL.exe" -hide_banner -v verbose ^
+-f vapoursynth -i "%script%" -an ^
+-map 0:v:0 ^
+-vf "setdar=16/9" ^
+-fps_mode passthrough ^
+-sws_flags lanczos+accurate_rnd+full_chroma_int+full_chroma_inp ^
+-strict experimental ^
+-c:v h264_nvenc -pix_fmt nv12 -preset p7 -multipass fullres -forced-idr 1 -g 25 ^
+-coder:v cabac -spatial-aq 1 -temporal-aq 1 ^
+-dpb_size 0 -bf:v 3 -b_ref_mode:v 0 ^
+-rc:v vbr -cq:v 0 -b:v 3500000 -minrate:v 100000 -maxrate:v 9000000 -bufsize 9000000 ^
+-profile:v high -level 5.2 ^
+-movflags +faststart+write_colr ^
+-y "%mp4_file%"
+
 goto :eof
-
-call :using_python_only
-goto :eof
-
-call :convert_to_dvd_mpg
-goto :eof
-
-goto :eof
-
-
 
 :using_python_only
 @ECHO ON
@@ -101,10 +136,16 @@ goto :eof
 @setlocal ENABLEDELAYEDEXPANSION
 @setlocal enableextensions
 REM +++ try a run using a CMD and vspipe
-REM pushd "%vs_path%"
-REM cd
+
+echo pushd "%vs_path%">.\vspipe.txt
+echo cd>>.\vspipe.txt
+
+pushd "%vs_path%"
+cd
 
 type "%ini_file%"
+
+pause
 
 REM nvenc parameters suitable for an nvidia 2060Super and will fail on a lesser card eg 1050Ti, eg bf:v 3 -spatial-aq 1 -temporal-aq 1
 REM the script *should* have converted everythng to bt.709
@@ -112,6 +153,12 @@ REM cannot put pipe symbol where I need it, so separate the commands and use the
 set "cmd1="
 set "cmd1=%cmd1%"%vs_path%VSPipe.exe" --container y4m "%script%" - "
 REM set "cmd1=%cmd1%"C:\SOFTWARE\Vapoursynth-x64\VSPipe.exe" --progress --filter-time --container y4m "%script%" - "
+
+echo %cmd1%
+echo %cmd1%>>.\vspipe.txt
+
+pause
+
 set "cmd2="
 set "cmd2=%cmd2%"%vs_path%ffmpeg_OpenCL.exe" -hide_banner -v verbose -stats "
 set "cmd2=%cmd2%-f yuv4mpegpipe -i pipe: "
@@ -127,11 +174,24 @@ set "cmd2=%cmd2%-profile:v high -level 5.2 -movflags +faststart+write_colr "
 set "cmd2=%cmd2%-an "
 set "cmd2=%cmd2%-y "%mp4_file%" "
 
-echo %cmd1% "pipe" %cmd2%
-echo %cmd1% "pipe" %cmd2% > .\vspipe.txt
+echo %cmd2%
+echo %cmd2%>>.\vspipe.txt
+
+pause
+
+echo %cmd1% "pipe" %cmd2% >>.\vspipe.txt
+
+pause
 
 %cmd1% | %cmd2%
-REM popd
+
+pause
+
+echo popd>>.\vspipe.txt
+
+pause
+
+
 goto :eof
 
 
@@ -148,7 +208,7 @@ REM CONVERT TO DVD
 # 3900x with nvidia 2060 Super uses -spatial-aq 1 -temporal-aq 1 -dpb_size 0 -bf:v 3 -b_ref_mode:v 0 # otherwise omit these 5 parameters
 
 "C:\SOFTWARE\Vapoursynth-x64\ffmpeg_OpenCL.exe" -hide_banner -v verbose -stats ^
--f vapoursynth -i "!script!" ^
+-f vapoursynth -i "%script%" ^
 -probesize 200M ^
 -analyzeduration 200M ^
 -sws_flags lanczos+accurate_rnd+full_chroma_int+full_chroma_inp ^
