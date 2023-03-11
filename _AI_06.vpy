@@ -278,11 +278,24 @@ def boxing(clip, W, H):	# was def boxing(clip, W=TARGET_WIDTH, H=TARGET_HEIGHT):
 		else: return clip
 
 ###
-def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET_HEIGHT):
-	W = calc_ini["TARGET_WIDTH"]
-	H = calc_ini["TARGET_HEIGHT"]
-	if w>W or h>H:	resize = getattr(clip.resize, calc_ini["DOWNSIZE_KERNEL"])	# get the resize function object ?handle? with the nominated kernel
-	else:			resize = getattr(clip.resize, calc_ini["UPSIZE_KERNEL"])	# get the resize function object ?handle? with the nominated kernel
+def resize_clip(clip,w,h):
+	# ... removed W = calc_ini["TARGET_WIDTH"]	# not relevant here, this is the final target, not that oif the interim step before addborders
+	# ... removed H = calc_ini["TARGET_HEIGHT"]	# not relevant here, this is the final target, not that oif the interim step before addborders
+	# w = calculated interim target width  before addborders
+	# h = calculated interim target height before addborders
+	W = clip.width					# current clip width before resizing
+	H = clip.height					# current clip height before resizing
+	if w>=W or h>=H:	# the clip needs to be increased in size in at least one dimension, or is the same
+		resize = getattr(clip.resize, calc_ini["UPSIZE_KERNEL"])	# get the resize function object ?handle? with the nominated kernel
+		xyz = "UPSIZE_KERNEL"
+	else:			# the clip needs to be reduced in size in at least one dimension
+		resize = getattr(clip.resize, calc_ini["DOWNSIZE_KERNEL"])	# get the resize function object ?handle? with the nominated kernel
+		xyz = "DOWNSIZE_KERNEL"
+	
+	print_DEBUG(f'resize_clip: incoming clip w={clip.width}\th={clip.height}')
+	print_DEBUG(f'resize_clip:   func params w={w}\th={h}')
+	print_DEBUG(f'resize_clip: kernel to use {xyz}')
+	
 	
 	if clip.format.color_family==vs.RGB:
 		#rgb to YUV, perhaps only for png images, figure out what matrix out is needed ... use the HD one REC.709
@@ -292,12 +305,14 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
 		print_DEBUG(f'resize_clip: clip.format.color_family==vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB}')
 		with clip.get_frame(0) as f:
-			print_DEBUG(f'resize_clip: incoming frame properties after RGB resize={objPrettyPrint.pformat(f.props)}')
+			print_DEBUG(f'resize_clip: incoming frame properties before RGB resize: w={clip.width} h={clip.height} {objPrettyPrint.pformat(f.props)}')
 		print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, range={calc_ini["TARGET_COLOR_RANGE_I"]}, primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
-		#c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix_s=calc_ini["TARGET_COLORSPACE_MATRIX_S"])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
-		c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix=calc_ini["TARGET_COLORSPACE_MATRIX_I"], transfer=calc_ini["TARGET_COLOR_TRANSFER_I"], primaries=calc_ini["TARGET_COLOR_PRIMARIES_I"], range=calc_ini["TARGET_COLOR_RANGE_I"])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+		# https://www.vapoursynth.com/doc/functions/video/resize.html
+		# https://www.itu.int/rec/T-REC-H.265
+		#c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix_s=calc_ini["TARGET_COLORSPACE_MATRIX_S"])
+		c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix=calc_ini["TARGET_COLORSPACE_MATRIX_I"], transfer=calc_ini["TARGET_COLOR_TRANSFER_I"], primaries=calc_ini["TARGET_COLOR_PRIMARIES_I"], range=calc_ini["TARGET_COLOR_RANGE_I"])
 		with c.get_frame(0) as f:
-			print_DEBUG(f'resize_clip: outgoing frame properties after RGB resize={objPrettyPrint.pformat(f.props)}')
+			print_DEBUG(f'resize_clip: outgoing frame properties after RGB resize: w={c.width} h={c.height} {objPrettyPrint.pformat(f.props)}')
 		return c
 	elif clip.format.color_family==vs.YUV:
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
@@ -307,10 +322,12 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		
 		print_DEBUG(f'resize_clip: clip.format.color_family==vs.YUV: clip.format.color_family={clip.format.color_family} vs.YUV={vs.YUV}')
 		with clip.get_frame(0) as f:
-			print_DEBUG(f'resize_clip: incoming frame properties after RGB resize={objPrettyPrint.pformat(f.props)}')
+			print_DEBUG(f'resize_clip: incoming frame properties before YUV resize: w={clip.width} h={clip.height} {objPrettyPrint.pformat(f.props)}')
 		print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, range={calc_ini["TARGET_COLOR_RANGE_I"]}, primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
-		#c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix_s=calc_ini["TARGET_COLORSPACE_MATRIX_S"])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
-		c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix=calc_ini["TARGET_COLORSPACE_MATRIX_I"], transfer=calc_ini["TARGET_COLOR_TRANSFER_I"], primaries=calc_ini["TARGET_COLOR_PRIMARIES_I"], range=calc_ini["TARGET_COLOR_RANGE_I"])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+		# https://www.vapoursynth.com/doc/functions/video/resize.html
+		# https://www.itu.int/rec/T-REC-H.265
+		#c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix_s=calc_ini["TARGET_COLORSPACE_MATRIX_S"])
+		c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix=calc_ini["TARGET_COLORSPACE_MATRIX_I"], transfer=calc_ini["TARGET_COLOR_TRANSFER_I"], primaries=calc_ini["TARGET_COLOR_PRIMARIES_I"], range=calc_ini["TARGET_COLOR_RANGE_I"])	
 		# AH !!! the above line with matrix_s='709' can cause this error:
 		# If you get an error like:
 		# 		Resize error 3074: no path between colorspaces (2/2/2 => 1/1/1). May need to specify additional colorspace parameters.
@@ -318,7 +335,7 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		# *** and you have to specify the input colorspace parameters yourself. *** Note: 2 means “unspecified” according to the ITU-T recommendation.
 		#c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"])
 		with c.get_frame(0) as f:
-			print_DEBUG(f'resize_clip: outgoing frame properties after YUV resize={objPrettyPrint.pformat(f.props)}')
+			print_DEBUG(f'resize_clip: outgoing frame properties after YUV resize: w={c.width} h={c.height} {objPrettyPrint.pformat(f.props)}')
 		return c
 	else:
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
@@ -327,7 +344,7 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
 		print_DEBUG(f'resize_clip: non-vs.RGB,non-vs.YUV clip.format.color_family!=vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB} vs.YUV={vs.YUV}')
 		with clip.get_frame(0) as f:
-			print_DEBUG(f'resize_clip: incoming frame properties after RGB resize={objPrettyPrint.pformat(f.props)}')
+			print_DEBUG(f'resize_clip: incoming frame properties before non-vs.RGB,non-vs.YUV resize: w={clip.width} h={clip.height} {objPrettyPrint.pformat(f.props)}')
 		print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, range={calc_ini["TARGET_COLOR_RANGE_I"]}, primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
 		#c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix_s=calc_ini["TARGET_COLORSPACE_MATRIX_S"])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 		c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix=calc_ini["TARGET_COLORSPACE_MATRIX_I"], transfer=calc_ini["TARGET_COLOR_TRANSFER_I"], primaries=calc_ini["TARGET_COLOR_PRIMARIES_I"], range=calc_ini["TARGET_COLOR_RANGE_I"])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
@@ -338,7 +355,7 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		# *** and you have to specify the input colorspace parameters yourself. *** Note: 2 means “unspecified” according to the ITU-T recommendation.
 		#c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"])
 		with c.get_frame(0) as f:
-			print_DEBUG(f'resize_clip: outgoing frame properties after non-vs.RGB,non-vs.YUV resize={objPrettyPrint.pformat(f.props)}')
+			print_DEBUG(f'resize_clip: outgoing frame properties after non-vs.RGB,non-vs.YUV resize: w={c.width} h={c.height} {objPrettyPrint.pformat(f.props)}')
 		return c
 
 ###
@@ -1166,8 +1183,8 @@ if calc_ini["CROSSFADE_DURATION"]>0:
 	prior_clip_for_crossfade = crossfade_blank_clip
 #---
 while not (path is None):	# first clip already pre-retrieved ready for this while loop
-	print_DEBUG(f'****************************************************************************************************************************')
-	print_DEBUG(f'****************************************************************************************************************************')
+	print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
+	print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
 	Count_of_files = Count_of_files + 1
 	print(f'INFO: processing {Count_of_files} {str(path)}', flush=True)
 	#if (Count_of_files % 10)==0:
@@ -1188,8 +1205,8 @@ while not (path is None):	# first clip already pre-retrieved ready for this whil
 	else:
 		clips = clips + this_clip
 	path = get_path(paths)		# get next path to process in this while loop
-	print_DEBUG(f'****************************************************************************************************************************')
-	print_DEBUG(f'****************************************************************************************************************************')
+	print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
+	print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
 #---
 # perhaps a finishing crossfade to black ?
 if calc_ini["CROSSFADE_DURATION"]>0:	
