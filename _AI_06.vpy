@@ -377,7 +377,7 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	#print(f'DEBUG: NOTE can use both: resize_clip: vs.ColorRange.RANGE_LIMITED.value = {vs.ColorRange.RANGE_LIMITED.value}',flush=True)
 	#print(f'DEBUG: NOTE can use both: resize_clip: vs.RANGE_LIMITED.value = {vs.RANGE_LIMITED.value}',flush=True)
 	#print(f'DEBUG: ----------------------------------------------------------------------',flush=True)
-	print(f'DEBUG: get_clip_specs: clip=\n{clip}',flush=True)
+	#print(f'DEBUG: get_clip_specs: clip=\n{clip}',flush=True)
 	## https://www.vapoursynth.com/doc/pythonreference.html
 	#print(f'DEBUG: get_clip_specs: clip.format=\n{clip.format}',flush=True)
 	#print(f'DEBUG: get_clip_specs: clip.width={clip.width}',flush=True)
@@ -392,8 +392,8 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	#print(f'DEBUG: get_clip_specs: clip.format.num_planes={clip.format.num_planes}',flush=True) # per https://www.vapoursynth.com/doc/pythonreference.html
 	#print(f'DEBUG: get_clip_specs: clip.format.subsampling_w={clip.format.subsampling_w}',flush=True)
 	#print(f'DEBUG: get_clip_specs: clip.format.subsampling_h={clip.format.subsampling_h}',flush=True)
-	with clip.get_frame(0) as f:
-		print(f'DEBUG: get_clip_specs: incoming frame properties =\n{f.props}',flush=True)
+	#with clip.get_frame(0) as f:
+	#	print(f'DEBUG: get_clip_specs: incoming frame properties =\n{f.props}',flush=True)
 	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_Matrix"] = {f.props["_Matrix"]}',flush=True)
 	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_Transfer"] = {f.props["_Transfer"]}',flush=True)
 	#	print(f'DEBUG: get_clip_specs: frame properties f.props["_Primaries"] = {f.props["_Primaries"]}',flush=True)
@@ -554,7 +554,7 @@ def get_clip_specs(clip=None, path=None, ext=None):
 		#print(f'DEBUG: get_clip_specs: ColorPrimaries.PRIMARIES_UNSPECIFIED: incoming clip_specs=\n{objPrettyPrint.pformat(clip_specs)}',flush=True)
 		clip_specs["guessed_Transfer"] = True
 		if clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_ST170_M:
-			clip_specs["proposed_Transfer"] = TransferCharacteristics.TRANSFER_BT601
+			clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT601
 		elif clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_BT470_BG:
 			clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT470_BG
 		elif clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_BT709:
@@ -590,6 +590,28 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	clip_specs["guessed_ColorRange"] = False
 	clip_specs["proposed_ColorRange"] = clip_specs["_ColorRange"]
 	#clip_specs["proposed_ColorRange"] = vs.ColorRange.RANGE_FULL
+
+	# **********
+	# guess at a possible incoming colour source
+	if   clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_BT470_BG:
+		clip_specs["possible_colour_source"] = "PAL".upper()
+	elif clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_ST170_M:
+		clip_specs["possible_colour_source"] = "NTSC".upper()
+	elif clip_specs["proposed_Transfer"] == vs.TransferCharacteristics.TRANSFER_BT470_BG:
+		clip_specs["possible_colour_source"] = "PAL".upper()
+	elif clip_specs["proposed_Transfer"] in [vs.TransferCharacteristics.TRANSFER_BT470_M, vs.TransferCharacteristics.TRANSFER_ST240_M]:
+		clip_specs["possible_colour_source"] = "NTSC".upper()
+	elif clip_specs["proposed_Primaries"] == vs.ColorPrimaries.PRIMARIES_BT470_BG:
+		clip_specs["possible_colour_source"] = "PAL".upper()
+	elif clip_specs["proposed_Primaries"] in [vs.ColorPrimaries.PRIMARIES_ST170_M, vs.ColorPrimaries.PRIMARIES_BT470_M, vs.ColorPrimaries.PRIMARIES_ST170_M, vs.ColorPrimaries.PRIMARIES_ST240_M]:
+		clip_specs["possible_colour_source"] = "PAL".upper()
+	# allow for incoming errors in fps, use ranges instead of values
+	elif (clip_specs["fps"] >=23.5 and clip_specs["fps"] <= 24.49) or (clip_specs["fps"] >=29 and clip_specs["fps"] <= 31):
+		clip_specs["possible_colour_source"] = "NTSC".upper()		# possibly NTSC although 30fps could still be PAL in phone cameras :(
+	elif (clip_specs["fps"] >=24.5 and clip_specs["fps"] <= 25.5):
+		clip_specs["possible_colour_source"] = "PAL".upper()
+	else:	# deault to PAL since, well, I'm in a PAL country
+		clip_specs["possible_colour_source"] = "PAL".upper()
 
 	#print(f'DEBUG: get_clip_specs: clip_specs=\n{objPrettyPrint.pformat(clip_specs)}',flush=True)
 	return clip_specs
@@ -637,16 +659,16 @@ def get_clip(path):
 	#
 	#++++++++++++++++++++
 	if clip_specs["guessed_Matrix"]:
-		print(f'DEBUG: get_clip: SetFrameProps _Matrix from existing "{clip_specs["_Matrix"]}" to guessed "{clip_specs["proposed_Matrix"]}"',flush=True)
+		#print(f'DEBUG: get_clip: SetFrameProps _Matrix from existing "{clip_specs["_Matrix"]}" to guessed "{clip_specs["proposed_Matrix"]}"',flush=True)
 		clip = core.std.SetFrameProps(clip, _Matrix=clip_specs["proposed_Matrix"])
 	if clip_specs["guessed_Primaries"]:
-		print(f'DEBUG: get_clip: SetFrameProps _Primaries from existing "{clip_specs["_Primaries"]}" to guessed "{clip_specs["proposed_Primaries"]}"',flush=True)
+		#print(f'DEBUG: get_clip: SetFrameProps _Primaries from existing "{clip_specs["_Primaries"]}" to guessed "{clip_specs["proposed_Primaries"]}"',flush=True)
 		clip = core.std.SetFrameProps(clip, _Primaries=clip_specs["proposed_Primaries"])
 	if clip_specs["guessed_Transfer"]:
-		print(f'DEBUG: get_clip: SetFrameProps _Transfer from existing "{clip_specs["_Transfer"]}" to guessed "{clip_specs["proposed_Transfer"]}"',flush=True)
+		#print(f'DEBUG: get_clip: SetFrameProps _Transfer from existing "{clip_specs["_Transfer"]}" to guessed "{clip_specs["proposed_Transfer"]}"',flush=True)
 		clip = core.std.SetFrameProps(clip, _Transfer=clip_specs["proposed_Transfer"])
 	if clip_specs["guessed_ColorRange"]:
-		print(f'DEBUG: get_clip: SetFrameProps _ColorRange from existing "{clip_specs["_ColorRange"]}" to guessed "{clip_specs["proposed_ColorRange"]}"',flush=True)
+		#print(f'DEBUG: get_clip: SetFrameProps _ColorRange from existing "{clip_specs["_ColorRange"]}" to guessed "{clip_specs["proposed_ColorRange"]}"',flush=True)
 		clip = core.std.SetFrameProps(clip, _Transfer=clip_specs["proposed_Transfer"])
 	#
 	#++++++++++++++++++++
@@ -1124,7 +1146,7 @@ if calc_ini['CROSSFADE_DURATION']>0:
 #---
 while not (path is None):	# first clip already pre-retrieved ready for this while loop
 	Count_of_files = Count_of_files + 1
-	print(f'\nDEBUG: processing {Count_of_files} {str(path)}',flush=True)
+	print(f'INFO: processing {Count_of_files} {str(path)}',flush=True)
 	#if (Count_of_files % 10)==0:
 	#	print(f'{Count_of_files},',end="",flush=True)
 	#	if (Count_of_files % (10*10*3))==0:
@@ -1153,7 +1175,7 @@ if calc_ini['CROSSFADE_DURATION']>0:
 clips = clips + blank_clip		# end the accumulated clips with a finishing small blank clip
 clips = clips.std.AssumeFPS(fpsnum=calc_ini['TARGET_FPSNUM'], fpsden=calc_ini['TARGET_FPSDEN'])
 print(f'',flush=True)
-print(f'INFO: Finished processing {Count_of_files} image/video files.',flush=True)
+print(f'INFO: Finished processing {Count_of_files} image/video files.\n',flush=True)
 # Cleanup any temporary .ffindex files created by ffms2
 print(f'DEBUG: Removing temporary *.ffindex files from folder "{calc_ini["DIRECTORY"]}" with recursive="{calc_ini["RECURSIVE"]}" ...',flush=True)
 pp = calc_ini['DIRECTORY'] + "/" + ff_glob_var
@@ -1163,7 +1185,7 @@ for ff in ffindex_files:
 	if ff.lower()[-len(calc_ini['DOT_FFINDEX']):] == calc_ini['DOT_FFINDEX']:	# double check the file really does have ext .ffindex
 		try:
 			Count_of_files_removed = Count_of_files_removed + 1
-			print(f'DEBUG: removing {Count_of_files_removed} {ff}',flush=True)
+			print(f'INFO: removing {Count_of_files_removed} {ff}',flush=True)
 			os.remove(ff)
 			#if (Count_of_files_removed % (10))==0:
 			#	print(f'{Count_of_files_removed},',end="",flush=True)
@@ -1172,7 +1194,7 @@ for ff in ffindex_files:
 		except OSError as ee:
 			print(f'Error: %s : %s' % (ff, ee.strerror),flush=True)
 print(f'',flush=True)
-print(f'INFO: Finished removing {Count_of_files_removed} .ffindex files.',flush=True)
+print(f'INFO: Finished removing {Count_of_files_removed} .ffindex files.\n',flush=True)
 # hmm, audio ? maybe later using source filter "bas" ?
 #print(f'DEBUG: Done.',flush=True)
 clips.set_output()
