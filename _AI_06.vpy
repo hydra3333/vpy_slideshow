@@ -700,13 +700,13 @@ def get_clip(path):
 		if source_duration_frames>(calc_ini["MAX_DURATION_FRAMES"]-1):
 			clip = core.std.Trim(clip, first=0, last=(calc_ini["MAX_DURATION_FRAMES"]-1))
 		# denoise ANY "small" dimension video clips, older videos likely to be noisy
-		if source_width<calc_ini["TARGET_WIDTH"] or source_height<calc_ini["TARGET_HEIGHT"]:	 
-			print_DEBUG(f'applying DGDenoise to small {source_width}x{source_height} video {path.name}')
-			# clip must be YUV420P16 for DGDenoise etc
-			clip = clip.resize.Point(format=calc_ini["DG_PIXEL_FORMAT"])		# convert to DG_PIXEL_FORMAT via resizer which does no resizing
-			#clip = core.avs.DGDenoise(clip, strength=0.06, cstrength=0.06)
-			clip = core.avs.DGDenoise(clip, strength=0.15, cstrength=0.15)
-			clip = clip.resize.Point(format=calc_ini["TARGET_PIXEL_FORMAT"])	# convert to calc_ini["TARGET_PIXEL_FORMAT"] via resizer which does no resizing
+		#if source_width<calc_ini["TARGET_WIDTH"] or source_height<calc_ini["TARGET_HEIGHT"]:	 
+		#	print_DEBUG(f'applying DGDenoise to small {source_width}x{source_height} video {path.name}')
+		#	# clip must be YUV420P16 for DGDenoise etc
+		#	clip = clip.resize.Point(format=calc_ini["DG_PIXEL_FORMAT"])		# convert to DG_PIXEL_FORMAT via resizer which does no resizing
+		#	#clip = core.avs.DGDenoise(clip, strength=0.06, cstrength=0.06)
+		#	clip = core.avs.DGDenoise(clip, strength=0.15, cstrength=0.15)
+		#	clip = clip.resize.Point(format=calc_ini["TARGET_PIXEL_FORMAT"])	# convert to calc_ini["TARGET_PIXEL_FORMAT"] via resizer which does no resizing
 	else: # source is not a video type, i.e. it must be an image (picture)
 		# extend duration of a clip of an image
 		clip = clip[0]*calc_ini["MIN_DURATION_FRAMES"] if len(clip)<calc_ini["MIN_DURATION_FRAMES"] else clip # make clip at least calc_ini["MIN_DURATION_FRAMES"] frames long if less than MIN_DURATION_FRAMES frames
