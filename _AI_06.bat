@@ -22,24 +22,29 @@ set bv_min=3000000
 set bv_max=15000000
 set bv_buf=15000000
 
+IF NOT EXIST "%ini_file%" (
+	REM DEL "%ini_file%">NUL 2>&1
+	echo [slideshow]>>"%ini_file%"
+	echo directory = G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST>>"%ini_file%"
+	echo temp_directory = D:\TEMP>>"%ini_file%"
+	echo recursive = True>>"%ini_file%"
+	echo debug_mode = False>>"%ini_file%"
+	REM type "%ini_file%"
+)
+
 call :using_python_only
-pause
 goto :eof
 
 call :using_vapoursynth_input
-pause
 goto :eof
 
 call :using_vspipe_input
-pause
 goto :eof
 
 
 call :convert_to_dvd_mpg
-pause
 goto :eof
 
-pause
 goto :eof
 
 
@@ -53,13 +58,7 @@ REM +++ just run python over it to see debug output
 REM pushd "%vs_path%"
 REM cd
 
-REM DEL "%ini_file%">NUL 2>&1
-REM echo [slideshow]>>"%ini_file%"
-REM echo directory = G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST>>"%ini_file%"
-REM echo temp_directory = D:\TEMP>>"%ini_file%"
-REM echo recursive = True>>"%ini_file%"
-REM echo demug_mode = False>>"%ini_file%"
-REM type "%ini_file%"
+type "%ini_file%"
 
 REM the script *should* have converted everythng to bt.709
 "%vs_path%python.exe" "%script%"
@@ -75,12 +74,9 @@ goto :eof
 REM +++ try a raw run with vapoursynth input
 REM pushd "%vs_path%"
 REM cd
-DEL "%ini_file%">NUL 2>&1
-echo [slideshow]>>"%ini_file%"
-echo directory = G:\DVD\PAT-SLIDESHOWS\_AI_06_in_development\0TEST>>"%ini_file%"
-echo temp_directory = D:\TEMP>>"%ini_file%"
-echo recursive = True>>"%ini_file%"
+
 type "%ini_file%"
+
 REM nvenc parameters suitable for an nvidia 2060Super and will fail on a lesser card eg 1050Ti, eg bf:v 3 -spatial-aq 1 -temporal-aq 1
 REM the script *should* have converted everythng to bt.709
 "%vs_path%ffmpeg_OpenCL.exe" -hide_banner -v verbose -stats ^
@@ -107,12 +103,9 @@ goto :eof
 REM +++ try a run using a CMD and vspipe
 REM pushd "%vs_path%"
 REM cd
-DEL "%ini_file%">NUL 2>&1
-echo [slideshow]>>"%ini_file%"
-echo directory = G:\DVD\PAT-SLIDESHOWS\_AI_06_in_development\0TEST>>"%ini_file%"
-echo temp_directory = D:\TEMP>>"%ini_file%"
-echo recursive = True>>"%ini_file%"
+
 type "%ini_file%"
+
 REM nvenc parameters suitable for an nvidia 2060Super and will fail on a lesser card eg 1050Ti, eg bf:v 3 -spatial-aq 1 -temporal-aq 1
 REM the script *should* have converted everythng to bt.709
 REM cannot put pipe symbol where I need it, so separate the commands and use the pipe symbol  later

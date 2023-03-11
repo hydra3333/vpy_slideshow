@@ -982,11 +982,11 @@ reset_to_ini_defaults = False
 try:
 	config.read_file(open(ini_file_speciying_parameters,'r'))
 	if ini_section_name in config:
-		print(f'"{ini_section_name}" is in config, config={objPrettyPrint.pformat(config[ini_section_name])}', flush=True)
+		print_DEBUG(f'"{ini_section_name}" is in config, config={objPrettyPrint.pformat(config[ini_section_name])}')
 		for k,v in config[ini_section_name].items():
-			print(f'config["{ini_section_name}"]["{k}"] = "{v}"', flush=True)
+			print_DEBUG(f'config["{ini_section_name}"]["{k}"] = "{v}"')
 	else:
-		print(f'"{ini_section_name}" is NOT in config.', flush=True)
+		print(f'WARNING: "{ini_section_name}" is NOT found in config.', flush=True)
 		print(f'WARNING: Missing section "{ini_section_name}" in .ini file "{ini_file_speciying_parameters}"', flush=True)
 		reset_to_ini_defaults = True
 except:
