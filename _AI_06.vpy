@@ -227,7 +227,7 @@ from MediaInfoDLL3 import MediaInfo, Stream, Info, InfoOption	# per https://foru
 
 ###
 global IS_DEBUG
-IS_DEBUG = False
+IS_DEBUG = False	# default DEBUG to False
 global last_file_opened_with_ffms2
 global last_file_opened_with_imwri
 global last_file_opened_with_LWLibavSource
@@ -290,14 +290,14 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		#			enum chromaloc, enum matrix_in, enum transfer_in, enum primaries_in, enum range_in, enum chromaloc_in, 
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
-		#print_DEBUG(f'resize_clip: clip.format.color_family==vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB}')
-		#with clip.get_frame(0) as f:
-		#	print_DEBUG(f'resize_clip: incoming frame properties after RGB resize={objPrettyPrint.pformat(f.props)}')
-		#print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, range={calc_ini["TARGET_COLOR_RANGE_I"]}, primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
+		print_DEBUG(f'resize_clip: clip.format.color_family==vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB}')
+		with clip.get_frame(0) as f:
+			print_DEBUG(f'resize_clip: incoming frame properties after RGB resize={objPrettyPrint.pformat(f.props)}')
+		print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, range={calc_ini["TARGET_COLOR_RANGE_I"]}, primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
 		#c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix_s=calc_ini["TARGET_COLORSPACE_MATRIX_S"])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 		c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix=calc_ini["TARGET_COLORSPACE_MATRIX_I"], transfer=calc_ini["TARGET_COLOR_TRANSFER_I"], primaries=calc_ini["TARGET_COLOR_PRIMARIES_I"], range=calc_ini["TARGET_COLOR_RANGE_I"])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
-		#with c.get_frame(0) as f:
-		#	print_DEBUG(f'resize_clip: outgoing frame properties after RGB resize={objPrettyPrint.pformat(f.props)}')
+		with c.get_frame(0) as f:
+			print_DEBUG(f'resize_clip: outgoing frame properties after RGB resize={objPrettyPrint.pformat(f.props)}')
 		return c
 	elif clip.format.color_family==vs.YUV:
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
@@ -305,10 +305,10 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
 		
-		#print_DEBUG(f'resize_clip: clip.format.color_family==vs.YUV: clip.format.color_family={clip.format.color_family} vs.YUV={vs.YUV}')
-		#with clip.get_frame(0) as f:
-		#	print_DEBUG(f'resize_clip: incoming frame properties after RGB resize={objPrettyPrint.pformat(f.props)}')
-		#print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, range={calc_ini["TARGET_COLOR_RANGE_I"]}, primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
+		print_DEBUG(f'resize_clip: clip.format.color_family==vs.YUV: clip.format.color_family={clip.format.color_family} vs.YUV={vs.YUV}')
+		with clip.get_frame(0) as f:
+			print_DEBUG(f'resize_clip: incoming frame properties after RGB resize={objPrettyPrint.pformat(f.props)}')
+		print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, range={calc_ini["TARGET_COLOR_RANGE_I"]}, primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
 		#c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix_s=calc_ini["TARGET_COLORSPACE_MATRIX_S"])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 		c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix=calc_ini["TARGET_COLORSPACE_MATRIX_I"], transfer=calc_ini["TARGET_COLOR_TRANSFER_I"], primaries=calc_ini["TARGET_COLOR_PRIMARIES_I"], range=calc_ini["TARGET_COLOR_RANGE_I"])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 		# AH !!! the above line with matrix_s='709' can cause this error:
@@ -317,18 +317,18 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		# It usually means the matrix/transfer/primaries are unknown 
 		# *** and you have to specify the input colorspace parameters yourself. *** Note: 2 means “unspecified” according to the ITU-T recommendation.
 		#c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"])
-		#with c.get_frame(0) as f:
-		#	print_DEBUG(f'resize_clip: outgoing frame properties after YUV resize={objPrettyPrint.pformat(f.props)}')
+		with c.get_frame(0) as f:
+			print_DEBUG(f'resize_clip: outgoing frame properties after YUV resize={objPrettyPrint.pformat(f.props)}')
 		return c
 	else:
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
 		#			enum chromaloc, enum matrix_in, enum transfer_in, enum primaries_in, enum range_in, enum chromaloc_in, 
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
-		#print_DEBUG(f'resize_clip: non-vs.RGB,non-vs.YUV clip.format.color_family!=vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB} vs.YUV={vs.YUV}')
-		#with clip.get_frame(0) as f:
-		#	print_DEBUG(f'resize_clip: incoming frame properties after RGB resize={objPrettyPrint.pformat(f.props)}')
-		#print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, range={calc_ini["TARGET_COLOR_RANGE_I"]}, primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
+		print_DEBUG(f'resize_clip: non-vs.RGB,non-vs.YUV clip.format.color_family!=vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB} vs.YUV={vs.YUV}')
+		with clip.get_frame(0) as f:
+			print_DEBUG(f'resize_clip: incoming frame properties after RGB resize={objPrettyPrint.pformat(f.props)}')
+		print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, range={calc_ini["TARGET_COLOR_RANGE_I"]}, primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
 		#c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix_s=calc_ini["TARGET_COLORSPACE_MATRIX_S"])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 		c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix=calc_ini["TARGET_COLORSPACE_MATRIX_I"], transfer=calc_ini["TARGET_COLOR_TRANSFER_I"], primaries=calc_ini["TARGET_COLOR_PRIMARIES_I"], range=calc_ini["TARGET_COLOR_RANGE_I"])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
 		# AH !!! the avove line with matrix_s='709' can cause this error:
@@ -337,8 +337,8 @@ def resize_clip(clip,w,h):		# was resize_clip(clip,w,h, W=TARGET_WIDTH, H=TARGET
 		# It usually means the matrix/transfer/primaries are unknown 
 		# *** and you have to specify the input colorspace parameters yourself. *** Note: 2 means “unspecified” according to the ITU-T recommendation.
 		#c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"])
-		#with c.get_frame(0) as f:
-		#	print_DEBUG(f'resize_clip: outgoing frame properties after non-vs.RGB,non-vs.YUV resize={objPrettyPrint.pformat(f.props)}')
+		with c.get_frame(0) as f:
+			print_DEBUG(f'resize_clip: outgoing frame properties after non-vs.RGB,non-vs.YUV resize={objPrettyPrint.pformat(f.props)}')
 		return c
 
 ###
@@ -355,55 +355,21 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	if ext is None:
 		raise ValueError(f'ERROR: get_clip_specs: "ext" not passed as an argument to get_clip_specs')
 	#
-	# https://www.vapoursynth.com/doc/api/vapoursynth.h.html#enum-vspresetformat
-	#print_DEBUG(f'----------------------------------------------------------------------')
-	#for v in vs.PresetFormat:	# eg vs.YUV420P8
-	#	print_DEBUG(f'get_clip_specs: vs.PresetFormat ENUM: {str(v)} = {v.value}')
-	#for v in vs.MatrixCoefficients:
-	#	print_DEBUG(f'get_clip_specs: vs.MatrixCoefficients ENUM: {str(v)} = {v.value}')
-	#for v in vs.TransferCharacteristics:
-	#	print_DEBUG(f'get_clip_specs: vs.TransferCharacteristics ENUM: {str(v)} = {v.value}')
-	#for v in vs.ColorPrimaries:
-	#	print_DEBUG(f'get_clip_specs: vs.ColorPrimaries ENUM: {str(v)} = {v.value}')
-	#for v in vs.ColorRange:
-	#	print_DEBUG(f'get_clip_specs: vs.ColorRange ENUM: {str(v)} = {v.value}')
-	#for v in vs.ColorFamily:
-	#	print_DEBUG(f'get_clip_specs: vs.ColorFamily ENUM: {str(v)} = {v.value}')
-	#for v in vs.ChromaLocation:
-	#	print_DEBUG(f'get_clip_specs: vs.ChromaLocation ENUM: {str(v)} = {v.value}')
-	#for v in vs.FieldBased:
-	#	print_DEBUG(f'get_clip_specs: vs.FieldBased ENUM: {str(v)} = {v.value}')
-	#print_DEBUG(f'NOTE can use both: resize_clip: vs.ColorRange.RANGE_FULL.value = {vs.ColorRange.RANGE_FULL.value}')
-	#print_DEBUG(f'NOTE can use both: resize_clip: vs.RANGE_FULL.value = {vs.RANGE_FULL.value}')
-	#print_DEBUG(f'NOTE can use both: resize_clip: vs.ColorRange.RANGE_LIMITED.value = {vs.ColorRange.RANGE_LIMITED.value}')
-	#print_DEBUG(f'NOTE can use both: resize_clip: vs.RANGE_LIMITED.value = {vs.RANGE_LIMITED.value}')
-	#print_DEBUG(f'----------------------------------------------------------------------')
 	#print_DEBUG(f'get_clip_specs: clip=\n{clip}')
 	## https://www.vapoursynth.com/doc/pythonreference.html
-	#print_DEBUG(f'get_clip_specs: clip.format=\n{clip.format}')
-	#print_DEBUG(f'get_clip_specs: clip.width={clip.width}')
-	#print_DEBUG(f'get_clip_specs: clip.height={clip.height}')
-	#print_DEBUG(f'get_clip_specs: clip.num_frames={clip.num_frames}')
-	#print_DEBUG(f'get_clip_specs: clip.fps={clip.fps}')
-	#print_DEBUG(f'get_clip_specs: clip.format.name={clip.format.name} clip.format.id={clip.format.id} (see enum vs.PresetFormat')
-	#print_DEBUG(f'get_clip_specs: clip.format.color_family={clip.format.color_family}')
-	#print_DEBUG(f'get_clip_specs: clip.format.sample_type={clip.format.sample_type}')	# If the format is integer or floating point based.
-	#print_DEBUG(f'get_clip_specs: clip.format.bits_per_sample={clip.format.bits_per_sample}')
-	#print_DEBUG(f'get_clip_specs: clip.format.bytes_per_sample={clip.format.bytes_per_sample}')
-	#print_DEBUG(f'get_clip_specs: clip.format.num_planes={clip.format.num_planes}') # per https://www.vapoursynth.com/doc/pythonreference.html
-	#print_DEBUG(f'get_clip_specs: clip.format.subsampling_w={clip.format.subsampling_w}')
-	#print_DEBUG(f'get_clip_specs: clip.format.subsampling_h={clip.format.subsampling_h}')
-	#with clip.get_frame(0) as f:
-	#	print_DEBUG(f'get_clip_specs: incoming frame properties =\n{f.props}')
-	#	print_DEBUG(f'get_clip_specs: frame properties f.props["_Matrix"] = {f.props["_Matrix"]}')
-	#	print_DEBUG(f'get_clip_specs: frame properties f.props["_Transfer"] = {f.props["_Transfer"]}')
-	#	print_DEBUG(f'get_clip_specs: frame properties f.props["_Primaries"] = {f.props["_Primaries"]}')
-	#	print_DEBUG(f'get_clip_specs: frame properties f.props["_ColorRange"] = {f.props["_ColorRange"]}')
-	#	print_DEBUG(f'get_clip_specs: frame properties f.props["_ChromaLocation"] = {f.props["_ChromaLocation"]}')
-	#	print_DEBUG(f'get_clip_specs: frame properties f.props["_DurationDen"] = {f.props["_DurationDen"]}')
-	#	print_DEBUG(f'get_clip_specs: frame properties f.props["_DurationNum"] = {f.props["_DurationNum"]}')
-	#	print_DEBUG(f'get_clip_specs: frame properties f.props["_FieldBased"] = {f.props["_FieldBased"]}')
-	#	print_DEBUG(f'get_clip_specs: frame properties f.props["_PictType"] = {f.props["_PictType"]}') # a byte character eg 'I'
+	print_DEBUG(f'get_clip_specs: clip.format=\n{clip.format}')
+	print_DEBUG(f'get_clip_specs: clip.width={clip.width}')
+	print_DEBUG(f'get_clip_specs: clip.height={clip.height}')
+	print_DEBUG(f'get_clip_specs: clip.num_frames={clip.num_frames}')
+	print_DEBUG(f'get_clip_specs: clip.fps={clip.fps}')
+	print_DEBUG(f'get_clip_specs: clip.format.name={clip.format.name} clip.format.id={clip.format.id} (see enum vs.PresetFormat')
+	print_DEBUG(f'get_clip_specs: clip.format.color_family={clip.format.color_family}')
+	print_DEBUG(f'get_clip_specs: clip.format.sample_type={clip.format.sample_type}')	# If the format is integer or floating point based.
+	print_DEBUG(f'get_clip_specs: clip.format.bits_per_sample={clip.format.bits_per_sample}')
+	print_DEBUG(f'get_clip_specs: clip.format.bytes_per_sample={clip.format.bytes_per_sample}')
+	print_DEBUG(f'get_clip_specs: clip.format.num_planes={clip.format.num_planes}') # per https://www.vapoursynth.com/doc/pythonreference.html
+	print_DEBUG(f'get_clip_specs: clip.format.subsampling_w={clip.format.subsampling_w}')
+	print_DEBUG(f'get_clip_specs: clip.format.subsampling_h={clip.format.subsampling_h}')
 	#
 	# Create a local dict of Clip and Frame properties, ready for later validation/resetting if need be of _Matrix/_Transfer/_Primaries/_ColorRange
 	clip_specs = {}
@@ -429,6 +395,17 @@ def get_clip_specs(clip=None, path=None, ext=None):
 		clip_specs["_DurationNum"] = f.props["_DurationNum"] if "_DurationNum" in f.props else None
 		clip_specs["_FieldBased"] = f.props["_FieldBased"] if "_FieldBased" in f.props else None
 		clip_specs["_PictType"] = f.props["_PictType"] if "_PictType" in f.props else None
+		print_DEBUG(f'get_clip_specs: incoming frame properties =\n{f.props}')
+		print_DEBUG(f'get_clip_specs: frame properties f.props["_Matrix"] = {clip_specs["_Matrix"]}')
+		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_Transfer"] = {clip_specs["_Transfer"]}')
+		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_Primaries"] = {clip_specs["_Primaries"]}')
+		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_ColorRange"] = {clip_specs["_ColorRange"]}')
+		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_ChromaLocation"] = {clip_specs["_ChromaLocation"]}')
+		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_DurationDen"] = {clip_specs["_DurationDen"]}')
+		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_DurationNum"] = {clip_specs["_DurationNum"]}')
+		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_FieldBased"] = {clip_specs["_FieldBased"]}')
+		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_PictType"] = {clip_specs["_PictType"]}') # a byte character eg 'I'
+
 	# check for picture/video rotation specified perhaps in EXIF but not auto-processed here by the file openers
 	if ext in calc_ini["VID_EEK_EXTENSIONS"]:
 		rotation_value = auto_rotation_value_MediaInfo(clip, path)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
@@ -446,13 +423,13 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	clip_specs["guessed_Matrix"] = False
 	clip_specs["proposed_Matrix"] = clip_specs["_Matrix"]
 	if  clip_specs["_Matrix"] == vs.MatrixCoefficients.MATRIX_UNSPECIFIED:	# _Matrix is usually defined and the rest may not be. (ffms2 usually yields MATRIX_BT470_BG)
-		#print_DEBUG(f'get_clip_specs: MatrixCoefficients.MATRIX_UNSPECIFIED: incoming clip_specs=\n{objPrettyPrint.pformat(clip_specs)}')
+		print_DEBUG(f'get_clip_specs: MatrixCoefficients.MATRIX_UNSPECIFIED: incoming clip_specs=\n{objPrettyPrint.pformat(clip_specs)}')
 		clip_specs["guessed_Matrix"] = True
 		if ext in calc_ini["PIC_EXTENSIONS"]:	#PIC # assume opened by ffms2 (ffms2 usually yields MATRIX_BT470_BG for images)
 			print_DEBUG(f'get_clip_specs: PIC: MatrixCoefficients.MATRIX_UNSPECIFIED in PIC, choosing a default')
 			if last_file_opened_with_ffms2:
 				clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT470_BG
-				#print_DEBUG(f'get_clip_specs: PIC: MatrixCoefficients.MATRIX_UNSPECIFIED in PIC, opened by ffms2, replacement _Matrix={clip_specs["proposed_Matrix"]}')
+				print_DEBUG(f'get_clip_specs: PIC: MatrixCoefficients.MATRIX_UNSPECIFIED in PIC, opened by ffms2, replacement _Matrix={clip_specs["proposed_Matrix"]}')
 			else:
 				print_DEBUG(f'get_clip_specs: PIC: MatrixCoefficients.MATRIX_UNSPECIFIED in PIC, opened by non-ffms2')
 				#### This is a poor guess, last resort, if there is no other way to deduce matrix.
@@ -487,7 +464,7 @@ def get_clip_specs(clip=None, path=None, ext=None):
 					clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_NCL 				# Non-Constant Luminance
 				else:
 					raise ValueError(f'ERROR: get_clip_specs: PIC: unable to guess default _Matrix in PIC to replace MatrixCoefficients.MATRIX_UNSPECIFIED')
-				#print_DEBUG(f'get_clip_specs: PIC: MatrixCoefficients.MATRIX_UNSPECIFIED ({vs.MatrixCoefficients.MATRIX_UNSPECIFIED}) in PIC, opened by non-ffms2, replacement _Matrix={clip_specs["proposed_Matrix"]}')
+				print_DEBUG(f'get_clip_specs: PIC: MatrixCoefficients.MATRIX_UNSPECIFIED ({vs.MatrixCoefficients.MATRIX_UNSPECIFIED}) in PIC, opened by non-ffms2, replacement _Matrix={clip_specs["proposed_Matrix"]}')
 		elif ext in calc_ini["VID_EEK_EXTENSIONS"]:	#VID 
 			print_DEBUG(f'get_clip_specs: VID: MatrixCoefficients.MATRIX_UNSPECIFIED in VID')
 			#### This is a poor guess, last resort, if there is no other way to deduce matrix.
@@ -522,7 +499,7 @@ def get_clip_specs(clip=None, path=None, ext=None):
 				#clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_NCL 				# Non-Constant Luminance
 			else:
 				raise ValueError(f'ERROR: get_clip_specs: VID: unable to guess default _Matrix in PIC to replace MatrixCoefficients.MATRIX_UNSPECIFIED')
-			#print_DEBUG(f'get_clip_specs: VID: MatrixCoefficients.MATRIX_UNSPECIFIED ({vs.MatrixCoefficients.MATRIX_UNSPECIFIED}) in VID, replacement _Matrix={clip_specs["proposed_Matrix"]}')
+			print_DEBUG(f'get_clip_specs: VID: MatrixCoefficients.MATRIX_UNSPECIFIED ({vs.MatrixCoefficients.MATRIX_UNSPECIFIED}) in VID, replacement _Matrix={clip_specs["proposed_Matrix"]}')
 		else:
 			raise ValueError(f'ERROR: get_clip_specs: VID: ext "{ext}" not recognised in VID to replace MatrixCoefficients.MATRIX_UNSPECIFIED')
 	
@@ -532,7 +509,7 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	clip_specs["guessed_Primaries"] = False
 	clip_specs["proposed_Primaries"] = clip_specs["_Primaries"]
 	if  clip_specs["_Primaries"] == vs.ColorPrimaries.PRIMARIES_UNSPECIFIED:
-		#print_DEBUG(f'get_clip_specs: ColorPrimaries.PRIMARIES_UNSPECIFIED: incoming clip_specs=\n{objPrettyPrint.pformat(clip_specs)}')
+		print_DEBUG(f'get_clip_specs: ColorPrimaries.PRIMARIES_UNSPECIFIED: incoming clip_specs=\n{objPrettyPrint.pformat(clip_specs)}')
 		clip_specs["guessed_Primaries"] = True
 		if clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_ST170_M:
 			clip_specs["proposed_Primaries"] = vs.ColorPrimaries.PRIMARIES_ST170_M
@@ -544,7 +521,7 @@ def get_clip_specs(clip=None, path=None, ext=None):
 			clip_specs["proposed_Primaries"] = vs.ColorPrimaries.PRIMARIES_BT2020
 		else:
 			raise ValueError(f'ERROR: get_clip_specs: unable to guess default _Primaries to replace ColorPrimaries.PRIMARIES_UNSPECIFIED')
-		#print_DEBUG(f'get_clip_specs: ColorPrimaries.PRIMARIES_UNSPECIFIED ({vs.ColorPrimaries.PRIMARIES_UNSPECIFIED}), replacement _Primaries={clip_specs["proposed_Primaries"]}')
+		print_DEBUG(f'get_clip_specs: ColorPrimaries.PRIMARIES_UNSPECIFIED ({vs.ColorPrimaries.PRIMARIES_UNSPECIFIED}), replacement _Primaries={clip_specs["proposed_Primaries"]}')
 		
 	# **********
 	# if not already specified, guess new _Transfer
@@ -552,7 +529,7 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	clip_specs["guessed_Transfer"] = False
 	clip_specs["proposed_Transfer"] = clip_specs["_Transfer"]
 	if  clip_specs["_Transfer"] == vs.TransferCharacteristics.TRANSFER_UNSPECIFIED:
-		#print_DEBUG(f'get_clip_specs: ColorPrimaries.PRIMARIES_UNSPECIFIED: incoming clip_specs=\n{objPrettyPrint.pformat(clip_specs)}')
+		print_DEBUG(f'get_clip_specs: ColorPrimaries.PRIMARIES_UNSPECIFIED: incoming clip_specs=\n{objPrettyPrint.pformat(clip_specs)}')
 		clip_specs["guessed_Transfer"] = True
 		if clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_ST170_M:
 			clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT601
@@ -583,7 +560,7 @@ def get_clip_specs(clip=None, path=None, ext=None):
 				raise ValueError(f'ERROR: get_clip_specs: unable to guess {clip_specs["bits_per_sample"]}-bit default _Transfer to replace TransferCharacteristics.TRANSFER_UNSPECIFIED')
 		else:
 			raise ValueError(f'ERROR: get_clip_specs: unable to guess default _Transfer to replace TransferCharacteristics.TRANSFER_UNSPECIFIED')
-		#print_DEBUG(f'get_clip_specs: TransferCharacteristics.TRANSFER_UNSPECIFIED ({vs.TransferCharacteristics.TRANSFER_UNSPECIFIED}), replacement _Transfer={clip_specs["proposed_Transfer"]}')
+		print_DEBUG(f'get_clip_specs: TransferCharacteristics.TRANSFER_UNSPECIFIED ({vs.TransferCharacteristics.TRANSFER_UNSPECIFIED}), replacement _Transfer={clip_specs["proposed_Transfer"]}')
 	
 	# **********
 	# if not already specified, guess new _ColorRange
@@ -614,7 +591,7 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	else:	# deault to PAL since, well, I'm in a PAL country
 		clip_specs["possible_colour_source"] = "PAL".upper()
 
-	#print_DEBUG(f'get_clip_specs: clip_specs=\n{objPrettyPrint.pformat(clip_specs)}')
+	print_DEBUG(f'get_clip_specs: clip_specs=\n{objPrettyPrint.pformat(clip_specs)}')
 	return clip_specs
 
 ###
@@ -630,70 +607,65 @@ def get_clip(path):
 	last_file_opened_with_LibavSMASHSource = False
 	#
 	if path.suffix.lower()   in calc_ini["EEK_EXTENSIONS"]:
-		#print_DEBUG(f'get_clip: lsmas Video: {path.name}')
 		clip = core.lsmas.LWLibavSource(str(path))
 		last_file_opened_with_LWLibavSource = True
-		#print_DEBUG(f'get_clip: lsmas Video info:\n{clip}')
+		print_DEBUG(f'get_clip: lsmas Video {path.name} info:\n{clip}')
 	elif path.suffix.lower() in calc_ini["VID_EXTENSIONS"]:
-		#print_DEBUG(f'get_clip: ffms2 Video: {path.name}')
 		clip = core.ffms2.Source(str(path))	#ffms2 leaves *.ffindex files everywhere in folders.
 		last_file_opened_with_ffms2 = True
 		#clip = core.lsmas.LibavSMASHSource(str(path))
 		#last_file_opened_with_LibavSMASHSource = True
-		#print_DEBUG(f'get_clip: ffms2 Video info:\n{clip}')
+		print_DEBUG(f'get_clip: ffms2 Video {path.name} info:\n{clip}')
 	elif path.suffix.lower() in calc_ini["PIC_EXTENSIONS"]:
-		#print_DEBUG(f'get_clip: ffms2 PIC: {path.name}')
 		clip = core.ffms2.Source(str(path))
 		last_file_opened_with_ffms2 = True
-		#print_DEBUG(f'get_clip: ffms2 PIC info:\n{clip}')
+		print_DEBUG(f'get_clip: ffms2 PIC {path.name} info:\n{clip}')
 		# NOTE: imwri returns no frame properties ! eg "_Matrix" ! and thus IS NO GOOD AT ALL FOR US
 		#clip = core.imwri.Read(str(path)) # ImageMagick Writer-Reader, if installed into vapoursynth folder
 		#last_file_opened_with_imwri = True
 		#print_DEBUG(f'get_clip: imwri Video info:\n{clip}')
 	else: # UNKNOWN TYPE
-		#print_DEBUG(f'get_clip: ffms2 UNKNOWN TYPE: {path.name}')
 		clip = core.ffms2.Source(str(path))	# if file extension not recognised, use this reader
 		last_file_opened_with_ffms2 = True
-		#print_DEBUG(f'get_clip: ffms2 Video info:\n{clip}')
+		print_DEBUG(f'get_clip: ffms2 Video {path.name} info:\n{clip}')
 	#
 	clip_specs = get_clip_specs(clip, path, ext=path.suffix.lower())
 	#
 	#++++++++++++++++++++
 	if clip_specs["guessed_Matrix"]:
-		#print_DEBUG(f'get_clip: SetFrameProps _Matrix from existing "{clip_specs["_Matrix"]}" to guessed "{clip_specs["proposed_Matrix"]}"')
+		print_DEBUG(f'get_clip: SetFrameProps _Matrix from existing "{clip_specs["_Matrix"]}" to guessed "{clip_specs["proposed_Matrix"]}"')
 		clip = core.std.SetFrameProps(clip, _Matrix=clip_specs["proposed_Matrix"])
 	if clip_specs["guessed_Primaries"]:
-		#print_DEBUG(f'get_clip: SetFrameProps _Primaries from existing "{clip_specs["_Primaries"]}" to guessed "{clip_specs["proposed_Primaries"]}"')
+		print_DEBUG(f'get_clip: SetFrameProps _Primaries from existing "{clip_specs["_Primaries"]}" to guessed "{clip_specs["proposed_Primaries"]}"')
 		clip = core.std.SetFrameProps(clip, _Primaries=clip_specs["proposed_Primaries"])
 	if clip_specs["guessed_Transfer"]:
-		#print_DEBUG(f'get_clip: SetFrameProps _Transfer from existing "{clip_specs["_Transfer"]}" to guessed "{clip_specs["proposed_Transfer"]}"')
+		print_DEBUG(f'get_clip: SetFrameProps _Transfer from existing "{clip_specs["_Transfer"]}" to guessed "{clip_specs["proposed_Transfer"]}"')
 		clip = core.std.SetFrameProps(clip, _Transfer=clip_specs["proposed_Transfer"])
 	if clip_specs["guessed_ColorRange"]:
-		#print_DEBUG(f'get_clip: SetFrameProps _ColorRange from existing "{clip_specs["_ColorRange"]}" to guessed "{clip_specs["proposed_ColorRange"]}"')
+		print_DEBUG(f'get_clip: SetFrameProps _ColorRange from existing "{clip_specs["_ColorRange"]}" to guessed "{clip_specs["proposed_ColorRange"]}"')
 		clip = core.std.SetFrameProps(clip, _Transfer=clip_specs["proposed_Transfer"])
 	#
 	#++++++++++++++++++++
 	# Apply an auto-rotate if specified in the source file (perhaps in an image, some do, if at all)
 	if clip_specs["auto_rotation_degrees"] == 0:
-		#print_DEBUG(f'get_clip: zero auto-rotation of clip {path}')
+		print_DEBUG(f'get_clip: zero auto-rotation of clip {path}')
 		pass
 	elif clip_specs["auto_rotation_degrees"] == 90:
-		#print_DEBUG(f'get_clip: auto-Rotating by 90 degrees {path}')
+		print_DEBUG(f'get_clip: auto-Rotating by 90 degrees {path}')
 		clip = clip.std.Transpose().std.FlipVertical()
 	elif clip_specs["auto_rotation_degrees"] == 180:
-		#print_DEBUG(f'get_clip: auto-Rotating by 180 degrees {path}')
+		print_DEBUG(f'get_clip: auto-Rotating by 180 degrees {path}')
 		clip = clip.std.Turn180()
 	elif clip_specs["auto_rotation_degrees"] == 270:
-		#print_DEBUG(f'get_clip: auto-Rotating by 270 degrees {path}')
+		print_DEBUG(f'get_clip: auto-Rotating by 270 degrees {path}')
 		clip = clip.std.Transpose().std.FlipHorizontal()
 	else:
 		raise ValueError('ERROR: get_clip: auto_rotation_degrees "{clip_specs["auto_rotation_degrees"]}" unable to be processed for "{path}" : only 0,90,180,270 are valid')
 	#++++++++++++++++++++
 
 	# do video-specific or picture-specific changes
-	if path.suffix.lower()   in calc_ini["VID_EEK_EXTENSIONS"]:	#if any sort of video, probably an old hand-held camera or phone, sometimes variable fps ...
-		#print_DEBUG(f'get_clip: opened Video: {path.name}')
-		#print_DEBUG(f'get_clip: opened Video: {path.name}\nVideo info:\n{clip}')
+	if path.suffix.lower() in calc_ini["VID_EEK_EXTENSIONS"]:	#if any sort of video, probably an old hand-held camera or phone, sometimes variable fps ...
+		print_DEBUG(f'get_clip: opened Video: {path.name}\nVideo info:\n{clip}')
 		#clip = core.text.Text(clip, path.name, alignment=3, scale=1)
 		#clip = core.text.FrameNum(clip, alignment=5, scale=1)
 		#clip = core.text.ClipInfo(clip, alignment=8, scale=1)
@@ -704,7 +676,7 @@ def get_clip(path):
 		source_duration_frames = clip.num_frames
 		source_duration_secs = round((source_duration_frames / source_fps),3)
 		source_width, source_height = clip.width, clip.height
-		#print_DEBUG(f'get_clip: {source_width}x{source_height}\nsource_fpsnum:{source_fpsnum} source_fpsden:{source_fpsden}\nsource_fps:{source_fps}\nsource_duration_frames:{source_duration_frames}\nsource_duration_secs:{source_duration_secs}')
+		print_DEBUG(f'get_clip: {source_width}x{source_height}\nsource_fpsnum:{source_fpsnum} source_fpsden:{source_fpsden}\nsource_fps:{source_fps}\nsource_duration_frames:{source_duration_frames}\nsource_duration_secs:{source_duration_secs}')
 		# change framerate ? too hard for a small simple video sample, just "assume" target fps and ignore consequences of speed-up or slow-down or VFR
 		clip = clip.std.AssumeFPS(fpsnum=calc_ini["TARGET_FPSNUM"], fpsden=calc_ini["TARGET_FPSDEN"])
 		# if duration greater than out review maximum, clip it
@@ -712,7 +684,7 @@ def get_clip(path):
 			clip = core.std.Trim(clip, first=0, last=(calc_ini["MAX_DURATION_FRAMES"]-1))
 		# denoise ANY "small" dimension video clips, older videos likely to be noisy
 		if source_width<calc_ini["TARGET_WIDTH"] or source_height<calc_ini["TARGET_HEIGHT"]:	 
-			#print_DEBUG(f'applying DGDenoise to small {source_width}x{source_height} video {path.name}')
+			print_DEBUG(f'applying DGDenoise to small {source_width}x{source_height} video {path.name}')
 			# clip must be YUV420P16 for DGDenoise etc
 			clip = clip.resize.Point(format=calc_ini["DG_PIXEL_FORMAT"])		# convert to DG_PIXEL_FORMAT via resizer which does no resizing
 			#clip = core.avs.DGDenoise(clip, strength=0.06, cstrength=0.06)
@@ -752,11 +724,11 @@ def get_path(path_generator):
 	while 1:	# loop until we do a "return", hitting past the end of the iterator returns None
 		try:
 			path = next(path_generator)
-			#print_DEBUG(f'get_path: get success, path.name=' + path.name)
+			print_DEBUG(f'get_path: get success, path.name=' + path.name)
 		except StopIteration:
 			return None
 		if path.suffix.lower() in calc_ini["EXTENSIONS"]:	# only return files which are in known extensions
-			#print_DEBUG(f'get_path: in calc_ini["EXTENSIONS"] success, path.name=' + path.name)
+			print_DEBUG(f'get_path: in calc_ini["EXTENSIONS"] success, path.name=' + path.name)
 			return path
 		  
 ###
@@ -798,15 +770,15 @@ def auto_rotation_value_PIL(clip, path):
 	try:
 		image = Image.open(str(path))
 	except UnidentifiedImageError:
-		#print_DEBUG(f'auto_rotation_value_PIL: except UnidentifiedImageError immediate return now')
+		print_DEBUG(f'auto_rotation_value_PIL: except UnidentifiedImageError immediate return now')
 		return rotation_degrees
 	except PermissionError:
-		#print_DEBUG(f'auto_rotation_value_PIL: except PermissionError Permission denied to load: {path} immediate return now')
+		print_DEBUG(f'auto_rotation_value_PIL: except PermissionError Permission denied to load: {path} immediate return now')
 		return rotation_degrees
 	except Exception as e:
-		#print_DEBUG(f'auto_rotation_value_PIL: except Exception {e} immediate return now')
+		print_DEBUG(f'auto_rotation_value_PIL: except Exception {e} immediate return now')
 		return rotation_degrees
-	#print_DEBUG(f'auto_rotation_value_PIL: try on Image.open succeeded')
+	print_DEBUG(f'auto_rotation_value_PIL: try on Image.open succeeded')
 	rotation_value = 0
 	try:		
 		for key in ExifTags.TAGS.keys():
@@ -818,23 +790,23 @@ def auto_rotation_value_PIL(clip, path):
 		else:
 			value = 0
 	except (AttributeError, KeyError, IndexError):
-		#print_DEBUG(f'auto_rotation_value_PIL: except AttributeError during for key in ExifTags.TAGS.keys(), immediate return now')
+		print_DEBUG(f'auto_rotation_value_PIL: except AttributeError during for key in ExifTags.TAGS.keys(), immediate return now')
 		return rotation_degrees
 	else:
 		if   value == 0:
 			rotation_degrees = 0
-			##print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating by 0 degrees {path}')
+			#print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating by 0 degrees {path}')
 		elif   value == 3:
 			rotation_degrees = 180
-			##print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating by 180 degrees {path}')
+			#print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating by 180 degrees {path}')
 		elif value == 8:
 			rotation_degrees = 90
-			##print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating by  90 degrees {path}')
+			#print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating by  90 degrees {path}')
 		elif value == 6:
 			rotation_degrees = 270
-			##print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating by 270 degrees {path}')
+			#print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating by 270 degrees {path}')
 	image.close()	
-	#print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating by {rotation_degrees} degrees {path}')
+	print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating by {rotation_degrees} degrees {path}')
 	return rotation_degrees
 
 ###
@@ -847,7 +819,7 @@ def auto_rotation_value_MediaInfo(clip, path):
 			rotation_degrees = 0
 		else:
 			rotation_degrees = int(float(value)) # for some reason Rotation value type mediainfo carries as a string,  like: '180.00'
-	#print_DEBUG(f'auto_rotation_value_MediaInfo: MediaInfo says auto-Rotating by {rotation_degrees} degrees {path}')
+	print_DEBUG(f'auto_rotation_value_MediaInfo: MediaInfo says auto-Rotating by {rotation_degrees} degrees {path}')
 	return rotation_degrees
 
 ###
@@ -858,19 +830,19 @@ def perform_rotation_PIL(clip, path, save_rotated_image=False):
 	# Older PIL stands for Python Imaging Library, and it's the original library that enabled Python to deal with images. 
 	# PIL was discontinued in 2011 (that author died) and only supports Python 2.23 ... so use Pillow instead.
 	# https://python-pillow.org/
-	#print_DEBUG(f'perform_rotation_PIL entered')
+	print_DEBUG(f'perform_rotation_PIL entered')
 	try:
 		image = Image.open(str(path))
 	except UnidentifiedImageError:
-		#print_DEBUG(f'perform_rotation_PIL except UnidentifiedImageError immediate return now')
+		print_DEBUG(f'perform_rotation_PIL except UnidentifiedImageError immediate return now')
 		return clip
 	except PermissionError:
-		#print_DEBUG(f'perform_rotation_PIL except PermissionError Permission denied to load: {path} immediate return now')
+		print_DEBUG(f'perform_rotation_PIL except PermissionError Permission denied to load: {path} immediate return now')
 		return clip
 	except Exception as e:
-		#print_DEBUG(f'perform_rotation_PIL except Exception {e} immediate return now')
+		print_DEBUG(f'perform_rotation_PIL except Exception {e} immediate return now')
 		return clip
-	#print_DEBUG(f'perform_rotation_PIL try on Image.open succeeded')
+	print_DEBUG(f'perform_rotation_PIL try on Image.open succeeded')
 	try:		
 		for key in ExifTags.TAGS.keys():
 			if ExifTags.TAGS[key] == 'Orientation':
@@ -878,7 +850,7 @@ def perform_rotation_PIL(clip, path, save_rotated_image=False):
 		exif = dict(image.getexif().items())
 		value = exif[key]
 	except (AttributeError, KeyError, IndexError):
-		#print_DEBUG(f'perform_rotation_PIL except AttributeError during for key in ExifTags.TAGS.keys(), immediate return now')
+		print_DEBUG(f'perform_rotation_PIL except AttributeError during for key in ExifTags.TAGS.keys(), immediate return now')
 		return clip
 	else:
 		if   value == 3:
@@ -896,23 +868,24 @@ def perform_rotation_PIL(clip, path, save_rotated_image=False):
 			image = image.transpose(rotate[value])
 			path2 = path.parent / f'{path.stem}_rotated{path.suffix}'
 			##image.save(str(path2))	# comment this out ... no writing new images, please
-			#print_DEBUG(f'Rotated image {path} was NOT saved as requested into {path2}')
-	#exif = image.getexif()
-	#print_exif_data(exif)
-	#print_DEBUG('', flush=True)
-	#print_exif_data(exif.get_ifd(0x8769), flush=True)
-	#print_DEBUG('', flush=True)
-	#
-	#print_exif_data2(image.getexif())
-	#print_DEBUG('', flush=True)
-	#print_exif_data(image._getexif(), flush=True)
-	#print_DEBUG('', flush=True)
+			print_DEBUG(f'Rotated image {path} was NOT saved as requested into {path2}')
+	if is_DEBUG:
+		exif = image.getexif()
+		print_exif_data(exif)
+		print_DEBUG('')
+		print_exif_data(exif.get_ifd(0x8769))
+		print_DEBUG('')
+		#
+		print_exif_data2(image.getexif())
+		print_DEBUG('')
+		print_exif_data(image._getexif())
+		print_DEBUG('')
 	image.close()	
 	return clip
 
 ###
 def perform_rotation_MediaInfo(clip, path, save_rotated_image=False):
-	#print_DEBUG(f'perform_rotation_MediaInfo entered')
+	print_DEBUG(f'perform_rotation_MediaInfo entered')
 	param = 'Rotation'
 	value = mediainfo_value(Stream.Video, 0, param, path)
 	if param == 'Rotation':
@@ -920,7 +893,7 @@ def perform_rotation_MediaInfo(clip, path, save_rotated_image=False):
 			value = 0
 		else:
 			value = int(float(value)) # for some reason Rotation value type mediainfo carries as a string,  like: '180.00'
-	#print_DEBUG(f'perform_rotation_MediaInfo: value={value} for {path}')
+	print_DEBUG(f'perform_rotation_MediaInfo: value={value} for {path}')
 	if   value == 180:
 		print_DEBUG(f'MediaInfo says auto-Rotating by 180 degrees {path}')
 		clip = clip.std.Turn180()
@@ -962,22 +935,15 @@ MI = MediaInfo()	# initialize per https://forum.videohelp.com/threads/408230-ffm
 ini_file_speciying_parameters = r'.\SLIDESHOW_PARAMETERS.ini'.strip() # r prefix means the string is treated as a raw string so all escape codes will be ignored.EPT IF THE \ is the last character in the string !
 ini_file_speciying_parameters = fully_qualified_folder_no_trailing_backslash(ini_file_speciying_parameters)
 	
-#print_DEBUG(f'ini_file_speciying_parameters="{ini_file_speciying_parameters}"')
-#for v in vs.MatrixCoefficients:
-#	print_DEBUG(f'vs.MatrixCoefficients: {v} {objPrettyPrint.pformat(v)}')
-#for v in vs.TransferCharacteristics:
-#	print_DEBUG(f'vs.TransferCharacteristics: {v} {objPrettyPrint.pformat(v)}')
-#for v in vs.ColorPrimaries:
-#	print_DEBUG(f'vs.ColorPrimaries: {v} {objPrettyPrint.pformat(v)}')
-#for v in vs.ColorRange:
-#	print_DEBUG(f'vs.ColorRange: {v} {objPrettyPrint.pformat(v)}')
+#print(f'ini_file_speciying_parameters="{ini_file_speciying_parameters}"', flush=True)
 
 ini_section_name = 'slideshow'
 default_ini_values =	{ ini_section_name : {
 							#'DIRECTORY' :						fully_qualified_folder_no_trailing_backslash(os.getcwd().strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
 							'DIRECTORY' :						fully_qualified_folder_no_trailing_backslash(r'G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\ '.strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
 							'TEMP_DIRECTORY' :					fully_qualified_folder_no_trailing_backslash(r'D:\TEMP\ '.strip()),	# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
-							'RECURSIVE' :						True,
+							'RECURSIVE' :						False,
+							'DEBUG_MODE' :						False,
 							'CROSSFADE_DURATION':				1,
 							'TARGET_COLORSPACE' : 				r'BT.709',											# colorspace Rec2020, BT.2020 Rec709, BT.709, Rec601, BT.601, PC.709, PC.601, TV.fcc, PC.fcc, TV.240m, PC.240m; When no hint found in ASS script and colorspace parameter is empty then the default is BT.601
 							'TARGET_COLORSPACE_MATRIX' :		r'BT.709',
@@ -1010,22 +976,46 @@ default_ini_values =	{ ini_section_name : {
 							}
 						}
 ini_values = default_ini_values
-config = configparser.ConfigParser(default_ini_values[ini_section_name], allow_no_value=True)
-config.read(ini_file_speciying_parameters)
-# if a missing not badly formatted .ini, save and use default ini valies
-if not config.has_section(ini_section_name):
-	config = configparser.ConfigParser(allow_no_value=True)
+#
+config = configparser.ConfigParser(default_ini_values[ini_section_name], allow_no_value=False)
+reset_to_ini_defaults = False
+try:
+	config.read_file(open(ini_file_speciying_parameters,'r'))
+	if ini_section_name in config:
+		print(f'"{ini_section_name}" is in config, config={objPrettyPrint.pformat(config[ini_section_name])}', flush=True)
+		for k,v in config[ini_section_name].items():
+			print(f'config["{ini_section_name}"]["{k}"] = "{v}"', flush=True)
+	else:
+		print(f'"{ini_section_name}" is NOT in config.', flush=True)
+		print(f'WARNING: Missing section "{ini_section_name}" in .ini file "{ini_file_speciying_parameters}"', flush=True)
+		reset_to_ini_defaults = True
+except:
+	print(f'WARNING: Missing and/or error reading .ini file "{ini_file_speciying_parameters}"', flush=True)
+	reset_to_ini_defaults = True
+#
+if not reset_to_ini_defaults:
+	print(f'INFO: Using settings from .ini file "{ini_file_speciying_parameters}"', flush=True)
+else:
+	print(f'INFO: Reverting to default settngs', flush=True)
+	# revert to default values
+	config = configparser.ConfigParser(allow_no_value=False)	# don't apply defaults here, do't want them written to the .ini file
 	config.read_dict(default_ini_values)
-	with open(ini_file_speciying_parameters, 'w') as configfile:
+	# re-write the .ini file with newly defaulted values
+	with open(ini_file_speciying_parameters,'w') as configfile:
 		config.write(configfile)
-	config = configparser.ConfigParser(default_ini_values[ini_section_name], allow_no_value=True)
-	config.read(ini_file_speciying_parameters)
-	print(f'WARNING: default values applied due to missing or invalid .ini file\n{objPrettyPrint.pformat(default_ini_values)}', flush=True)
-# if using ini values fails, even after trying to use default values, exit
+	# re-read the parameters from the newly re-created .inni file, this tim applying defaults to the read operation
+	config = configparser.ConfigParser(default_ini_values[ini_section_name], allow_no_value=False)
+	config.read_file(open(ini_file_speciying_parameters,'r'))	# no try/except, let it fail this time
+#
+IS_DEBUG = config.getboolean(ini_section_name, "DEBUG_MODE")	# if enabled, turn on DEBUG immediately
+if IS_DEBUG:
+	print_DEBUG(f'Debug Mode turned on since .ini file DEBUG_MODE={config.getboolean(ini_section_name, "DEBUG_MODE")}')
+# grab the .ini settings that the user has specified
 if config.has_section(ini_section_name):
 	ini_values[ini_section_name]["DIRECTORY"] = fully_qualified_folder_no_trailing_backslash(config.get(ini_section_name, 'DIRECTORY'))
 	ini_values[ini_section_name]["TEMP_DIRECTORY"] = fully_qualified_folder_no_trailing_backslash(config.get(ini_section_name, 'TEMP_DIRECTORY'))
 	ini_values[ini_section_name]["RECURSIVE"] = config.getboolean(ini_section_name, 'RECURSIVE')
+	ini_values[ini_section_name]["DEBUG_MODE"] = config.getboolean(ini_section_name, 'DEBUG_MODE')
 	ini_values[ini_section_name]["CROSSFADE_DURATION"] = config.getint(ini_section_name, 'CROSSFADE_DURATION')
 	ini_values[ini_section_name]["TARGET_COLORSPACE"] = config.get(ini_section_name, 'TARGET_COLORSPACE')
 	ini_values[ini_section_name]["TARGET_COLORSPACE_MATRIX"] = config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX')
@@ -1053,7 +1043,8 @@ if config.has_section(ini_section_name):
 	ini_values[ini_section_name]["DOWNSIZE_KERNEL"] = config.get(ini_section_name, 'DOWNSIZE_KERNEL')
 else:
 	raise ValueError(f'ERROR: .ini file unable to be read or recreated properly')
-# save the updated set of .ini values over the top of the existing set
+	
+# add clarifying information to and re-save the updated set of .ini values over the top of the existing .ini file
 with open(ini_file_speciying_parameters, 'w') as configfile:
 	# add the new set of .ini value to be saved
 	update_config =  configparser.ConfigParser(allow_no_value=True)
@@ -1110,6 +1101,7 @@ with open(ini_file_speciying_parameters, 'w') as configfile:
 	# update the .ini file
 	update_config.write(configfile)
 print(f'INFO: Saved updated .ini "{ini_file_speciying_parameters}"', flush=True)
+
 # calculate some values and create a new updated calculated values dict
 calc_ini = ini_values[ini_section_name]
 calc_ini["PIC_EXTENSIONS"]		= [".png", ".jpg", ".jpeg", ".gif"]								# always lower case
@@ -1127,6 +1119,31 @@ calc_ini["DOT_FFINDEX"]			= ".ffindex".lower()		# for removing temporary *.ffind
 calc_ini["MODX"]				= 2	   # mods for letterboxing calculations, example, for 411 YUV as an extreme
 calc_ini["MODY"]				= 2	   # mods would have to be MODX=4, MODY=1 as minimum
 
+if IS_DEBUG:
+	# https://www.vapoursynth.com/doc/api/vapoursynth.h.html#enum-vspresetformat
+	print_DEBUG(f'----------------------------------------------------------------------------------------------------------------------------')
+	for v in vs.PresetFormat:	# eg vs.YUV420P8
+		print_DEBUG(f'get_clip_specs: vs.PresetFormat ENUM: {str(v)} = {v.value}')
+	for v in vs.MatrixCoefficients:
+		print_DEBUG(f'get_clip_specs: vs.MatrixCoefficients ENUM: {str(v)} = {v.value}')
+	for v in vs.TransferCharacteristics:
+		print_DEBUG(f'get_clip_specs: vs.TransferCharacteristics ENUM: {str(v)} = {v.value}')
+	for v in vs.ColorPrimaries:
+		print_DEBUG(f'get_clip_specs: vs.ColorPrimaries ENUM: {str(v)} = {v.value}')
+	for v in vs.ColorRange:
+		print_DEBUG(f'get_clip_specs: vs.ColorRange ENUM: {str(v)} = {v.value}')
+	for v in vs.ColorFamily:
+		print_DEBUG(f'get_clip_specs: vs.ColorFamily ENUM: {str(v)} = {v.value}')
+	for v in vs.ChromaLocation:
+		print_DEBUG(f'get_clip_specs: vs.ChromaLocation ENUM: {str(v)} = {v.value}')
+	for v in vs.FieldBased:
+		print_DEBUG(f'get_clip_specs: vs.FieldBased ENUM: {str(v)} = {v.value}')
+	print_DEBUG(f'----------------------------------------------------------------------------------------------------------------------------')
+	print_DEBUG(f'default_ini_values=\n{objPrettyPrint.pformat(default_ini_values)}')
+	print_DEBUG(f'ini_values=\n{objPrettyPrint.pformat(ini_values)}')
+	print_DEBUG(f'calc_ini=\n{objPrettyPrint.pformat(calc_ini)}')
+	print_DEBUG(f'----------------------------------------------------------------------------------------------------------------------------')
+
 ########################################################################################################################################################
 if calc_ini["RECURSIVE"]:
 	glob_var="**/*.*"			# recursive
@@ -1135,7 +1152,7 @@ else:
 	glob_var="*.*"				# non-recursive
 	ff_glob_var="*.ffindex"		# for .ffindex file deletion non-recursive
 # glob : with DIRECTORY not having a trailing slash !!!
-print(f'INFO: Start processing image/video files in "{calc_ini["DIRECTORY"]}" recursive="{calc_ini["RECURSIVE"]}" glob_var="{glob_var}" \n      with Extensions={objPrettyPrint.pformat(calc_ini["EXTENSIONS"])}', flush=True)
+print(f'INFO: Start processing image/video files in "{calc_ini["DIRECTORY"]}" recursive={calc_ini["RECURSIVE"]} debug={calc_ini["DEBUG_MODE"]}  glob_var="{glob_var}" \n      with Extensions={objPrettyPrint.pformat(calc_ini["EXTENSIONS"])}', flush=True)
 Count_of_files = 0
 # NOTE: calc_ini["DIRECTORY"] MUST NOT have a trailing backslash ... remove during ini setup
 paths = Path(calc_ini["DIRECTORY"]).glob(glob_var) # generator of all paths in a directory, files starting with . won't be matched by default
@@ -1149,6 +1166,8 @@ if calc_ini["CROSSFADE_DURATION"]>0:
 	prior_clip_for_crossfade = crossfade_blank_clip
 #---
 while not (path is None):	# first clip already pre-retrieved ready for this while loop
+	print_DEBUG(f'****************************************************************************************************************************')
+	print_DEBUG(f'****************************************************************************************************************************')
 	Count_of_files = Count_of_files + 1
 	print(f'INFO: processing {Count_of_files} {str(path)}', flush=True)
 	#if (Count_of_files % 10)==0:
@@ -1161,7 +1180,7 @@ while not (path is None):	# first clip already pre-retrieved ready for this whil
 	#this_clip = core.text.ClipInfo(this_clip, alignment=8, scale=1)
 	#this_clip = core.text.FrameProps(this_clip, alignment=2, scale=1)
 	if calc_ini["CROSSFADE_DURATION"]>0:	
-		#print_DEBUG(f'doing crossfade in while loop', flush=True)
+		print_DEBUG(f'doing crossfade in while loop')
 		crossfade_clip = crossfade(prior_clip_for_crossfade, this_clip, calc_ini["CROSSFADE_DURATION"])
 		# for now, don't do equivalent of this from _AI_ ... right  = right_clip[calc_ini["CROSSFADE_DURATION"]:-calc_ini["CROSSFADE_DURATION"]]
 		clips = clips + crossfade_clip + this_clip
@@ -1169,10 +1188,12 @@ while not (path is None):	# first clip already pre-retrieved ready for this whil
 	else:
 		clips = clips + this_clip
 	path = get_path(paths)		# get next path to process in this while loop
+	print_DEBUG(f'****************************************************************************************************************************')
+	print_DEBUG(f'****************************************************************************************************************************')
 #---
 # perhaps a finishing crossfade to black ?
 if calc_ini["CROSSFADE_DURATION"]>0:	
-	#print_DEBUG(f'doing final crossfade after while loop')
+	print_DEBUG(f'doing final crossfade after while loop')
 	crossfade_clip = crossfade(prior_clip_for_crossfade, crossfade_blank_clip, calc_ini["CROSSFADE_DURATION"])
 	# for now, don't do equivalent of this from _AI_ ... right  = right_clip[calc_ini["CROSSFADE_DURATION"]:-calc_ini["CROSSFADE_DURATION"]]
 	clips = clips + crossfade_clip + this_clip
@@ -1191,9 +1212,9 @@ for ff in ffindex_files:
 			print_DEBUG(f'INFO: removing {Count_of_files_removed} {ff}')
 			os.remove(ff)
 			#if (Count_of_files_removed % (10))==0:
-			#	print_DEBUG(f'{Count_of_files_removed},', end='', flush=True)	# https://www.geeksforgeeks.org/gfact-50-python-end-parameter-in-print/
+			#	print(f'{Count_of_files_removed},', end='', flush=True)	# https://www.geeksforgeeks.org/gfact-50-python-end-parameter-in-print/
 			#	if (Count_of_files_removed % (10*10*3))==0:
-			#		print_DEBUG(f'', flush=True)
+			#		print(f'', flush=True)
 		except OSError as ee:
 			print(f'ERROR:  error during removal of ffindex file: {ff} :{ee} : {ee.strerror}', flush=True)
 			raise ValueError(f'ERROR: error during removal of ffindex file: {ff} :{ee} : {ee.strerror}')

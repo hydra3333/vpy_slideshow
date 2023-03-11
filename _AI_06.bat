@@ -13,9 +13,9 @@ REM if /I NOT "%pth:~-1%" == "\" (set "pth=%pth%\")
 set "pwd=%CD%"
 if /I NOT "%pwd:~-1%" == "\" (set "pwd=%pwd%\")
 
-set   "script=%pwd%\_AI_06.vpy"
+set   "script=%pwd%_AI_06.vpy"
 set "ini_file=%pwd%SLIDESHOW_PARAMETERS.ini"
-set "mp4_file=%pwd%\_AI_06.mp4"
+set "mp4_file=%pwd%_AI_06.mp4"
 
 set bv=9000000
 set bv_min=3000000
@@ -52,12 +52,15 @@ goto :eof
 REM +++ just run python over it to see debug output
 REM pushd "%vs_path%"
 REM cd
-DEL "%ini_file%">NUL 2>&1
-echo [slideshow]>>"%ini_file%"
-echo directory = G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST>>"%ini_file%"
-echo temp_directory = D:\TEMP>>"%ini_file%"
-echo recursive = True>>"%ini_file%"
-type "%ini_file%"
+
+REM DEL "%ini_file%">NUL 2>&1
+REM echo [slideshow]>>"%ini_file%"
+REM echo directory = G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST>>"%ini_file%"
+REM echo temp_directory = D:\TEMP>>"%ini_file%"
+REM echo recursive = True>>"%ini_file%"
+REM echo demug_mode = False>>"%ini_file%"
+REM type "%ini_file%"
+
 REM the script *should* have converted everythng to bt.709
 "%vs_path%python.exe" "%script%"
 REM popd
