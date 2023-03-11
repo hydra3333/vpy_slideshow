@@ -32,15 +32,15 @@ IF NOT EXIST "%ini_file%" (
 	REM type "%ini_file%"
 )
 
-call :using_python_only
+
+call :using_vspipe_input
 goto :eof
 
 call :using_vapoursynth_input
 goto :eof
 
-call :using_vspipe_input
+call :using_python_only
 goto :eof
-
 
 call :convert_to_dvd_mpg
 goto :eof
@@ -127,7 +127,9 @@ set "cmd2=%cmd2%-profile:v high -level 5.2 -movflags +faststart+write_colr "
 set "cmd2=%cmd2%-an "
 set "cmd2=%cmd2%-y "%mp4_file%" "
 
-echo %cmd1% ^| %cmd2%
+echo %cmd1% "pipe" %cmd2%
+echo %cmd1% "pipe" %cmd2% > .\vspipe.txt
+
 %cmd1% | %cmd2%
 REM popd
 goto :eof

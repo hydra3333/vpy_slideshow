@@ -997,7 +997,9 @@ ini_values = default_ini_values
 config = configparser.ConfigParser(default_ini_values[ini_section_name], allow_no_value=False)
 reset_to_ini_defaults = False
 try:
-	config.read_file(open(ini_file_speciying_parameters,'r'))
+	i_f = open(ini_file_speciying_parameters,'r')
+	config.read_file(i_f)
+	i_f.close()
 	if ini_section_name in config:
 		print_DEBUG(f'"{ini_section_name}" is in config, config={objPrettyPrint.pformat(config[ini_section_name])}')
 		for k,v in config[ini_section_name].items():
@@ -1018,11 +1020,14 @@ else:
 	config = configparser.ConfigParser(allow_no_value=False)	# don't apply defaults here, do't want them written to the .ini file
 	config.read_dict(default_ini_values)
 	# re-write the .ini file with newly defaulted values
-	with open(ini_file_speciying_parameters,'w') as configfile:
-		config.write(configfile)
+	o_f = open(ini_file_speciying_parameters,'w')
+	config.write(o_f)
+	o_f.close()
 	# re-read the parameters from the newly re-created .inni file, this tim applying defaults to the read operation
 	config = configparser.ConfigParser(default_ini_values[ini_section_name], allow_no_value=False)
-	config.read_file(open(ini_file_speciying_parameters,'r'))	# no try/except, let it fail this time
+	i_f = open(ini_file_speciying_parameters,'r')	# no try/except, let it fail this time
+	config.read_file(i_f)
+	i_f.close()
 #
 IS_DEBUG = config.getboolean(ini_section_name, "DEBUG_MODE")	# if enabled, turn on DEBUG immediately
 if IS_DEBUG:
