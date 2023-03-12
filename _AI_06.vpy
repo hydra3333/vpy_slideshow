@@ -737,18 +737,20 @@ def get_clip(path):
 	#
 	#++++++++++++++++++++
 	# Add a subtitle being the trailing x parts of the path
-	if calc_ini["ADD_SUBTITLE_DEPTH"] > 0:	# Add a subtitle being up to the trailing calc_ini["SUBTITLE_MAX_DEPTH"] parts of the path
+	if calc_ini["SUBTITLE_DEPTH"] > 0:	# Add a subtitle being up to the trailing calc_ini["SUBTITLE_MAX_DEPTH"] parts of the path
 		pwp = PureWindowsPath(path)
 		num_parts = len(pwp.parts)
-		#text_subpath_for_subtitles = "/" + pwp.parts[n-3] + "/" + pwp.parts[n-2] + "/" +  pwp.parts[n-1]
-		#text_subpath_for_subtitles = "/" + pwp.parts[n-2] + "/" +  pwp.parts[n-1]
-		# (n-10) (n-9)(n-8) (n-7) (n-6) (n-5) (n-4) (n-3) (n-2) (n-1)
 		text_subpath_for_subtitles = ""
-		max_depth_this_time = min((num_parts), calc_ini["SUBTITLE_MAX_DEPTH"], calc_ini["ADD_SUBTITLE_DEPTH"]) # maybe (num_parts-1) should be ) ?
+		max_depth_this_time = min(num_parts-1, calc_ini["SUBTITLE_MAX_DEPTH"], calc_ini["SUBTITLE_DEPTH"]) # maybe (num_parts-1) should be ) ?
+
 		if max_depth_this_time > 0:
-			for i in range(max_depth_this_time, 0, -1): # returns values (x down to 1) # range(start, stop, step) and the final number "stop" is not included in the range
-				text_subpath_for_subtitles = text_subpath_for_subtitles + "/" +  pwp.parts[max_depth_this_time - i]
+			for i in range((num_parts - max_depth_this_time), (num_parts)):
+				text_subpath_for_subtitles = text_subpath_for_subtitles + "/" + pwp.parts[i]
+				print_DEBUG(f'Subtitling loop: num_parts={num_parts} i={i} pwp.parts[{i}]= {pwp.parts[i]} text_subpath_for_subtitles="{text_subpath_for_subtitles}"')
 			clip = core.assrender.Subtitle(clip, text_subpath_for_subtitles, style="sans-serif,18,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0.9,0.5,3,2,2,2,1", colorspace=calc_ini["TARGET_COLORSPACE"])
+			print_DEBUG(f'Subtitling performed. calc_ini["SUBTITLE_DEPTH"]={calc_ini["SUBTITLE_DEPTH"]} pwp={pwp} num_parts={num_parts} max_depth_this_time={max_depth_this_time} text_subpath_for_subtitles="{text_subpath_for_subtitles}"')
+		else:
+			print_DEBUG(f'No subtitling performed since max_depth_this_time <= 0. calc_ini["SUBTITLE_DEPTH"]={calc_ini["SUBTITLE_DEPTH"]} pwp={pwp} num_parts={num_parts} max_depth_this_time={max_depth_this_time}')
 		# To tinker with .ass subs, see https://snapcraft.io/install/aegisub-procles/ubuntu
 		# Also note from an aegisub created .ass file
 		#	Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
@@ -758,9 +760,9 @@ def get_clip(path):
 		# assrender.Subtitle(clip clip, string[] text, [string style="sans-serif,20,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,7,10,10,10,1", int[] start, int[] end, string vfr, int hinting=0, float scale=1.0, float line_spacing=1.0, float dar, float sar, bool set_default_storage_size=True, int top=0, int bottom=0, int left=0, int right=0, string charset, int debuglevel, string fontdir="", string srt_font="sans-serif", string colorspace])
 		#	colorspace Rec2020, BT.2020 Rec709, BT.709, Rec601, BT.601, PC.709, PC.601, TV.fcc, PC.fcc, TV.240m, PC.240m
 		#	When no hint found in ASS script and colorspace parameter is empty then the default is BT.601
-		print_DEBUG(f'No subtitling performed. calc_ini["ADD_SUBTITLE_DEPTH"]={calc_ini["ADD_SUBTITLE_DEPTH"]} pwp={pwp} num_parts={num_parts} max_depth_this_time={max_depth_this_time} text_subpath_for_subtitles="{text_subpath_for_subtitles}"')
+		
 	else:
-		print_DEBUG(f'No subtitling performed. calc_ini["ADD_SUBTITLE_DEPTH"]={calc_ini["ADD_SUBTITLE_DEPTH"]} pwp={pwp} num_parts={num_parts} max_depth_this_time={max_depth_this_time}')
+		print_DEBUG(f'No subtitling performed. calc_ini["SUBTITLE_DEPTH"]={calc_ini["SUBTITLE_DEPTH"]}')
 	#++++++++++++++++++++
 	#
 	return clip
@@ -1000,7 +1002,7 @@ default_ini_values =	{ ini_section_name : {
 							'DIRECTORY' :						fully_qualified_folder_no_trailing_backslash(r'G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\ '.strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
 							'TEMP_DIRECTORY' :					fully_qualified_folder_no_trailing_backslash(r'D:\TEMP\ '.strip()),	# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
 							'RECURSIVE' :						True,
-							'ADD_SUBTITLE_DEPTH' :				1,													# adds a subtitle in the bottom right corner containing the last specified number of  parts of the path to the image/video
+							'SUBTITLE_DEPTH' :					2,													# adds a subtitle in the bottom right corner containing the last specified number of  parts of the path to the image/video
 							'DURATION_PIC_SEC' :				4.0,												### MAXIMUM duration of display of an image, in seconds
 							'DURATION_CROSSFADE_SECS':			1.0,												# 1 sec
 							'DURATION_MAX_VIDEO_SEC' :			60.0,												# Maximum duration of a video clip in seconds (incoming video will get clipped at this point)
@@ -1093,7 +1095,7 @@ if config.has_section(ini_section_name):
 	ini_values[ini_section_name]["DIRECTORY"]					= fully_qualified_folder_no_trailing_backslash(config.get(ini_section_name, 'DIRECTORY'))
 	ini_values[ini_section_name]["TEMP_DIRECTORY"]				= fully_qualified_folder_no_trailing_backslash(config.get(ini_section_name, 'TEMP_DIRECTORY'))
 	ini_values[ini_section_name]["RECURSIVE"]					= config.getboolean(ini_section_name, 'RECURSIVE')
-	ini_values[ini_section_name]["ADD_SUBTITLE_DEPTH"]			= int(config.getint(ini_section_name, 'ADD_SUBTITLE_DEPTH'))
+	ini_values[ini_section_name]["SUBTITLE_DEPTH"]				= int(config.getint(ini_section_name, 'SUBTITLE_DEPTH'))
 	ini_values[ini_section_name]["DURATION_PIC_SEC"]			= float(config.getfloat(ini_section_name, 'DURATION_PIC_SEC'))
 	ini_values[ini_section_name]["DURATION_CROSSFADE_SECS"]		= float(config.getfloat(ini_section_name, 'DURATION_CROSSFADE_SECS'))
 	ini_values[ini_section_name]["DURATION_MAX_VIDEO_SEC"]		= float(config.getfloat(ini_section_name, 'DURATION_MAX_VIDEO_SEC'))
