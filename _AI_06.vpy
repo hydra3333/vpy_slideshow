@@ -1285,24 +1285,6 @@ last_file_opened_with_ffms2 = False
 print_DEBUG(f'================================== created blank_clip with the desired  target properties')
 #++++++++++++++++++++
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#
 clips = blank_clip	# initialize the accumulated clips with a starting small blank clip
 if calc_ini["CROSSFADE_DURATION"]>0:	
 	crossfade_blank_clip = blank_clip[0]*calc_ini["MIN_DURATION_FRAMES"] if len(blank_clip)<calc_ini["MIN_DURATION_FRAMES"] else blank_clip
