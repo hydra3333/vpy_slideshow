@@ -974,12 +974,22 @@ def fully_qualified_folder_no_trailing_backslash(folder_name):
 	if folder_name[-1:] == r'\ '.strip():		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
 		new_folder_name = folder_name[:-1]		# remove any trailing backslash
 	return new_folder_name
-	print(f'Done.', flush=True)
+	print_NORMAL(f'Done.')
 
 ###
-def print_DEBUG(txt):
+def print_DEBUG(*args, **kwargs):	# PRINT TO stderr
+		# per https://stackoverflow.com/questions/5574702/how-do-i-print-to-stderr-in-python
+	# 	eprint("foo", "bar", "baz", sep="---")
+	#	foo---bar---baz
 	if IS_DEBUG:
-		print(f'DEBUG: {txt}', flush=True)
+		print('DEBUG:', *args, **kwargs, file=sys.stderr, flush=True)
+
+def print_NORMAL(*args, **kwargs):	# PRINT TO stderr
+	# per https://stackoverflow.com/questions/5574702/how-do-i-print-to-stderr-in-python
+	# 	eprint_NORMAL("foo", "bar", "baz", sep="---")
+	#	foo---bar---baz
+	print(*args, **kwargs, file=sys.stderr, flush=True)
+
 
 ###################################################################################################################################################
 ###################################################################################################################################################
@@ -1055,17 +1065,17 @@ try:
 		for k,v in config[ini_section_name].items():
 			print_DEBUG(f'config["{ini_section_name}"]["{k}"] = "{v}"')
 	else:
-		print(f'WARNING: "{ini_section_name}" is NOT found in config.', flush=True)
-		print(f'WARNING: Missing section "{ini_section_name}" in .ini file "{ini_file_speciying_parameters}"', flush=True)
+		print_NORMAL(f'WARNING: "{ini_section_name}" is NOT found in config.')
+		print_NORMAL(f'WARNING: Missing section "{ini_section_name}" in .ini file "{ini_file_speciying_parameters}"')
 		reset_to_ini_defaults = True
 except:
-	print(f'WARNING: Missing and/or error reading .ini file "{ini_file_speciying_parameters}"', flush=True)
+	print_NORMAL(f'WARNING: Missing and/or error reading .ini file "{ini_file_speciying_parameters}"')
 	reset_to_ini_defaults = True
 #
 if not reset_to_ini_defaults:
-	print(f'Using settings from .ini file "{ini_file_speciying_parameters}"', flush=True)
+	print_NORMAL(f'Using settings from .ini file "{ini_file_speciying_parameters}"')
 else:
-	print(f'Reverting to default settngs', flush=True)
+	print_NORMAL(f'Reverting to default settngs')
 	# revert to default values
 	config = configparser.ConfigParser(allow_no_value=False)	# don't apply defaults here, do't want them written to the .ini file
 	config.read_dict(default_ini_values)
@@ -1171,7 +1181,7 @@ with open(ini_file_speciying_parameters, 'w') as configfile:
 	update_config[tmp_name] = tmp_dict[tmp_name]
 	# update the .ini file
 	update_config.write(configfile)
-print(f'Saved updated .ini "{ini_file_speciying_parameters}"', flush=True)
+print_NORMAL(f'Saved updated .ini "{ini_file_speciying_parameters}"')
 
 # calculate some values and create a new updated calculated values dict
 calc_ini = ini_values[ini_section_name]
@@ -1234,7 +1244,7 @@ else:
 	glob_var="*.*"				# non-recursive
 	ff_glob_var="*.ffindex"		# for .ffindex file deletion non-recursive
 # glob : with DIRECTORY not having a trailing slash !!!
-print(f'Start processing image/video files in "{calc_ini["DIRECTORY"]}" recursive={calc_ini["RECURSIVE"]} debug={calc_ini["DEBUG_MODE"]}  glob_var="{glob_var}" \n      with Extensions={objPrettyPrint.pformat(calc_ini["EXTENSIONS"])}', flush=True)
+print_NORMAL(f'Start processing image/video files in "{calc_ini["DIRECTORY"]}" recursive={calc_ini["RECURSIVE"]} debug={calc_ini["DEBUG_MODE"]}  glob_var="{glob_var}" \n      with Extensions={objPrettyPrint.pformat(calc_ini["EXTENSIONS"])}')
 Count_of_files = 0
 # NOTE: calc_ini["DIRECTORY"] MUST NOT have a trailing backslash ... remove during ini setup
 paths = Path(calc_ini["DIRECTORY"]).glob(glob_var) # generator of all paths in a directory, files starting with . won't be matched by default
@@ -1294,11 +1304,11 @@ while not (path is None):	# first clip already pre-retrieved ready for this whil
 	print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
 	print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
 	Count_of_files = Count_of_files + 1
-	print(f'processing {Count_of_files} {str(path)}', flush=True)
+	print_NORMAL(f'processing {Count_of_files} {str(path)}')
 	#if (Count_of_files % 10)==0:
-	#	print(f'{Count_of_files},',end="", flush=True)	# https://www.geeksforgeeks.org/gfact-50-python-end-parameter-in-print/
+	#	print_NORMAL(f'{Count_of_files},',end="")	# https://www.geeksforgeeks.org/gfact-50-python-end-parameter-in-print/
 	#	if (Count_of_files % (10*10*3))==0:
-	#		print(f'', flush=True)
+	#		print_NORMAL(f'')
 	this_clip = get_clip(path)
 	#this_clip = core.text.Text(this_clip, text_subpath_for_subtitles, alignment=9, scale=1)
 	#this_clip = core.text.FrameNum(this_clip, alignment=2, scale=1)
@@ -1324,9 +1334,9 @@ if calc_ini["CROSSFADE_DURATION"]>0:
 	clips = clips + crossfade_clip + this_clip
 clips = clips + blank_clip		# end the accumulated clips with a finishing small blank clip
 clips = clips.std.AssumeFPS(fpsnum=calc_ini["TARGET_FPSNUM"], fpsden=calc_ini["TARGET_FPSDEN"])
-print(f'Finished processing {Count_of_files} image/video files.', flush=True)
+print_NORMAL(f'Finished processing {Count_of_files} image/video files.')
 # Cleanup any temporary .ffindex files created by ffms2
-print(f'Start removing temporary *.ffindex files from folder "{calc_ini["DIRECTORY"]}" with recursive="{calc_ini["RECURSIVE"]}" ...')
+print_NORMAL(f'Start removing temporary *.ffindex files from folder "{calc_ini["DIRECTORY"]}" with recursive="{calc_ini["RECURSIVE"]}" ...')
 pp = calc_ini["DIRECTORY"] + "/" + ff_glob_var
 ffindex_files = glob.glob(pp, recursive=calc_ini["RECURSIVE"])
 Count_of_files_removed = 0
@@ -1337,14 +1347,14 @@ for ff in ffindex_files:
 			print_DEBUG(f'removing {Count_of_files_removed} {ff}')
 			os.remove(ff)
 			#if (Count_of_files_removed % (10))==0:
-			#	print(f'{Count_of_files_removed},', end='', flush=True)	# https://www.geeksforgeeks.org/gfact-50-python-end-parameter-in-print/
+			#	print_NORMAL(f'{Count_of_files_removed},', end='')	# https://www.geeksforgeeks.org/gfact-50-python-end-parameter-in-print/
 			#	if (Count_of_files_removed % (10*10*3))==0:
-			#		print(f'', flush=True)
+			#		print_NORMAL(f'')
 		except OSError as ee:
-			print(f'ERROR:  error during removal of ffindex file: {ff} :{ee} : {ee.strerror}', flush=True)
+			print_NORMAL(f'ERROR:  error during removal of ffindex file: {ff} :{ee} : {ee.strerror}')
 			raise ValueError(f'ERROR: error during removal of ffindex file: {ff} :{ee} : {ee.strerror}')
-print(f'Finished removing {Count_of_files_removed} temporary .ffindex files from folder "{calc_ini["DIRECTORY"]}" with recursive="{calc_ini["RECURSIVE"]}"', flush=True)
+print_NORMAL(f'Finished removing {Count_of_files_removed} temporary .ffindex files from folder "{calc_ini["DIRECTORY"]}" with recursive="{calc_ini["RECURSIVE"]}"')
 # hmm, audio ? maybe later using source filter "bas" ?
-print(f'Done.', flush=True)
+print_NORMAL(f'Done.')
 clips.set_output()
 #------
