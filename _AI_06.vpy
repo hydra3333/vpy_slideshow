@@ -681,20 +681,21 @@ def get_clip(path):
 		clip = core.std.SetFrameProps(clip, _ColorRange=clip_specs["proposed_ColorRange"])
 	#
 	#++++++++++++++++++++
-	# Apply an auto-rotate if specified in the source file (perhaps in an image, some do, if at all)
-	if clip_specs["auto_rotation_degrees"] == 0:
-		print_DEBUG(f'get_clip: zero auto-rotation of clip {path}')
-	if clip_specs["auto_rotation_degrees"] == 90:
-		print_DEBUG(f'get_clip: auto-Rotating by 90 degrees {path}')
-		clip = clip.std.Transpose().std.FlipVertical()	# ??? works for images ???
-	elif clip_specs["auto_rotation_degrees"] == 180:
-		print_DEBUG(f'get_clip: auto-Rotating by 180 degrees {path}')
-		clip = clip.std.Turn180()
-	elif clip_specs["auto_rotation_degrees"] == 270:
-		print_DEBUG(f'get_clip: auto-Rotating by 270 degrees {path}')
-		clip = clip.std.Transpose().std.FlipHorizontal()
-	else:
-		raise ValueError('ERROR: get_clip: auto_rotation_degrees "{clip_specs["auto_rotation_degrees"]}" unable to be processed for "{path}" : only 0,90,180,270 are valid')
+	# Apply an auto-rotate if specified in the source file ... for an image only)
+	if path.suffix.lower() in calc_ini["PIC_EXTENSIONS"]:
+		if clip_specs["auto_rotation_degrees"] == 0:
+			print_DEBUG(f'get_clip: zero auto-rotation of clip {path}')
+		if clip_specs["auto_rotation_degrees"] == 90:
+			print_DEBUG(f'get_clip: auto-Rotating by 90 degrees {path}')
+			clip = clip.std.Transpose().std.FlipVertical()	# ??? works for images ???
+		elif clip_specs["auto_rotation_degrees"] == 180:
+			print_DEBUG(f'get_clip: auto-Rotating by 180 degrees {path}')
+			clip = clip.std.Turn180()
+		elif clip_specs["auto_rotation_degrees"] == 270:
+			print_DEBUG(f'get_clip: auto-Rotating by 270 degrees {path}')
+			clip = clip.std.Transpose().std.FlipHorizontal()
+		else:
+			raise ValueError('ERROR: get_clip: auto_rotation_degrees "{clip_specs["auto_rotation_degrees"]}" unable to be processed for "{path}" : only 0,90,180,270 are valid')
 	#++++++++++++++++++++
 	#
 	# do video-specific or picture-specific changes
