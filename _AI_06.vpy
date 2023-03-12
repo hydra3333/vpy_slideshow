@@ -201,41 +201,6 @@
 #			"C:\SOFTWARE\Vapoursynth-x64\python.exe" "G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\_AI_05.vpy"
 #			popd
 #
-# ???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
-# ???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
-# ???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
-# ???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
-# ???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
-# ???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
-# ???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
-# DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN 
-# DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN 
-# DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN 
-#
-# Note the inequality test result without the "int()" for items 3 and 7 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# So we MUST put "int" etc around values we poke into dicionaries like calc_ini !!!
-#
-# DEBUG: 1. before range resizer choice ZIMG_RANGE_FULL=1 ZIMG_RANGE_LIMITED=0 vs.ColorRange.RANGE_LIMITED.value=1 vs.ColorRange.RANGE_FULL.value=0 calc_ini["TARGET_COLOR_RANGE_I"]=0
-# DEBUG: 2. before range resizer choice calc_ini["TARGET_COLOR_RANGE_I"] 0 == vs.ColorRange.RANGE_LIMITED.value 1 = False
-# DEBUG: 3. before range resizer choice calc_ini["TARGET_COLOR_RANGE_I"] 0 == vs.ColorRange.RANGE_FULL.value 0 = False				<<<<<<<<<<<<<<<<<<<<<<<--------------------
-# DEBUG: 4. before range resizer choice int(calc_ini["TARGET_COLOR_RANGE_I"]) 0 == vs.ColorRange.RANGE_LIMITED.value) 1 = False
-# DEBUG: 5. before range resizer choice int(calc_ini["TARGET_COLOR_RANGE_I"]) 0 == vs.ColorRange.RANGE_FULL.value) 0 = True
-# DEBUG: 6. before range resizer choice calc_ini["TARGET_COLOR_RANGE_I"] 0 == int(vs.ColorRange.RANGE_LIMITED.value) 1 = False
-# DEBUG: 7. before range resizer choice calc_ini["TARGET_COLOR_RANGE_I"] 0 == int(vs.ColorRange.RANGE_FULL.value) 0 = False			<<<<<<<<<<<<<<<<<<<<<<<--------------------
-# DEBUG: 8. before range resizer choice int(calc_ini["TARGET_COLOR_RANGE_I"]) 0 == int(vs.ColorRange.RANGE_LIMITED.value) 1 = False
-# DEBUG: 9. before range resizer choice int(calc_ini["TARGET_COLOR_RANGE_I"]) 0 == int(vs.ColorRange.RANGE_FULL.value) 0 = True
-#
-# DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN 
-# DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN 
-# DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN DAMN 
-# ???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
-# ???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
-# ???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
-# ???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
-# ???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
-# ???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
-#
-#
 import vapoursynth as vs
 from vapoursynth import core
 from fractions import Fraction
@@ -276,7 +241,7 @@ global last_file_opened_with_LibavSMASHSource
 #	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
 #	ZIMG_RANGE_FULL     = 1   /**< Full (PC) dynamic range, 0-255 in 8 bits. */
 # but when obtaining from frame properties and comparing etc, use the vs values from
-# frame properties even though the values are incorrect (opposite to the spec)
+# frame properties even though the vapoursynth values are incorrect (opposite to the spec)
 #
 ZIMG_RANGE_LIMITED  = 0		# /**< Studio (TV) legal range, 16-235 in 8 bits. */
 ZIMG_RANGE_FULL     = 1		# /**< Full (PC) dynamic range, 0-255 in 8 bits. */
@@ -341,22 +306,6 @@ def resize_clip(clip,w,h):
 		resize = getattr(clip.resize, calc_ini["DOWNSIZE_KERNEL"])	# get the resize function object ?handle? with the nominated kernel
 		xyz = "DOWNSIZE_KERNEL"
 	print_DEBUG(f'resize_clip: incoming clip w={clip.width}\th={clip.height}   resize_clip:   func params w={w}\th={h}   resize_clip: kernel to use {xyz}')
-	
-	# https://github.com/vapoursynth/vapoursynth/issues/940#issuecomment-1465041338
-	# When calling rezisers etc, ONLY use these values:
-	#	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
-	#	ZIMG_RANGE_FULL     = 1   /**< Full (PC) dynamic range, 0-255 in 8 bits. */
-	# but when obtaining from frame properties and comparing etc, use the vs values from
-	# frame properties even though the values are incorrect (opposite to the spec)
-	#
-	resizer_range_value_to_use = ZIMG_RANGE_FULL
-	if calc_ini["TARGET_COLOR_RANGE_I"] == int(vs.ColorRange.RANGE_LIMITED.value):
-		resizer_range_value_to_use = ZIMG_RANGE_FULL		# ZIMG_RANGE_FULL and ZIMG_RANGE_LIMITED defined as conmstants above
-	elif calc_ini["TARGET_COLOR_RANGE_I"] == int(vs.ColorRange.RANGE_FULL.value):
-		resizer_range_value_to_use = ZIMG_RANGE_LIMITED		# ZIMG_RANGE_FULL and ZIMG_RANGE_LIMITED defined as conmstants above
-	else:
-		raise ValueError(f'ERROR: calc_ini["TARGET_COLOR_RANGE_I"]={calc_ini["TARGET_COLOR_RANGE_I"]} is an invalid value')
-	
 	if clip.format.color_family==vs.RGB:
 		#rgb to YUV, perhaps only for png images, figure out what matrix out is needed ... use the HD one REC.709
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
@@ -366,20 +315,12 @@ def resize_clip(clip,w,h):
 		print_DEBUG(f'resize_clip: clip.format.color_family==vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB}')
 		with clip.get_frame(0) as f:
 			print_DEBUG(f'resize_clip: incoming frame properties before RGB resize: w={clip.width} h={clip.height} {objPrettyPrint.pformat(f.props)}')
-		print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, resizer_range_value_to_use={resizer_range_value_to_use} (vs range={calc_ini["TARGET_COLOR_RANGE_I"]}), primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
+		print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, calc_ini["TARGET_COLOR_RANGE_I_ZIMG"]={calc_ini["TARGET_COLOR_RANGE_I_ZIMG"]}), primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
 		# https://www.vapoursynth.com/doc/functions/video/resize.html
 		# https://www.itu.int/rec/T-REC-H.265
-		# NOTE THESE IN REGARD TO VS "bug" in RANGE values not agreeing with the spec:
-		#	https://github.com/vapoursynth/vapoursynth/issues/940
-		#	https://github.com/vapoursynth/vapoursynth/issues/857
-		# https://github.com/vapoursynth/vapoursynth/issues/940#issuecomment-1465041338
-		# When calling rezisers etc, ONLY use these values:
-		#	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
-		#	ZIMG_RANGE_FULL     = 1   /**< Full (PC) dynamic range, 0-255 in 8 bits. */
-		# but when obtaining from frame properties and comparing etc, use the vs values from
-		# frame properties even though the values are incorrect (opposite to the spec)
 		#c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix_s=calc_ini["TARGET_COLORSPACE_MATRIX_S"])
-		c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix=calc_ini["TARGET_COLORSPACE_MATRIX_I"], transfer=calc_ini["TARGET_COLOR_TRANSFER_I"], primaries=calc_ini["TARGET_COLOR_PRIMARIES_I"], range=calc_ini["TARGET_COLOR_RANGE_I"])
+		c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix=calc_ini["TARGET_COLORSPACE_MATRIX_I"], transfer=calc_ini["TARGET_COLOR_TRANSFER_I"], primaries=calc_ini["TARGET_COLOR_PRIMARIES_I"], range=calc_ini["TARGET_COLOR_RANGE_I_ZIMG"])
+		c = core.std.AssumeFPS(clip=c, fpsnum=calc_ini["TARGET_FPSNUM"], fpsden=calc_ini["TARGET_FPSNUM"])
 		with c.get_frame(0) as f:
 			print_DEBUG(f'resize_clip: outgoing frame properties after RGB resize: w={c.width} h={c.height} {objPrettyPrint.pformat(f.props)}')
 		return c
@@ -391,20 +332,12 @@ def resize_clip(clip,w,h):
 		print_DEBUG(f'resize_clip: clip.format.color_family==vs.YUV: clip.format.color_family={clip.format.color_family} vs.YUV={vs.YUV}')
 		with clip.get_frame(0) as f:
 			print_DEBUG(f'resize_clip: incoming frame properties before YUV resize: w={clip.width} h={clip.height} {objPrettyPrint.pformat(f.props)}')
-		print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, resizer_range_value_to_use={resizer_range_value_to_use} (vs range={calc_ini["TARGET_COLOR_RANGE_I"]}), primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
+		print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, calc_ini["TARGET_COLOR_RANGE_I_ZIMG"]={calc_ini["TARGET_COLOR_RANGE_I_ZIMG"]}), primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
 		# https://www.vapoursynth.com/doc/functions/video/resize.html
 		# https://www.itu.int/rec/T-REC-H.265
-		# NOTE THESE IN REGARD TO VS "bug" in RANGE values not agreeing with the spec:
-		#	https://github.com/vapoursynth/vapoursynth/issues/940
-		#	https://github.com/vapoursynth/vapoursynth/issues/857
-		# https://github.com/vapoursynth/vapoursynth/issues/940#issuecomment-1465041338
-		# When calling rezisers etc, ONLY use these values:
-		#	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
-		#	ZIMG_RANGE_FULL     = 1   /**< Full (PC) dynamic range, 0-255 in 8 bits. */
-		# but when obtaining from frame properties and comparing etc, use the vs values from
-		# frame properties even though the values are incorrect (opposite to the spec)
 		#c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix_s=calc_ini["TARGET_COLORSPACE_MATRIX_S"])
-		c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix=calc_ini["TARGET_COLORSPACE_MATRIX_I"], transfer=calc_ini["TARGET_COLOR_TRANSFER_I"], primaries=calc_ini["TARGET_COLOR_PRIMARIES_I"], range=calc_ini["TARGET_COLOR_RANGE_I"])	
+		c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix=calc_ini["TARGET_COLORSPACE_MATRIX_I"], transfer=calc_ini["TARGET_COLOR_TRANSFER_I"], primaries=calc_ini["TARGET_COLOR_PRIMARIES_I"], range=calc_ini["TARGET_COLOR_RANGE_I_ZIMG"])	
+		c = core.std.AssumeFPS(clip=c, fpsnum=calc_ini["TARGET_FPSNUM"], fpsden=calc_ini["TARGET_FPSNUM"])
 		# AH !!! the above line with matrix_s='709' can cause this error:
 		# If you get an error like:
 		# 		Resize error 3074: no path between colorspaces (2/2/2 => 1/1/1). May need to specify additional colorspace parameters.
@@ -422,20 +355,12 @@ def resize_clip(clip,w,h):
 		print_DEBUG(f'resize_clip: non-vs.RGB,non-vs.YUV clip.format.color_family!=vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB} vs.YUV={vs.YUV}')
 		with clip.get_frame(0) as f:
 			print_DEBUG(f'resize_clip: incoming frame properties before non-vs.RGB,non-vs.YUV resize: w={clip.width} h={clip.height} {objPrettyPrint.pformat(f.props)}')
-		print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, resizer_range_value_to_use={resizer_range_value_to_use} (vs range={calc_ini["TARGET_COLOR_RANGE_I"]}), primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
+		print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, calc_ini["TARGET_COLOR_RANGE_I_ZIMG"]={calc_ini["TARGET_COLOR_RANGE_I_ZIMG"]}), primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
 		# https://www.vapoursynth.com/doc/functions/video/resize.html
 		# https://www.itu.int/rec/T-REC-H.265
-		# NOTE THESE IN REGARD TO VS "bug" in RANGE values not agreeing with the spec:
-		#	https://github.com/vapoursynth/vapoursynth/issues/940
-		#	https://github.com/vapoursynth/vapoursynth/issues/857
-		# https://github.com/vapoursynth/vapoursynth/issues/940#issuecomment-1465041338
-		# When calling rezisers etc, ONLY use these values:
-		#	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
-		#	ZIMG_RANGE_FULL     = 1   /**< Full (PC) dynamic range, 0-255 in 8 bits. */
-		# but when obtaining from frame properties and comparing etc, use the vs values from
-		# frame properties even though the values are incorrect (opposite to the spec)
 		#c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix_s=calc_ini["TARGET_COLORSPACE_MATRIX_S"])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
-		c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix=calc_ini["TARGET_COLORSPACE_MATRIX_I"], transfer=calc_ini["TARGET_COLOR_TRANSFER_I"], primaries=calc_ini["TARGET_COLOR_PRIMARIES_I"], range=calc_ini["TARGET_COLOR_RANGE_I"])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+		c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"], matrix=calc_ini["TARGET_COLORSPACE_MATRIX_I"], transfer=calc_ini["TARGET_COLOR_TRANSFER_I"], primaries=calc_ini["TARGET_COLOR_PRIMARIES_I"], range=calc_ini["TARGET_COLOR_RANGE_I_ZIMG"])	# https://www.vapoursynth.com/doc/functions/video/resize.html# https://www.itu.int/rec/T-REC-H.265
+		c = core.std.AssumeFPS(clip=c, fpsnum=calc_ini["TARGET_FPSNUM"], fpsden=calc_ini["TARGET_FPSNUM"])
 		# AH !!! the avove line with matrix_s='709' can cause this error:
 		# If you get an error like:
 		# 		Resize error 3074: no path between colorspaces (2/2/2 => 1/1/1). May need to specify additional colorspace parameters.
@@ -456,7 +381,9 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	if clip is None:
 		raise ValueError(f'ERROR: get_clip_specs: "clip" not passed as an argument to get_clip_specs')
 	if path is None:
-		raise ValueError(f'ERROR: get_clip_specs: "path" not passed as an argument to get_clip_specs')
+		##raise ValueError(f'ERROR: get_clip_specs: "path" not passed as an argument to get_clip_specs')
+		# we can use get_clip_specs on any clip including blank_clip and forego rotation checks if we check for is None then
+		pass
 	if ext is None:
 		raise ValueError(f'ERROR: get_clip_specs: "ext" not passed as an argument to get_clip_specs')
 	#
@@ -494,15 +421,6 @@ def get_clip_specs(clip=None, path=None, ext=None):
 		clip_specs["_Matrix"] = f.props["_Matrix"] if "_Matrix" in f.props else None
 		clip_specs["_Transfer"] = f.props["_Transfer"] if "_Transfer" in f.props else None
 		clip_specs["_Primaries"] = f.props["_Primaries"] if "_Primaries" in f.props else None
-		# NOTE THESE IN REGARD TO VS "bug" in RANGE values not agreeing with the spec:
-		#	https://github.com/vapoursynth/vapoursynth/issues/940
-		#	https://github.com/vapoursynth/vapoursynth/issues/857
-		# https://github.com/vapoursynth/vapoursynth/issues/940#issuecomment-1465041338
-		# When calling rezisers etc, ONLY use these values:
-		#	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
-		#	ZIMG_RANGE_FULL     = 1   /**< Full (PC) dynamic range, 0-255 in 8 bits. */
-		# but when obtaining from frame properties and comparing etc, use the vs values from
-		# frame properties even though the values are incorrect (opposite to the spec)
 		clip_specs["_ColorRange"] = f.props["_ColorRange"] if "_ColorRange" in f.props else None
 		clip_specs["_ChromaLocation"] = f.props["_ChromaLocation"] if  "_ChromaLocation" in f.props else None
 		clip_specs["_DurationDen"] = f.props["_DurationDen"] if "_DurationDen" in f.props else None
@@ -513,15 +431,6 @@ def get_clip_specs(clip=None, path=None, ext=None):
 		print_DEBUG(f'get_clip_specs: frame properties f.props["_Matrix"] = {clip_specs["_Matrix"]}')
 		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_Transfer"] = {clip_specs["_Transfer"]}')
 		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_Primaries"] = {clip_specs["_Primaries"]}')
-		# NOTE THESE IN REGARD TO VS "bug" in RANGE values not agreeing with the spec:
-		#	https://github.com/vapoursynth/vapoursynth/issues/940
-		#	https://github.com/vapoursynth/vapoursynth/issues/857
-		# https://github.com/vapoursynth/vapoursynth/issues/940#issuecomment-1465041338
-		# When calling rezisers etc, ONLY use these values:
-		#	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
-		#	ZIMG_RANGE_FULL     = 1   /**< Full (PC) dynamic range, 0-255 in 8 bits. */
-		# but when obtaining from frame properties and comparing etc, use the vs values from
-		# frame properties even though the values are incorrect (opposite to the spec)
 		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_ColorRange"] = {clip_specs["_ColorRange"]}')
 		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_ChromaLocation"] = {clip_specs["_ChromaLocation"]}')
 		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_DurationDen"] = {clip_specs["_DurationDen"]}')
@@ -530,10 +439,13 @@ def get_clip_specs(clip=None, path=None, ext=None):
 		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_PictType"] = {clip_specs["_PictType"]}') # a byte character eg 'I'
 
 	# check for picture/video rotation specified perhaps in EXIF but not auto-processed here by the file openers
-	if ext in calc_ini["VID_EEK_EXTENSIONS"]:
-		rotation_value = auto_rotation_value_MediaInfo(clip, path)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
-	else: # source is not a video type, i.e. an image
-		rotation_value = clip = auto_rotation_value_PIL(clip, path)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
+	if path is None:
+		rotation_value = 0
+	else:	
+		if ext in calc_ini["VID_EEK_EXTENSIONS"]:
+			rotation_value = auto_rotation_value_MediaInfo(clip, path)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
+		else: # source is not a video type, i.e. an image
+			rotation_value = clip = auto_rotation_value_PIL(clip, path)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
 	clip_specs["auto_rotation_degrees"] = rotation_value
 	clip_specs["opened_with_ffms2"] = last_file_opened_with_ffms2
 	clip_specs["opened_with_imwri"] = last_file_opened_with_imwri
@@ -545,7 +457,7 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	# explainer https://docs.rs/av-data/0.4.1/av_data/pixel/index.html https://docs.rs/av-data/0.4.1/av_data/pixel/enum.MatrixCoefficients.html
 	clip_specs["guessed_Matrix"] = False
 	clip_specs["proposed_Matrix"] = clip_specs["_Matrix"]
-	if  clip_specs["_Matrix"] == vs.MatrixCoefficients.MATRIX_UNSPECIFIED:	# _Matrix is usually defined and the rest may not be. (ffms2 usually yields MATRIX_BT470_BG)
+	if  clip_specs["_Matrix"] == vs.MatrixCoefficients.MATRIX_UNSPECIFIED or clip_specs["_Matrix"] is None:	# _Matrix is usually defined and the rest may not be. (ffms2 usually yields MATRIX_BT470_BG)
 		print_DEBUG(f'get_clip_specs: MatrixCoefficients.MATRIX_UNSPECIFIED: incoming clip_specs=\n{objPrettyPrint.pformat(clip_specs)}')
 		clip_specs["guessed_Matrix"] = True
 		if ext in calc_ini["PIC_EXTENSIONS"]:	#PIC # assume opened by ffms2 (ffms2 usually yields MATRIX_BT470_BG for images)
@@ -631,7 +543,7 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	# explainer https://docs.rs/av-data/0.4.1/av_data/pixel/index.html https://docs.rs/av-data/0.4.1/av_data/pixel/enum.ColorPrimaries.html
 	clip_specs["guessed_Primaries"] = False
 	clip_specs["proposed_Primaries"] = clip_specs["_Primaries"]
-	if  clip_specs["_Primaries"] == vs.ColorPrimaries.PRIMARIES_UNSPECIFIED:
+	if  clip_specs["_Primaries"] == vs.ColorPrimaries.PRIMARIES_UNSPECIFIED or clip_specs["_Primaries"] is None:
 		print_DEBUG(f'get_clip_specs: ColorPrimaries.PRIMARIES_UNSPECIFIED: incoming clip_specs=\n{objPrettyPrint.pformat(clip_specs)}')
 		clip_specs["guessed_Primaries"] = True
 		if clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_ST170_M:
@@ -651,7 +563,7 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	# explainer https://docs.rs/av-data/0.4.1/av_data/pixel/index.html https://docs.rs/av-data/0.4.1/av_data/pixel/enum.TransferCharacteristic.html
 	clip_specs["guessed_Transfer"] = False
 	clip_specs["proposed_Transfer"] = clip_specs["_Transfer"]
-	if  clip_specs["_Transfer"] == vs.TransferCharacteristics.TRANSFER_UNSPECIFIED:
+	if  clip_specs["_Transfer"] == vs.TransferCharacteristics.TRANSFER_UNSPECIFIED or clip_specs["_Transfer"] is None:
 		print_DEBUG(f'get_clip_specs: ColorPrimaries.PRIMARIES_UNSPECIFIED: incoming clip_specs=\n{objPrettyPrint.pformat(clip_specs)}')
 		clip_specs["guessed_Transfer"] = True
 		if clip_specs["proposed_Matrix"] == vs.MatrixCoefficients.MATRIX_ST170_M:
@@ -696,10 +608,13 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	#	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
 	#	ZIMG_RANGE_FULL     = 1   /**< Full (PC) dynamic range, 0-255 in 8 bits. */
 	# but when obtaining from frame properties and comparing etc, use the vs values from
-	# frame properties even though the values are incorrect (opposite to the spec)
+	# frame properties even though the vapoursynth values are incorrect (opposite to the spec)
+	# BUT BUT BUT here we are working solely with vapoursynth settings, not resizers, so stick with using vapoursynth constants and not zimg ones
 	clip_specs["guessed_ColorRange"] = False
 	clip_specs["proposed_ColorRange"] = clip_specs["_ColorRange"]
-	#clip_specs["proposed_ColorRange"] = vs.ColorRange.RANGE_FULL
+	if clip_specs["_ColorRange"] is None:
+		clip_specs["guessed_ColorRange"] = True
+		clip_specs["proposed_ColorRange"] = vs.ColorRange.RANGE_FULL
 
 	# **********
 	# guess at a possible incoming colour source
@@ -781,10 +696,11 @@ def get_clip(path):
 	#	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
 	#	ZIMG_RANGE_FULL     = 1   /**< Full (PC) dynamic range, 0-255 in 8 bits. */
 	# but when obtaining from frame properties and comparing etc, use the vs values from
-	# frame properties even though the values are incorrect (opposite to the spec)
+	# frame properties even though the vapoursynth values are incorrect (opposite to the spec)
+	# BUT BUT BUT here we are working solely with vapoursynth settings, not resizers, so stick with using vapoursynth constants and not zimg ones
 	if clip_specs["guessed_ColorRange"]:
 		print_DEBUG(f'get_clip: SetFrameProps _ColorRange from existing "{clip_specs["_ColorRange"]}" to guessed "{clip_specs["proposed_ColorRange"]}"')
-		clip = core.std.SetFrameProps(clip, _Transfer=clip_specs["proposed_Transfer"])
+		clip = core.std.SetFrameProps(clip, _ColorRange=clip_specs["proposed_ColorRange"])
 	#
 	#++++++++++++++++++++
 	# Apply an auto-rotate if specified in the source file (perhaps in an image, some do, if at all)
@@ -1016,14 +932,14 @@ def perform_rotation_PIL(clip, path, save_rotated_image=False):
 	if is_DEBUG:
 		exif = image.getexif()
 		print_exif_data(exif)
-		print_DEBUG('')
+		print_DEBUG(f'')
 		print_exif_data(exif.get_ifd(0x8769))
-		print_DEBUG('')
+		print_DEBUG(f'')
 		#
 		print_exif_data2(image.getexif())
-		print_DEBUG('')
+		print_DEBUG(f'')
 		print_exif_data(image._getexif())
-		print_DEBUG('')
+		print_DEBUG(f'')
 	image.close()	
 	return clip
 
@@ -1108,7 +1024,8 @@ default_ini_values =	{ ini_section_name : {
 							#	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
 							#	ZIMG_RANGE_FULL     = 1   /**< Full (PC) dynamic range, 0-255 in 8 bits. */
 							# but when obtaining from frame properties and comparing etc, use the vs values from
-							# frame properties even though the values are incorrect (opposite to the spec)
+							# frame properties even though the vapoursynth values are incorrect (opposite to the spec)
+							# BUT BUT BUT here we are working solely with vapoursynth settings, not resizers, so stick with using vapoursynth constants and not zimg ones
 							'TARGET_COLOR_RANGE' :				r'pc',	
 							'TARGET_COLOR_RANGE_S' :			r'pc',												# for resize
 							'TARGET_COLOR_RANGE_I' :			int(vs.ColorRange.RANGE_FULL.value),
@@ -1127,7 +1044,6 @@ default_ini_values =	{ ini_section_name : {
 							}
 						}
 ini_values = default_ini_values
-#
 config = configparser.ConfigParser(default_ini_values[ini_section_name], allow_no_value=False)
 reset_to_ini_defaults = False
 try:
@@ -1183,15 +1099,6 @@ if config.has_section(ini_section_name):
 	ini_values[ini_section_name]["TARGET_COLOR_PRIMARIES"]		= config.get(ini_section_name, 'TARGET_COLOR_PRIMARIES')
 	ini_values[ini_section_name]["TARGET_COLOR_PRIMARIES_S"]	= config.get(ini_section_name, 'TARGET_COLOR_PRIMARIES_S')
 	ini_values[ini_section_name]["TARGET_COLOR_PRIMARIES_I"]	= int(config.get(ini_section_name, 'TARGET_COLOR_PRIMARIES_I'))
-	# NOTE THESE IN REGARD TO VS "bug" in RANGE values not agreeing with the spec:
-	#	https://github.com/vapoursynth/vapoursynth/issues/940
-	#	https://github.com/vapoursynth/vapoursynth/issues/857
-	# https://github.com/vapoursynth/vapoursynth/issues/940#issuecomment-1465041338
-	# When calling rezisers etc, ONLY use these values:
-	#	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
-	#	ZIMG_RANGE_FULL     = 1   /**< Full (PC) dynamic range, 0-255 in 8 bits. */
-	# but when obtaining from frame properties and comparing etc, use the vs values from
-	# frame properties even though the values are incorrect (opposite to the spec)
 	ini_values[ini_section_name]["TARGET_COLOR_RANGE"]			= config.get(ini_section_name, 'TARGET_COLOR_RANGE')
 	ini_values[ini_section_name]["TARGET_COLOR_RANGE_S"]		= config.get(ini_section_name, 'TARGET_COLOR_RANGE_S')
 	ini_values[ini_section_name]["TARGET_COLOR_RANGE_I"]		= int(config.get(ini_section_name, 'TARGET_COLOR_RANGE_I'))
@@ -1208,7 +1115,6 @@ if config.has_section(ini_section_name):
 	ini_values[ini_section_name]["DOWNSIZE_KERNEL"]				= config.get(ini_section_name, 'DOWNSIZE_KERNEL')
 else:
 	raise ValueError(f'ERROR: .ini file unable to be read or recreated properly')
-	
 # add clarifying information to and re-save the updated set of .ini values over the top of the existing .ini file
 with open(ini_file_speciying_parameters, 'w') as configfile:
 	# add the new set of .ini value to be saved
@@ -1232,15 +1138,6 @@ with open(ini_file_speciying_parameters, 'w') as configfile:
 	for v in vs.ColorPrimaries:
 		tmp_dict[tmp_name][str(v)] = v.value
 		pass
-	# NOTE THESE IN REGARD TO VS "bug" in RANGE values not agreeing with the spec:
-	#	https://github.com/vapoursynth/vapoursynth/issues/940
-	#	https://github.com/vapoursynth/vapoursynth/issues/857
-	# https://github.com/vapoursynth/vapoursynth/issues/940#issuecomment-1465041338
-	# When calling rezisers etc, ONLY use these values:
-	#	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
-	#	ZIMG_RANGE_FULL     = 1   /**< Full (PC) dynamic range, 0-255 in 8 bits. */
-	# but when obtaining from frame properties and comparing etc, use the vs values from
-	# frame properties even though the values are incorrect (opposite to the spec)
 	update_config[tmp_name] = tmp_dict[tmp_name]
 	tmp_name = 'Enum_vs.ColorRange'
 	tmp_dict = { tmp_name : {}}
@@ -1292,7 +1189,18 @@ calc_ini["MAX_DURATION_VIDEO_FRAMES"]	= int(math.ceil(calc_ini["MAX_DURATION_VID
 calc_ini["DOT_FFINDEX"]					= ".ffindex".lower()		# for removing temporary *.ffindex files at the end
 calc_ini["MODX"]						= int(2)	   # mods for letterboxing calculations, example, for 411 YUV as an extreme
 calc_ini["MODY"]						= int(2)	   # mods would have to be MODX=4, MODY=1 as minimum
-
+# https://github.com/vapoursynth/vapoursynth/issues/940#issuecomment-1465041338
+# When calling rezisers etc, ONLY use these values:
+#	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
+#	ZIMG_RANGE_FULL     = 1   /**< Full (PC) dynamic range, 0-255 in 8 bits. */
+# but when obtaining from frame properties and comparing etc, use the vs values from
+# frame properties even though the vapoursynth values are incorrect (opposite to the spec)
+if calc_ini["TARGET_COLOR_RANGE_I"] == int(vs.ColorRange.RANGE_LIMITED.value):
+	calc_ini["TARGET_COLOR_RANGE_I_ZIMG"] = ZIMG_RANGE_LIMITED					# use the ZIMG RANGE constants as they are correct and vapoursynth ones are not (opposite to the spec)
+elif calc_ini["TARGET_COLOR_RANGE_I"] == int(vs.ColorRange.RANGE_FULL.value):
+	calc_ini["TARGET_COLOR_RANGE_I_ZIMG"] = ZIMG_RANGE_FULL						# use the ZIMG RANGE constants as they are correct and vapoursynth ones are not (opposite to the spec)
+else:
+	raise ValueError(f'ERROR: calc_ini["TARGET_COLOR_RANGE_I"]={calc_ini["TARGET_COLOR_RANGE_I"]} is an invalid value')
 if IS_DEBUG:
 	# https://www.vapoursynth.com/doc/api/vapoursynth.h.html#enum-vspresetformat
 	print_DEBUG(f'----------------------------------------------------------------------------------------------------------------------------')
@@ -1304,15 +1212,6 @@ if IS_DEBUG:
 		print_DEBUG(f'get_clip_specs: vs.TransferCharacteristics ENUM: {str(v)} = {v.value}')
 	for v in vs.ColorPrimaries:
 		print_DEBUG(f'get_clip_specs: vs.ColorPrimaries ENUM: {str(v)} = {v.value}')
-	# NOTE THESE IN REGARD TO VS "bug" in RANGE values not agreeing with the spec:
-	#	https://github.com/vapoursynth/vapoursynth/issues/940
-	#	https://github.com/vapoursynth/vapoursynth/issues/857
-	# https://github.com/vapoursynth/vapoursynth/issues/940#issuecomment-1465041338
-	# When calling rezisers etc, ONLY use these values:
-	#	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
-	#	ZIMG_RANGE_FULL     = 1   /**< Full (PC) dynamic range, 0-255 in 8 bits. */
-	# but when obtaining from frame properties and comparing etc, use the vs values from
-	# frame properties even though the values are incorrect (opposite to the spec)
 	for v in vs.ColorRange:
 		print_DEBUG(f'get_clip_specs: vs.ColorRange ENUM: {str(v)} = {v.value}')
 	for v in vs.ColorFamily:
@@ -1342,6 +1241,24 @@ paths = Path(calc_ini["DIRECTORY"]).glob(glob_var) # generator of all paths in a
 path = get_path(paths)	#pre-fetch first path
 if path is None:
 	raise ValueError(f'ERROR: File Extensions: {calc_ini["EXTENSIONS"]}, not found in "{calc_ini["DIRECTORY"]}"')
+#++++++++++++++++++++
+print_DEBUG(f'================================== creating blank_clip with the desired  target properties')
+blank_clip = core.std.BlankClip(format=calc_ini["TARGET_PIXEL_FORMAT"], width=calc_ini["TARGET_WIDTH"], height=calc_ini["TARGET_HEIGHT"], length=calc_ini["BLANK_CLIP_LENGTH"], color=(16,128,128))	 # notice no colorspace,"range" etc can be specified
+last_file_opened_with_ffms2 = True	# JUST A DUMMY FOR get_clip_specs
+last_file_opened_with_imwri = False
+last_file_opened_with_LWLibavSource = False
+last_file_opened_with_LibavSMASHSource = False
+blank_clip_specs = get_clip_specs(blank_clip, path=None, ext=".mp4")
+# now guess and set any missing specs in blank_clip
+if blank_clip_specs["guessed_Matrix"]:
+	print_DEBUG(f'blank_clip: SetFrameProps _Matrix from existing "{blank_clip_specs["_Matrix"]}" to guessed "{blank_clip_specs["proposed_Matrix"]}"')
+	blank_clip = core.std.SetFrameProps(blank_clip, _Matrix=blank_clip_specs["proposed_Matrix"])
+if blank_clip_specs["guessed_Primaries"]:
+	print_DEBUG(f'blank_clip: SetFrameProps _Primaries from existing "{blank_clip_specs["_Primaries"]}" to guessed "{blank_clip_specs["proposed_Primaries"]}"')
+	blank_clip = core.std.SetFrameProps(blank_clip, _Primaries=blank_clip_specs["proposed_Primaries"])
+if blank_clip_specs["guessed_Transfer"]:
+	print_DEBUG(f'blank_clip: SetFrameProps _Transfer from existing "{blank_clip_specs["_Transfer"]}" to guessed "{blank_clip_specs["proposed_Transfer"]}"')
+	blank_clip = core.std.SetFrameProps(blank_clip, _Transfer=blank_clip_specs["proposed_Transfer"])
 # NOTE THESE IN REGARD TO VS "bug" in RANGE values not agreeing with the spec:
 #	https://github.com/vapoursynth/vapoursynth/issues/940
 #	https://github.com/vapoursynth/vapoursynth/issues/857
@@ -1350,8 +1267,42 @@ if path is None:
 #	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
 #	ZIMG_RANGE_FULL     = 1   /**< Full (PC) dynamic range, 0-255 in 8 bits. */
 # but when obtaining from frame properties and comparing etc, use the vs values from
-# frame properties even though the values are incorrect (opposite to the spec)
-blank_clip = core.std.BlankClip(format=calc_ini["TARGET_PIXEL_FORMAT"], width=calc_ini["TARGET_WIDTH"], height=calc_ini["TARGET_HEIGHT"], length=calc_ini["BLANK_CLIP_LENGTH"], color=(16,128,128))	 # notice no colorspace,"range" etc can be specified
+# frame properties even though the vapoursynth values are incorrect (opposite to the spec)
+# BUT BUT BUT here we are working solely with vapoursynth settings, not resizers, so stick with using vapoursynth constants and not zimg ones
+#if blank_clip_specs["guessed_ColorRange"]:
+#	print_DEBUG(f'blank_clip: SetFrameProps _ColorRange from existing "{blank_clip_specs["_ColorRange"]}" to guessed "{blank_clip_specs["proposed_ColorRange"]}"')
+#	blank_clip = core.std.SetFrameProps(blank_clip, _ColorRange=blank_clip_specs["proposed_ColorRange"])
+# Ensure the colour range of the blank_clip is what we require, by using a resizer to set the properties
+with blank_clip.get_frame(0) as f:
+	print_DEBUG(f'blank_clip: incoming frame properties before resize: w={blank_clip.width} h={blank_clip.height} {objPrettyPrint.pformat(f.props)}')
+print_DEBUG(f'blank_clip: TARGET frame properties: width={blank_clip.width}, height={blank_clip.height}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, calc_ini["TARGET_COLOR_RANGE_I_ZIMG"]={calc_ini["TARGET_COLOR_RANGE_I_ZIMG"]}), primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
+blank_clip_resize = getattr(blank_clip.resize, calc_ini["UPSIZE_KERNEL"])	# get the resize function object ?handle? with the nominated kernel
+blank_clip = blank_clip_resize(width=calc_ini["TARGET_WIDTH"], height=calc_ini["TARGET_HEIGHT"], format=calc_ini["TARGET_PIXEL_FORMAT"], matrix=calc_ini["TARGET_COLORSPACE_MATRIX_I"], transfer=calc_ini["TARGET_COLOR_TRANSFER_I"], primaries=calc_ini["TARGET_COLOR_PRIMARIES_I"], range=calc_ini["TARGET_COLOR_RANGE_I_ZIMG"])
+blank_clip = core.std.AssumeFPS(clip=blank_clip, fpsnum=calc_ini["TARGET_FPSNUM"], fpsden=calc_ini["TARGET_FPSNUM"])
+with blank_clip.get_frame(0) as f:
+	print_DEBUG(f'blank_clip: outgoing frame properties after resize: w={blank_clip.width} h={blank_clip.height} {objPrettyPrint.pformat(f.props)}')
+last_file_opened_with_ffms2 = False
+print_DEBUG(f'================================== created blank_clip with the desired  target properties')
+#++++++++++++++++++++
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
 clips = blank_clip	# initialize the accumulated clips with a starting small blank clip
 if calc_ini["CROSSFADE_DURATION"]>0:	
 	crossfade_blank_clip = blank_clip[0]*calc_ini["MIN_DURATION_FRAMES"] if len(blank_clip)<calc_ini["MIN_DURATION_FRAMES"] else blank_clip
