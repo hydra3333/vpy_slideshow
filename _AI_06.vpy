@@ -741,8 +741,8 @@ def get_clip(path):
 		clip = clip.std.AssumeFPS(fpsnum=calc_ini["TARGET_FPSNUM"], fpsden=calc_ini["TARGET_FPSDEN"])
 		#
 		# if duration greater than out review maximum, clip it
-		if source_duration_frames>(calc_ini["MAX_DURATION_VIDEO_FRAMES"]-1):
-			clip = core.std.Trim(clip, first=0, last=(calc_ini["MAX_DURATION_VIDEO_FRAMES"]-1))
+		if source_duration_frames>(calc_ini["DURATION_MAX_VIDEO_FRAMES"]-1):
+			clip = core.std.Trim(clip, first=0, last=(calc_ini["DURATION_MAX_VIDEO_FRAMES"]-1))
 		#
 		# TEMPORARILY COMMENT OUT DG SHARPEN OF SMALL CLIPS
 		# denoise ANY "small" dimension video clips, older videos likely to be noisy
@@ -754,9 +754,9 @@ def get_clip(path):
 		#	clip = core.avs.DGDenoise(clip, strength=0.15, cstrength=0.15)
 		#	clip = clip.resize.Point(format=calc_ini["TARGET_PIXEL_FORMAT"])	# convert to calc_ini["TARGET_PIXEL_FORMAT"] via resizer which does no resizing
 	else: # source is not a video type, i.e. it must be an image (picture)
-		# extend duration of a clip of an image
-		clip = clip[0]*calc_ini["MIN_DURATION_FRAMES"] if len(clip)<calc_ini["MIN_DURATION_FRAMES"] else clip # make clip at least calc_ini["MIN_DURATION_FRAMES"] frames long if less than MIN_DURATION_FRAMES frames
-	
+		# ensure duration of a clip of an image is the proper number of frames
+		if len(clip) < calc_ini["DURATION_PIC_FRAMES"]:
+			clip = clip[0]*calc_ini["DURATION_PIC_FRAMES"]
 	# either add borders to maintain aspect ratio (boxing), or just stretch to fit (yuk)
 	if calc_ini["BOX"]:
 		clip = boxing(clip, calc_ini["TARGET_WIDTH"], calc_ini["TARGET_HEIGHT"])
@@ -764,11 +764,23 @@ def get_clip(path):
 		clip = resize_clip(clip, calc_ini["TARGET_WIDTH"], calc_ini["TARGET_HEIGHT"])
 
 	# Add a subtitle being the trailing 3 parts of the path
-	if calc_ini["ADD_SUBTITLE"]:	# Add a subtitle being the trailing 3 parts of the path
+	if calc_ini["ADD_SUBTITLE_DEPTH"] > 0 and calc_ini["ADD_SUBTITLE_DEPTH"]:	# Add a subtitle being up to the trailing calc_ini["SUBTITLE_MAX_DEPTH"] parts of the path
 		pwp = PureWindowsPath(path)
-		n = len(pwp.parts)
+		num_parts = len(pwp.parts)	# assume minimum of 2 parts : name and extension
+		
+		
 		#text_subpath_for_subtitles = "/" + pwp.parts[n-3] + "/" + pwp.parts[n-2] + "/" +  pwp.parts[n-1]
-		text_subpath_for_subtitles = "/" + pwp.parts[n-2] + "/" +  pwp.parts[n-1]
+		#text_subpath_for_subtitles = "/" + pwp.parts[n-2] + "/" +  pwp.parts[n-1]
+		
+		# (n-10) (n-9)(n-8) (n-7) (n-6) (n-5) (n-4) (n-3) (n-2) (n-1)
+		text_subpath_for_subtitles = ""
+		max_depth_this_time = min((num_parts), calc_ini["SUBTITLE_MAX_DEPTH"], calc_ini["ADD_SUBTITLE_DEPTH"]) # maybe (num_parts-1) should be ) ?
+
+???		for i = 1 to max_depth_this_time
+			text_subpath_for_subtitles = text_subpath_for_subtitles + "/" +  pwp.parts[i - 1] ???
+		
+		
+		
 		# To tinker with .ass subs, see https://snapcraft.io/install/aegisub-procles/ubuntu
 		# Also note from an aegisub created .ass file
 		#	Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
@@ -795,13 +807,13 @@ def get_path(path_generator):
 			return path
 		  
 ###
-def crossfade(a, b, duration):
+def crossfade(a, b, crossfade_duration_frames):
 	#gets crosfade part from end of clip a and start of clip b
 	def fade_image(n, a, b):
-		return core.std.Merge(a, b, weight=n/duration)
+		return core.std.Merge(a, b, weight=n/crossfade_duration_frames)
 	if a.format.id != b.format.id or a.height != b.height or a.width != b.width:
 		raise ValueError('ERROR: crossfade: Both clips must have the same dimensions and format.')
-	return core.std.FrameEval(a[-duration:], partial(fade_image, a=a[-duration:], b=b[:duration]))
+	return core.std.FrameEval(a[-crossfade_duration_frames:], partial(fade_image, a=a[-crossfade_duration_frames:], b=b[:crossfade_duration_frames]))
 
 ###
 def print_exif_data(exif_data):
@@ -1016,11 +1028,10 @@ default_ini_values =	{ ini_section_name : {
 							'DIRECTORY' :						fully_qualified_folder_no_trailing_backslash(r'G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\ '.strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
 							'TEMP_DIRECTORY' :					fully_qualified_folder_no_trailing_backslash(r'D:\TEMP\ '.strip()),	# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
 							'RECURSIVE' :						True,
-							'ADD_SUBTITLE' :					True,												# True adds a subtitle in the bottom right corner containing the last few parts of the path to the image/video
-							'CROSSFADE_DURATION':				1,													# 1 sec
-							'MAX_DURATION_VIDEO_SEC' :			60,													# Maximum duration of a video clip in seconds (incoming video will get clipped at this point)
-							'MIN_DURATION_PIC_SEC' :			0.5,												### MINIMUM duration of display of an image, in seconds
-							'MAX_DURATION_PIC_SEC' :			4,													### MAXIMUM duration of display of an image, in seconds
+							'ADD_SUBTITLE_DEPTH' :				1,													# adds a subtitle in the bottom right corner containing the last specified number of  parts of the path to the image/video
+							'DURATION_PIC_SEC' :				4.0,												### MAXIMUM duration of display of an image, in seconds
+							'DURATION_CROSSFADE_SECS':			1.0,												# 1 sec
+							'DURATION_MAX_VIDEO_SEC' :			60.0,												# Maximum duration of a video clip in seconds (incoming video will get clipped at this point)
 							'SILENT_MODE' :						False,												# overrides DEBUG_MODE
 							'DEBUG_MODE' :						False,
 							'TARGET_COLORSPACE' : 				r'BT.709',											# colorspace Rec2020, BT.2020 Rec709, BT.709, Rec601, BT.601, PC.709, PC.601, TV.fcc, PC.fcc, TV.240m, PC.240m; When no hint found in ASS script and colorspace parameter is empty then the default is BT.601
@@ -1110,11 +1121,10 @@ if config.has_section(ini_section_name):
 	ini_values[ini_section_name]["DIRECTORY"]					= fully_qualified_folder_no_trailing_backslash(config.get(ini_section_name, 'DIRECTORY'))
 	ini_values[ini_section_name]["TEMP_DIRECTORY"]				= fully_qualified_folder_no_trailing_backslash(config.get(ini_section_name, 'TEMP_DIRECTORY'))
 	ini_values[ini_section_name]["RECURSIVE"]					= config.getboolean(ini_section_name, 'RECURSIVE')
-	ini_values[ini_section_name]["ADD_SUBTITLE"]				= config.getboolean(ini_section_name, 'ADD_SUBTITLE')
-	ini_values[ini_section_name]["CROSSFADE_DURATION"]			= int(config.get(ini_section_name, 'CROSSFADE_DURATION'))
-	ini_values[ini_section_name]["MAX_DURATION_VIDEO_SEC"]		= int(config.getint(ini_section_name, 'MAX_DURATION_VIDEO_SEC'))
-	ini_values[ini_section_name]["MIN_DURATION_PIC_SEC"]		= int(config.getfloat(ini_section_name, 'MIN_DURATION_PIC_SEC'))
-	ini_values[ini_section_name]["MAX_DURATION_PIC_SEC"]		= int(config.getint(ini_section_name, 'MAX_DURATION_PIC_SEC'))
+	ini_values[ini_section_name]["ADD_SUBTITLE_DEPTH"]			= int(config.getint(ini_section_name, 'ADD_SUBTITLE_DEPTH'))
+	ini_values[ini_section_name]["DURATION_PIC_SEC"]			= float(config.getint(ini_section_name, 'DURATION_PIC_SEC'))
+	ini_values[ini_section_name]["DURATION_CROSSFADE_SECS"]		= float(config.getfloat(ini_section_name, 'DURATION_CROSSFADE_SECS'))
+	ini_values[ini_section_name]["DURATION_MAX_VIDEO_SEC"]		= float(config.getfloat(ini_section_name, 'DURATION_MAX_VIDEO_SEC'))
 	ini_values[ini_section_name]["SILENT_MODE"]					= config.getboolean(ini_section_name, 'SILENT_MODE')
 	ini_values[ini_section_name]["DEBUG_MODE"]					= config.getboolean(ini_section_name, 'DEBUG_MODE')
 	ini_values[ini_section_name]["TARGET_COLORSPACE"] 			= config.get(ini_section_name, 'TARGET_COLORSPACE')
@@ -1203,20 +1213,22 @@ print_NORMAL(f'Saved updated .ini "{ini_file_speciying_parameters}"')
 
 # calculate some values and create a new updated calculated values dict
 calc_ini = ini_values[ini_section_name]
-calc_ini["PIC_EXTENSIONS"]				= [".png", ".jpg", ".jpeg", ".gif"]								# always lower case
-calc_ini["VID_EXTENSIONS"]				= [".mp4", ".mpeg4", ".mpg", ".mpeg", ".avi", ".mjpeg", ".3gp", ".mov"]	# always lower case
-calc_ini["EEK_EXTENSIONS"]				= [".m2ts"]														# always lower case
-calc_ini["VID_EEK_EXTENSIONS"]			= calc_ini["VID_EXTENSIONS"] + calc_ini["EEK_EXTENSIONS"]
-calc_ini["EXTENSIONS"]					= calc_ini["PIC_EXTENSIONS"] + calc_ini["VID_EXTENSIONS"] + calc_ini["EEK_EXTENSIONS"]
-calc_ini["TARGET_PIXEL_FORMAT"]			= int(vs.YUV420P8.value)				# pixel format of the target video
-calc_ini["DG_PIXEL_FORMAT"]				= int(vs.YUV420P16.value)				# pixel format of the video for use by DG tools
-calc_ini["TARGET_FPS"]					= round(calc_ini["TARGET_FPSNUM"] / calc_ini["TARGET_FPSDEN"], 3)
-calc_ini["BLANK_CLIP_LENGTH"]			= int(math.ceil(0.1*calc_ini["TARGET_FPS"]))	# leading and trailing blank clip duration in frames with round-up. int(round(0.1*calc_ini["TARGET_FPS"])) will round up/down
-calc_ini["MIN_DURATION_FRAMES"]			= int(math.ceil(calc_ini["MIN_DURATION_PIC_SEC"] * calc_ini["TARGET_FPS"]))	### duration of display of an image, in frames
-calc_ini["MAX_DURATION_VIDEO_FRAMES"]	= int(math.ceil(calc_ini["MAX_DURATION_VIDEO_SEC"] * calc_ini["TARGET_FPS"]))	### max duration of display of a video, in frames
-calc_ini["DOT_FFINDEX"]					= ".ffindex".lower()		# for removing temporary *.ffindex files at the end
-calc_ini["MODX"]						= int(2)	   # mods for letterboxing calculations, example, for 411 YUV as an extreme
-calc_ini["MODY"]						= int(2)	   # mods would have to be MODX=4, MODY=1 as minimum
+calc_ini["PIC_EXTENSIONS"]					= [".png", ".jpg", ".jpeg", ".gif"]								# always lower case
+calc_ini["VID_EXTENSIONS"]					= [".mp4", ".mpeg4", ".mpg", ".mpeg", ".avi", ".mjpeg", ".3gp", ".mov"]	# always lower case
+calc_ini["EEK_EXTENSIONS"]					= [".m2ts"]														# always lower case
+calc_ini["VID_EEK_EXTENSIONS"]				= calc_ini["VID_EXTENSIONS"] + calc_ini["EEK_EXTENSIONS"]
+calc_ini["EXTENSIONS"]						= calc_ini["PIC_EXTENSIONS"] + calc_ini["VID_EXTENSIONS"] + calc_ini["EEK_EXTENSIONS"]
+calc_ini["TARGET_PIXEL_FORMAT"]				= int(vs.YUV420P8.value)				# pixel format of the target video
+calc_ini["DG_PIXEL_FORMAT"]					= int(vs.YUV420P16.value)				# pixel format of the video for use by DG tools
+calc_ini["TARGET_FPS"]						= round(calc_ini["TARGET_FPSNUM"] / calc_ini["TARGET_FPSDEN"], 3)
+calc_ini["BLANK_CLIP_LENGTH_FRAMES"]		= int(math.ceil(1.0*calc_ini["TARGET_FPS"]))	# leading and trailing blank clip duration in frames with round-up. int(round(0.1*calc_ini["TARGET_FPS"])) will round up/down
+calc_ini["DURATION_PIC_FRAMES"]				= int(math.ceil(calc_ini["DURATION_PIC_SEC"] * calc_ini["TARGET_FPS"]))
+calc_ini["DURATION_CROSSFADE_FRAMES"]		= int(math.ceil(calc_ini["DURATION_CROSSFADE_SECS"] * calc_ini["TARGET_FPS"]))
+calc_ini["DURATION_MAX_VIDEO_FRAMES"]		= int(math.ceil(calc_ini["DURATION_MAX_VIDEO_SEC"] * calc_ini["TARGET_FPS"]))
+calc_ini["DOT_FFINDEX"]						= ".ffindex".lower()		# for removing temporary *.ffindex files at the end
+calc_ini["MODX"]							= int(2)	   # mods for letterboxing calculations, example, for 411 YUV as an extreme
+calc_ini["MODY"]							= int(2)	   # mods would have to be MODX=4, MODY=1 as minimum
+calc_ini["SUBTITLE_MAX_DEPTH"]				= int(10)
 # https://github.com/vapoursynth/vapoursynth/issues/940#issuecomment-1465041338
 # When calling rezisers etc, ONLY use these values:
 #	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
@@ -1270,8 +1282,8 @@ path = get_path(paths)	#pre-fetch first path
 if path is None:
 	raise ValueError(f'ERROR: File Extensions: {calc_ini["EXTENSIONS"]}, not found in "{calc_ini["DIRECTORY"]}"')
 #++++++++++++++++++++
-print_DEBUG(f'================================== creating blank_clip with the desired  target properties')
-blank_clip = core.std.BlankClip(format=calc_ini["TARGET_PIXEL_FORMAT"], width=calc_ini["TARGET_WIDTH"], height=calc_ini["TARGET_HEIGHT"], length=calc_ini["BLANK_CLIP_LENGTH"], color=(16,128,128))	 # notice no colorspace,"range" etc can be specified
+print_DEBUG(f'Creating blank_clip with the desired  target properties')
+blank_clip = core.std.BlankClip(format=calc_ini["TARGET_PIXEL_FORMAT"], width=calc_ini["TARGET_WIDTH"], height=calc_ini["TARGET_HEIGHT"], length=calc_ini["BLANK_CLIP_LENGTH_FRAMES"], color=(16,128,128))	 # notice no colorspace,"range" etc can be specified
 last_file_opened_with_ffms2 = True	# JUST A DUMMY FOR get_clip_specs
 last_file_opened_with_imwri = False
 last_file_opened_with_LWLibavSource = False
@@ -1310,12 +1322,16 @@ blank_clip = core.std.AssumeFPS(clip=blank_clip, fpsnum=calc_ini["TARGET_FPSNUM"
 with blank_clip.get_frame(0) as f:
 	print_DEBUG(f'blank_clip: outgoing frame properties after resize: w={blank_clip.width} h={blank_clip.height} {objPrettyPrint.pformat(f.props)}')
 last_file_opened_with_ffms2 = False
-print_DEBUG(f'================================== created blank_clip with the desired  target properties')
+print_DEBUG(f'Created blank_clip with the desired  target properties')
 #++++++++++++++++++++
 
 clips = blank_clip	# initialize the accumulated clips with a starting small blank clip
-if calc_ini["CROSSFADE_DURATION"]>0:	
-	crossfade_blank_clip = blank_clip[0]*calc_ini["MIN_DURATION_FRAMES"] if len(blank_clip)<calc_ini["MIN_DURATION_FRAMES"] else blank_clip
+if calc_ini["DURATION_CROSSFADE_FRAMES"]>0:
+	#if len(blank_clip) < calc_ini["DURATION_CROSSFADE_FRAMES"] :
+	#	crossfade_blank_clip = blank_clip[0]*calc_ini["DURATION_CROSSFADE_FRAMES"]
+	#else 
+	#	crossfade_blank_clip = blank_clip
+	crossfade_blank_clip = blank_clip[0]*calc_ini["DURATION_CROSSFADE_FRAMES"]
 	prior_clip_for_crossfade = crossfade_blank_clip
 #---
 while not (path is None):	# first clip already pre-retrieved ready for this while loop
@@ -1332,10 +1348,10 @@ while not (path is None):	# first clip already pre-retrieved ready for this whil
 	#this_clip = core.text.FrameNum(this_clip, alignment=2, scale=1)
 	#this_clip = core.text.ClipInfo(this_clip, alignment=8, scale=1)
 	#this_clip = core.text.FrameProps(this_clip, alignment=2, scale=1)
-	if calc_ini["CROSSFADE_DURATION"]>0:	
+	if calc_ini["DURATION_CROSSFADE_FRAMES"]>0:	
 		print_DEBUG(f'doing crossfade in while loop')
-		crossfade_clip = crossfade(prior_clip_for_crossfade, this_clip, calc_ini["CROSSFADE_DURATION"])
-		# for now, don't do equivalent of this from _AI_ ... right  = right_clip[calc_ini["CROSSFADE_DURATION"]:-calc_ini["CROSSFADE_DURATION"]]
+		crossfade_clip = crossfade(prior_clip_for_crossfade, this_clip, calc_ini["DURATION_CROSSFADE_FRAMES"])
+		# for now, don't do equivalent of this from _AI_ ... right  = right_clip[calc_ini["DURATION_CROSSFADE_FRAMES"]:-calc_ini["DURATION_CROSSFADE_FRAMES"]]
 		clips = clips + crossfade_clip + this_clip
 		prior_clip_for_crossfade = this_clip
 	else:
@@ -1345,10 +1361,10 @@ while not (path is None):	# first clip already pre-retrieved ready for this whil
 	print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
 #---
 # perhaps a finishing crossfade to black ?
-if calc_ini["CROSSFADE_DURATION"]>0:	
+if calc_ini["DURATION_CROSSFADE_FRAMES"]>0:	
 	print_DEBUG(f'doing final crossfade after while loop')
-	crossfade_clip = crossfade(prior_clip_for_crossfade, crossfade_blank_clip, calc_ini["CROSSFADE_DURATION"])
-	# for now, don't do equivalent of this from _AI_ ... right  = right_clip[calc_ini["CROSSFADE_DURATION"]:-calc_ini["CROSSFADE_DURATION"]]
+	crossfade_clip = crossfade(prior_clip_for_crossfade, crossfade_blank_clip, calc_ini["DURATION_CROSSFADE_FRAMES"])
+	# for now, don't do equivalent of this from _AI_ ... right  = right_clip[calc_ini["DURATION_CROSSFADE_FRAMES"]:-calc_ini["DURATION_CROSSFADE_FRAMES"]]
 	clips = clips + crossfade_clip + this_clip
 clips = clips + blank_clip		# end the accumulated clips with a finishing small blank clip
 clips = clips.std.AssumeFPS(fpsnum=calc_ini["TARGET_FPSNUM"], fpsden=calc_ini["TARGET_FPSDEN"])
