@@ -73,7 +73,7 @@ set  "script=G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\_AI_06.vpy"
 -vf "setdar=16/9" ^
 -fps_mode passthrough ^
 -sws_flags lanczos+accurate_rnd+full_chroma_int+full_chroma_inp ^
--strict experimental ^
+-colorspace bt709 -color_primaries bt709 -color_trc bt709 -color_range pc -strict experimental ^
 -c:v h264_nvenc -pix_fmt nv12 -preset p7 -multipass fullres -forced-idr 1 -g 25 ^
 -coder:v cabac -spatial-aq 1 -temporal-aq 1 ^
 -dpb_size 0 -bf:v 3 -b_ref_mode:v 0 ^

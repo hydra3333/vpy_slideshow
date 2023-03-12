@@ -309,13 +309,13 @@ def resize_clip(clip,w,h):
 		resize = getattr(clip.resize, calc_ini["DOWNSIZE_KERNEL"])	# get the resize function object ?handle? with the nominated kernel
 		xyz = "DOWNSIZE_KERNEL"
 	print_DEBUG(f'resize_clip: incoming clip w={clip.width}\th={clip.height}   resize_clip:   func params w={w}\th={h}   resize_clip: kernel to use {xyz}')
+	c = clip
 	if clip.format.color_family==vs.RGB:
 		#rgb to YUV, perhaps only for png images, figure out what matrix out is needed ... use the HD one REC.709
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
 		#			enum chromaloc, enum matrix_in, enum transfer_in, enum primaries_in, enum range_in, enum chromaloc_in, 
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
-		print_DEBUG(f'resize_clip: clip.format.color_family==vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB}')
 		with clip.get_frame(0) as f:
 			print_DEBUG(f'resize_clip: incoming frame properties before RGB resize: w={clip.width} h={clip.height} {objPrettyPrint.pformat(f.props)}')
 		print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, calc_ini["TARGET_COLOR_RANGE_I_ZIMG"]={calc_ini["TARGET_COLOR_RANGE_I_ZIMG"]}), primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
@@ -326,13 +326,12 @@ def resize_clip(clip,w,h):
 		c = core.std.AssumeFPS(clip=c, fpsnum=calc_ini["TARGET_FPSNUM"], fpsden=calc_ini["TARGET_FPSNUM"])
 		with c.get_frame(0) as f:
 			print_DEBUG(f'resize_clip: outgoing frame properties after RGB resize: w={c.width} h={c.height} {objPrettyPrint.pformat(f.props)}')
-		return c
+		#return c
 	elif clip.format.color_family==vs.YUV:
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
 		#			enum chromaloc, enum matrix_in, enum transfer_in, enum primaries_in, enum range_in, enum chromaloc_in, 
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
-		print_DEBUG(f'resize_clip: clip.format.color_family==vs.YUV: clip.format.color_family={clip.format.color_family} vs.YUV={vs.YUV}')
 		with clip.get_frame(0) as f:
 			print_DEBUG(f'resize_clip: incoming frame properties before YUV resize: w={clip.width} h={clip.height} {objPrettyPrint.pformat(f.props)}')
 		print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, calc_ini["TARGET_COLOR_RANGE_I_ZIMG"]={calc_ini["TARGET_COLOR_RANGE_I_ZIMG"]}), primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
@@ -349,13 +348,12 @@ def resize_clip(clip,w,h):
 		#c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"])
 		with c.get_frame(0) as f:
 			print_DEBUG(f'resize_clip: outgoing frame properties after YUV resize: w={c.width} h={c.height} {objPrettyPrint.pformat(f.props)}')
-		return c
+		#return c
 	else:
 		#resize.(vnode clip[, int width, int height, int format, enum matrix, enum transfer, enum primaries, enum range, 
 		#			enum chromaloc, enum matrix_in, enum transfer_in, enum primaries_in, enum range_in, enum chromaloc_in, 
 		#			float filter_param_a, float filter_param_b, string resample_filter_uv, float filter_param_a_uv, float filter_param_b_uv, 
 		#			string dither_type="none", string cpu_type, float src_left, float src_top, float src_width, float src_height, float nominal_luminance])
-		print_DEBUG(f'resize_clip: non-vs.RGB,non-vs.YUV clip.format.color_family!=vs.RGB: clip.format.color_family={clip.format.color_family} vs.RGB={vs.RGB} vs.YUV={vs.YUV}')
 		with clip.get_frame(0) as f:
 			print_DEBUG(f'resize_clip: incoming frame properties before non-vs.RGB,non-vs.YUV resize: w={clip.width} h={clip.height} {objPrettyPrint.pformat(f.props)}')
 		print_DEBUG(f'resize_clip: TARGET frame properties: width={w}, height={h}, format={calc_ini["TARGET_PIXEL_FORMAT"]}, calc_ini["TARGET_COLOR_RANGE_I_ZIMG"]={calc_ini["TARGET_COLOR_RANGE_I_ZIMG"]}), primaries={calc_ini["TARGET_COLOR_PRIMARIES_I"]}, transfer={calc_ini["TARGET_COLOR_TRANSFER_I"]},  matrix={calc_ini["TARGET_COLORSPACE_MATRIX_I"]}')
@@ -372,7 +370,8 @@ def resize_clip(clip,w,h):
 		#c = resize(width=w, height=h, format=calc_ini["TARGET_PIXEL_FORMAT"])
 		with c.get_frame(0) as f:
 			print_DEBUG(f'resize_clip: outgoing frame properties after non-vs.RGB,non-vs.YUV resize: w={c.width} h={c.height} {objPrettyPrint.pformat(f.props)}')
-		return c
+		#return c
+	return c
 
 ###
 def get_clip_specs(clip=None, path=None, ext=None):
@@ -392,19 +391,6 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	#
 	#print_DEBUG(f'get_clip_specs: clip=\n{clip}')
 	## https://www.vapoursynth.com/doc/pythonreference.html
-	print_DEBUG(f'get_clip_specs: clip.format=\n{clip.format}')
-	print_DEBUG(f'get_clip_specs: clip.width={clip.width}')
-	print_DEBUG(f'get_clip_specs: clip.height={clip.height}')
-	print_DEBUG(f'get_clip_specs: clip.num_frames={clip.num_frames}')
-	print_DEBUG(f'get_clip_specs: clip.fps={clip.fps}')
-	print_DEBUG(f'get_clip_specs: clip.format.name={clip.format.name} clip.format.id={clip.format.id} (see enum vs.PresetFormat')
-	print_DEBUG(f'get_clip_specs: clip.format.color_family={clip.format.color_family}')
-	print_DEBUG(f'get_clip_specs: clip.format.sample_type={clip.format.sample_type}')	# If the format is integer or floating point based.
-	print_DEBUG(f'get_clip_specs: clip.format.bits_per_sample={clip.format.bits_per_sample}')
-	print_DEBUG(f'get_clip_specs: clip.format.bytes_per_sample={clip.format.bytes_per_sample}')
-	print_DEBUG(f'get_clip_specs: clip.format.num_planes={clip.format.num_planes}') # per https://www.vapoursynth.com/doc/pythonreference.html
-	print_DEBUG(f'get_clip_specs: clip.format.subsampling_w={clip.format.subsampling_w}')
-	print_DEBUG(f'get_clip_specs: clip.format.subsampling_h={clip.format.subsampling_h}')
 	#
 	# Create a local dict of Clip and Frame properties, ready for later validation/resetting if need be of _Matrix/_Transfer/_Primaries/_ColorRange
 	clip_specs = {}
@@ -430,17 +416,6 @@ def get_clip_specs(clip=None, path=None, ext=None):
 		clip_specs["_DurationNum"] = f.props["_DurationNum"] if "_DurationNum" in f.props else None
 		clip_specs["_FieldBased"] = f.props["_FieldBased"] if "_FieldBased" in f.props else None
 		clip_specs["_PictType"] = f.props["_PictType"] if "_PictType" in f.props else None
-		print_DEBUG(f'get_clip_specs: incoming frame properties =\n{f.props}')
-		print_DEBUG(f'get_clip_specs: frame properties f.props["_Matrix"] = {clip_specs["_Matrix"]}')
-		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_Transfer"] = {clip_specs["_Transfer"]}')
-		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_Primaries"] = {clip_specs["_Primaries"]}')
-		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_ColorRange"] = {clip_specs["_ColorRange"]}')
-		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_ChromaLocation"] = {clip_specs["_ChromaLocation"]}')
-		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_DurationDen"] = {clip_specs["_DurationDen"]}')
-		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_DurationNum"] = {clip_specs["_DurationNum"]}')
-		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_FieldBased"] = {clip_specs["_FieldBased"]}')
-		print_DEBUG(f'get_clip_specs: frame properties clip_specs["_PictType"] = {clip_specs["_PictType"]}') # a byte character eg 'I'
-
 	# check for picture/video rotation specified perhaps in EXIF but not auto-processed here by the file openers
 	if path is None:
 		rotation_value = 0
@@ -540,7 +515,6 @@ def get_clip_specs(clip=None, path=None, ext=None):
 			print_DEBUG(f'get_clip_specs: VID: MatrixCoefficients.MATRIX_UNSPECIFIED ({vs.MatrixCoefficients.MATRIX_UNSPECIFIED}) in VID, replacement _Matrix={clip_specs["proposed_Matrix"]}')
 		else:
 			raise ValueError(f'ERROR: get_clip_specs: VID: ext "{ext}" not recognised in VID to replace MatrixCoefficients.MATRIX_UNSPECIFIED')
-	
 	# **********
 	# if not already specified, guess new _Primaries
 	# explainer https://docs.rs/av-data/0.4.1/av_data/pixel/index.html https://docs.rs/av-data/0.4.1/av_data/pixel/enum.ColorPrimaries.html
@@ -659,29 +633,30 @@ def get_clip(path):
 	if path.suffix.lower()   in calc_ini["EEK_EXTENSIONS"]:
 		clip = core.lsmas.LWLibavSource(str(path))
 		last_file_opened_with_LWLibavSource = True
-		print_DEBUG(f'get_clip: lsmas Video {path.name} info:\n{clip}')
+		#print_DEBUG(f'get_clip: lsmas Video {path.name} info:\n{clip}')
 	elif path.suffix.lower() in calc_ini["VID_EXTENSIONS"]:
 		clip = core.ffms2.Source(str(path))	#ffms2 leaves *.ffindex files everywhere in folders.
 		last_file_opened_with_ffms2 = True
 		#clip = core.lsmas.LibavSMASHSource(str(path))
 		#last_file_opened_with_LibavSMASHSource = True
-		print_DEBUG(f'get_clip: ffms2 Video {path.name} info:\n{clip}')
+		#print_DEBUG(f'get_clip: ffms2 Video {path.name} info:\n{clip}')
 	elif path.suffix.lower() in calc_ini["PIC_EXTENSIONS"]:
 		clip = core.ffms2.Source(str(path))
 		last_file_opened_with_ffms2 = True
-		print_DEBUG(f'get_clip: ffms2 PIC {path.name} info:\n{clip}')
-		# NOTE: imwri returns no frame properties ! eg "_Matrix" ! and thus IS NO GOOD AT ALL FOR US
-		#clip = core.imwri.Read(str(path)) # ImageMagick Writer-Reader, if installed into vapoursynth folder
-		#last_file_opened_with_imwri = True
-		#print_DEBUG(f'get_clip: imwri Video info:\n{clip}')
+		#print_DEBUG(f'get_clip: ffms2 PIC {path.name} info:\n{clip}')
+		## NOTE: imwri returns no frame properties ! eg "_Matrix" ! and thus IS NO GOOD AT ALL FOR US
+		##clip = core.imwri.Read(str(path)) # ImageMagick Writer-Reader, if installed into vapoursynth folder
+		##last_file_opened_with_imwri = True
+		##print_DEBUG(f'get_clip: imwri Video info:\n{clip}')
 	else: # UNKNOWN TYPE
 		clip = core.ffms2.Source(str(path))	# if file extension not recognised, use this reader
 		last_file_opened_with_ffms2 = True
-		print_DEBUG(f'get_clip: ffms2 Video {path.name} info:\n{clip}')
+		#print_DEBUG(f'get_clip: ffms2 Video {path.name} info:\n{clip}')
 	#
 	clip_specs = get_clip_specs(clip, path, ext=path.suffix.lower())
 	#
 	#++++++++++++++++++++
+	# SET missing frame properties with guessed values
 	if clip_specs["guessed_Matrix"]:
 		print_DEBUG(f'get_clip: SetFrameProps _Matrix from existing "{clip_specs["_Matrix"]}" to guessed "{clip_specs["proposed_Matrix"]}"')
 		clip = core.std.SetFrameProps(clip, _Matrix=clip_specs["proposed_Matrix"])
@@ -721,7 +696,7 @@ def get_clip(path):
 	else:
 		raise ValueError('ERROR: get_clip: auto_rotation_degrees "{clip_specs["auto_rotation_degrees"]}" unable to be processed for "{path}" : only 0,90,180,270 are valid')
 	#++++++++++++++++++++
-
+	#
 	# do video-specific or picture-specific changes
 	if path.suffix.lower() in calc_ini["VID_EEK_EXTENSIONS"]:	#if any sort of video, probably an old hand-held camera or phone, sometimes variable fps ...
 		print_DEBUG(f'get_clip: opened Video: {path.name}\nVideo info:\n{clip}')
@@ -736,14 +711,11 @@ def get_clip(path):
 		source_duration_secs = round((source_duration_frames / source_fps),3)
 		source_width, source_height = clip.width, clip.height
 		print_DEBUG(f'get_clip: {source_width}x{source_height}\nsource_fpsnum:{source_fpsnum} source_fpsden:{source_fpsden}\nsource_fps:{source_fps}\nsource_duration_frames:{source_duration_frames}\nsource_duration_secs:{source_duration_secs}')
-		#
 		# change framerate ? too hard for a small simple video sample, just "assume" target fps and ignore consequences of speed-up or slow-down or VFR
 		clip = clip.std.AssumeFPS(fpsnum=calc_ini["TARGET_FPSNUM"], fpsden=calc_ini["TARGET_FPSDEN"])
-		#
 		# if duration greater than out review maximum, clip it
-		if source_duration_frames>(calc_ini["DURATION_MAX_VIDEO_FRAMES"]-1):
+		if source_duration_frames > (calc_ini["DURATION_MAX_VIDEO_FRAMES"]-1):
 			clip = core.std.Trim(clip, first=0, last=(calc_ini["DURATION_MAX_VIDEO_FRAMES"]-1))
-		#
 		# TEMPORARILY COMMENT OUT DG SHARPEN OF SMALL CLIPS
 		# denoise ANY "small" dimension video clips, older videos likely to be noisy
 		#if source_width<calc_ini["TARGET_WIDTH"] or source_height<calc_ini["TARGET_HEIGHT"]:	 
@@ -762,25 +734,21 @@ def get_clip(path):
 		clip = boxing(clip, calc_ini["TARGET_WIDTH"], calc_ini["TARGET_HEIGHT"])
 	else:
 		clip = resize_clip(clip, calc_ini["TARGET_WIDTH"], calc_ini["TARGET_HEIGHT"])
-
-	# Add a subtitle being the trailing 3 parts of the path
-	if calc_ini["ADD_SUBTITLE_DEPTH"] > 0 and calc_ini["ADD_SUBTITLE_DEPTH"]:	# Add a subtitle being up to the trailing calc_ini["SUBTITLE_MAX_DEPTH"] parts of the path
+	#
+	#++++++++++++++++++++
+	# Add a subtitle being the trailing x parts of the path
+	if calc_ini["ADD_SUBTITLE_DEPTH"] > 0:	# Add a subtitle being up to the trailing calc_ini["SUBTITLE_MAX_DEPTH"] parts of the path
 		pwp = PureWindowsPath(path)
-		num_parts = len(pwp.parts)	# assume minimum of 2 parts : name and extension
-		
-		
+		num_parts = len(pwp.parts)
 		#text_subpath_for_subtitles = "/" + pwp.parts[n-3] + "/" + pwp.parts[n-2] + "/" +  pwp.parts[n-1]
 		#text_subpath_for_subtitles = "/" + pwp.parts[n-2] + "/" +  pwp.parts[n-1]
-		
 		# (n-10) (n-9)(n-8) (n-7) (n-6) (n-5) (n-4) (n-3) (n-2) (n-1)
 		text_subpath_for_subtitles = ""
 		max_depth_this_time = min((num_parts), calc_ini["SUBTITLE_MAX_DEPTH"], calc_ini["ADD_SUBTITLE_DEPTH"]) # maybe (num_parts-1) should be ) ?
-
-???		for i = 1 to max_depth_this_time
-			text_subpath_for_subtitles = text_subpath_for_subtitles + "/" +  pwp.parts[i - 1] ???
-		
-		
-		
+		if max_depth_this_time > 0:
+			for i in range(max_depth_this_time, 0, -1): # returns values (x down to 1) # range(start, stop, step) and the final number "stop" is not included in the range
+				text_subpath_for_subtitles = text_subpath_for_subtitles + "/" +  pwp.parts[max_depth_this_time - i]
+			clip = core.assrender.Subtitle(clip, text_subpath_for_subtitles, style="sans-serif,18,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0.9,0.5,3,2,2,2,1", colorspace=calc_ini["TARGET_COLORSPACE"])
 		# To tinker with .ass subs, see https://snapcraft.io/install/aegisub-procles/ubuntu
 		# Also note from an aegisub created .ass file
 		#	Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
@@ -790,7 +758,11 @@ def get_clip(path):
 		# assrender.Subtitle(clip clip, string[] text, [string style="sans-serif,20,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,7,10,10,10,1", int[] start, int[] end, string vfr, int hinting=0, float scale=1.0, float line_spacing=1.0, float dar, float sar, bool set_default_storage_size=True, int top=0, int bottom=0, int left=0, int right=0, string charset, int debuglevel, string fontdir="", string srt_font="sans-serif", string colorspace])
 		#	colorspace Rec2020, BT.2020 Rec709, BT.709, Rec601, BT.601, PC.709, PC.601, TV.fcc, PC.fcc, TV.240m, PC.240m
 		#	When no hint found in ASS script and colorspace parameter is empty then the default is BT.601
-		clip = core.assrender.Subtitle(clip, text_subpath_for_subtitles, style="sans-serif,18,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0.9,0.5,3,2,2,2,1", colorspace=calc_ini["TARGET_COLORSPACE"])
+		print_DEBUG(f'No subtitling performed. calc_ini["ADD_SUBTITLE_DEPTH"]={calc_ini["ADD_SUBTITLE_DEPTH"]} pwp={pwp} num_parts={num_parts} max_depth_this_time={max_depth_this_time} text_subpath_for_subtitles="{text_subpath_for_subtitles}"')
+	else:
+		print_DEBUG(f'No subtitling performed. calc_ini["ADD_SUBTITLE_DEPTH"]={calc_ini["ADD_SUBTITLE_DEPTH"]} pwp={pwp} num_parts={num_parts} max_depth_this_time={max_depth_this_time}')
+	#++++++++++++++++++++
+	#
 	return clip
 
 ###
@@ -1082,9 +1054,9 @@ try:
 			IS_SILENT = config.getboolean(ini_section_name, "SILENT_MODE")	# if enabled, turn on DEBUG immediately
 		if config.has_option(ini_section_name, "DEBUG_MODE"):
 			IS_DEBUG = config.getboolean(ini_section_name, "DEBUG_MODE")	# if enabled, turn on DEBUG immediately
-		print_DEBUG(f'"{ini_section_name}" is in config, config={objPrettyPrint.pformat(config[ini_section_name])}')
-		for k,v in config[ini_section_name].items():
-			print_DEBUG(f'config["{ini_section_name}"]["{k}"] = "{v}"')
+		#print_DEBUG(f'"{ini_section_name}" is in config, config={objPrettyPrint.pformat(config[ini_section_name])}')
+		#for k,v in config[ini_section_name].items():
+		#	print_DEBUG(f'config["{ini_section_name}"]["{k}"] = "{v}"')
 	else:
 		print_NORMAL(f'WARNING: "{ini_section_name}" is NOT found in config.')
 		print_NORMAL(f'WARNING: Missing section "{ini_section_name}" in .ini file "{ini_file_speciying_parameters}"')
@@ -1122,7 +1094,7 @@ if config.has_section(ini_section_name):
 	ini_values[ini_section_name]["TEMP_DIRECTORY"]				= fully_qualified_folder_no_trailing_backslash(config.get(ini_section_name, 'TEMP_DIRECTORY'))
 	ini_values[ini_section_name]["RECURSIVE"]					= config.getboolean(ini_section_name, 'RECURSIVE')
 	ini_values[ini_section_name]["ADD_SUBTITLE_DEPTH"]			= int(config.getint(ini_section_name, 'ADD_SUBTITLE_DEPTH'))
-	ini_values[ini_section_name]["DURATION_PIC_SEC"]			= float(config.getint(ini_section_name, 'DURATION_PIC_SEC'))
+	ini_values[ini_section_name]["DURATION_PIC_SEC"]			= float(config.getfloat(ini_section_name, 'DURATION_PIC_SEC'))
 	ini_values[ini_section_name]["DURATION_CROSSFADE_SECS"]		= float(config.getfloat(ini_section_name, 'DURATION_CROSSFADE_SECS'))
 	ini_values[ini_section_name]["DURATION_MAX_VIDEO_SEC"]		= float(config.getfloat(ini_section_name, 'DURATION_MAX_VIDEO_SEC'))
 	ini_values[ini_section_name]["SILENT_MODE"]					= config.getboolean(ini_section_name, 'SILENT_MODE')
@@ -1130,13 +1102,13 @@ if config.has_section(ini_section_name):
 	ini_values[ini_section_name]["TARGET_COLORSPACE"] 			= config.get(ini_section_name, 'TARGET_COLORSPACE')
 	ini_values[ini_section_name]["TARGET_COLORSPACE_MATRIX"]	= config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX')
 	ini_values[ini_section_name]["TARGET_COLORSPACE_MATRIX_S"]	= config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX_S')
-	ini_values[ini_section_name]["TARGET_COLORSPACE_MATRIX_I"]	= int(config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX_I'))
+	ini_values[ini_section_name]["TARGET_COLORSPACE_MATRIX_I"]	= int(config.getint(ini_section_name, 'TARGET_COLORSPACE_MATRIX_I'))
 	ini_values[ini_section_name]["TARGET_COLOR_TRANSFER"]		= config.get(ini_section_name, 'TARGET_COLOR_TRANSFER')
 	ini_values[ini_section_name]["TARGET_COLOR_TRANSFER_S"]		= config.get(ini_section_name, 'TARGET_COLOR_TRANSFER_S')
-	ini_values[ini_section_name]["TARGET_COLOR_TRANSFER_I"]		= int(config.get(ini_section_name, 'TARGET_COLOR_TRANSFER_I'))
+	ini_values[ini_section_name]["TARGET_COLOR_TRANSFER_I"]		= int(config.getint(ini_section_name, 'TARGET_COLOR_TRANSFER_I'))
 	ini_values[ini_section_name]["TARGET_COLOR_PRIMARIES"]		= config.get(ini_section_name, 'TARGET_COLOR_PRIMARIES')
 	ini_values[ini_section_name]["TARGET_COLOR_PRIMARIES_S"]	= config.get(ini_section_name, 'TARGET_COLOR_PRIMARIES_S')
-	ini_values[ini_section_name]["TARGET_COLOR_PRIMARIES_I"]	= int(config.get(ini_section_name, 'TARGET_COLOR_PRIMARIES_I'))
+	ini_values[ini_section_name]["TARGET_COLOR_PRIMARIES_I"]	= int(config.getint(ini_section_name, 'TARGET_COLOR_PRIMARIES_I'))
 	ini_values[ini_section_name]["TARGET_COLOR_RANGE"]			= config.get(ini_section_name, 'TARGET_COLOR_RANGE')
 	ini_values[ini_section_name]["TARGET_COLOR_RANGE_S"]		= config.get(ini_section_name, 'TARGET_COLOR_RANGE_S')
 	ini_values[ini_section_name]["TARGET_COLOR_RANGE_I"]		= int(config.get(ini_section_name, 'TARGET_COLOR_RANGE_I'))
@@ -1245,21 +1217,21 @@ if IS_DEBUG:
 	# https://www.vapoursynth.com/doc/api/vapoursynth.h.html#enum-vspresetformat
 	print_DEBUG(f'----------------------------------------------------------------------------------------------------------------------------')
 	for v in vs.PresetFormat:	# eg vs.YUV420P8
-		print_DEBUG(f'get_clip_specs: vs.PresetFormat ENUM: {str(v)} = {v.value}')
+		print_DEBUG(f'vs.PresetFormat ENUM: {str(v)} = {v.value}')
 	for v in vs.MatrixCoefficients:
-		print_DEBUG(f'get_clip_specs: vs.MatrixCoefficients ENUM: {str(v)} = {v.value}')
+		print_DEBUG(f'vs.MatrixCoefficients ENUM: {str(v)} = {v.value}')
 	for v in vs.TransferCharacteristics:
-		print_DEBUG(f'get_clip_specs: vs.TransferCharacteristics ENUM: {str(v)} = {v.value}')
+		print_DEBUG(f'vs.TransferCharacteristics ENUM: {str(v)} = {v.value}')
 	for v in vs.ColorPrimaries:
-		print_DEBUG(f'get_clip_specs: vs.ColorPrimaries ENUM: {str(v)} = {v.value}')
+		print_DEBUG(f'vs.ColorPrimaries ENUM: {str(v)} = {v.value}')
 	for v in vs.ColorRange:
-		print_DEBUG(f'get_clip_specs: vs.ColorRange ENUM: {str(v)} = {v.value}')
+		print_DEBUG(f'vs.ColorRange ENUM: {str(v)} = {v.value}')
 	for v in vs.ColorFamily:
-		print_DEBUG(f'get_clip_specs: vs.ColorFamily ENUM: {str(v)} = {v.value}')
+		print_DEBUG(f'vs.ColorFamily ENUM: {str(v)} = {v.value}')
 	for v in vs.ChromaLocation:
-		print_DEBUG(f'get_clip_specs: vs.ChromaLocation ENUM: {str(v)} = {v.value}')
+		print_DEBUG(f'vs.ChromaLocation ENUM: {str(v)} = {v.value}')
 	for v in vs.FieldBased:
-		print_DEBUG(f'get_clip_specs: vs.FieldBased ENUM: {str(v)} = {v.value}')
+		print_DEBUG(f'vs.FieldBased ENUM: {str(v)} = {v.value}')
 	print_DEBUG(f'----------------------------------------------------------------------------------------------------------------------------')
 	print_DEBUG(f'default_ini_values=\n{objPrettyPrint.pformat(default_ini_values)}')
 	print_DEBUG(f'ini_values=\n{objPrettyPrint.pformat(ini_values)}')
@@ -1326,16 +1298,18 @@ print_DEBUG(f'Created blank_clip with the desired  target properties')
 #++++++++++++++++++++
 
 clips = blank_clip	# initialize the accumulated clips with a starting small blank clip
-if calc_ini["DURATION_CROSSFADE_FRAMES"]>0:
+if calc_ini["DURATION_CROSSFADE_FRAMES"] > 0:
 	#if len(blank_clip) < calc_ini["DURATION_CROSSFADE_FRAMES"] :
 	#	crossfade_blank_clip = blank_clip[0]*calc_ini["DURATION_CROSSFADE_FRAMES"]
 	#else 
 	#	crossfade_blank_clip = blank_clip
 	crossfade_blank_clip = blank_clip[0]*calc_ini["DURATION_CROSSFADE_FRAMES"]
 	prior_clip_for_crossfade = crossfade_blank_clip
+	print_DEBUG(f'calc_ini["DURATION_CROSSFADE_FRAMES"] ({calc_ini["DURATION_CROSSFADE_FRAMES"]}) > 0 ... crossfade_blank_clip={crossfade_blank_clip}')
+else:
+	print_DEBUG(f'calc_ini["DURATION_CROSSFADE_FRAMES"] ({calc_ini["DURATION_CROSSFADE_FRAMES"]}) <= 0 ... no crossfade_blank_clipcreated')
 #---
 while not (path is None):	# first clip already pre-retrieved ready for this while loop
-	print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
 	print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
 	Count_of_files = Count_of_files + 1
 	print_NORMAL(f'processing {Count_of_files} {str(path)}')
@@ -1357,7 +1331,6 @@ while not (path is None):	# first clip already pre-retrieved ready for this whil
 	else:
 		clips = clips + this_clip
 	path = get_path(paths)		# get next path to process in this while loop
-	print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
 	print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
 #---
 # perhaps a finishing crossfade to black ?
