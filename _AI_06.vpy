@@ -984,14 +984,16 @@ def print_DEBUG(*args, **kwargs):	# PRINT TO stderr
 		# per https://stackoverflow.com/questions/5574702/how-do-i-print-to-stderr-in-python
 	# 	eprint("foo", "bar", "baz", sep="---")
 	#	foo---bar---baz
-	if IS_DEBUG:
-		print('DEBUG:', *args, **kwargs, file=sys.stderr, flush=True)
+	if not IS_SILENT:
+		if IS_DEBUG:
+			print('DEBUG:', *args, **kwargs, file=sys.stderr, flush=True)
 
 def print_NORMAL(*args, **kwargs):	# PRINT TO stderr
 	# per https://stackoverflow.com/questions/5574702/how-do-i-print-to-stderr-in-python
 	# 	eprint_NORMAL("foo", "bar", "baz", sep="---")
 	#	foo---bar---baz
-	print(*args, **kwargs, file=sys.stderr, flush=True)
+	if not IS_SILENT:
+		print(*args, **kwargs, file=sys.stderr, flush=True)
 
 
 ###################################################################################################################################################
