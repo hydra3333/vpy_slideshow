@@ -1015,10 +1015,14 @@ default_ini_values =	{ ini_section_name : {
 							#'DIRECTORY' :						fully_qualified_folder_no_trailing_backslash(os.getcwd().strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
 							'DIRECTORY' :						fully_qualified_folder_no_trailing_backslash(r'G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\ '.strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
 							'TEMP_DIRECTORY' :					fully_qualified_folder_no_trailing_backslash(r'D:\TEMP\ '.strip()),	# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
-							'RECURSIVE' :						False,
+							'RECURSIVE' :						True,
+							'ADD_SUBTITLE' :					True,												# True adds a subtitle in the bottom right corner containing the last few parts of the path to the image/video
+							'CROSSFADE_DURATION':				1,													# 1 sec
+							'MAX_DURATION_VIDEO_SEC' :			60,													# Maximum duration of a video clip in seconds (incoming video will get clipped at this point)
+							'MIN_DURATION_PIC_SEC' :			0.5,												### MINIMUM duration of display of an image, in seconds
+							'MAX_DURATION_PIC_SEC' :			4,													### MAXIMUM duration of display of an image, in seconds
 							'SILENT_MODE' :						False,												# overrides DEBUG_MODE
 							'DEBUG_MODE' :						False,
-							'CROSSFADE_DURATION':				1,
 							'TARGET_COLORSPACE' : 				r'BT.709',											# colorspace Rec2020, BT.2020 Rec709, BT.709, Rec601, BT.601, PC.709, PC.601, TV.fcc, PC.fcc, TV.240m, PC.240m; When no hint found in ASS script and colorspace parameter is empty then the default is BT.601
 							'TARGET_COLORSPACE_MATRIX' :		r'BT.709',
 							'TARGET_COLORSPACE_MATRIX_S' :		r'709',												# for resize, shortened name for bt.709 (not "BT.709" nor "BT709")
@@ -1050,13 +1054,9 @@ default_ini_values =	{ ini_section_name : {
 							'TARGET_HEIGHT' :					1080,
 							'TARGET_FPSNUM' :					25,													# for fps numerator		... PAL world bias
 							'TARGET_FPSDEN' :					1,													# for fps denominator	... PAL world bias
-							'MIN_DURATION_SEC' :				0.5,												### MINIMUM duration of display of an image, in seconds
-							'MAX_DURATION_SEC' :				4,													### MAXIMUM duration of display of an image, in seconds
-							'MAX_DURATION_VIDEO_SEC' :			60,													# Maximum duration of a video clip in seconds (incoming video will get clipped at this point)
-							'BOX' :								True,												# True would initiate letterboxing or pillarboxing. False fills to TARGET_WIDTH,TARGET_HEIGHT
-							'ADD_SUBTITLE' :					True,												# True adds a subtitle in the bottom right corner containing the last few parts of the path to the image/video
 							'UPSIZE_KERNEL' :					r'Lanczos',
 							'DOWNSIZE_KERNEL' :					r'Spline36',
+							'BOX' :								True,											# True would initiate letterboxing or pillarboxing. False fills to TARGET_WIDTH,TARGET_HEIGHT
 							}
 						}
 ini_values = default_ini_values
@@ -1110,8 +1110,13 @@ if config.has_section(ini_section_name):
 	ini_values[ini_section_name]["DIRECTORY"]					= fully_qualified_folder_no_trailing_backslash(config.get(ini_section_name, 'DIRECTORY'))
 	ini_values[ini_section_name]["TEMP_DIRECTORY"]				= fully_qualified_folder_no_trailing_backslash(config.get(ini_section_name, 'TEMP_DIRECTORY'))
 	ini_values[ini_section_name]["RECURSIVE"]					= config.getboolean(ini_section_name, 'RECURSIVE')
-	ini_values[ini_section_name]["DEBUG_MODE"]					= config.getboolean(ini_section_name, 'DEBUG_MODE')
+	ini_values[ini_section_name]["ADD_SUBTITLE"]				= config.getboolean(ini_section_name, 'ADD_SUBTITLE')
 	ini_values[ini_section_name]["CROSSFADE_DURATION"]			= int(config.get(ini_section_name, 'CROSSFADE_DURATION'))
+	ini_values[ini_section_name]["MAX_DURATION_VIDEO_SEC"]		= int(config.getint(ini_section_name, 'MAX_DURATION_VIDEO_SEC'))
+	ini_values[ini_section_name]["MIN_DURATION_PIC_SEC"]		= int(config.getfloat(ini_section_name, 'MIN_DURATION_PIC_SEC'))
+	ini_values[ini_section_name]["MAX_DURATION_PIC_SEC"]		= int(config.getint(ini_section_name, 'MAX_DURATION_PIC_SEC'))
+	ini_values[ini_section_name]["SILENT_MODE"]					= config.getboolean(ini_section_name, 'SILENT_MODE')
+	ini_values[ini_section_name]["DEBUG_MODE"]					= config.getboolean(ini_section_name, 'DEBUG_MODE')
 	ini_values[ini_section_name]["TARGET_COLORSPACE"] 			= config.get(ini_section_name, 'TARGET_COLORSPACE')
 	ini_values[ini_section_name]["TARGET_COLORSPACE_MATRIX"]	= config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX')
 	ini_values[ini_section_name]["TARGET_COLORSPACE_MATRIX_S"]	= config.get(ini_section_name, 'TARGET_COLORSPACE_MATRIX_S')
@@ -1129,13 +1134,9 @@ if config.has_section(ini_section_name):
 	ini_values[ini_section_name]["TARGET_HEIGHT"]				= int(config.getint(ini_section_name, 'TARGET_HEIGHT'))
 	ini_values[ini_section_name]["TARGET_FPSNUM"]				= int(config.getint(ini_section_name, 'TARGET_FPSNUM'))
 	ini_values[ini_section_name]["TARGET_FPSDEN"]				= int(config.getint(ini_section_name, 'TARGET_FPSDEN'))
-	ini_values[ini_section_name]["MIN_DURATION_SEC"]			= int(config.getfloat(ini_section_name, 'MIN_DURATION_SEC'))
-	ini_values[ini_section_name]["MAX_DURATION_SEC"]			= int(config.getint(ini_section_name, 'MAX_DURATION_SEC'))
-	ini_values[ini_section_name]["MAX_DURATION_VIDEO_SEC"]		= int(config.getint(ini_section_name, 'MAX_DURATION_VIDEO_SEC'))
-	ini_values[ini_section_name]["BOX"]							= config.getboolean(ini_section_name, 'BOX')
-	ini_values[ini_section_name]["ADD_SUBTITLE"]				= config.getboolean(ini_section_name, 'ADD_SUBTITLE')
 	ini_values[ini_section_name]["UPSIZE_KERNEL"]				= config.get(ini_section_name, 'UPSIZE_KERNEL')
 	ini_values[ini_section_name]["DOWNSIZE_KERNEL"]				= config.get(ini_section_name, 'DOWNSIZE_KERNEL')
+	ini_values[ini_section_name]["BOX"]							= config.getboolean(ini_section_name, 'BOX')
 else:
 	raise ValueError(f'ERROR: .ini file unable to be read or recreated properly')
 # add clarifying information to and re-save the updated set of .ini values over the top of the existing .ini file
@@ -1162,11 +1163,15 @@ with open(ini_file_speciying_parameters, 'w') as configfile:
 		tmp_dict[tmp_name][str(v)] = v.value
 		pass
 	update_config[tmp_name] = tmp_dict[tmp_name]
+
 	tmp_name = 'Enum_vs.ColorRange'
 	tmp_dict = { tmp_name : {}}
 	for v in vs.ColorRange:
 		tmp_dict[tmp_name][str(v)] = v.value
 		pass
+	update_config[tmp_name] = tmp_dict[tmp_name]
+	tmp_name = 'Enum_ZIMG.ColorRange'
+	tmp_dict = { tmp_name : {"ZIMG.RANGE_LIMITED" : ZIMG_RANGE_LIMITED, "ZIMG.RANGE_FULL" : ZIMG_RANGE_FULL}}
 	update_config[tmp_name] = tmp_dict[tmp_name]
 	tmp_name = 'Enum_vs.PresetFormat'
 	tmp_dict = { tmp_name : {}}
@@ -1207,7 +1212,7 @@ calc_ini["TARGET_PIXEL_FORMAT"]			= int(vs.YUV420P8.value)				# pixel format of 
 calc_ini["DG_PIXEL_FORMAT"]				= int(vs.YUV420P16.value)				# pixel format of the video for use by DG tools
 calc_ini["TARGET_FPS"]					= round(calc_ini["TARGET_FPSNUM"] / calc_ini["TARGET_FPSDEN"], 3)
 calc_ini["BLANK_CLIP_LENGTH"]			= int(math.ceil(0.1*calc_ini["TARGET_FPS"]))	# leading and trailing blank clip duration in frames with round-up. int(round(0.1*calc_ini["TARGET_FPS"])) will round up/down
-calc_ini["MIN_DURATION_FRAMES"]			= int(math.ceil(calc_ini["MIN_DURATION_SEC"] * calc_ini["TARGET_FPS"]))	### duration of display of an image, in frames
+calc_ini["MIN_DURATION_FRAMES"]			= int(math.ceil(calc_ini["MIN_DURATION_PIC_SEC"] * calc_ini["TARGET_FPS"]))	### duration of display of an image, in frames
 calc_ini["MAX_DURATION_VIDEO_FRAMES"]	= int(math.ceil(calc_ini["MAX_DURATION_VIDEO_SEC"] * calc_ini["TARGET_FPS"]))	### max duration of display of a video, in frames
 calc_ini["DOT_FFINDEX"]					= ".ffindex".lower()		# for removing temporary *.ffindex files at the end
 calc_ini["MODX"]						= int(2)	   # mods for letterboxing calculations, example, for 411 YUV as an extreme
