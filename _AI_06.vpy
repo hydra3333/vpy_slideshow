@@ -226,8 +226,6 @@ CDLL(r'C:\SOFTWARE\Vapoursynth-x64\MediaInfo.dll')				# per https://forum.videoh
 from MediaInfoDLL3 import MediaInfo, Stream, Info, InfoOption	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
 
 ###
-global IS_DEBUG
-IS_DEBUG = True	# default DEBUG to False
 global last_file_opened_with_ffms2
 global last_file_opened_with_imwri
 global last_file_opened_with_LWLibavSource
@@ -236,14 +234,19 @@ global last_file_opened_with_LibavSMASHSource
 ###
 # Define GLOBALS
 #
+global IS_SILENT
+IS_SILENT = True	# start silently
+global IS_DEBUG
+IS_DEBUG = False	# default DEBUG to False
 # https://github.com/vapoursynth/vapoursynth/issues/940#issuecomment-1465041338
 # When calling rezisers etc, ONLY use these values:
 #	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
 #	ZIMG_RANGE_FULL     = 1   /**< Full (PC) dynamic range, 0-255 in 8 bits. */
 # but when obtaining from frame properties and comparing etc, use the vs values from
 # frame properties even though the vapoursynth values are incorrect (opposite to the spec)
-#
+global ZIMG_RANGE_LIMITED
 ZIMG_RANGE_LIMITED  = 0		# /**< Studio (TV) legal range, 16-235 in 8 bits. */
+global ZIMG_RANGE_FULL
 ZIMG_RANGE_FULL     = 1		# /**< Full (PC) dynamic range, 0-255 in 8 bits. */
 
 ###
@@ -1011,6 +1014,7 @@ default_ini_values =	{ ini_section_name : {
 							'DIRECTORY' :						fully_qualified_folder_no_trailing_backslash(r'G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\ '.strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
 							'TEMP_DIRECTORY' :					fully_qualified_folder_no_trailing_backslash(r'D:\TEMP\ '.strip()),	# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
 							'RECURSIVE' :						False,
+							'SILENT_MODE' :						False,												# overrides DEBUG_MODE
 							'DEBUG_MODE' :						False,
 							'CROSSFADE_DURATION':				1,
 							'TARGET_COLORSPACE' : 				r'BT.709',											# colorspace Rec2020, BT.2020 Rec709, BT.709, Rec601, BT.601, PC.709, PC.601, TV.fcc, PC.fcc, TV.240m, PC.240m; When no hint found in ASS script and colorspace parameter is empty then the default is BT.601
@@ -1046,7 +1050,7 @@ default_ini_values =	{ ini_section_name : {
 							'TARGET_FPSDEN' :					1,													# for fps denominator	... PAL world bias
 							'MIN_DURATION_SEC' :				0.5,												### MINIMUM duration of display of an image, in seconds
 							'MAX_DURATION_SEC' :				4,													### MAXIMUM duration of display of an image, in seconds
-							'MAX_DURATION_VIDEO_SEC' :			15,													# Maximum diraction of a video clip in seconds
+							'MAX_DURATION_VIDEO_SEC' :			60,													# Maximum duration of a video clip in seconds (incoming video will get clipped at this point)
 							'BOX' :								True,												# True would initiate letterboxing or pillarboxing. False fills to TARGET_WIDTH,TARGET_HEIGHT
 							'ADD_SUBTITLE' :					True,												# True adds a subtitle in the bottom right corner containing the last few parts of the path to the image/video
 							'UPSIZE_KERNEL' :					r'Lanczos',
@@ -1061,6 +1065,10 @@ try:
 	config.read_file(i_f)
 	i_f.close()
 	if ini_section_name in config:
+		if config.has_option(ini_section_name, "SILENT_MODE"):
+			IS_SILENT = config.getboolean(ini_section_name, "SILENT_MODE")	# if enabled, turn on DEBUG immediately
+		if config.has_option(ini_section_name, "DEBUG_MODE"):
+			IS_DEBUG = config.getboolean(ini_section_name, "DEBUG_MODE")	# if enabled, turn on DEBUG immediately
 		print_DEBUG(f'"{ini_section_name}" is in config, config={objPrettyPrint.pformat(config[ini_section_name])}')
 		for k,v in config[ini_section_name].items():
 			print_DEBUG(f'config["{ini_section_name}"]["{k}"] = "{v}"')
@@ -1088,8 +1096,11 @@ else:
 	i_f = open(ini_file_speciying_parameters,'r')	# no try/except, let it fail this time
 	config.read_file(i_f)
 	i_f.close()
-#
-#IS_DEBUG = config.getboolean(ini_section_name, "DEBUG_MODE")	# if enabled, turn on DEBUG immediately
+
+if config.has_option(ini_section_name, "SILENT_MODE"):
+	IS_SILENT = config.getboolean(ini_section_name, "SILENT_MODE")	# if enabled, turn on DEBUG immediately
+if config.has_option(ini_section_name, "DEBUG_MODE"):
+	IS_DEBUG = config.getboolean(ini_section_name, "DEBUG_MODE")	# if enabled, turn on DEBUG immediately
 if IS_DEBUG:
 	print_DEBUG(f'Debug Mode turned on since .ini file DEBUG_MODE={config.getboolean(ini_section_name, "DEBUG_MODE")}')
 # grab the .ini settings that the user has specified
