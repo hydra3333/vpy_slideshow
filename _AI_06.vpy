@@ -1015,7 +1015,7 @@ default_ini_values =	{ ini_section_name : {
 							'SUBTITLE_DEPTH' :					3,													# adds a subtitle in the bottom right corner containing the last specified number of  parts of the path to the image/video
 							'DURATION_PIC_SEC' :				3.0,												### MAXIMUM duration of display of an image, in seconds
 							'DURATION_CROSSFADE_SECS':			0.2,												# 1 sec
-							'DURATION_MAX_VIDEO_SEC' :			10.0,												# Maximum duration of a video clip in seconds (incoming video will get clipped at this point)
+							'DURATION_MAX_VIDEO_SEC' :			60.0,												# Maximum duration of a video clip in seconds (incoming video will get clipped at this point)
 							#'DENOISE_STRENGTH' :				0.15,												# values less than .3 are "OK"
 							'SILENT_MODE' :						False,												# overrides DEBUG_MODE
 							'DEBUG_MODE' :						False,
@@ -1367,6 +1367,7 @@ if calc_ini["DURATION_CROSSFADE_FRAMES"]>0:
 clips = clips + blank_clip		# end the accumulated clips with a finishing small blank clip
 clips = clips.std.AssumeFPS(fpsnum=calc_ini["TARGET_FPSNUM"], fpsden=calc_ini["TARGET_FPSDEN"])
 print_NORMAL(f'Finished processing {Count_of_files} image/video files.')
+#---
 # Cleanup any temporary .ffindex files created by ffms2
 print_NORMAL(f'Start removing temporary *.ffindex files from folder "{calc_ini["DIRECTORY"]}" with recursive="{calc_ini["RECURSIVE"]}" ...')
 pp = calc_ini["DIRECTORY"] + "/" + ff_glob_var

@@ -22,15 +22,15 @@ set bv_min=3000000
 set bv_max=15000000
 set bv_buf=15000000
 
-REM DEL "%ini_file%">NUL 2>&1
+DEL "%ini_file%">NUL 2>&1
 IF NOT EXIST "%ini_file%" (
-	REM DEL "%ini_file%">NUL 2>&1
 	echo [slideshow]>>"%ini_file%"
 	echo directory = G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST>>"%ini_file%"
 	echo temp_directory = D:\TEMP>>"%ini_file%"
 	echo recursive = False>>"%ini_file%"
 	echo debug_mode = False>>"%ini_file%"
-	REM type "%ini_file%"
+	echo duration_max_video_sec = 10.0
+	type "%ini_file%"
 )
 
 
