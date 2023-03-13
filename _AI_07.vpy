@@ -375,7 +375,14 @@ def mediainfo_value_worker(stream:int, track:int, param:str, path: Union[Path,st
 	if info_option:
 		#returning a proper value type, int, float or str for particular parameter
 		type_ = info_option[InfoOption.TypeOfValue] #type_=info_option[3] #_type will be 'I', 'F', 'T', 'D' or 'B'
-		val = {'I':int, 'F':float, 'T':str, 'D':str, 'B':str}[type_](str_value)
+		try:
+			val = {'I':int, 'F':float, 'T':str, 'D':str, 'B':str}[type_](str_value)
+		except Exception as err:
+			print_DEBUG(f'COVERSION EXCEPTION ON val =["I":int, "F":float, "T":str, "D":str, "B":str][type_](str_value) ... type_="{type_}" param="{param}" str_value="{str_value}" path={path}')
+			print_DEBUG(f"Unexpected Error {err=}, {type(err)=}")
+			val = None
+			#raise
+			pass
 		return val
 	else:
 		raise ValueError(f'ERROR: mediainfo_value_worker: wrong parameter: "{param}" for given stream: {stream}')
@@ -557,6 +564,8 @@ def get_clip_specs(clip=None, path=None, ext=None):
 
 	# **********
 	# Guess the Specs Pass #1 before we resort to total guesses
+	# Sometimes, ffms2 delvers content with missing metadata tellng us what the source frame properties are
+	# Perhaps mediainfo can find out for us.
 	# **********
 	clip_specs["guessed_Matrix"] = False
 	clip_specs["proposed_Matrix"] = clip_specs["_Matrix"]
@@ -575,11 +584,11 @@ def get_clip_specs(clip=None, path=None, ext=None):
 		pass
 	if clip_specs["_ColorRange"] is None:
 		pass
-	
-	
 
 	# **********
 	# Guess the Specs Pass #2 once we've had a god with medinfo values ..
+	# Sometimes, ffms2 delvers content with missing metadata tellng us what the source frame properties are
+	# So, now we really guess.
 	# **********
 	# if not already specified, guess a new _Matrix
 	# explainer https://docs.rs/av-data/0.4.1/av_data/pixel/index.html https://docs.rs/av-data/0.4.1/av_data/pixel/enum.MatrixCoefficients.html

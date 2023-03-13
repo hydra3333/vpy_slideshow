@@ -65,12 +65,28 @@ def mediainfo_value(MI, stream:int, track:int, param:str, path: Union[Path,str])
 		#returning a proper value type, int, float or str for particular parameter
 		type_ = info_option[InfoOption.TypeOfValue] #type_=info_option[3] #_type will be 'I', 'F', 'T', 'D' or 'B'
 		#print(f'MI says {param} = type "{type_}"')
-		val = {'I':int, 'F':float, 'T':str, 'D':str, 'B':str}[type_](str_value)
+		try:
+			val = {'I':int, 'F':float, 'T':str, 'D':str, 'B':str}[type_](str_value)
+		except Exception as err:
+			print(f'INVALID COVERSION EXCEPTION ON val =["I":int, "F":float, "T":str, "D":str, "B":str][type_](str_value) ... type_="{type_}" param="{param}" str_value="{str_value}" path={path}')
+			print(f"Unexpected Error {err=}, {type(err)=}")
+			#raise
+			val = None
+			pass
 		return val
 	else:
 		raise ValueError(f'wrong parameter: "{param}" for given stream: {stream}')
 
-DIRECTORY = r"G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST"
+# for the moment, hacked for testing
+#DIRECTORY = r"G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST"
+#DIRECTORY = r"G:\2021.06.14-Pat.and.Ted-Photos"
+#DIRECTORY = r"G:\2021.08.26-Pat.and.Ted-Photos-from-USB-keys"
+DIRECTORY = r"E:\MULTIMEDIA"
+
+
+########## if k in dict:
+########## 	do something
+
 #paths = Path(DIRECTORY).glob(f'**/*.mp4') # recursive
 paths = Path(DIRECTORY).glob(f'**/*.*') # recursive
 
@@ -117,11 +133,29 @@ mi_video_params = [
 	'transfer_characteristics',                      # : Opto-electronic transfer characteristic of the source picture
 	'matrix_coefficients',                           # : Matrix coefficients used in deriving luma and chroma signals from the green, blue, and red primaries
 ]
+# for the moment, hacked for testing
+mi_video_params = [
+	'Rotation',                                      # : Rotation as a real number eg 180.00
+	'FrameRate',                                     # : Frames per second
+	'FrameRate_Num',                                 # : Frames per second, numerator
+	'FrameRate_Den',                                 # : Frames per second, denominator
+	'FrameCount',                                    # : Number of frames
+	'Standard',                                      # : NTSC or PAL
+	'ColorSpace',                                    # : 
+	'ChromaSubsampling',                             # : 
+	'BitDepth',                                      # : 16/24/32
+	'ScanType',                                      # : 
+	'colour_description_present',                    # : Presence of colour description "Yes" or not "Yes" if not None
+	'colour_range',                                  # : Colour range for YUV colour space
+	'colour_primaries',                              # : Chromaticity coordinates of the source primaries
+	'transfer_characteristics',                      # : Opto-electronic transfer characteristic of the source picture
+	'matrix_coefficients',                           # : Matrix coefficients used in deriving luma and chroma signals from the green, blue, and red primaries
+]
 #---
 yes_extensions = [".mp4", ".mpeg4", ".mpg", ".mpeg", ".avi", ".mjpeg", ".3gp", ".mov", ".m2ts"]	#always lowercase
 for path in paths:
 	if path.suffix.lower() in yes_extensions:
-		print(f'\nFile: {path}')
+		print(f'File: {path}')
 		MI.Open(str(path))
 		p_dict = {}
 		for param in mi_video_params:
@@ -129,6 +163,8 @@ for path in paths:
 			#print(f'"{param}" = \t\t\t\t"{value}"\t\t\ttype={type(value)}\t\t\tisinstance(value,str)={isinstance(value,str)}\t\tisinstance(value,int)={isinstance(value,int)}\t\tisinstance(value,bool)={isinstance(value,bool)}\t\tisinstance(value,float)={isinstance(value,float)}')
 			p_dict[param] = value	# any of str, bool, int, float, etc
 		MI.Close()
+		# for the moment, hacked for testing
+		#print(f'{p_dict}')
 		print(f'{objPrettyPrint.pformat(p_dict)}')
 
 

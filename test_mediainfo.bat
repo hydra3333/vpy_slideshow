@@ -11,8 +11,8 @@ set "pwd=%CD%"
 if /I NOT "%pwd:~-1%" == "\" (set "pwd=%pwd%\")
 
 set   "script=%pwd%test_mediainfo.vpy"
-"%vs_path%python.exe" "%script%"
-REM "%vs_path%python.exe" "%script%" >"%script%.log"
+REM "%vs_path%python.exe" "%script%"
+"%vs_path%python.exe" "%script%" >"%script%.log" 2>&1
 
 pause
 exit
