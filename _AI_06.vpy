@@ -1,5 +1,7 @@
 # PYTHON3
 #
+# "C:\SOFTWARE\MediaInfo\MediaInfo.exe" --full "G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\20180801_125800.mp4"
+#
 # Version:	as at 2023.03.04
 #
 # Description:
@@ -681,21 +683,22 @@ def get_clip(path):
 		clip = core.std.SetFrameProps(clip, _ColorRange=clip_specs["proposed_ColorRange"])
 	#
 	#++++++++++++++++++++
-	# Apply an auto-rotate if specified in the source file ... for an image only)
-	if path.suffix.lower() in calc_ini["PIC_EXTENSIONS"]:
-		if clip_specs["auto_rotation_degrees"] == 0:
-			print_DEBUG(f'get_clip: zero auto-rotation of clip {path}')
-		if clip_specs["auto_rotation_degrees"] == 90:
-			print_DEBUG(f'get_clip: auto-Rotating by 90 degrees {path}')
-			clip = clip.std.Transpose().std.FlipVertical()	# ??? works for images ???
-		elif clip_specs["auto_rotation_degrees"] == 180:
-			print_DEBUG(f'get_clip: auto-Rotating by 180 degrees {path}')
-			clip = clip.std.Turn180()
-		elif clip_specs["auto_rotation_degrees"] == 270:
-			print_DEBUG(f'get_clip: auto-Rotating by 270 degrees {path}')
-			clip = clip.std.Transpose().std.FlipHorizontal()
-		else:
-			raise ValueError('ERROR: get_clip: auto_rotation_degrees "{clip_specs["auto_rotation_degrees"]}" unable to be processed for "{path}" : only 0,90,180,270 are valid')
+	# Apply an auto-rotate if specified in the source file
+	##if path.suffix.lower() in calc_ini["PIC_EXTENSIONS"]:
+	print_DEBUG(f'type(clip_specs["auto_rotation_degrees"])={type(clip_specs["auto_rotation_degrees"])}  clip_specs["auto_rotation_degrees"]={clip_specs["auto_rotation_degrees"]}')
+	if clip_specs["auto_rotation_degrees"] == 0:
+		print_DEBUG(f'get_clip: zero auto-rotation of clip {path}')
+	elif clip_specs["auto_rotation_degrees"] == 90:
+		print_DEBUG(f'get_clip: auto-Rotating by 90 degrees {path}')
+		clip = clip.std.Transpose().std.FlipVertical()	# ??? works for images ???
+	elif clip_specs["auto_rotation_degrees"] == 180:
+		print_DEBUG(f'get_clip: auto-Rotating by 180 degrees {path}')
+		clip = clip.std.Turn180()
+	elif clip_specs["auto_rotation_degrees"] == 270:
+		print_DEBUG(f'get_clip: auto-Rotating by 270 degrees {path}')
+		clip = clip.std.Transpose().std.FlipHorizontal()
+	else:
+		raise ValueError(f'ERROR: get_clip: auto_rotation_degrees "{clip_specs["auto_rotation_degrees"]}" unable to be processed for "{path}" : only 0/90/180/270 are valid')
 	#++++++++++++++++++++
 	#
 	# do video-specific or picture-specific changes
@@ -787,7 +790,7 @@ def crossfade(a, b, crossfade_duration_frames):
 	def fade_image(n, a, b):
 		return core.std.Merge(a, b, weight=n/crossfade_duration_frames)
 	if a.format.id != b.format.id or a.height != b.height or a.width != b.width:
-		raise ValueError('ERROR: crossfade: Both clips must have the same dimensions and format.')
+		raise ValueError(f'ERROR: crossfade: Both clips must have the same dimensions and format.')
 	return core.std.FrameEval(a[-crossfade_duration_frames:], partial(fade_image, a=a[-crossfade_duration_frames:], b=b[:crossfade_duration_frames]))
 
 ###
