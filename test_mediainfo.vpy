@@ -47,27 +47,28 @@ objPrettyPrint = pprint.PrettyPrinter(width=TERMINAL_WIDTH, compact=False, sort_
 
 
 def mediainfo_value(MI, stream:int, track:int, param:str, path: Union[Path,str]) -> Union[int,float,str]:
-    if not stream in range(0,8):
-        raise ValueError(f'stream must be a Stream attribute: General, Video, Audio, Text, Other, Image, Menu, Max')
-    if not isinstance(track, int) or track<0:
-        raise ValueError(f'track must be a positive integer')
-    if not isinstance(param, str):
-        raise ValueError(f'param must be a string for particular stream, print(MI.Option_Static("Info_Parameters")')
-    if not isinstance(path, (Path, str)):
-        raise ValueError(f'path must be Path or str class')    
-    #MI.Open(str(path))
-    str_value = MI.Get(stream, track, param)
-    info_option =  MI.Get(stream, track, param, InfoKind=Info.Options)
-    #MI.Close()
-    if not str_value:
-        return None
-    if info_option:
-        #returning a proper value type, int, float or str for particular parameter
-        type_ = info_option[InfoOption.TypeOfValue] #type_=info_option[3] #_type will be 'I', 'F', 'T', 'D' or 'B'
-        val = {'I':int, 'F':float, 'T':str, 'D':str, 'B':str}[type_](str_value)
-        return val
-    else:
-        raise ValueError(f'wrong parameter: "{param}" for given stream: {stream}')
+	if not stream in range(0,8):
+		raise ValueError(f'stream must be a Stream attribute: General, Video, Audio, Text, Other, Image, Menu, Max')
+	if not isinstance(track, int) or track<0:
+		raise ValueError(f'track must be a positive integer')
+	if not isinstance(param, str):
+		raise ValueError(f'param must be a string for particular stream, print(MI.Option_Static("Info_Parameters")')
+	if not isinstance(path, (Path, str)):
+		raise ValueError(f'path must be Path or str class')    
+	#MI.Open(str(path))
+	str_value = MI.Get(stream, track, param)
+	info_option =  MI.Get(stream, track, param, InfoKind=Info.Options)
+	#MI.Close()
+	if not str_value:
+		return None
+	if info_option:
+		#returning a proper value type, int, float or str for particular parameter
+		type_ = info_option[InfoOption.TypeOfValue] #type_=info_option[3] #_type will be 'I', 'F', 'T', 'D' or 'B'
+		#print(f'MI says {param} = type "{type_}"')
+		val = {'I':int, 'F':float, 'T':str, 'D':str, 'B':str}[type_](str_value)
+		return val
+	else:
+		raise ValueError(f'wrong parameter: "{param}" for given stream: {stream}')
 
 DIRECTORY = r"G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST"
 #paths = Path(DIRECTORY).glob(f'**/*.mp4') # recursive
