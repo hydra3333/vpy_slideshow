@@ -222,9 +222,9 @@ import pprint
 
 from PIL import Image, ExifTags, UnidentifiedImageError
 from PIL.ExifTags import TAGS
-core.std.LoadPlugin(r'C:\SOFTWARE\Vapoursynth-x64\DGIndex\DGDecodeNV.dll') 	# note the hard-coded folder
-core.avs.LoadPlugin(r'C:\SOFTWARE\Vapoursynth-x64\DGIndex\DGDecodeNV.dll') 	# note the hard-coded folder
-CDLL(r'C:\SOFTWARE\Vapoursynth-x64\MediaInfo.dll')				# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
+#core.std.LoadPlugin(r'C:\SOFTWARE\Vapoursynth-x64\DGIndex\DGDecodeNV.dll') 	# note the hard-coded folder
+#core.avs.LoadPlugin(r'C:\SOFTWARE\Vapoursynth-x64\DGIndex\DGDecodeNV.dll') 	# note the hard-coded folder
+CDLL(r'C:\SOFTWARE\Vapoursynth-x64\MediaInfo.dll')				# note the hard-coded folder # per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
 from MediaInfoDLL3 import MediaInfo, Stream, Info, InfoOption	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
 
 ###
@@ -240,6 +240,10 @@ global IS_SILENT
 IS_SILENT = True	# start silently
 global IS_DEBUG
 IS_DEBUG = False	# default DEBUG to False
+# for major debugging ONLY: this is always FALSE otherwide ...
+global IS_DEBUG_SYSTEM_OVERRIDE
+IS_DEBUG_SYSTEM_OVERRIDE = False
+#
 # https://github.com/vapoursynth/vapoursynth/issues/940#issuecomment-1465041338
 # When calling rezisers etc, ONLY use these values:
 #	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
@@ -720,15 +724,17 @@ def get_clip(path):
 		# if duration greater than out review maximum, clip it
 		if source_duration_frames > (calc_ini["DURATION_MAX_VIDEO_FRAMES"]-1):
 			clip = core.std.Trim(clip, first=0, last=(calc_ini["DURATION_MAX_VIDEO_FRAMES"]-1))
+		#
 		# TEMPORARILY COMMENT OUT DG SHARPEN OF SMALL CLIPS
 		# denoise ANY "small" dimension video clips, older videos likely to be noisy
-		#if source_width<calc_ini["TARGET_WIDTH"] or source_height<calc_ini["TARGET_HEIGHT"]:	 
+		#if source_width < calc_ini["TARGET_WIDTH"] or source_height < calc_ini["TARGET_HEIGHT"]:	 
 		#	print_DEBUG(f'applying DGDenoise to small {source_width}x{source_height} video {path.name}')
 		#	# clip must be YUV420P16 for DGDenoise etc
 		#	clip = clip.resize.Point(format=calc_ini["DG_PIXEL_FORMAT"])		# convert to DG_PIXEL_FORMAT via resizer which does no resizing
 		#	#clip = core.avs.DGDenoise(clip, strength=0.06, cstrength=0.06)
 		#	clip = core.avs.DGDenoise(clip, strength=0.15, cstrength=0.15)
 		#	clip = clip.resize.Point(format=calc_ini["TARGET_PIXEL_FORMAT"])	# convert to calc_ini["TARGET_PIXEL_FORMAT"] via resizer which does no resizing
+		#
 	else: # source is not a video type, i.e. it must be an image (picture)
 		# ensure duration of a clip of an image is the proper number of frames
 		if len(clip) < calc_ini["DURATION_PIC_FRAMES"]:
@@ -974,15 +980,15 @@ def print_DEBUG(*args, **kwargs):	# PRINT TO stderr
 		# per https://stackoverflow.com/questions/5574702/how-do-i-print-to-stderr-in-python
 	# 	eprint("foo", "bar", "baz", sep="---")
 	#	foo---bar---baz
-	if not IS_SILENT:
-		if IS_DEBUG:
+	if (not IS_SILENT) or IS_DEBUG_SYSTEM_OVERRIDE:
+		if IS_DEBUG or IS_DEBUG_SYSTEM_OVERRIDE:
 			print('DEBUG:', *args, **kwargs, file=sys.stderr, flush=True)
 
 def print_NORMAL(*args, **kwargs):	# PRINT TO stderr
 	# per https://stackoverflow.com/questions/5574702/how-do-i-print-to-stderr-in-python
 	# 	eprint_NORMAL("foo", "bar", "baz", sep="---")
 	#	foo---bar---baz
-	if not IS_SILENT:
+	if (not IS_SILENT) or IS_DEBUG_SYSTEM_OVERRIDE:
 		print(*args, **kwargs, file=sys.stderr, flush=True)
 
 
@@ -997,19 +1003,20 @@ TERMINAL_WIDTH = 132
 objPrettyPrint = pprint.PrettyPrinter(width=TERMINAL_WIDTH, compact=False, sort_dicts=False)	# facilitates formatting and printing of text and dicts etc
 MI = MediaInfo()	# initialize per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
 	
-ini_file_speciying_parameters = r'.\SLIDESHOW_PARAMETERS.ini'.strip() # r prefix means the string is treated as a raw string so all escape codes will be ignored.EPT IF THE \ is the last character in the string !
-ini_file_speciying_parameters = fully_qualified_folder_no_trailing_backslash(ini_file_speciying_parameters)
-print_DEBUG(f'ini_file_speciying_parameters="{ini_file_speciying_parameters}"')
+ini_file_specifying_parameters = r'.\SLIDESHOW_PARAMETERS.ini'.strip() # r prefix means the string is treated as a raw string so all escape codes will be ignored.EPT IF THE \ is the last character in the string !
+ini_file_specifying_parameters = fully_qualified_folder_no_trailing_backslash(ini_file_specifying_parameters)
+print_DEBUG(f'ini_file_specifying_parameters="{ini_file_specifying_parameters}"')
 ini_section_name = 'slideshow'
 default_ini_values =	{ ini_section_name : {
 							#'DIRECTORY' :						fully_qualified_folder_no_trailing_backslash(os.getcwd().strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
 							'DIRECTORY' :						fully_qualified_folder_no_trailing_backslash(r'G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\ '.strip()),		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
 							'TEMP_DIRECTORY' :					fully_qualified_folder_no_trailing_backslash(r'D:\TEMP\ '.strip()),	# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
 							'RECURSIVE' :						True,
-							'SUBTITLE_DEPTH' :					2,													# adds a subtitle in the bottom right corner containing the last specified number of  parts of the path to the image/video
-							'DURATION_PIC_SEC' :				4.0,												### MAXIMUM duration of display of an image, in seconds
-							'DURATION_CROSSFADE_SECS':			1.0,												# 1 sec
-							'DURATION_MAX_VIDEO_SEC' :			60.0,												# Maximum duration of a video clip in seconds (incoming video will get clipped at this point)
+							'SUBTITLE_DEPTH' :					3,													# adds a subtitle in the bottom right corner containing the last specified number of  parts of the path to the image/video
+							'DURATION_PIC_SEC' :				3.0,												### MAXIMUM duration of display of an image, in seconds
+							'DURATION_CROSSFADE_SECS':			0.2,												# 1 sec
+							'DURATION_MAX_VIDEO_SEC' :			10.0,												# Maximum duration of a video clip in seconds (incoming video will get clipped at this point)
+							#'DENOISE_STRENGTH' :				0.15,												# values less than .3 are "OK"
 							'SILENT_MODE' :						False,												# overrides DEBUG_MODE
 							'DEBUG_MODE' :						False,
 							'TARGET_COLORSPACE' : 				r'BT.709',											# colorspace Rec2020, BT.2020 Rec709, BT.709, Rec601, BT.601, PC.709, PC.601, TV.fcc, PC.fcc, TV.240m, PC.240m; When no hint found in ASS script and colorspace parameter is empty then the default is BT.601
@@ -1051,50 +1058,61 @@ default_ini_values =	{ ini_section_name : {
 ini_values = default_ini_values
 config = configparser.ConfigParser(default_ini_values[ini_section_name], allow_no_value=False)
 reset_to_ini_defaults = False
-try:
-	i_f = open(ini_file_speciying_parameters,'r')
-	config.read_file(i_f)
-	i_f.close()
-	if ini_section_name in config:
-		if config.has_option(ini_section_name, "SILENT_MODE"):
-			IS_SILENT = config.getboolean(ini_section_name, "SILENT_MODE")	# if enabled, turn on DEBUG immediately
-		if config.has_option(ini_section_name, "DEBUG_MODE"):
-			IS_DEBUG = config.getboolean(ini_section_name, "DEBUG_MODE")	# if enabled, turn on DEBUG immediately
-		#print_DEBUG(f'"{ini_section_name}" is in config, config={objPrettyPrint.pformat(config[ini_section_name])}')
-		#for k,v in config[ini_section_name].items():
-		#	print_DEBUG(f'config["{ini_section_name}"]["{k}"] = "{v}"')
-	else:
-		print_NORMAL(f'WARNING: "{ini_section_name}" is NOT found in config.')
-		print_NORMAL(f'WARNING: Missing section "{ini_section_name}" in .ini file "{ini_file_speciying_parameters}"')
+if os.path.isfile(ini_file_specifying_parameters):
+	print_DEBUG(f'.ini file "{ini_file_specifying_parameters}" exists ... about to try reading the file ...')
+	try:
+		i_f = open(ini_file_specifying_parameters,'r')	# why is this not failing opn open ?
+		config.read_file(i_f)
+		i_f.close()
+		if config.has_section(ini_section_name):
+			if config.has_option(ini_section_name, "SILENT_MODE"):
+				print_DEBUG(f'config.getboolean(ini_section_name, "SILENT_MODE") detected EARLY in .ini, value={config.getboolean(ini_section_name, "SILENT_MODE")}')
+				IS_SILENT = config.getboolean(ini_section_name, "SILENT_MODE")	# if enabled, turn on DEBUG immediately
+			if config.has_option(ini_section_name, "DEBUG_MODE"):
+				print_DEBUG(f'config.getboolean(ini_section_name, "DEBUG_MODE") detected EARLY in .ini, value={config.getboolean(ini_section_name, "DEBUG_MODE")}')
+				IS_DEBUG = config.getboolean(ini_section_name, "DEBUG_MODE")	# if enabled, turn on DEBUG immediately
+			print_DEBUG(f'"{ini_section_name}" is in config, config={objPrettyPrint.pformat(config[ini_section_name])}')
+			for k,v in config[ini_section_name].items():
+				print_DEBUG(f'config["{ini_section_name}"]["{k}"] = "{v}"')
+			reset_to_ini_defaults = False
+		else:
+			print_DEBUG(f'WARNING: Missing section "{ini_section_name}" in .ini file "{ini_file_specifying_parameters}"')
+			reset_to_ini_defaults = True
+	except:
+		print_DEBUG(f'WARNING: Error reading .ini file "{ini_file_specifying_parameters}"')
 		reset_to_ini_defaults = True
-except:
-	print_NORMAL(f'WARNING: Missing and/or error reading .ini file "{ini_file_speciying_parameters}"')
+else:
+	print_DEBUG(f'WARNING: Missing .ini file "{ini_file_specifying_parameters}"')
 	reset_to_ini_defaults = True
 #
-if not reset_to_ini_defaults:
-	print_NORMAL(f'Using settings from .ini file "{ini_file_speciying_parameters}"')
-else:
-	print_NORMAL(f'Reverting to default settngs')
+if reset_to_ini_defaults:
+	print_DEBUG(f'Reverting to default settngs')
 	# revert to default values
 	config = configparser.ConfigParser(allow_no_value=False)	# don't apply defaults here, do't want them written to the .ini file
 	config.read_dict(default_ini_values)
 	# re-write the .ini file with newly defaulted values
-	o_f = open(ini_file_speciying_parameters,'w')
+	o_f = open(ini_file_specifying_parameters,'w')
 	config.write(o_f)
 	o_f.close()
 	# re-read the parameters from the newly re-created .inni file, this tim applying defaults to the read operation
 	config = configparser.ConfigParser(default_ini_values[ini_section_name], allow_no_value=False)
-	i_f = open(ini_file_speciying_parameters,'r')	# no try/except, let it fail this time
+	i_f = open(ini_file_specifying_parameters,'r')	# no try/except, let it fail this time
 	config.read_file(i_f)
 	i_f.close()
+else:
+	print_DEBUG(f'Using settings from .ini file "{ini_file_specifying_parameters}"')
 
 if config.has_option(ini_section_name, "SILENT_MODE"):
-	IS_SILENT = config.getboolean(ini_section_name, "SILENT_MODE")	# if enabled, turn on DEBUG immediately
+	print_DEBUG(f'config.getboolean(ini_section_name, "SILENT_MODE") detected value={config.getboolean(ini_section_name, "SILENT_MODE")}')
+	IS_SILENT = config.getboolean(ini_section_name, "SILENT_MODE")	# if enabled, turn on/off SILENT_MODE immediately
 if config.has_option(ini_section_name, "DEBUG_MODE"):
-	IS_DEBUG = config.getboolean(ini_section_name, "DEBUG_MODE")	# if enabled, turn on DEBUG immediately
-if IS_DEBUG:
-	print_DEBUG(f'Debug Mode turned on since .ini file DEBUG_MODE={config.getboolean(ini_section_name, "DEBUG_MODE")}')
+	print_DEBUG(f'config.getboolean(ini_section_name, "DEBUG_MODE") detected value={config.getboolean(ini_section_name, "DEBUG_MODE")}')
+	IS_DEBUG = config.getboolean(ini_section_name, "DEBUG_MODE")	# if enabled, turn on/off DEBUG_MODE immediately
+#
+print_DEBUG(f'Final setting of SILENT_MODE={config.getboolean(ini_section_name, "SILENT_MODE")}')
+print_DEBUG(f'Final setting of DEBUG_MODE={config.getboolean(ini_section_name, "DEBUG_MODE")}')
 # grab the .ini settings that the user has specified
+
 if config.has_section(ini_section_name):
 	ini_values[ini_section_name]["DIRECTORY"]					= fully_qualified_folder_no_trailing_backslash(config.get(ini_section_name, 'DIRECTORY'))
 	ini_values[ini_section_name]["TEMP_DIRECTORY"]				= fully_qualified_folder_no_trailing_backslash(config.get(ini_section_name, 'TEMP_DIRECTORY'))
@@ -1103,6 +1121,7 @@ if config.has_section(ini_section_name):
 	ini_values[ini_section_name]["DURATION_PIC_SEC"]			= float(config.getfloat(ini_section_name, 'DURATION_PIC_SEC'))
 	ini_values[ini_section_name]["DURATION_CROSSFADE_SECS"]		= float(config.getfloat(ini_section_name, 'DURATION_CROSSFADE_SECS'))
 	ini_values[ini_section_name]["DURATION_MAX_VIDEO_SEC"]		= float(config.getfloat(ini_section_name, 'DURATION_MAX_VIDEO_SEC'))
+	#ini_values[ini_section_name]["DENOISE_STRENGTH"]			= float(config.getfloat(ini_section_name, 'DENOISE_STRENGTH'))
 	ini_values[ini_section_name]["SILENT_MODE"]					= config.getboolean(ini_section_name, 'SILENT_MODE')
 	ini_values[ini_section_name]["DEBUG_MODE"]					= config.getboolean(ini_section_name, 'DEBUG_MODE')
 	ini_values[ini_section_name]["TARGET_COLORSPACE"] 			= config.get(ini_section_name, 'TARGET_COLORSPACE')
@@ -1128,7 +1147,7 @@ if config.has_section(ini_section_name):
 else:
 	raise ValueError(f'ERROR: .ini file unable to be read or recreated properly')
 # add clarifying information to and re-save the updated set of .ini values over the top of the existing .ini file
-with open(ini_file_speciying_parameters, 'w') as configfile:
+with open(ini_file_specifying_parameters, 'w') as configfile:
 	# add the new set of .ini value to be saved
 	update_config =  configparser.ConfigParser(allow_no_value=True)
 	update_config[ini_section_name] = default_ini_values[ini_section_name]
@@ -1187,7 +1206,7 @@ with open(ini_file_speciying_parameters, 'w') as configfile:
 	update_config[tmp_name] = tmp_dict[tmp_name]
 	# update the .ini file
 	update_config.write(configfile)
-print_NORMAL(f'Saved updated .ini "{ini_file_speciying_parameters}"')
+print_NORMAL(f'Saved updated .ini "{ini_file_specifying_parameters}"')
 
 # calculate some values and create a new updated calculated values dict
 calc_ini = ini_values[ini_section_name]
@@ -1252,7 +1271,7 @@ else:
 	glob_var="*.*"				# non-recursive
 	ff_glob_var="*.ffindex"		# for .ffindex file deletion non-recursive
 # glob : with DIRECTORY not having a trailing slash !!!
-print_NORMAL(f'Start processing image/video files in "{calc_ini["DIRECTORY"]}" recursive={calc_ini["RECURSIVE"]} debug={calc_ini["DEBUG_MODE"]}  glob_var="{glob_var}" \n      with Extensions={objPrettyPrint.pformat(calc_ini["EXTENSIONS"])}')
+print_NORMAL(f'Start processing image/video files in "{calc_ini["DIRECTORY"]}" RECURSIVE={calc_ini["RECURSIVE"]} DEBUG_MODE={calc_ini["DEBUG_MODE"]} SILENT_MODE={calc_ini["SILENT_MODE"]}  glob_var="{glob_var}" \n      with Extensions={objPrettyPrint.pformat(calc_ini["EXTENSIONS"])}')
 Count_of_files = 0
 # NOTE: calc_ini["DIRECTORY"] MUST NOT have a trailing backslash ... remove during ini setup
 paths = Path(calc_ini["DIRECTORY"]).glob(glob_var) # generator of all paths in a directory, files starting with . won't be matched by default
