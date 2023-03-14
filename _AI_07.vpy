@@ -278,7 +278,7 @@ def get_mediainfo_specs(path: Union[Path,str]):
 	'Height',                                        # : Height in pixel
 	'PixelAspectRatio',                              # : Pixel Aspect ratio
 	'DisplayAspectRatio',                            # : Display Aspect ratio
-	'Rotation',                                      # : Rotation as a real number eg 180.00
+	'Rotation',                                      # : Rotation as a real number eg 180.00	# CLOCKWISE in mediainfo
 	'FrameRate',                                     # : Frames per second
 	'FrameRate_Num',                                 # : Frames per second, numerator
 	'FrameRate_Den',                                 # : Frames per second, denominator
@@ -532,12 +532,16 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	# check for picture/video rotation specified perhaps in EXIF but not auto-processed here by the file openers
 	if path is None:
 		rotation_value = 0
-	else:	
+		rotation_direction = calc_ini["Rotation_clockwise"]
+	else:
+		# A TRICK FOR NEW PLAYERS ... MEDIAINFO YIELDS ROTATION VALUES FOR CLOCKWISE ROTATIONS for videos !!! NOT ANTI-CLOCKWISE like PIL !!!
+		# so ... rotation_direction is returned as "anti-clockise" or "clockwise" using  calc_ini["Rotation_anti-clockwise"] and calc_ini["Rotation_clockwise"]
 		if ext in calc_ini["VID_EEK_EXTENSIONS"]:
-			rotation_value = auto_rotation_value_MediaInfo(clip, path)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
+			rotation_value, rotation_direction = auto_rotation_value_MediaInfo(clip, path)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
 		else: # source is not a video type, i.e. an image
-			rotation_value = clip = auto_rotation_value_PIL(clip, path)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
+			rotation_value, rotation_direction  = auto_rotation_value_PIL(clip, path)	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678326
 	clip_specs["auto_rotation_degrees"] = rotation_value
+	clip_specs["auto_rotation_direction"] = rotation_direction
 	clip_specs["opened_with_ffms2"] = last_file_opened_with_ffms2
 	clip_specs["opened_with_imwri"] = last_file_opened_with_imwri
 	clip_specs["opened_with_LWLibavSource"] = last_file_opened_with_LWLibavSource
@@ -912,22 +916,40 @@ def get_clip(path):
 		clip = core.std.SetFrameProps(clip, _ColorRange=clip_specs["proposed_ColorRange"])
 	#
 	#++++++++++++++++++++
-	# Apply an auto-rotate if specified in the source file
+	# # A TRICK FOR NEW PLAYERS ... MEDIAINFO YIELDS ROTATION VALUES FOR CLOCKWISE ROTATIONS for videos !!! NOT ANTI-CLOCKWISE like PIL !!!
+	# Apply an auto-rotate auto_rotation if specified in the source file
 	##if path.suffix.lower() in calc_ini["PIC_EXTENSIONS"]:
 	print_DEBUG(f'type(clip_specs["auto_rotation_degrees"])={type(clip_specs["auto_rotation_degrees"])}  clip_specs["auto_rotation_degrees"]={clip_specs["auto_rotation_degrees"]}')
 	if clip_specs["auto_rotation_degrees"] == 0:
-		print_DEBUG(f'get_clip: zero auto-rotation of clip {path}')
-	elif clip_specs["auto_rotation_degrees"] == 90:
-		print_DEBUG(f'get_clip: auto-Rotating by 90 degrees {path}')
-		clip = clip.std.Transpose().std.FlipVertical()	# ??? works for images ???
+		#print_DEBUG(f'get_clip: zero auto-rotation of clip {path}')
+		pass
+	elif clip_specs["auto_rotation_degrees"] == 90 or clip_specs["auto_rotation_degrees"] == -270:
+		print_DEBUG(f'get_clip: auto-Rotating {clip_specs["auto_rotation_direction"]} by {clip_specs["auto_rotation_degrees"]} degrees {path}')
+		if clip_specs["auto_rotation_direction"] == calc_ini["Rotation_anti-clockwise"]:
+			clip = clip.std.Transpose().std.FlipVertical()		# ANTICLOCKWISE ROTATION 90 DEGREES
+		elif clip_specs["auto_rotation_direction"] == calc_ini["Rotation_clockwise"]:
+			clip = clip.std.Transpose().std.FlipHorizontal()	# CLOCKWISE ROTATION 90 DEGREES
+		else:
+			raise ValueError(f'ERROR: get_clip: auto_rotation_degrees "{clip_specs["auto_rotation_degrees"]}" unrecognised direction={clip_specs["auto_rotation_direction"]} unable to be processed for "{path}" : only 0/90/180/270 are valid')
 	elif clip_specs["auto_rotation_degrees"] == 180:
-		print_DEBUG(f'get_clip: auto-Rotating by 180 degrees {path}')
-		clip = clip.std.Turn180()
-	elif clip_specs["auto_rotation_degrees"] == 270:
-		print_DEBUG(f'get_clip: auto-Rotating by 270 degrees {path}')
-		clip = clip.std.Transpose().std.FlipHorizontal()
+		print_DEBUG(f'get_clip: auto-Rotating {clip_specs["auto_rotation_direction"]} by {clip_specs["auto_rotation_degrees"]} degrees {path}')
+		if clip_specs["auto_rotation_direction"] == calc_ini["Rotation_anti-clockwise"]:
+			clip = clip.std.Turn180()
+		elif clip_specs["auto_rotation_direction"] == calc_ini["Rotation_clockwise"]:
+			clip = clip.std.Turn180()
+		else:
+			raise ValueError(f'ERROR: get_clip: auto_rotation_degrees "{clip_specs["auto_rotation_degrees"]}" unrecognised direction={clip_specs["auto_rotation_direction"]} unable to be processed for "{path}" : only 0/90/180/270 are valid')
+	elif clip_specs["auto_rotation_degrees"] == 270 or clip_specs["auto_rotation_degrees"] == -90:
+		print_DEBUG(f'get_clip: auto-Rotating {clip_specs["auto_rotation_direction"]} by {clip_specs["auto_rotation_degrees"]} degrees {path}')
+		if clip_specs["auto_rotation_direction"] == calc_ini["Rotation_anti-clockwise"]:
+			clip = clip.std.Transpose().std.FlipHorizontal()	# ANTICLOCKWISE ROTATION 270 degrees
+		elif clip_specs["auto_rotation_direction"] == calc_ini["Rotation_clockwise"]:
+			clip = clip.std.Transpose().std.FlipVertical()		# CLOCKWISE ROTATION 270 degrees
+		else:
+			raise ValueError(f'ERROR: get_clip: auto_rotation_degrees "{clip_specs["auto_rotation_degrees"]}" unrecognised direction={clip_specs["auto_rotation_direction"]} unable to be processed for "{path}" : only 0/90/180/270 are valid')
 	else:
-		raise ValueError(f'ERROR: get_clip: auto_rotation_degrees "{clip_specs["auto_rotation_degrees"]}" unable to be processed for "{path}" : only 0/90/180/270 are valid')
+		raise ValueError(f'ERROR: get_clip: auto_rotation_degrees "{clip_specs["auto_rotation_degrees"]}" direction={clip_specs["auto_rotation_direction"]} unable to be processed for "{path}" : only 0/90/180/270 are valid')
+	
 	#++++++++++++++++++++
 	#
 	# do video-specific or picture-specific changes
@@ -1044,6 +1066,7 @@ def print_exif_data2(exif_data):
 
 ###
 def auto_rotation_value_PIL(clip, path):
+	# A TRICK FOR NEW PLAYERS ... MEDIAINFO YIELDS ROTATION VALUES FOR CLOCKWISE ROTATIONS for videos !!! NOT ANTI-CLOCKWISE like PIL !!!
 	# from PIL import Image, ExifTags, UnidentifiedImageError   # pip install Pillow, or equivalent
 	# PIL Pillow module loads an image, checks if EXIF data, checks for 'Orientation'
 	# The Python Pillow library is a fork of an older library called PIL. 
@@ -1079,22 +1102,23 @@ def auto_rotation_value_PIL(clip, path):
 	else:
 		if   value == 0:
 			rotation_degrees = 0
-			#print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating by 0 degrees {path}')
+			#print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating ANTI-CLOCKWISE by 0 degrees {path}')
 		elif   value == 3:
 			rotation_degrees = 180
-			#print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating by 180 degrees {path}')
+			#print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating ANTI-CLOCKWISE by 180 degrees {path}')
 		elif value == 8:
 			rotation_degrees = 90
-			#print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating by  90 degrees {path}')
+			#print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating ANTI-CLOCKWISE by  90 degrees {path}')
 		elif value == 6:
 			rotation_degrees = 270
-			#print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating by 270 degrees {path}')
+			#print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating ANTI-CLOCKWISE by 270 degrees {path}')
 	image.close()	
-	print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating by {rotation_degrees} degrees {path}')
-	return rotation_degrees
+	print_DEBUG(f'auto_rotation_value_PIL: PIL says auto-Rotating ANTI-CLOCKWISE by {rotation_degrees} degrees {path}')
+	return rotation_degrees, calc_ini["Rotation_anti-clockwise"]
 
 ###
 def auto_rotation_value_MediaInfo(clip, path):
+	# A TRICK FOR NEW PLAYERS ... MEDIAINFO YIELDS ROTATION VALUES FOR CLOCKWISE ROTATIONS for videos !!! NOT ANTI-CLOCKWISE like PIL !!!
 	rotation_degrees = 0
 	param = 'Rotation'
 	value = mediainfo_value(Stream.Video, 0, param, path)
@@ -1103,11 +1127,13 @@ def auto_rotation_value_MediaInfo(clip, path):
 			rotation_degrees = 0
 		else:
 			rotation_degrees = int(float(value)) # for some reason Rotation value type mediainfo carries as a string,  like: '180.00'
-	print_DEBUG(f'auto_rotation_value_MediaInfo: MediaInfo says auto-Rotating by {rotation_degrees} degrees {path}')
-	return rotation_degrees
+	print_DEBUG(f'auto_rotation_value_MediaInfo: MediaInfo says auto-Rotating CLOCKWISE by {rotation_degrees} degrees {path}')
+	return rotation_degrees, calc_ini["Rotation_clockwise"]
 
 ###
 def perform_rotation_PIL(clip, path, save_rotated_image=False):
+	# THIS FUNCTION IS NO LONGER USED
+	# A TRICK FOR NEW PLAYERS ... MEDIAINFO YIELDS ROTATION VALUES FOR CLOCKWISE ROTATIONS for videos !!! NOT ANTI-CLOCKWISE like PIL !!!
 	# from PIL import Image, ExifTags, UnidentifiedImageError   # pip install Pillow, or equivalent
 	# PIL Pillow module loads an image, checks if EXIF data, checks for 'Orientation'
 	# The Python Pillow library is a fork of an older library called PIL. 
@@ -1118,13 +1144,13 @@ def perform_rotation_PIL(clip, path, save_rotated_image=False):
 	try:
 		image = Image.open(str(path))
 	except UnidentifiedImageError:
-		print_DEBUG(f'perform_rotation_PIL except UnidentifiedImageError immediate return now')
+		print_DEBUG(f'perform_rotation_PIL: except UnidentifiedImageError immediate return now')
 		return clip
 	except PermissionError:
-		print_DEBUG(f'perform_rotation_PIL except PermissionError Permission denied to load: {path} immediate return now')
+		print_DEBUG(f'perform_rotation_PIL: except PermissionError Permission denied to load: {path} immediate return now')
 		return clip
 	except Exception as e:
-		print_DEBUG(f'perform_rotation_PIL except Exception {e} immediate return now')
+		print_DEBUG(f'perform_rotation_PIL: except Exception {e} immediate return now')
 		return clip
 	print_DEBUG(f'perform_rotation_PIL try on Image.open succeeded')
 	try:		
@@ -1138,14 +1164,16 @@ def perform_rotation_PIL(clip, path, save_rotated_image=False):
 		return clip
 	else:
 		if   value == 3:
-			print_DEBUG(f'PIL says auto-Rotating by 180 degrees {path}')
-			clip = clip.std.Turn180()
+			print_DEBUG(f'PIL says auto-Rotating anti-clockwise by 180 degrees {path}')
+			clip = clip.std.Turn180()							# 180 DEGREE CLOCKWISE AND ANTI-CLOCLWISE ARE IDENTICAL
 		elif value == 8:
-			print_DEBUG(f'PIL says auto-Rotating by  90 degrees {path}')
-			clip = clip.std.Transpose().std.FlipVertical()
+			print_DEBUG(f'PIL says auto-Rotating by anti-clockwise  90 degrees {path}')
+			clip = clip.std.Transpose().std.FlipVertical()		# THIS IS ANTICLOCKWISE
 		elif value == 6:
-			print_DEBUG(f'PIL says auto-Rotating by 270 degrees {path}')
-			clip = clip.std.Transpose().std.FlipHorizontal()
+			print_DEBUG(f'PIL says auto-Rotating anti-clockwise by 270 degrees {path}')
+			clip = clip.std.Transpose().std.FlipHorizontal()	# THIS IS ANTICLOCKWISE
+		else:
+			print_DEBUG(f'PIL says auto-Rotating IGNORED value={value} {path}')
 		if save_rotated_image and value in [3,8,6]:
 			#rotation degrees are in counterclockwise direction!
 			rotate = {3:Image.ROTATE_180, 6:Image.ROTATE_270, 8:Image.ROTATE_90}
@@ -1169,6 +1197,8 @@ def perform_rotation_PIL(clip, path, save_rotated_image=False):
 
 ###
 def perform_rotation_MediaInfo(clip, path, save_rotated_image=False):
+	# THIS FUNCTION IS NO LONGER USED
+	# A TRICK FOR NEW PLAYERS ... MEDIAINFO YIELDS ROTATION VALUES FOR CLOCKWISE ROTATIONS for videos !!! NOT ANTI-CLOCKWISE like PIL !!!
 	print_DEBUG(f'perform_rotation_MediaInfo entered')
 	param = 'Rotation'
 	value = mediainfo_value(Stream.Video, 0, param, path)
@@ -1177,18 +1207,22 @@ def perform_rotation_MediaInfo(clip, path, save_rotated_image=False):
 			value = 0
 		else:
 			value = int(float(value)) # for some reason Rotation value type mediainfo carries as a string,  like: '180.00'
-	print_DEBUG(f'perform_rotation_MediaInfo: value={value} for {path}')
-	if   value == 180:
-		print_DEBUG(f'MediaInfo says auto-Rotating by 180 degrees {path}')
-		clip = clip.std.Turn180()
-	elif value == 90:
-		print_DEBUG(f'MediaInfo says auto-Rotating by 90 degrees {path}')
-		clip = clip.std.Transpose().std.FlipVertical()
-	elif value == 270:
-		print_DEBUG(f'MediaInfo says auto-Rotating by 270 degrees {path}')
-		clip = clip.std.Transpose().std.FlipHorizontal()
+	#print_DEBUG(f'perform_rotation_MediaInfo: auto-Rotating by value={value} for {path}')
+	if   value == 180 or value == -180:
+		print_DEBUG(f'MediaInfo says auto-Rotating clockwise by 180 degrees {path}')	# A TRICK FOR NEW PLAYERS ... MEDIAINFO YIELDS ROTATION VALUES FOR CLOCKWISE ROTATIONS for videos !!! NOT ANTI-CLOCKWISE like PIL !!!
+		clip = clip.std.Turn180()							# 180 DEGREE CLOCKWISE AND ANTI-CLOCLWISE ARE IDENTICAL
+	elif value == 90 or value == -270:
+		# A TRICK FOR NEW PLAYERS ... MEDIAINFO YIELDS ROTATION VALUES FOR CLOCKWISE ROTATIONS for videos !!! NOT ANTI-CLOCKWISE like PIL !!!
+		print_DEBUG(f'MediaInfo says auto-Rotating clockwise by 90 degrees {path}')
+		#clip = clip.std.Transpose().std.FlipVertical()		# THIS IS ANTICLOCKWISE
+		clip = clip.std.Transpose().std.FlipHorizontal()	# THIS IS CLOCKWISE
+	elif value == 270 or value == -90:
+		# A TRICK FOR NEW PLAYERS ... MEDIAINFO YIELDS ROTATION VALUES FOR CLOCKWISE ROTATIONS for videos !!! NOT ANTI-CLOCKWISE like PIL !!!
+		print_DEBUG(f'MediaInfo says auto-Rotating clockwise by 270 degrees {path}')
+		#clip = clip.std.Transpose().std.FlipHorizontal()	# THIS IS ANTICLOCKWISE
+		clip = clip.std.Transpose().std.FlipVertical()		# THIS IS CLOCKWISE
 	else:
-		clip = clip
+		print_DEBUG(f'MediaInfo says auto-Rotating clockwise IGNORED value={value} {path}')
 	return clip
 
 ###
@@ -1239,7 +1273,7 @@ default_ini_values =	{ ini_section_name : {
 							'RECURSIVE' :						True,
 							'SUBTITLE_DEPTH' :					3,													# adds a subtitle in the bottom right corner containing the last specified number of  parts of the path to the image/video
 							'DURATION_PIC_SEC' :				3.0,												### MAXIMUM duration of display of an image, in seconds
-							'DURATION_CROSSFADE_SECS':			0.2,												# 1 sec
+							'DURATION_CROSSFADE_SECS':			0,													# 0 sec is best. # could be 0.2
 							'DURATION_MAX_VIDEO_SEC' :			15.0,												# Maximum duration of a video clip in seconds (incoming video will get clipped at this point)
 							#'DENOISE_STRENGTH' :				0.15,												# values less than .3 are "OK"
 							'SILENT_MODE' :						False,												# overrides DEBUG_MODE
@@ -1451,6 +1485,8 @@ calc_ini["DOT_FFINDEX"]						= ".ffindex".lower()		# for removing temporary *.ff
 calc_ini["MODX"]							= int(2)	   # mods for letterboxing calculations, example, for 411 YUV as an extreme
 calc_ini["MODY"]							= int(2)	   # mods would have to be MODX=4, MODY=1 as minimum
 calc_ini["SUBTITLE_MAX_DEPTH"]				= int(10)
+calc_ini["Rotation_anti-clockwise"]			= "anti-clockwise".lower()
+calc_ini["Rotation_clockwise"]				= "clockwise".lower()
 # https://github.com/vapoursynth/vapoursynth/issues/940#issuecomment-1465041338
 # When calling rezisers etc, ONLY use these values:
 #	ZIMG_RANGE_LIMITED  = 0,  /**< Studio (TV) legal range, 16-235 in 8 bits. */
