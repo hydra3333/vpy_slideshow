@@ -29,7 +29,6 @@ IF NOT EXIST "%ini_file%" (
 	echo temp_directory = D:\TEMP>>"%ini_file%"
 	echo recursive = False>>"%ini_file%"
 	echo debug_mode = True>>"%ini_file%"
-	echo duration_max_video_sec = 10.0
 	type "%ini_file%"
 )
 
@@ -80,7 +79,7 @@ set  "script=G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\_AI_07.vpy"
 -rc:v vbr -cq:v 0 -b:v 3500000 -minrate:v 100000 -maxrate:v 9000000 -bufsize 9000000 ^
 -profile:v high -level 5.2 ^
 -movflags +faststart+write_colr ^
--y "%mp4_file%"
+-y "%mp4_file%" 2> "%script%.debug.log"
 
 goto :eof
 

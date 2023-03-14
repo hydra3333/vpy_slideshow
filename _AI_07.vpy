@@ -566,6 +566,7 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	# Guess the Specs Pass #1 before we resort to total guesses
 	# Sometimes, ffms2 delvers content with missing metadata tellng us what the source frame properties are
 	# Perhaps mediainfo can find out for us.
+	# Experience show usually not though, but it can't hirt to try
 	# **********
 	clip_specs["guessed_Matrix"] = False
 	clip_specs["proposed_Matrix"] = clip_specs["_Matrix"]
@@ -1239,7 +1240,7 @@ default_ini_values =	{ ini_section_name : {
 							'SUBTITLE_DEPTH' :					3,													# adds a subtitle in the bottom right corner containing the last specified number of  parts of the path to the image/video
 							'DURATION_PIC_SEC' :				3.0,												### MAXIMUM duration of display of an image, in seconds
 							'DURATION_CROSSFADE_SECS':			0.2,												# 1 sec
-							'DURATION_MAX_VIDEO_SEC' :			60.0,												# Maximum duration of a video clip in seconds (incoming video will get clipped at this point)
+							'DURATION_MAX_VIDEO_SEC' :			15.0,												# Maximum duration of a video clip in seconds (incoming video will get clipped at this point)
 							#'DENOISE_STRENGTH' :				0.15,												# values less than .3 are "OK"
 							'SILENT_MODE' :						False,												# overrides DEBUG_MODE
 							'DEBUG_MODE' :						False,
