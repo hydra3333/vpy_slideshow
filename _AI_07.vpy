@@ -1078,13 +1078,13 @@ def auto_rotation_value_PIL(clip, path):
 		image = Image.open(str(path))
 	except UnidentifiedImageError:
 		print_DEBUG(f'auto_rotation_value_PIL: except UnidentifiedImageError immediate return now')
-		return rotation_degrees
+		return rotation_degrees, calc_ini["Rotation_anti-clockwise"]
 	except PermissionError:
 		print_DEBUG(f'auto_rotation_value_PIL: except PermissionError Permission denied to load: {path} immediate return now')
-		return rotation_degrees
+		return rotation_degrees, calc_ini["Rotation_anti-clockwise"]
 	except Exception as e:
 		print_DEBUG(f'auto_rotation_value_PIL: except Exception {e} immediate return now')
-		return rotation_degrees
+		return rotation_degrees, calc_ini["Rotation_anti-clockwise"]
 	print_DEBUG(f'auto_rotation_value_PIL: try on Image.open succeeded')
 	rotation_value = 0
 	try:		
@@ -1098,7 +1098,7 @@ def auto_rotation_value_PIL(clip, path):
 			value = 0
 	except (AttributeError, KeyError, IndexError):
 		print_DEBUG(f'auto_rotation_value_PIL: except AttributeError during for key in ExifTags.TAGS.keys(), immediate return now')
-		return rotation_degrees
+		return rotation_degrees, calc_ini["Rotation_anti-clockwise"]
 	else:
 		if   value == 0:
 			rotation_degrees = 0

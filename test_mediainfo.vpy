@@ -46,42 +46,129 @@ TERMINAL_WIDTH = 132
 objPrettyPrint = pprint.PrettyPrinter(width=TERMINAL_WIDTH, compact=False, sort_dicts=False)
 
 
-def mediainfo_value(MI, stream:int, track:int, param:str, path: Union[Path,str]) -> Union[int,float,str]:
+###
+def mediainfo_value(stream:int, track:int, param:str, path: Union[Path,str]) -> Union[int,float,str]:
+	# A wrapper for mediainfo_value_worker, which gets and returns a single parameter
+	# This function permits mediainfo_value_worker to be recycled elsewhere to be called mutiple times per one single MI.open
+	global MI	# use the global, since we re-use it across functions
 	if not stream in range(0,8):
-		raise ValueError(f'stream must be a Stream attribute: General, Video, Audio, Text, Other, Image, Menu, Max')
+		raise ValueError(f'ERROR: mediainfo_value: stream must be a Stream attribute: General, Video, Audio, Text, Other, Image, Menu, Max')
 	if not isinstance(track, int) or track<0:
-		raise ValueError(f'track must be a positive integer')
+		raise ValueError(f'ERROR: mediainfo_value: track must be a positive integer')
 	if not isinstance(param, str):
-		raise ValueError(f'param must be a string for particular stream, print(MI.Option_Static("Info_Parameters")')
+		raise ValueError(f'ERROR: mediainfo_value: param must be a string for particular stream, ion_Static("Info_Parameters")')
 	if not isinstance(path, (Path, str)):
-		raise ValueError(f'path must be Path or str class')    
-	#MI.Open(str(path))
+		raise ValueError(f'ERROR: mediainfo_value: path must be Path or str class')   
+	MI.Open(str(path))
+	val = mediainfo_value_worker(stream, track, param, path)
+	MI.Close()
+	return val
+
+###
+def mediainfo_value_worker(stream:int, track:int, param:str, path: Union[Path,str]) -> Union[int,float,str]:
+	global MI	# use the global, since we re-use it across functions
+	if not stream in range(0,8):
+		raise ValueError(f'ERROR: mediainfo_value_worker: stream must be a Stream attribute: General, Video, Audio, Text, Other, Image, Menu, Max')
+	if not isinstance(track, int) or track<0:
+		raise ValueError(f'ERROR: mediainfo_value_worker: track must be a positive integer')
+	if not isinstance(param, str):
+		raise ValueError(f'ERROR: mediainfo_value_worker: param must be a string for particular stream, ion_Static("Info_Parameters")')
+	if not isinstance(path, (Path, str)):
+		raise ValueError(f'ERROR: mediainfo_value_worker: path must be Path or str class')    
+	#MI.Open(str(path)) # CHANGED: open/close in calling routine, allowing this to be called mutiple times
 	str_value = MI.Get(stream, track, param)
 	info_option =  MI.Get(stream, track, param, InfoKind=Info.Options)
-	#MI.Close()
+	#MI.Close() 		# CHANGED: open/close in calling routine, allowing this to be called mutiple times
 	if not str_value:
 		return None
 	if info_option:
 		#returning a proper value type, int, float or str for particular parameter
 		type_ = info_option[InfoOption.TypeOfValue] #type_=info_option[3] #_type will be 'I', 'F', 'T', 'D' or 'B'
-		#print(f'MI says {param} = type "{type_}"')
-		try:
+		try:	# sometimes mediainfo flags an INT or a FLOAT which cannou be ocnverted, so catch those
 			val = {'I':int, 'F':float, 'T':str, 'D':str, 'B':str}[type_](str_value)
 		except Exception as err:
-			print(f'INVALID COVERSION EXCEPTION ON val =["I":int, "F":float, "T":str, "D":str, "B":str][type_](str_value) ... type_="{type_}" param="{param}" str_value="{str_value}" path={path}')
+			print(f'COVERSION EXCEPTION ON val =["I":int, "F":float, "T":str, "D":str, "B":str][type_](str_value) ... type_="{type_}" param="{param}" str_value="{str_value}" path={path}')
 			print(f"Unexpected Error {err=}, {type(err)=}")
-			#raise
 			val = None
+			#raise
 			pass
 		return val
 	else:
-		raise ValueError(f'wrong parameter: "{param}" for given stream: {stream}')
+		raise ValueError(f'ERROR: mediainfo_value_worker: wrong parameter: "{param}" for given stream: {stream}')
+
+###
+def auto_rotation_value_PIL(path):
+	# A TRICK FOR NEW PLAYERS ... MEDIAINFO YIELDS ROTATION VALUES FOR CLOCKWISE ROTATIONS for videos !!! NOT ANTI-CLOCKWISE like PIL !!!
+	# from PIL import Image, ExifTags, UnidentifiedImageError   # pip install Pillow, or equivalent
+	# PIL Pillow module loads an image, checks if EXIF data, checks for 'Orientation'
+	# The Python Pillow library is a fork of an older library called PIL. 
+	# Older PIL stands for Python Imaging Library, and it's the original library that enabled Python to deal with images. 
+	# PIL was discontinued in 2011 (that author died) and only supports Python 2.23 ... so use Pillow instead.
+	# https://python-pillow.org/
+	rotation_degrees = 0
+	try:
+		image = Image.open(str(path))
+	except UnidentifiedImageError:
+		print(f'auto_rotation_value_PIL: except UnidentifiedImageError immediate return now')
+		return rotation_degrees, "anti-clockwise"
+	except PermissionError:
+		print(f'auto_rotation_value_PIL: except PermissionError Permission denied to load: {path} immediate return now')
+		return rotation_degrees, "anti-clockwise"
+	except Exception as e:
+		print(f'auto_rotation_value_PIL: except Exception {e} immediate return now')
+		return rotation_degrees, "anti-clockwise"
+	#print(f'auto_rotation_value_PIL: try on Image.open succeeded')
+	rotation_value = 0
+	try:		
+		for key in ExifTags.TAGS.keys():
+			if ExifTags.TAGS[key] == 'Orientation':
+				break
+		exif = dict(image.getexif().items())
+		if ExifTags.TAGS[key] == 'Orientation':
+			value = exif[key]
+		else:
+			value = 0
+	except (AttributeError, KeyError, IndexError):
+		print(f'auto_rotation_value_PIL: except AttributeError during for key in ExifTags.TAGS.keys(), immediate return now {path}')
+		return rotation_degrees, "anti-clockwise"
+	else:
+		if   value == 0:
+			rotation_degrees = 0
+			#print(f'auto_rotation_value_PIL: PIL says auto-Rotating ANTI-CLOCKWISE by 0 degrees {path}')
+		elif   value == 3:
+			rotation_degrees = 180
+			#print(f'auto_rotation_value_PIL: PIL says auto-Rotating ANTI-CLOCKWISE by 180 degrees {path}')
+		elif value == 8:
+			rotation_degrees = 90
+			#print(f'auto_rotation_value_PIL: PIL says auto-Rotating ANTI-CLOCKWISE by  90 degrees {path}')
+		elif value == 6:
+			rotation_degrees = 270
+			#print(f'auto_rotation_value_PIL: PIL says auto-Rotating ANTI-CLOCKWISE by 270 degrees {path}')
+	image.close()	
+	#print(f'auto_rotation_value_PIL: PIL says auto-Rotating ANTI-CLOCKWISE by {rotation_degrees} degrees {path}')
+	return rotation_degrees, "anti-clockwise"
+
+###
+def auto_rotation_value_MediaInfo(path):
+	# A TRICK FOR NEW PLAYERS ... MEDIAINFO YIELDS ROTATION VALUES FOR CLOCKWISE ROTATIONS for videos !!! NOT ANTI-CLOCKWISE like PIL !!!
+	rotation_degrees = 0
+	param = 'Rotation'
+	value = mediainfo_value(Stream.Video, 0, param, path)
+	if param == 'Rotation':
+		if value is None:
+			rotation_degrees = 0
+		else:
+			rotation_degrees = int(float(value)) # for some reason Rotation value type mediainfo carries as a string,  like: '180.00'
+	#print(f'auto_rotation_value_MediaInfo: MediaInfo says auto-Rotating CLOCKWISE by {rotation_degrees} degrees {path}')
+	return rotation_degrees, "clockwise"
+
 
 # for the moment, hacked for testing
+DIRECTORY = r"G:\DVD\PAT-SLIDESHOWS"
 #DIRECTORY = r"G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST"
 #DIRECTORY = r"G:\2021.06.14-Pat.and.Ted-Photos"
 #DIRECTORY = r"G:\2021.08.26-Pat.and.Ted-Photos-from-USB-keys"
-DIRECTORY = r"E:\MULTIMEDIA"
+#DIRECTORY = r"E:\MULTIMEDIA"
 
 
 ########## if k in dict:
@@ -98,6 +185,7 @@ MI = MediaInfo()
 #---
 
 #---
+# The Full Lot
 mi_video_params = [
 	'Format',                                        # : Format used
 	'Format/String',                                 # : Format used + additional features
@@ -134,6 +222,7 @@ mi_video_params = [
 	'matrix_coefficients',                           # : Matrix coefficients used in deriving luma and chroma signals from the green, blue, and red primaries
 ]
 # for the moment, hacked for testing
+# Only a few
 mi_video_params = [
 	'Rotation',                                      # : Rotation as a real number eg 180.00
 	'FrameRate',                                     # : Frames per second
@@ -151,21 +240,33 @@ mi_video_params = [
 	'transfer_characteristics',                      # : Opto-electronic transfer characteristic of the source picture
 	'matrix_coefficients',                           # : Matrix coefficients used in deriving luma and chroma signals from the green, blue, and red primaries
 ]
+
 #---
-yes_extensions = [".mp4", ".mpeg4", ".mpg", ".mpeg", ".avi", ".mjpeg", ".3gp", ".mov", ".m2ts"]	#always lowercase
+vid_extensions = [".mp4", ".mpeg4", ".mpg", ".mpeg", ".avi", ".mjpeg", ".3gp", ".mov", ".m2ts"]	#always lowercase
+pic_extensions = [".png", ".jpg", ".jpeg", ".gif"]	#always lowercase
 for path in paths:
-	if path.suffix.lower() in yes_extensions:
-		print(f'File: {path}')
-		MI.Open(str(path))
-		p_dict = {}
-		for param in mi_video_params:
-			value = mediainfo_value(MI, Stream.Video, track=0, param=param, path=path)
-			#print(f'"{param}" = \t\t\t\t"{value}"\t\t\ttype={type(value)}\t\t\tisinstance(value,str)={isinstance(value,str)}\t\tisinstance(value,int)={isinstance(value,int)}\t\tisinstance(value,bool)={isinstance(value,bool)}\t\tisinstance(value,float)={isinstance(value,float)}')
-			p_dict[param] = value	# any of str, bool, int, float, etc
-		MI.Close()
-		# for the moment, hacked for testing
-		#print(f'{p_dict}')
-		print(f'{objPrettyPrint.pformat(p_dict)}')
+	if path.suffix.lower() in vid_extensions:
+		#print(f'File: {path}')
+		#MI.Open(str(path))
+		#p_dict = {}
+		#for param in mi_video_params:
+		#	value = mediainfo_value(MI, Stream.Video, track=0, param=param, path=path)
+		#	#print(f'"{param}" = \t\t\t\t"{value}"\t\t\ttype={type(value)}\t\t\tisinstance(value,str)={isinstance(value,str)}\t\tisinstance(value,int)={isinstance(value,int)}\t\tisinstance(value,bool)={isinstance(value,bool)}\t\tisinstance(value,float)={isinstance(value,float)}')
+		#	p_dict[param] = value	# any of str, bool, int, float, etc
+		#MI.Close()
+		## for the moment, hacked for testing
+		##print(f'{path} {p_dict}')
+		#print(f'{objPrettyPrint.pformat(p_dict)}')
+		r, d = auto_rotation_value_MediaInfo(path)
+		if r !=0:
+			print(f'mediainfo Rotation Value={r} {d} {path} ')
+
+	if path.suffix.lower() in pic_extensions:
+		r, d = auto_rotation_value_PIL(path)
+		if r !=0:
+			print(f'PIL Rotation Value={r} {d} {path} ')
+
+
 
 
 '''

@@ -14,6 +14,10 @@ set   "script=%pwd%test_mediainfo.vpy"
 REM "%vs_path%python.exe" "%script%"
 "%vs_path%python.exe" "%script%" >"%script%.log" 2>&1
 
+pause
+goto :eof
+
+
 REM https://www.computerhope.com/findstr.htm#:~:text=The%20findstr%20(short%20for%20find,specific%20string%20of%20plain%20text.
 
 findstr /L /I  /c:"matrix_coefficients" .\test_mediainfo.vpy.log | sort /unique >.\z-matrix_coefficients.txt
@@ -33,7 +37,7 @@ type .\z-ChromaSubsampling.txt
 
 
 pause
-exit
+goto :eof
 
 # Create some translation tables from mediainfo return values to "vs" constants
 # values of video stream Standard seen returned by  mediainfo
@@ -70,19 +74,14 @@ mi_transfer_characteristics_dict = {'BT.470 System B/G' :		vs.TransferCharacteri
 # values of video stream matrix_coefficients seen returned by  mediainfo
 # used to convert mediainfo to "vs" MatrixCoefficients
 mc_bt6021 = vs.MatrixCoefficients.MATRIX_BT470_BG
-
-??? mi_standard ??? is which variable/value in the mi return-value dict ??
-if 'NTSC'.lower() in mi_standard.lower():
-	mc_bt601 = vs.MatrixCoefficients.MATRIX_ST170_M
-
-??? mi_color_primaries ??? is which variable/value in the mi return-value dict ??
-if 'NTSC'.lower() in  mi_color_primaries.lower():	# if the substring string is inthe string
-	mc_bt601 = vs.MatrixCoefficients.MATRIX_ST170_M
-
-??? mi_color_primaries ??? is which variable/value in the mi return-value dict ??
-if mi_color_primaries.lower() in list(map(str.lower,[ 'BT.470 M', 'BT.470 M', 'BT.470_M', 'BT.601 NTSC', 'BT.470 NTSC' ]):
-	mc_bt601 = vs.MatrixCoefficients.MATRIX_ST170_M
-
+if 'Standard' in mediainfo_specs:
+	if 'NTSC'.lower() in mediainfo_specs['Standard'].lower():
+		mc_bt601 = vs.MatrixCoefficients.MATRIX_ST170_M
+if 'colour_primaries' in mediainfo_specs:
+	if 'NTSC'.lower() in  mediainfo_specs['colour_primaries'].lower():	# if the substring string is inthe string
+		mc_bt601 = vs.MatrixCoefficients.MATRIX_ST170_M
+	if  mediainfo_specs['colour_primaries'].lower() in list(map(str.lower,[ 'BT.470 M', 'BT.470 M', 'BT.470_M', 'BT.601 NTSC', 'BT.470 NTSC' ]):
+		mc_bt601 = vs.MatrixCoefficients.MATRIX_ST170_M
 mi_matrix_coefficients_dict = {		'BT.470 System B/G' :		vs.MatrixCoefficients.MATRIX_BT470_BG,
 									'BT.601' : 					mc_bt601,									# assume PAL unless colour_primaries/Standard say NTSC then vs.MatrixCoefficients.MATRIX_ST170_M 
 									'BT.709' :					vs.MatrixCoefficients.MATRIX_BT709,
