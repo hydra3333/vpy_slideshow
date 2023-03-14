@@ -378,7 +378,7 @@ def mediainfo_value_worker(stream:int, track:int, param:str, path: Union[Path,st
 		try:	# sometimes mediainfo flags an INT or a FLOAT which cannou be ocnverted, so catch those
 			val = {'I':int, 'F':float, 'T':str, 'D':str, 'B':str}[type_](str_value)
 		except Exception as err:
-			print_DEBUG(f'COVERSION EXCEPTION ON val =["I":int, "F":float, "T":str, "D":str, "B":str][type_](str_value) ... type_="{type_}" param="{param}" str_value="{str_value}" path={path}')
+			print_DEBUG(f'CONVERSION EXCEPTION ON val =["I":int, "F":float, "T":str, "D":str, "B":str][type_](str_value) ... type_="{type_}" param="{param}" str_value="{str_value}" path={path}')
 			print_DEBUG(f"Unexpected Error {err=}, {type(err)=}")
 			val = None
 			#raise

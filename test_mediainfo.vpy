@@ -87,8 +87,8 @@ def mediainfo_value_worker(stream:int, track:int, param:str, path: Union[Path,st
 		try:	# sometimes mediainfo flags an INT or a FLOAT which cannou be ocnverted, so catch those
 			val = {'I':int, 'F':float, 'T':str, 'D':str, 'B':str}[type_](str_value)
 		except Exception as err:
-			print(f'COVERSION EXCEPTION ON val =["I":int, "F":float, "T":str, "D":str, "B":str][type_](str_value) ... type_="{type_}" param="{param}" str_value="{str_value}" path={path}')
-			print(f"Unexpected Error {err=}, {type(err)=}")
+			#print(f'CONVERSION EXCEPTION ON val =["I":int, "F":float, "T":str, "D":str, "B":str][type_](str_value) ... type_="{type_}" param="{param}" str_value="{str_value}" path={path}')
+			#print(f"Unexpected Error {err=}, {type(err)=}")
 			val = None
 			#raise
 			pass
@@ -109,13 +109,13 @@ def auto_rotation_value_PIL(path):
 	try:
 		image = Image.open(str(path))
 	except UnidentifiedImageError:
-		print(f'auto_rotation_value_PIL: except UnidentifiedImageError immediate return now')
+		#print(f'auto_rotation_value_PIL: except UnidentifiedImageError immediate return now')
 		return rotation_degrees, "anti-clockwise"
 	except PermissionError:
-		print(f'auto_rotation_value_PIL: except PermissionError Permission denied to load: {path} immediate return now')
+		#print(f'auto_rotation_value_PIL: except PermissionError Permission denied to load: {path} immediate return now')
 		return rotation_degrees, "anti-clockwise"
 	except Exception as e:
-		print(f'auto_rotation_value_PIL: except Exception {e} immediate return now')
+		#print(f'auto_rotation_value_PIL: except Exception {e} immediate return now')
 		return rotation_degrees, "anti-clockwise"
 	#print(f'auto_rotation_value_PIL: try on Image.open succeeded')
 	rotation_value = 0
@@ -129,7 +129,7 @@ def auto_rotation_value_PIL(path):
 		else:
 			value = 0
 	except (AttributeError, KeyError, IndexError):
-		print(f'auto_rotation_value_PIL: except AttributeError during for key in ExifTags.TAGS.keys(), immediate return now {path}')
+		#print(f'auto_rotation_value_PIL: except AttributeError during for key in ExifTags.TAGS.keys(), immediate return now {path}')
 		return rotation_degrees, "anti-clockwise"
 	else:
 		if   value == 0:
