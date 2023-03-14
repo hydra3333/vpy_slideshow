@@ -25,10 +25,15 @@ set bv_buf=15000000
 DEL "%ini_file%">NUL 2>&1
 IF NOT EXIST "%ini_file%" (
 	echo [slideshow]>>"%ini_file%"
-	echo directory = G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST>>"%ini_file%"
+	echo ;directory = G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST>>"%ini_file%"
+	echo ;directory = G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST>>"%ini_file%"
+	echo ;directory = G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\2TEST_rotations>>"%ini_file%"
+	echo directory = G:\DVD\PAT-SLIDESHOWS\2018>>"%ini_file%"
 	echo temp_directory = D:\TEMP>>"%ini_file%"
-	echo recursive = False>>"%ini_file%"
+	echo recursive = True>>"%ini_file%"
 	echo debug_mode = True>>"%ini_file%"
+	echo duration_pic_sec = 2.0>>"%ini_file%"
+	echo duration_max_video_sec = 3.0>>"%ini_file%"
 	type "%ini_file%"
 )
 

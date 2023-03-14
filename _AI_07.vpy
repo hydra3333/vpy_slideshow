@@ -919,7 +919,7 @@ def get_clip(path):
 	# # A TRICK FOR NEW PLAYERS ... MEDIAINFO YIELDS ROTATION VALUES FOR CLOCKWISE ROTATIONS for videos !!! NOT ANTI-CLOCKWISE like PIL !!!
 	# Apply an auto-rotate auto_rotation if specified in the source file
 	##if path.suffix.lower() in calc_ini["PIC_EXTENSIONS"]:
-	print_DEBUG(f'type(clip_specs["auto_rotation_degrees"])={type(clip_specs["auto_rotation_degrees"])}  clip_specs["auto_rotation_degrees"]={clip_specs["auto_rotation_degrees"]}')
+	#print_DEBUG(f'type(clip_specs["auto_rotation_degrees"])={type(clip_specs["auto_rotation_degrees"])}  clip_specs["auto_rotation_degrees"]={clip_specs["auto_rotation_degrees"]}')
 	if clip_specs["auto_rotation_degrees"] == 0:
 		#print_DEBUG(f'get_clip: zero auto-rotation of clip {path}')
 		pass
