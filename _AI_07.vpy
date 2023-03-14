@@ -613,11 +613,11 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	# values of video stream matrix_coefficients seen returned by  mediainfo
 	# used to convert mediainfo to "vs" MatrixCoefficients
 	mc_bt601 = vs.MatrixCoefficients.MATRIX_BT470_BG
-	if 'Standard' in mediainfo_specs:
+	if 'Standard' in mediainfo_specs and mediainfo_specs['Standard'] is not None:
 		if 'NTSC'.lower() in mediainfo_specs['Standard'].lower():
 			mc_bt601 = vs.MatrixCoefficients.MATRIX_ST170_M
-	if 'colour_primaries' in mediainfo_specs:
-		if 'NTSC'.lower() in  mediainfo_specs['colour_primaries'].lower():	# if the substring string is inthe string
+	if 'colour_primaries' in mediainfo_specs  and mediainfo_specs['colour_primaries'] is not None:
+		if 'NTSC'.lower() in  mediainfo_specs['colour_primaries'].lower():	# if the substring string is in the string
 			mc_bt601 = vs.MatrixCoefficients.MATRIX_ST170_M
 		if  mediainfo_specs['colour_primaries'].lower() in list(map(str.lower,[ 'BT.470 M', 'BT.470 M', 'BT.470_M', 'BT.601 NTSC', 'BT.470 NTSC' ])):
 			mc_bt601 = vs.MatrixCoefficients.MATRIX_ST170_M
