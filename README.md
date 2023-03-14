@@ -3,8 +3,8 @@
 ### to produce an .mp4 slideshow from images and video clips.
 
 ___
-### _AI_ has elegant code which works with audio   
-#### please go here to start with _AI_ code:      
+### \_AI\_ has elegant code which works with audio   
+#### please go here to start with \_AI\_ code instead of this git:      
 https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio/page2#post2678789   
 ___
 
