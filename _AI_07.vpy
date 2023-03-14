@@ -375,7 +375,7 @@ def mediainfo_value_worker(stream:int, track:int, param:str, path: Union[Path,st
 	if info_option:
 		#returning a proper value type, int, float or str for particular parameter
 		type_ = info_option[InfoOption.TypeOfValue] #type_=info_option[3] #_type will be 'I', 'F', 'T', 'D' or 'B'
-		try:
+		try:	# sometimes mediainfo flags an INT or a FLOAT which cannou be ocnverted, so catch those
 			val = {'I':int, 'F':float, 'T':str, 'D':str, 'B':str}[type_](str_value)
 		except Exception as err:
 			print_DEBUG(f'COVERSION EXCEPTION ON val =["I":int, "F":float, "T":str, "D":str, "B":str][type_](str_value) ... type_="{type_}" param="{param}" str_value="{str_value}" path={path}')
@@ -575,15 +575,93 @@ def get_clip_specs(clip=None, path=None, ext=None):
 	clip_specs["proposed_Transfer"] = clip_specs["_Transfer"]
 	clip_specs["guessed_ColorRange"] = False
 	clip_specs["proposed_ColorRange"] = clip_specs["_ColorRange"]
-	#
-	if  clip_specs["_Matrix"] == vs.MatrixCoefficients.MATRIX_UNSPECIFIED or clip_specs["_Matrix"] is None:	# _Matrix is usually defined and the rest may not be. (ffms2 usually yields MATRIX_BT470_BG)
-		pass
+	# Define translation tables form mediainfo (some are calculated)
+	# Create some translation tables from mediainfo return values to "vs" constants
+	# used to inform other choices
+	mi_standard_list = { 'Component', 'NTSC', 'PAL', None,}
+	print_DEBUG(f'get_clip_specs: translation_table mi_standard_list=\n{objPrettyPrint.pformat(mi_standard_list)}')
+	# values of video stream colour_primaries seen returned by  mediainfo
+	# used to convert mediainfo to "vs" ColorPrimaries
+	mi_color_primaries_dict = {			'BT.2020' : 				vs.ColorPrimaries.PRIMARIES_BT2020,
+										'BT.601 NTSC' :				vs.ColorPrimaries.PRIMARIES_ST170_M,		# ? newer than ColorPrimaries.PRIMARIES_BT470_M 
+										'BT.601 PAL' :				vs.ColorPrimaries.PRIMARIES_BT470_BG,
+										'BT.709' :					vs.ColorPrimaries.PRIMARIES_BT709,
+										#None :						None,
+										# not seen, check them anyway
+										'BT.470_BG' :				vs.ColorPrimaries.PRIMARIES_BT470_BG,
+										'BT.470 BG' :				vs.ColorPrimaries.PRIMARIES_BT470_BG,
+										'BT.470 PAL' :				vs.ColorPrimaries.PRIMARIES_BT470_BG,
+										'BT.470_PAL' :				vs.ColorPrimaries.PRIMARIES_BT470_BG,
+										'BT.470_M' :				vs.ColorPrimaries.PRIMARIES_ST170_M,
+										'BT.470 M' :				vs.ColorPrimaries.PRIMARIES_ST170_M,
+										'BT.470 NTSC' :				vs.ColorPrimaries.PRIMARIES_ST170_M,
+										}
+	print_DEBUG(f'get_clip_specs: translation_table mi_color_primaries_dict=\n{objPrettyPrint.pformat(mi_color_primaries_dict)}')
+	# values of video stream transfer_characteristics seen returned by  mediainfo
+	# used to convert mediainfo to "vs" TransferCharacteristics
+	mi_transfer_characteristics_dict = {'BT.470 System B/G' :		vs.TransferCharacteristics.TRANSFER_BT470_BG,
+										'BT.601' :					vs.TransferCharacteristics.TRANSFER_BT601,
+										'BT.709' :					vs.TransferCharacteristics.TRANSFER_BT709 ,
+										#None :						None,
+										# not seen, check them anyway
+										'BT.470 System M' :			vs.TransferCharacteristics.TRANSFER_BT470_M,
+										'BT.BT2020 10' :			vs.TransferCharacteristics.TRANSFER_BT2020_10,
+										'BT.BT2020 12' :			vs.TransferCharacteristics.TRANSFER_BT2020_12,
+										'ST.2084' :					vs.TransferCharacteristics.TRANSFER_ST2084,
+										}
+	print_DEBUG(f'get_clip_specs: translation_table mi_transfer_characteristics_dict=\n{objPrettyPrint.pformat(mi_transfer_characteristics_dict)}')
+	# values of video stream matrix_coefficients seen returned by  mediainfo
+	# used to convert mediainfo to "vs" MatrixCoefficients
+	mc_bt601 = vs.MatrixCoefficients.MATRIX_BT470_BG
+	if 'Standard' in mediainfo_specs:
+		if 'NTSC'.lower() in mediainfo_specs['Standard'].lower():
+			mc_bt601 = vs.MatrixCoefficients.MATRIX_ST170_M
+	if 'colour_primaries' in mediainfo_specs:
+		if 'NTSC'.lower() in  mediainfo_specs['colour_primaries'].lower():	# if the substring string is inthe string
+			mc_bt601 = vs.MatrixCoefficients.MATRIX_ST170_M
+		if  mediainfo_specs['colour_primaries'].lower() in list(map(str.lower,[ 'BT.470 M', 'BT.470 M', 'BT.470_M', 'BT.601 NTSC', 'BT.470 NTSC' ])):
+			mc_bt601 = vs.MatrixCoefficients.MATRIX_ST170_M
+	mi_matrix_coefficients_dict = {		'BT.470 System B/G' :		vs.MatrixCoefficients.MATRIX_BT470_BG,
+										'BT.601' : 					mc_bt601,									# assume PAL unless colour_primaries/Standard say NTSC then vs.MatrixCoefficients.MATRIX_ST170_M 
+										'BT.709' :					vs.MatrixCoefficients.MATRIX_BT709,
+										'BT.2020 non-constant' :	vs.MatrixCoefficients.MATRIX_BT2020_NCL,
+										'BT.2020 constant' :		vs.MatrixCoefficients.MATRIX_BT2020_CL,
+										#None :						None,
+										# not seen, check them anyway
+										}
+	print_DEBUG(f'get_clip_specs: translation_table mi_matrix_coefficients_dict=\n{objPrettyPrint.pformat(mi_matrix_coefficients_dict)}')
+	# values of video stream colour_range seen returned by  mediainfo
+	# used to convert mediainfo to "vs" ColorRange
+	mi_colour_range_dict = {			'Full' :					vs.ColorRange.RANGE_FULL,
+										'Limited' :					vs.ColorRange.RANGE_LIMITED,
+										#None :						None,
+										}
+	print_DEBUG(f'get_clip_specs: translation_table mi_colour_range_dict={objPrettyPrint.pformat(mi_colour_range_dict)}')
+	# now do the guessing for pass #1
+	if  clip_specs["_Matrix"] == vs.MatrixCoefficients.MATRIX_UNSPECIFIED or clip_specs["_Matrix"] is None:	# _Matrix is usually defined and the rest may not be. (ffms2 seems to usually yield MATRIX_BT470_BG ?)
+		if 'matrix_coefficients' in mediainfo_specs:
+			if mediainfo_specs['matrix_coefficients'] is not None:
+				clip_specs["guessed_Matrix"] = True
+				clip_specs["proposed_Matrix"] = mi_matrix_coefficients_dict[mediainfo_specs['matrix_coefficients']]	# translate to "vs." if possible
+				print_DEBUG(f'get_clip_specs: Guess the Specs Pass #1 translated mediainfo matrix_coefficients "{mediainfo_specs["matrix_coefficients"]}" to "{clip_specs["proposed_Matrix"]}"')
 	if  clip_specs["_Transfer"] == vs.TransferCharacteristics.TRANSFER_UNSPECIFIED or clip_specs["_Transfer"] is None:
-		pass
+		if 'transfer_characteristics' in mediainfo_specs:
+			if mediainfo_specs['transfer_characteristics'] is not None:
+				clip_specs["guessed_Transfer"] = False
+				clip_specs["proposed_Transfer"] = mi_transfer_characteristics_dict[mediainfo_specs['transfer_characteristics']]	# translate to "vs." if possible
+				print_DEBUG(f'get_clip_specs: Guess the Specs Pass #1 translated mediainfo transfer_characteristics "{mediainfo_specs["transfer_characteristics"]}" to "{clip_specs["proposed_Transfer"]}"')
 	if  clip_specs["_Primaries"] == vs.ColorPrimaries.PRIMARIES_UNSPECIFIED or clip_specs["_Primaries"] is None:
-		pass
+		if 'colour_primaries' in mediainfo_specs:
+			if mediainfo_specs['colour_primaries'] is not None:
+				clip_specs["guessed_Primaries"] = True
+				clip_specs["proposed_Primaries"] = mi_color_primaries_dict[mediainfo_specs['colour_primaries']]	# translate to "vs." if possible
+				print_DEBUG(f'get_clip_specs: Guess the Specs Pass #1 translated mediainfo colour_primaries "{mediainfo_specs["colour_primaries"]}" to "{clip_specs["proposed_Primaries"]}"')
 	if clip_specs["_ColorRange"] is None:
-		pass
+		if 'colour_range' in mediainfo_specs:
+			if mediainfo_specs['colour_range'] is not None:
+				clip_specs["guessed_ColorRange"] = True
+				clip_specs["proposed_ColorRange"] = mi_colour_range_dict[mediainfo_specs['colour_range']]	# translate to "vs." if possible
+				print_DEBUG(f'get_clip_specs: Guess the Specs Pass #1 translated mediainfo colour_range "{mediainfo_specs["colour_range"]}" to "{clip_specs["proposed_ColorRange"]}"')
 
 	# **********
 	# Guess the Specs Pass #2 once we've had a god with medinfo values ..
