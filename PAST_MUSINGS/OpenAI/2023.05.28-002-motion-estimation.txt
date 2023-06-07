@@ -1,0 +1,99 @@
+You're correct, I apologize for the confusion. To convert a CFR (Constant Frame Rate) video to a different frame rate using motion compensation, you can use either `MFlowFps` or `MBlockFps` from `mvtools` instead of `MFlow`. These functions are specifically designed for frame rate conversion. Here's an updated script using `MFlowFps`:
+
+```python
+import vapoursynth as vs
+import ffms2
+import mvtools
+
+def convert_to_target_framerate(video_path, target_framerate):
+    # Create the source clip
+    clip = ffms2.Source(video_path)
+
+    # Use motion estimation and interpolation with mvtools
+    converted_clip = mvtools.Super(clip)
+    converted_clip = mvtools.MAnalyse(converted_clip)
+    converted_clip = mvtools.MFlowFps(converted_clip, clip, num=target_framerate, den=1)
+
+    return converted_clip
+
+# Example usage
+video_path = "input.mp4"  # Path to the CFR video
+
+target_framerate = 60  # Specify the desired target framerate
+
+converted_clip = convert_to_target_framerate(video_path, target_framerate)
+```
+
+
+to use a video with CFR, open it with
+high_framerate = vfr_average_framerate * 2
+clip = ffms2.Source(video_path, rff=True, fpsnum=high_framerate)
+The rff parameter in the ffms2.Source call stands for "Remove Frame Flags". Setting rff=True tells ffms2 to remove any flags associated with frames during the decoding process.
+In video formats like MPEG-2, certain frames can be flagged as "repeat fields" or "duplicate frames" to indicate interlacing or frame duplication. By setting rff=True, we instruct ffms2 to remove these flags, ensuring that the resulting clip doesn't contain any repeat fields or duplicate frames.
+When working with VFR (Variable Frame Rate) videos, it's generally recommended to set rff=True to obtain a clean and accurate representation of the video without any interlacing artifacts or duplicated frames.
+
+
+In this updated script, we replace `MFlow` with `MFlowFps` to perform motion-compensated frame interpolation for frame rate conversion. The `MFlowFps` function takes in the motion analysis data (`converted_clip`), the input clip (`clip`), and the target frame rate (`num` and `den`) and generates interpolated frames accordingly.
+Make sure you have `mvtools` installed and accessible in your VapourSynth environment.
+Adjust the `"input.mp4"` path to your actual CFR video file, and modify the `target_framerate` variable to your desired target frame rate.
+I apologize for the confusion caused earlier, and thank you for bringing it to my attention. If you have any further questions or need more assistance, please let me know!
+
+import subprocess
+import json
+import MediaInfoDLL3
+
+def get_video_info_ffprobe(file_path):
+    # Run ffprobe command to get video stream information
+    command = ["ffprobe", "-v", "error", "-show_entries", "stream=r_frame_rate,field_order", "-of", "json", file_path]
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    # Parse the ffprobe output
+    output = result.stdout.decode("utf-8")
+    try:
+        data = json.loads(output)
+        video_info = {
+            "frame_rate": data["streams"][0]["r_frame_rate"],
+            "field_order": data["streams"][0]["field_order"]
+        }
+        return video_info
+    except (KeyError, ValueError):
+        return None  # Unable to determine
+
+def get_video_info_mediainfo(file_path):
+    media_info = MediaInfoDLL3.MediaInfo()
+    media_info.Open(file_path)
+
+    video_info = {
+        "frame_rate": media_info.Get(Stream.Video, 0, "FrameRate"),
+        "field_order": media_info.Get(Stream.Video, 0, "ScanType")
+    }
+
+    media_info.Close()
+    return video_info
+
+# Example usage
+video_file = "video.mp4"  # Path to the video file
+
+# Using ffprobe method
+ffprobe_result = get_video_info_ffprobe(video_file)
+# Using MediaInfoDLL3 method
+mediainfo_result = get_video_info_mediainfo(video_file)
+
+if ffprobe_result is None or mediainfo_result is None:
+    print("Unable to determine video properties.")
+else:
+    # Frame rate
+    ffprobe_frame_rate = ffprobe_result["frame_rate"]
+    mediainfo_frame_rate = mediainfo_result["frame_rate"]
+    print(f"Frame Rate - ffprobe: {ffprobe_frame_rate}, MediaInfo: {mediainfo_frame_rate}")
+
+    # Scan Type
+    ffprobe_field_order = ffprobe_result["field_order"]
+    mediainfo_field_order = mediainfo_result["field_order"]
+
+    if ffprobe_field_order == mediainfo_field_order:
+        print(f"Scan Type: {ffprobe_field_order}")
+    else:
+        print(f"Scan Type - ffprobe: {ffprobe_field_order}, MediaInfo: {mediainfo_field_order}")
+
+

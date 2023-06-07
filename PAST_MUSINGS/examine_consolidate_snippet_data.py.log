@@ -1,0 +1,624 @@
+ 
+vs_CD=D:\ssTEST\
+py_vs_CD=D:\\ssTEST\\
+root_folder=D:\ssTEST\TEST_VIDS_IMAGES\2022-11-Tasmania_renamed\
+root_folder_bb=D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\
+snippets_file_list=D:\ssTEST\TEST_VIDS_IMAGES\2022-11-Tasmania_renamed\vpy_slideshow.2022-11-Tasmania_renamed.list_of_snippets_files.txt
+snippets_file_list_bb=D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed.list_of_snippets_files.txt
+background_music=D:\ssTEST\TEST_VIDS_IMAGES\2022-11-Tasmania_renamed\background_music_concatenated_ebur128_final.doubled.m4a
+background_music_bb=D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\background_music_concatenated_ebur128_final.doubled.m4a
+main_video_file=D:\ssTEST\TEST_VIDS_IMAGES\2022-11-Tasmania_renamed\vpy_slideshow.2022-11-Tasmania_renamed-CONCATENATED_NO_AUDIO.mp4
+main_video_file_bb=D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-CONCATENATED_NO_AUDIO.mp4
+output_mp4_file=D:\ssTEST\TEST_VIDS_IMAGES\2022-11-Tasmania_renamed\vpy_slideshow.2022-11-Tasmania_renamed-CONCATENATED_WITH_AUDIO.mp4
+output_mp4_file_bb=D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-CONCATENATED_WITH_AUDIO.mp4
+ 
+"D:\ssTEST\TEST_VIDS_IMAGES\2022-11-Tasmania_renamed\vpy_slideshow.2022-11-Tasmania_renamed.list_of_snippets_files.txt" contains 
+D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-01.snippets.txt
+D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-02.snippets.txt
+D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-03.snippets.txt
+D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-04.snippets.txt
+D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-05.snippets.txt
+D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-06.snippets.txt
+D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-07.snippets.txt
+D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-08.snippets.txt
+D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-09.snippets.txt
+D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-10.snippets.txt
+ 
+ 
+Wed 07/06/2023 12:13:20.36 
+"D:\ssTEST\Vapoursynth_x64\python.exe" "D:\\ssTEST\\examine_consolidate_snippet_data.py" -i "D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-CONCATENATED_NO_AUDIO.mp4" -s "D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed.list_of_snippets_files.txt" -b "D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\background_music_concatenated_ebur128_final.doubled.m4a" -o "D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-CONCATENATED_WITH_AUDIO.mp4" 
+Background audio path was specified: D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\background_music_concatenated_ebur128_final.doubled.m4a
+Total audio snippets: 30 in 'D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-01.snippets.txt'
+Gathered info for audio snippet 1/30
+Gathered info for audio snippet 2/30
+Gathered info for audio snippet 3/30
+Gathered info for audio snippet 4/30
+Gathered info for audio snippet 5/30
+Gathered info for audio snippet 6/30
+Gathered info for audio snippet 7/30
+Gathered info for audio snippet 8/30
+Gathered info for audio snippet 9/30
+Gathered info for audio snippet 10/30
+Gathered info for audio snippet 11/30
+Gathered info for audio snippet 12/30
+Gathered info for audio snippet 13/30
+Gathered info for audio snippet 14/30
+Gathered info for audio snippet 15/30
+Gathered info for audio snippet 16/30
+Gathered info for audio snippet 17/30
+Gathered info for audio snippet 18/30
+Gathered info for audio snippet 19/30
+Gathered info for audio snippet 20/30
+Gathered info for audio snippet 21/30
+Gathered info for audio snippet 22/30
+Gathered info for audio snippet 23/30
+Gathered info for audio snippet 24/30
+Gathered info for audio snippet 25/30
+Gathered info for audio snippet 26/30
+Gathered info for audio snippet 27/30
+Gathered info for audio snippet 28/30
+Gathered info for audio snippet 29/30
+Gathered info for audio snippet 30/30
+Total audio snippets: 33 in 'D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-02.snippets.txt'
+Gathered info for audio snippet 1/33
+Gathered info for audio snippet 2/33
+Gathered info for audio snippet 3/33
+Gathered info for audio snippet 4/33
+Gathered info for audio snippet 5/33
+Gathered info for audio snippet 6/33
+Gathered info for audio snippet 7/33
+Gathered info for audio snippet 8/33
+Gathered info for audio snippet 9/33
+Gathered info for audio snippet 10/33
+Gathered info for audio snippet 11/33
+Gathered info for audio snippet 12/33
+Gathered info for audio snippet 13/33
+Gathered info for audio snippet 14/33
+Gathered info for audio snippet 15/33
+Gathered info for audio snippet 16/33
+Gathered info for audio snippet 17/33
+Gathered info for audio snippet 18/33
+Gathered info for audio snippet 19/33
+Gathered info for audio snippet 20/33
+Gathered info for audio snippet 21/33
+Gathered info for audio snippet 22/33
+Gathered info for audio snippet 23/33
+Gathered info for audio snippet 24/33
+Gathered info for audio snippet 25/33
+Gathered info for audio snippet 26/33
+Gathered info for audio snippet 27/33
+Gathered info for audio snippet 28/33
+Gathered info for audio snippet 29/33
+Gathered info for audio snippet 30/33
+Gathered info for audio snippet 31/33
+Gathered info for audio snippet 32/33
+Gathered info for audio snippet 33/33
+Total audio snippets: 0 in 'D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-03.snippets.txt'
+Total audio snippets: 41 in 'D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-04.snippets.txt'
+Gathered info for audio snippet 1/41
+Gathered info for audio snippet 2/41
+Gathered info for audio snippet 3/41
+Gathered info for audio snippet 4/41
+Gathered info for audio snippet 5/41
+Gathered info for audio snippet 6/41
+Gathered info for audio snippet 7/41
+Gathered info for audio snippet 8/41
+Gathered info for audio snippet 9/41
+Gathered info for audio snippet 10/41
+Gathered info for audio snippet 11/41
+Gathered info for audio snippet 12/41
+Gathered info for audio snippet 13/41
+Gathered info for audio snippet 14/41
+Gathered info for audio snippet 15/41
+Gathered info for audio snippet 16/41
+Gathered info for audio snippet 17/41
+Gathered info for audio snippet 18/41
+Gathered info for audio snippet 19/41
+Gathered info for audio snippet 20/41
+Gathered info for audio snippet 21/41
+Gathered info for audio snippet 22/41
+Gathered info for audio snippet 23/41
+Gathered info for audio snippet 24/41
+Gathered info for audio snippet 25/41
+Gathered info for audio snippet 26/41
+Gathered info for audio snippet 27/41
+Gathered info for audio snippet 28/41
+Gathered info for audio snippet 29/41
+Gathered info for audio snippet 30/41
+Gathered info for audio snippet 31/41
+Gathered info for audio snippet 32/41
+Gathered info for audio snippet 33/41
+Gathered info for audio snippet 34/41
+Gathered info for audio snippet 35/41
+Gathered info for audio snippet 36/41
+Gathered info for audio snippet 37/41
+Gathered info for audio snippet 38/41
+Gathered info for audio snippet 39/41
+Gathered info for audio snippet 40/41
+Gathered info for audio snippet 41/41
+Total audio snippets: 27 in 'D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-05.snippets.txt'
+Gathered info for audio snippet 1/27
+Gathered info for audio snippet 2/27
+Gathered info for audio snippet 3/27
+Gathered info for audio snippet 4/27
+Gathered info for audio snippet 5/27
+Gathered info for audio snippet 6/27
+Gathered info for audio snippet 7/27
+Gathered info for audio snippet 8/27
+Gathered info for audio snippet 9/27
+Gathered info for audio snippet 10/27
+Gathered info for audio snippet 11/27
+Gathered info for audio snippet 12/27
+Gathered info for audio snippet 13/27
+Gathered info for audio snippet 14/27
+Gathered info for audio snippet 15/27
+Gathered info for audio snippet 16/27
+Gathered info for audio snippet 17/27
+Gathered info for audio snippet 18/27
+Gathered info for audio snippet 19/27
+Gathered info for audio snippet 20/27
+Gathered info for audio snippet 21/27
+Gathered info for audio snippet 22/27
+Gathered info for audio snippet 23/27
+Gathered info for audio snippet 24/27
+Gathered info for audio snippet 25/27
+Gathered info for audio snippet 26/27
+Gathered info for audio snippet 27/27
+Total audio snippets: 16 in 'D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-06.snippets.txt'
+Gathered info for audio snippet 1/16
+Gathered info for audio snippet 2/16
+Gathered info for audio snippet 3/16
+Gathered info for audio snippet 4/16
+Gathered info for audio snippet 5/16
+Gathered info for audio snippet 6/16
+Gathered info for audio snippet 7/16
+Gathered info for audio snippet 8/16
+Gathered info for audio snippet 9/16
+Gathered info for audio snippet 10/16
+Gathered info for audio snippet 11/16
+Gathered info for audio snippet 12/16
+Gathered info for audio snippet 13/16
+Gathered info for audio snippet 14/16
+Gathered info for audio snippet 15/16
+Gathered info for audio snippet 16/16
+Total audio snippets: 42 in 'D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-07.snippets.txt'
+Gathered info for audio snippet 1/42
+Gathered info for audio snippet 2/42
+Gathered info for audio snippet 3/42
+Gathered info for audio snippet 4/42
+Gathered info for audio snippet 5/42
+Gathered info for audio snippet 6/42
+Gathered info for audio snippet 7/42
+Gathered info for audio snippet 8/42
+Gathered info for audio snippet 9/42
+Gathered info for audio snippet 10/42
+Gathered info for audio snippet 11/42
+Gathered info for audio snippet 12/42
+Gathered info for audio snippet 13/42
+Gathered info for audio snippet 14/42
+Gathered info for audio snippet 15/42
+Gathered info for audio snippet 16/42
+Gathered info for audio snippet 17/42
+Gathered info for audio snippet 18/42
+Gathered info for audio snippet 19/42
+Gathered info for audio snippet 20/42
+Gathered info for audio snippet 21/42
+Gathered info for audio snippet 22/42
+Gathered info for audio snippet 23/42
+Gathered info for audio snippet 24/42
+Gathered info for audio snippet 25/42
+Gathered info for audio snippet 26/42
+Gathered info for audio snippet 27/42
+Gathered info for audio snippet 28/42
+Gathered info for audio snippet 29/42
+Gathered info for audio snippet 30/42
+Gathered info for audio snippet 31/42
+Gathered info for audio snippet 32/42
+Gathered info for audio snippet 33/42
+Gathered info for audio snippet 34/42
+Gathered info for audio snippet 35/42
+Gathered info for audio snippet 36/42
+Gathered info for audio snippet 37/42
+Gathered info for audio snippet 38/42
+Gathered info for audio snippet 39/42
+Gathered info for audio snippet 40/42
+Gathered info for audio snippet 41/42
+Gathered info for audio snippet 42/42
+Total audio snippets: 37 in 'D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-08.snippets.txt'
+Gathered info for audio snippet 1/37
+Gathered info for audio snippet 2/37
+Gathered info for audio snippet 3/37
+Gathered info for audio snippet 4/37
+Gathered info for audio snippet 5/37
+Gathered info for audio snippet 6/37
+Gathered info for audio snippet 7/37
+Gathered info for audio snippet 8/37
+Gathered info for audio snippet 9/37
+Gathered info for audio snippet 10/37
+Gathered info for audio snippet 11/37
+Gathered info for audio snippet 12/37
+Gathered info for audio snippet 13/37
+Gathered info for audio snippet 14/37
+Gathered info for audio snippet 15/37
+Gathered info for audio snippet 16/37
+Gathered info for audio snippet 17/37
+Gathered info for audio snippet 18/37
+Gathered info for audio snippet 19/37
+Gathered info for audio snippet 20/37
+Gathered info for audio snippet 21/37
+Gathered info for audio snippet 22/37
+Gathered info for audio snippet 23/37
+Gathered info for audio snippet 24/37
+Gathered info for audio snippet 25/37
+Gathered info for audio snippet 26/37
+Gathered info for audio snippet 27/37
+Gathered info for audio snippet 28/37
+Gathered info for audio snippet 29/37
+Gathered info for audio snippet 30/37
+Gathered info for audio snippet 31/37
+Gathered info for audio snippet 32/37
+Gathered info for audio snippet 33/37
+Gathered info for audio snippet 34/37
+Gathered info for audio snippet 35/37
+Gathered info for audio snippet 36/37
+Gathered info for audio snippet 37/37
+Total audio snippets: 10 in 'D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-09.snippets.txt'
+Gathered info for audio snippet 1/10
+Gathered info for audio snippet 2/10
+Gathered info for audio snippet 3/10
+Gathered info for audio snippet 4/10
+Gathered info for audio snippet 5/10
+Gathered info for audio snippet 6/10
+Gathered info for audio snippet 7/10
+Gathered info for audio snippet 8/10
+Gathered info for audio snippet 9/10
+Gathered info for audio snippet 10/10
+Total audio snippets: 26 in 'D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-10.snippets.txt'
+Gathered info for audio snippet 1/26
+Gathered info for audio snippet 2/26
+Gathered info for audio snippet 3/26
+Gathered info for audio snippet 4/26
+Gathered info for audio snippet 5/26
+Gathered info for audio snippet 6/26
+Gathered info for audio snippet 7/26
+Gathered info for audio snippet 8/26
+Gathered info for audio snippet 9/26
+Gathered info for audio snippet 10/26
+Gathered info for audio snippet 11/26
+Gathered info for audio snippet 12/26
+Gathered info for audio snippet 13/26
+Gathered info for audio snippet 14/26
+Gathered info for audio snippet 15/26
+Gathered info for audio snippet 16/26
+Gathered info for audio snippet 17/26
+Gathered info for audio snippet 18/26
+Gathered info for audio snippet 19/26
+Gathered info for audio snippet 20/26
+Gathered info for audio snippet 21/26
+Gathered info for audio snippet 22/26
+Gathered info for audio snippet 23/26
+Gathered info for audio snippet 24/26
+Gathered info for audio snippet 25/26
+Gathered info for audio snippet 26/26
+Processing Main video/audio file                        : D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-CONCATENATED_NO_AUDIO.mp4
+Snippets info file containing a list of snippet files   : D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed.list_of_snippets_files.txt
+Resulting file of muxed new video/audio                 : D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-CONCATENATED_WITH_AUDIO.mp4
+Background ausio (or None for silence)                  : D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\background_music_concatenated_ebur128_final.doubled.m4a
+Processing snippet 1/262 from LIST, start_frame=1143 end_frame=1438 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_08_03_49_03_000000_rot_090_1080x1920__20221108_144850.mp4'
+Processing snippet 2/262 from LIST, start_frame=1426 end_frame=1745 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_08_03_49_22_000000_rot_090_1080x1920__20221108_144908.mp4'
+Processing snippet 3/262 from LIST, start_frame=1733 end_frame=2051 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_08_03_49_45_000000_rot_090_1080x1920__20221108_144932.mp4'
+Processing snippet 4/262 from LIST, start_frame=2039 end_frame=2469 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_08_03_50_26_000000_rot_090_1080x1920__20221108_145008.mp4'
+Processing snippet 5/262 from LIST, start_frame=6353 end_frame=6559 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_16_32_000000_rot_000_1920x1080__20221109_111623.mp4'
+Processing snippet 6/262 from LIST, start_frame=6547 end_frame=6830 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_17_27_000000_rot_090_1080x1920__20221109_111715.mp4'
+Processing snippet 7/262 from LIST, start_frame=6818 end_frame=6949 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_21_16_000000_rot_090_1080x1920__20221109_112110.mp4'
+Processing snippet 8/262 from LIST, start_frame=6937 end_frame=7061 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_21_44_000000_rot_090_1080x1920__20221109_112138.mp4'
+Processing snippet 9/262 from LIST, start_frame=7049 end_frame=7123 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_26_06_000000_rot_000_1920x1080__20221109_112603.mp4'
+Processing snippet 10/262 from LIST, start_frame=7111 end_frame=7185 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_26_10_000000_rot_000_1920x1080__20221109_112607.mp4'
+Processing snippet 11/262 from LIST, start_frame=7173 end_frame=7336 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_28_51_000000_rot_000_1920x1080__20221109_112842.mp4'
+Processing snippet 12/262 from LIST, start_frame=7324 end_frame=7609 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_28_58_000000_rot_090_1080x1920__20221109_112846.mp4'
+Processing snippet 13/262 from LIST, start_frame=7597 end_frame=7719 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_29_27_000000_rot_000_1920x1080__20221109_112920.mp4'
+Processing snippet 14/262 from LIST, start_frame=7707 end_frame=7819 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_29_47_000000_rot_000_1920x1080__20221109_112941.mp4'
+Processing snippet 15/262 from LIST, start_frame=7807 end_frame=7899 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_29_50_000000_rot_090_1080x1920__20221109_112945.mp4'
+Processing snippet 16/262 from LIST, start_frame=7887 end_frame=7961 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_31_19_000000_rot_000_1920x1080__20221109_113115.mp4'
+Processing snippet 17/262 from LIST, start_frame=7949 end_frame=8157 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_32_17_000000_rot_090_1080x1920__20221109_113208.mp4'
+Processing snippet 18/262 from LIST, start_frame=8145 end_frame=8309 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_41_46_000000_rot_090_1080x1920__20221109_114138.mp4'
+Processing snippet 19/262 from LIST, start_frame=8297 end_frame=8552 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_42_22_000000_rot_090_1080x1920__20221109_114211.mp4'
+Processing snippet 20/262 from LIST, start_frame=8540 end_frame=8688 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_43_00_000000_rot_090_1080x1920__20221109_114253.mp4'
+Processing snippet 21/262 from LIST, start_frame=8676 end_frame=8796 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_43_16_000000_rot_090_1080x1920__20221109_114310.mp4'
+Processing snippet 22/262 from LIST, start_frame=8784 end_frame=9063 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_43_58_000000_rot_090_1080x1920__20221109_114346.mp4'
+Processing snippet 23/262 from LIST, start_frame=9051 end_frame=9291 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_00_47_03_000000_rot_090_1080x1920__20221109_114652.mp4'
+Processing snippet 24/262 from LIST, start_frame=9279 end_frame=9488 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_01_07_50_000000_rot_090_1080x1920__20221109_120740.mp4'
+Processing snippet 25/262 from LIST, start_frame=9489 end_frame=9677 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_01_08_06_000000_rot_090_1080x1920__20221109_120757.mp4'
+Processing snippet 26/262 from LIST, start_frame=9665 end_frame=9739 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_01_11_10_000000_rot_090_1080x1920__20221109_121106.mp4'
+Processing snippet 27/262 from LIST, start_frame=9727 end_frame=9902 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_01_13_49_000000_rot_090_1080x1920__20221109_121340.mp4'
+Processing snippet 28/262 from LIST, start_frame=9890 end_frame=10011 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_01_14_09_000000_rot_090_1080x1920__20221109_121403.mp4'
+Processing snippet 29/262 from LIST, start_frame=9999 end_frame=10293 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_01_25_06_000000_rot_090_1080x1920__20221109_122454.mp4'
+Processing snippet 30/262 from LIST, start_frame=10281 end_frame=10599 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\01\\2022_11_09_01_40_12_000000_rot_090_1080x1920__20221109_123958.mp4'
+Processing snippet 31/262 from LIST, start_frame=21050 end_frame=21365 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_09_21_56_32_000000_rot_090_1080x1920__20221110_085618.mp4'
+Processing snippet 32/262 from LIST, start_frame=21353 end_frame=21736 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_09_22_32_52_000000_rot_090_1080x1920__20221110_093236.mp4'
+Processing snippet 33/262 from LIST, start_frame=21724 end_frame=22004 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_09_22_34_04_000000_rot_090_1080x1920__20221110_093352.mp4'
+Processing snippet 34/262 from LIST, start_frame=21992 end_frame=22377 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_09_22_36_31_000000_rot_000_1920x1080__20221110_093614.mp4'
+Processing snippet 35/262 from LIST, start_frame=22365 end_frame=22515 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_09_22_53_50_000000_rot_090_1080x1920__20221110_095343.mp4'
+Processing snippet 36/262 from LIST, start_frame=22503 end_frame=22842 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_10_02_35_54_000000_rot_090_1080x1920__20221110_133539.mp4'
+Processing snippet 37/262 from LIST, start_frame=22843 end_frame=23056 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_10_03_01_30_000000_rot_090_1080x1920__20221110_140121.mp4'
+Processing snippet 38/262 from LIST, start_frame=23044 end_frame=23309 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_10_03_03_55_000000_rot_090_1080x1920__20221110_140343.mp4'
+Processing snippet 39/262 from LIST, start_frame=23297 end_frame=23596 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_10_04_31_03_000000_rot_090_1080x1920__20221110_153050.mp4'
+Processing snippet 40/262 from LIST, start_frame=32492 end_frame=32743 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_10_23_25_50_000000_rot_090_1080x1920__20221111_102539.mp4'
+Processing snippet 41/262 from LIST, start_frame=32731 end_frame=32823 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_10_23_26_05_000000_rot_090_1080x1920__20221111_102601.mp4'
+Processing snippet 42/262 from LIST, start_frame=32811 end_frame=33073 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_10_23_27_10_000000_rot_090_1080x1920__20221111_102658.mp4'
+Processing snippet 43/262 from LIST, start_frame=33061 end_frame=33261 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_10_23_28_27_000000_rot_090_1080x1920__20221111_102818.mp4'
+Processing snippet 44/262 from LIST, start_frame=33249 end_frame=33502 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_10_23_30_27_000000_rot_090_1080x1920__20221111_103015.mp4'
+Processing snippet 45/262 from LIST, start_frame=33490 end_frame=33719 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_10_23_31_55_000000_rot_090_1080x1920__20221111_103145.mp4'
+Processing snippet 46/262 from LIST, start_frame=33707 end_frame=33784 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_10_23_32_34_000000_rot_090_1080x1920__20221111_103230.mp4'
+Processing snippet 47/262 from LIST, start_frame=33772 end_frame=34101 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_10_23_34_13_000000_rot_090_1080x1920__20221111_103359.mp4'
+Processing snippet 48/262 from LIST, start_frame=34089 end_frame=34427 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_10_23_37_57_000000_rot_090_1080x1920__20221111_103743.mp4'
+Processing snippet 49/262 from LIST, start_frame=34415 end_frame=34590 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_10_23_58_13_000000_rot_090_1080x1920__20221111_105805.mp4'
+Processing snippet 50/262 from LIST, start_frame=34578 end_frame=34900 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_10_23_59_24_000000_rot_090_1080x1920__20221111_105910.mp4'
+Processing snippet 51/262 from LIST, start_frame=34888 end_frame=35194 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_11_00_00_27_000000_rot_090_1080x1920__20221111_110014.mp4'
+Processing snippet 52/262 from LIST, start_frame=35182 end_frame=35420 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_11_00_01_28_000000_rot_090_1080x1920__20221111_110118.mp4'
+Processing snippet 53/262 from LIST, start_frame=35408 end_frame=35589 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_11_01_55_32_000000_rot_090_1080x1920__20221111_125524.mp4'
+Processing snippet 54/262 from LIST, start_frame=35590 end_frame=35708 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_11_02_13_32_000000_rot_090_1080x1920__20221111_131327.mp4'
+Processing snippet 55/262 from LIST, start_frame=35696 end_frame=36086 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_11_02_13_56_000000_rot_090_1080x1920__20221111_131340.mp4'
+Processing snippet 56/262 from LIST, start_frame=36074 end_frame=36463 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_11_02_17_17_000000_rot_090_1080x1920__20221111_131700.mp4'
+Processing snippet 57/262 from LIST, start_frame=36451 end_frame=36840 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_11_02_38_05_000000_rot_090_1080x1920__20221111_133748.mp4'
+Processing snippet 58/262 from LIST, start_frame=36828 end_frame=37238 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_11_04_36_54_000000_rot_090_1080x1920__20221111_153636.mp4'
+Processing snippet 59/262 from LIST, start_frame=37226 end_frame=37425 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_11_04_37_35_000000_rot_090_1080x1920__20221111_153726.mp4'
+Processing snippet 60/262 from LIST, start_frame=37413 end_frame=37605 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_11_05_25_52_000000_rot_090_1080x1920__20221111_162544.mp4'
+Processing snippet 61/262 from LIST, start_frame=37593 end_frame=38101 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_11_06_59_37_000000_rot_090_1080x1920__20221111_175916.mp4'
+Processing snippet 62/262 from LIST, start_frame=38089 end_frame=38209 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_11_07_05_22_000000_rot_090_1080x1920__20221111_180516.mp4'
+Processing snippet 63/262 from LIST, start_frame=38197 end_frame=38905 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\02\\2022_11_11_07_06_45_000000_rot_090_1080x1920__20221111_180616.mp4'
+Processing snippet 64/262 from LIST, start_frame=48268 end_frame=48833 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_22_17_51_000000_rot_090_1080x1920__20221112_091727.mp4'
+Processing snippet 65/262 from LIST, start_frame=48821 end_frame=49462 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_22_18_22_000000_rot_090_1080x1920__20221112_091755.mp4'
+Processing snippet 66/262 from LIST, start_frame=49450 end_frame=49843 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_22_19_09_000000_rot_090_1080x1920__20221112_091852.mp4'
+Processing snippet 67/262 from LIST, start_frame=49844 end_frame=50314 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_22_20_51_000000_rot_090_1080x1920__20221112_092031.mp4'
+Processing snippet 68/262 from LIST, start_frame=50302 end_frame=50513 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_22_23_30_000000_rot_090_1080x1920__20221112_092320.mp4'
+Processing snippet 69/262 from LIST, start_frame=50501 end_frame=50764 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_22_28_41_000000_rot_090_1080x1920__20221112_092830.mp4'
+Processing snippet 70/262 from LIST, start_frame=50752 end_frame=50826 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_22_33_56_000000_rot_090_1080x1920__20221112_093352.mp4'
+Processing snippet 71/262 from LIST, start_frame=50814 end_frame=51279 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_22_34_46_000000_rot_090_1080x1920__20221112_093427.mp4'
+Processing snippet 72/262 from LIST, start_frame=51267 end_frame=51455 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_23_29_05_000000_rot_090_1080x1920__20221112_102856.mp4'
+Processing snippet 73/262 from LIST, start_frame=51443 end_frame=51763 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_23_31_20_000000_rot_090_1080x1920__20221112_103106.mp4'
+Processing snippet 74/262 from LIST, start_frame=51751 end_frame=52392 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_23_35_45_000000_rot_090_1080x1920__20221112_103517.mp4'
+Processing snippet 75/262 from LIST, start_frame=52380 end_frame=52574 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_23_35_57_000000_rot_090_1080x1920__20221112_103547.mp4'
+Processing snippet 76/262 from LIST, start_frame=52562 end_frame=52728 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_23_38_00_000000_rot_000_1920x1080__20221112_103752.mp4'
+Processing snippet 77/262 from LIST, start_frame=52729 end_frame=52826 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_23_54_01_000000_rot_090_1080x1920__20221112_105357.mp4'
+Processing snippet 78/262 from LIST, start_frame=52814 end_frame=53104 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_23_56_27_000000_rot_090_1080x1920__20221112_105614.mp4'
+Processing snippet 79/262 from LIST, start_frame=53092 end_frame=53258 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_23_59_28_000000_rot_090_1080x1920__20221112_105921.mp4'
+Processing snippet 80/262 from LIST, start_frame=53246 end_frame=54236 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_23_59_43_000000_rot_000_1920x1080__20221112_105902.mp4'
+Processing snippet 81/262 from LIST, start_frame=54224 end_frame=54598 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_11_23_59_46_000000_rot_090_1080x1920__20221112_105930.mp4'
+Processing snippet 82/262 from LIST, start_frame=54586 end_frame=54878 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_00_43_10_000000_rot_090_1080x1920__20221112_114258.mp4'
+Processing snippet 83/262 from LIST, start_frame=54866 end_frame=55294 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_00_44_20_000000_rot_090_1080x1920__20221112_114402.mp4'
+Processing snippet 84/262 from LIST, start_frame=55282 end_frame=55656 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_00_56_11_000000_rot_090_1080x1920__20221112_115554.mp4'
+Processing snippet 85/262 from LIST, start_frame=55644 end_frame=55892 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_00_56_28_000000_rot_090_1080x1920__20221112_115616.mp4'
+Processing snippet 86/262 from LIST, start_frame=55880 end_frame=56615 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_00_57_43_000000_rot_090_1080x1920__20221112_115712.mp4'
+Processing snippet 87/262 from LIST, start_frame=56603 end_frame=57082 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_00_59_27_000000_rot_090_1080x1920__20221112_115906.mp4'
+Processing snippet 88/262 from LIST, start_frame=57070 end_frame=57144 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_01_00_53_000000_rot_090_1080x1920__20221112_120049.mp4'
+Processing snippet 89/262 from LIST, start_frame=57132 end_frame=58085 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_01_03_28_000000_rot_090_1080x1920__20221112_120248.mp4'
+Processing snippet 90/262 from LIST, start_frame=58073 end_frame=58959 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_02_06_00_000000_rot_090_1080x1920__20221112_130523.mp4'
+Processing snippet 91/262 from LIST, start_frame=58947 end_frame=59555 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_02_07_18_000000_rot_090_1080x1920__20221112_130652.mp4'
+Processing snippet 92/262 from LIST, start_frame=59543 end_frame=61462 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_02_11_33_000000_rot_090_1080x1920__20221112_131015.mp4'
+Processing snippet 93/262 from LIST, start_frame=61450 end_frame=62034 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_02_12_25_000000_rot_090_1080x1920__20221112_131201.mp4'
+Processing snippet 94/262 from LIST, start_frame=62022 end_frame=62450 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_02_16_45_000000_rot_090_1080x1920__20221112_131627.mp4'
+Processing snippet 95/262 from LIST, start_frame=62438 end_frame=62539 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_05_18_04_000000_rot_090_1080x1920__20221112_161759.mp4'
+Processing snippet 96/262 from LIST, start_frame=62527 end_frame=62848 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_05_45_43_000000_rot_090_1080x1920__20221112_164529.mp4'
+Processing snippet 97/262 from LIST, start_frame=62836 end_frame=63395 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_05_46_10_000000_rot_000_1920x1080__20221112_164545.mp4'
+Processing snippet 98/262 from LIST, start_frame=63383 end_frame=63507 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_07_49_07_000000_rot_090_1080x1920__20221112_184900.mp4'
+Processing snippet 99/262 from LIST, start_frame=63495 end_frame=63578 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_07_49_15_000000_rot_090_1080x1920__20221112_184911.mp4'
+Processing snippet 100/262 from LIST, start_frame=63566 end_frame=64095 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_07_52_00_000000_rot_090_1080x1920__20221112_185137.mp4'
+Processing snippet 101/262 from LIST, start_frame=64083 end_frame=65124 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_07_52_13_000000_rot_090_1080x1920__20221112_185130.mp4'
+Processing snippet 102/262 from LIST, start_frame=65112 end_frame=65327 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_08_02_12_000000_rot_090_1080x1920__20221112_190203.mp4'
+Processing snippet 103/262 from LIST, start_frame=65315 end_frame=65870 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_08_02_30_000000_rot_090_1080x1920__20221112_190206.mp4'
+Processing snippet 104/262 from LIST, start_frame=65858 end_frame=65950 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\04\\2022_11_12_08_17_17_000000_rot_090_1080x1920__20221112_191712.mp4'
+Processing snippet 105/262 from LIST, start_frame=66077 end_frame=66601 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_12_08_49_17_000000_rot_090_1080x1920__20221112_194855.mp4'
+Processing snippet 106/262 from LIST, start_frame=66602 end_frame=66676 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_12_08_55_03_000000_rot_090_1080x1920__20221112_195500.mp4'
+Processing snippet 107/262 from LIST, start_frame=66664 end_frame=66738 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_12_08_55_20_000000_rot_090_1080x1920__20221112_195517.mp4'
+Processing snippet 108/262 from LIST, start_frame=66726 end_frame=67220 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_12_08_55_43_000000_rot_090_1080x1920__20221112_195523.mp4'
+Processing snippet 109/262 from LIST, start_frame=77780 end_frame=78261 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_12_23_02_13_000000_rot_090_1080x1920__20221113_100152.mp4'
+Processing snippet 110/262 from LIST, start_frame=78249 end_frame=78578 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_00_06_48_000000_rot_090_1080x1920__20221113_110634.mp4'
+Processing snippet 111/262 from LIST, start_frame=78566 end_frame=79662 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_00_24_16_000000_rot_000_1920x1080__20221113_112330.mp4'
+Processing snippet 112/262 from LIST, start_frame=79650 end_frame=79724 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_00_24_31_000000_rot_000_1920x1080__20221113_112428.mp4'
+Processing snippet 113/262 from LIST, start_frame=79712 end_frame=79906 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_00_39_35_000000_rot_090_1080x1920__20221113_113927.mp4'
+Processing snippet 114/262 from LIST, start_frame=79894 end_frame=80285 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_00_44_46_000000_rot_090_1080x1920__20221113_114430.mp4'
+Processing snippet 115/262 from LIST, start_frame=80273 end_frame=80573 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_00_53_27_000000_rot_090_1080x1920__20221113_115314.mp4'
+Processing snippet 116/262 from LIST, start_frame=80574 end_frame=80807 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_01_06_49_000000_rot_090_1080x1920__20221113_120638.mp4'
+Processing snippet 117/262 from LIST, start_frame=80795 end_frame=81176 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_01_07_38_000000_rot_000_1920x1080__20221113_120722.mp4'
+Processing snippet 118/262 from LIST, start_frame=81164 end_frame=81428 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_01_07_56_000000_rot_000_1920x1080__20221113_120743.mp4'
+Processing snippet 119/262 from LIST, start_frame=81416 end_frame=81528 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_01_08_14_000000_rot_090_1080x1920__20221113_120807.mp4'
+Processing snippet 120/262 from LIST, start_frame=81516 end_frame=81934 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_01_09_07_000000_rot_000_1920x1080__20221113_120849.mp4'
+Processing snippet 121/262 from LIST, start_frame=81922 end_frame=82562 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_01_09_41_000000_rot_000_1920x1080__20221113_120914.mp4'
+Processing snippet 122/262 from LIST, start_frame=82550 end_frame=82731 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_01_11_04_000000_rot_090_1080x1920__20221113_121056.mp4'
+Processing snippet 123/262 from LIST, start_frame=82719 end_frame=82916 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_01_14_09_000000_rot_090_1080x1920__20221113_121401.mp4'
+Processing snippet 124/262 from LIST, start_frame=82904 end_frame=83380 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_01_20_12_000000_rot_090_1080x1920__20221113_121952.mp4'
+Processing snippet 125/262 from LIST, start_frame=83368 end_frame=83517 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_01_36_50_000000_rot_090_1080x1920__20221113_123643.mp4'
+Processing snippet 126/262 from LIST, start_frame=83505 end_frame=83592 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_05_19_53_000000_rot_090_1080x1920__20221113_161948.mp4'
+Processing snippet 127/262 from LIST, start_frame=83580 end_frame=83880 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_05_21_23_000000_rot_000_1920x1080__20221113_162109.mp4'
+Processing snippet 128/262 from LIST, start_frame=83868 end_frame=84368 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_05_23_04_000000_rot_090_1080x1920__20221113_162243.mp4'
+Processing snippet 129/262 from LIST, start_frame=84356 end_frame=84649 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_05_26_38_000000_rot_090_1080x1920__20221113_162626.mp4'
+Processing snippet 130/262 from LIST, start_frame=84637 end_frame=84897 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_05_27_42_000000_rot_090_1080x1920__20221113_162731.mp4'
+Processing snippet 131/262 from LIST, start_frame=84885 end_frame=85386 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\05\\2022_11_13_05_44_22_000000_rot_000_1920x1080__20221113_164401.mp4'
+Processing snippet 132/262 from LIST, start_frame=90130 end_frame=90919 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\06\\2022_11_13_22_06_09_000000_rot_000_1920x1080__20221114_090535.mp4'
+Processing snippet 133/262 from LIST, start_frame=90907 end_frame=91001 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\06\\2022_11_13_22_10_36_000000_rot_090_1080x1920__20221114_091030.mp4'
+Processing snippet 134/262 from LIST, start_frame=90989 end_frame=91231 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\06\\2022_11_13_22_10_54_000000_rot_090_1080x1920__20221114_091043.mp4'
+Processing snippet 135/262 from LIST, start_frame=91219 end_frame=91293 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\06\\2022_11_13_22_13_30_000000_rot_090_1080x1920__20221114_091326.mp4'
+Processing snippet 136/262 from LIST, start_frame=91294 end_frame=91581 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\06\\2022_11_13_22_13_46_000000_rot_090_1080x1920__20221114_091333.mp4'
+Processing snippet 137/262 from LIST, start_frame=91569 end_frame=91924 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\06\\2022_11_13_22_14_51_000000_rot_090_1080x1920__20221114_091435.mp4'
+Processing snippet 138/262 from LIST, start_frame=91912 end_frame=92120 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\06\\2022_11_13_22_15_29_000000_rot_090_1080x1920__20221114_091519.mp4'
+Processing snippet 139/262 from LIST, start_frame=92108 end_frame=95575 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\06\\2022_11_13_22_53_11_000000_rot_090_1080x1920__20221114_095051.mp4'
+Processing snippet 140/262 from LIST, start_frame=95563 end_frame=95867 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\06\\2022_11_13_23_44_07_000000_rot_000_1920x1080__20221114_104353.mp4'
+Processing snippet 141/262 from LIST, start_frame=95855 end_frame=96268 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\06\\2022_11_13_23_45_54_000000_rot_090_1080x1920__20221114_104536.mp4'
+Processing snippet 142/262 from LIST, start_frame=96256 end_frame=96585 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\06\\2022_11_13_23_47_20_000000_rot_090_1080x1920__20221114_104706.mp4'
+Processing snippet 143/262 from LIST, start_frame=96573 end_frame=98266 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\06\\2022_11_13_23_47_21_000000_rot_090_1080x1920__20221114_104611.mp4'
+Processing snippet 144/262 from LIST, start_frame=98254 end_frame=98374 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\06\\2022_11_13_23_48_09_000000_rot_090_1080x1920__20221114_104803.mp4'
+Processing snippet 145/262 from LIST, start_frame=98362 end_frame=98482 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\06\\2022_11_14_02_09_15_000000_rot_000_1920x1080__20221114_130908.mp4'
+Processing snippet 146/262 from LIST, start_frame=98470 end_frame=98677 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\06\\2022_11_14_06_08_23_000000_rot_090_1080x1920__20221114_170814.mp4'
+Processing snippet 147/262 from LIST, start_frame=98665 end_frame=98949 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\06\\2022_11_14_06_28_34_000000_rot_000_1920x1080__20221114_172822.mp4'
+Processing snippet 148/262 from LIST, start_frame=106571 end_frame=106931 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_14_22_07_44_000000_rot_090_1080x1920__20221115_090728.mp4'
+Processing snippet 149/262 from LIST, start_frame=106919 end_frame=107049 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_14_22_09_56_000000_rot_090_1080x1920__20221115_090950.mp4'
+Processing snippet 150/262 from LIST, start_frame=107037 end_frame=107364 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_14_22_14_39_000000_rot_090_1080x1920__20221115_091425.mp4'
+Processing snippet 151/262 from LIST, start_frame=107352 end_frame=107512 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_14_22_14_59_000000_rot_090_1080x1920__20221115_091452.mp4'
+Processing snippet 152/262 from LIST, start_frame=107500 end_frame=107616 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_14_22_16_19_000000_rot_000_1920x1080__20221115_091614.mp4'
+Processing snippet 153/262 from LIST, start_frame=107604 end_frame=107694 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_14_22_20_44_000000_rot_090_1080x1920__20221115_092039.mp4'
+Processing snippet 154/262 from LIST, start_frame=107682 end_frame=108333 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_14_23_55_30_000000_rot_090_1080x1920__20221115_105503.mp4'
+Processing snippet 155/262 from LIST, start_frame=108321 end_frame=108478 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_14_23_58_40_000000_rot_090_1080x1920__20221115_105832.mp4'
+Processing snippet 156/262 from LIST, start_frame=108466 end_frame=109141 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_14_23_59_50_000000_rot_090_1080x1920__20221115_105922.mp4'
+Processing snippet 157/262 from LIST, start_frame=109142 end_frame=110076 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_00_00_52_000000_rot_090_1080x1920__20221115_110014.mp4'
+Processing snippet 158/262 from LIST, start_frame=110064 end_frame=110240 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_00_02_59_000000_rot_090_1080x1920__20221115_110251.mp4'
+Processing snippet 159/262 from LIST, start_frame=110228 end_frame=110676 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_01_01_19_000000_rot_090_1080x1920__20221115_120100.mp4'
+Processing snippet 160/262 from LIST, start_frame=110664 end_frame=111196 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_01_02_09_000000_rot_090_1080x1920__20221115_120147.mp4'
+Processing snippet 161/262 from LIST, start_frame=111184 end_frame=111608 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_01_02_11_000000_rot_090_1080x1920__20221115_120153.mp4'
+Processing snippet 162/262 from LIST, start_frame=111596 end_frame=111747 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_01_03_49_000000_rot_090_1080x1920__20221115_120343.mp4'
+Processing snippet 163/262 from LIST, start_frame=111748 end_frame=111841 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_01_05_37_000000_rot_000_1920x1080__20221115_120533.mp4'
+Processing snippet 164/262 from LIST, start_frame=111829 end_frame=112083 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_01_06_50_000000_rot_090_1080x1920__20221115_120639.mp4'
+Processing snippet 165/262 from LIST, start_frame=112071 end_frame=112613 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_01_07_27_000000_rot_000_1920x1080__20221115_120703.mp4'
+Processing snippet 166/262 from LIST, start_frame=112614 end_frame=112893 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_01_07_53_000000_rot_090_1080x1920__20221115_120740.mp4'
+Processing snippet 167/262 from LIST, start_frame=112881 end_frame=112955 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_01_08_23_000000_rot_090_1080x1920__20221115_120820.mp4'
+Processing snippet 168/262 from LIST, start_frame=112943 end_frame=113043 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_01_08_41_000000_rot_090_1080x1920__20221115_120836.mp4'
+Processing snippet 169/262 from LIST, start_frame=113031 end_frame=113383 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_01_10_42_000000_rot_090_1080x1920__20221115_121027.mp4'
+Processing snippet 170/262 from LIST, start_frame=113371 end_frame=113565 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_01_29_28_000000_rot_090_1080x1920__20221115_122920.mp4'
+Processing snippet 171/262 from LIST, start_frame=113553 end_frame=113675 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_01_30_07_000000_rot_090_1080x1920__20221115_123001.mp4'
+Processing snippet 172/262 from LIST, start_frame=113663 end_frame=113810 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_01_30_27_000000_rot_090_1080x1920__20221115_123019.mp4'
+Processing snippet 173/262 from LIST, start_frame=113798 end_frame=113880 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_01_31_48_000000_rot_090_1080x1920__20221115_123144.mp4'
+Processing snippet 174/262 from LIST, start_frame=113868 end_frame=114007 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_01_33_00_000000_rot_090_1080x1920__20221115_123254.mp4'
+Processing snippet 175/262 from LIST, start_frame=113995 end_frame=114288 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_03_12_34_000000_rot_090_1080x1920__20221115_141221.mp4'
+Processing snippet 176/262 from LIST, start_frame=114276 end_frame=115834 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_04_23_54_000000_rot_090_1080x1920__20221115_152251.mp4'
+Processing snippet 177/262 from LIST, start_frame=115822 end_frame=116137 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_06_17_35_000000_rot_090_1080x1920__20221115_171722.mp4'
+Processing snippet 178/262 from LIST, start_frame=116125 end_frame=116694 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_06_19_10_000000_rot_090_1080x1920__20221115_171845.mp4'
+Processing snippet 179/262 from LIST, start_frame=116682 end_frame=116911 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_06_19_12_000000_rot_090_1080x1920__20221115_171901.mp4'
+Processing snippet 180/262 from LIST, start_frame=116899 end_frame=117086 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_06_20_15_000000_rot_090_1080x1920__20221115_172007.mp4'
+Processing snippet 181/262 from LIST, start_frame=117074 end_frame=118488 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_06_20_37_000000_rot_000_1920x1080__20221115_171939.mp4'
+Processing snippet 182/262 from LIST, start_frame=118476 end_frame=118972 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_06_21_35_000000_rot_090_1080x1920__20221115_172115.mp4'
+Processing snippet 183/262 from LIST, start_frame=118960 end_frame=119368 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_06_32_01_000000_rot_090_1080x1920__20221115_173144.mp4'
+Processing snippet 184/262 from LIST, start_frame=119356 end_frame=119477 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_06_41_31_000000_rot_090_1080x1920__20221115_174125.mp4'
+Processing snippet 185/262 from LIST, start_frame=129619 end_frame=130128 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_23_48_16_000000_rot_090_1080x1920__20221116_104754.mp4'
+Processing snippet 186/262 from LIST, start_frame=130116 end_frame=130785 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_23_48_26_000000_rot_000_1920x1080__20221116_104757.mp4'
+Processing snippet 187/262 from LIST, start_frame=130773 end_frame=131434 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_23_48_57_000000_rot_090_1080x1920__20221116_104829.mp4'
+Processing snippet 188/262 from LIST, start_frame=131435 end_frame=131582 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_23_49_59_000000_rot_090_1080x1920__20221116_104952.mp4'
+Processing snippet 189/262 from LIST, start_frame=131570 end_frame=131760 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\07\\2022_11_15_23_58_03_000000_rot_090_1080x1920__20221116_105755.mp4'
+Processing snippet 190/262 from LIST, start_frame=131763 end_frame=131842 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_00_00_04_000000_rot_090_1080x1920__20221116_110000.mp4'
+Processing snippet 191/262 from LIST, start_frame=131830 end_frame=133190 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_00_01_04_000000_rot_090_1080x1920__20221116_110007.mp4'
+Processing snippet 192/262 from LIST, start_frame=133178 end_frame=133476 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_00_01_18_000000_rot_090_1080x1920__20221116_110106.mp4'
+Processing snippet 193/262 from LIST, start_frame=133464 end_frame=133685 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_00_02_46_000000_rot_090_1080x1920__20221116_110236.mp4'
+Processing snippet 194/262 from LIST, start_frame=133673 end_frame=134127 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_00_04_34_000000_rot_090_1080x1920__20221116_110415.mp4'
+Processing snippet 195/262 from LIST, start_frame=134115 end_frame=134346 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_00_07_32_000000_rot_090_1080x1920__20221116_110722.mp4'
+Processing snippet 196/262 from LIST, start_frame=134334 end_frame=134517 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_00_18_30_000000_rot_090_1080x1920__20221116_111821.mp4'
+Processing snippet 197/262 from LIST, start_frame=140127 end_frame=140412 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_23_01_07_000000_rot_090_1080x1920__20221117_100055.mp4'
+Processing snippet 198/262 from LIST, start_frame=140400 end_frame=140474 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_23_01_54_000000_rot_000_1920x1080__20221117_100151.mp4'
+Processing snippet 199/262 from LIST, start_frame=140462 end_frame=140559 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_23_02_19_000000_rot_000_1920x1080__20221117_100214.mp4'
+Processing snippet 200/262 from LIST, start_frame=140547 end_frame=141295 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_23_03_09_000000_rot_000_1920x1080__20221117_100238.mp4'
+Processing snippet 201/262 from LIST, start_frame=141283 end_frame=141357 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_23_03_38_000000_rot_090_1080x1920__20221117_100335.mp4'
+Processing snippet 202/262 from LIST, start_frame=141345 end_frame=141694 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_23_04_28_000000_rot_000_1920x1080__20221117_100412.mp4'
+Processing snippet 203/262 from LIST, start_frame=141682 end_frame=143099 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_23_05_29_000000_rot_000_1920x1080__20221117_100431.mp4'
+Processing snippet 204/262 from LIST, start_frame=143087 end_frame=143161 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_23_05_38_000000_rot_000_1920x1080__20221117_100534.mp4'
+Processing snippet 205/262 from LIST, start_frame=143149 end_frame=143223 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_23_11_23_000000_rot_000_2224x1080__20221117_101119.mp4'
+Processing snippet 206/262 from LIST, start_frame=143211 end_frame=143293 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_23_11_29_000000_rot_000_2224x1080__20221117_101124.mp4'
+Processing snippet 207/262 from LIST, start_frame=143281 end_frame=143656 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_23_18_40_000000_rot_090_1080x1920__20221117_101824.mp4'
+Processing snippet 208/262 from LIST, start_frame=143644 end_frame=144450 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_23_31_08_000000_rot_090_1080x1920__20221117_103035.mp4'
+Processing snippet 209/262 from LIST, start_frame=144438 end_frame=145009 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_23_31_55_000000_rot_090_1080x1920__20221117_103132.mp4'
+Processing snippet 210/262 from LIST, start_frame=144997 end_frame=145369 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_23_34_34_000000_rot_000_1920x1080__20221117_103419.mp4'
+Processing snippet 211/262 from LIST, start_frame=145357 end_frame=146025 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_23_36_45_000000_rot_090_1080x1920__20221117_103617.mp4'
+Processing snippet 212/262 from LIST, start_frame=146013 end_frame=146179 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_23_59_27_000000_rot_090_1080x1920__20221117_105919.mp4'
+Processing snippet 213/262 from LIST, start_frame=146167 end_frame=146460 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_16_23_59_46_000000_rot_090_1080x1920__20221117_105933.mp4'
+Processing snippet 214/262 from LIST, start_frame=146448 end_frame=146977 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_17_00_00_10_000000_rot_090_1080x1920__20221117_105948.mp4'
+Processing snippet 215/262 from LIST, start_frame=146965 end_frame=147611 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_17_00_00_59_000000_rot_090_1080x1920__20221117_110032.mp4'
+Processing snippet 216/262 from LIST, start_frame=147599 end_frame=147673 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_17_00_01_21_000000_rot_000_1920x1080__20221117_110118.mp4'
+Processing snippet 217/262 from LIST, start_frame=147674 end_frame=148156 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_17_00_01_44_000000_rot_000_1920x1080__20221117_110123.mp4'
+Processing snippet 218/262 from LIST, start_frame=148144 end_frame=148284 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_17_00_02_09_000000_rot_000_1920x1080__20221117_110202.mp4'
+Processing snippet 219/262 from LIST, start_frame=148272 end_frame=148422 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_17_00_02_58_000000_rot_090_1080x1920__20221117_110251.mp4'
+Processing snippet 220/262 from LIST, start_frame=148410 end_frame=149443 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_17_00_04_22_000000_rot_090_1080x1920__20221117_110340.mp4'
+Processing snippet 221/262 from LIST, start_frame=149431 end_frame=149874 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_17_00_04_54_000000_rot_090_1080x1920__20221117_110434.mp4'
+Processing snippet 222/262 from LIST, start_frame=149862 end_frame=150008 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_17_00_38_46_000000_rot_000_1920x1080__20221117_113839.mp4'
+Processing snippet 223/262 from LIST, start_frame=149996 end_frame=150212 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_17_03_04_25_000000_rot_090_1080x1920__20221117_140416.mp4'
+Processing snippet 224/262 from LIST, start_frame=150200 end_frame=150541 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_17_03_08_34_000000_rot_000_1920x1080__20221117_140820.mp4'
+Processing snippet 225/262 from LIST, start_frame=150529 end_frame=150848 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_17_03_12_59_000000_rot_090_1080x1920__20221117_141245.mp4'
+Processing snippet 226/262 from LIST, start_frame=150836 end_frame=151067 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\08\\2022_11_17_03_20_01_000000_rot_090_1080x1920__20221117_141951.mp4'
+Processing snippet 227/262 from LIST, start_frame=160983 end_frame=161352 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\09\\2022_11_17_23_31_28_000000_rot_090_1080x1920__20221118_103112.mp4'
+Processing snippet 228/262 from LIST, start_frame=161340 end_frame=161588 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\09\\2022_11_18_00_08_17_000000_rot_090_1080x1920__20221118_110806.mp4'
+Processing snippet 229/262 from LIST, start_frame=161576 end_frame=161667 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\09\\2022_11_18_00_08_34_000000_rot_090_1080x1920__20221118_110830.mp4'
+Processing snippet 230/262 from LIST, start_frame=161655 end_frame=161815 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\09\\2022_11_18_00_09_32_000000_rot_090_1080x1920__20221118_110925.mp4'
+Processing snippet 231/262 from LIST, start_frame=161816 end_frame=162285 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\09\\2022_11_18_00_10_20_000000_rot_090_1080x1920__20221118_111000.mp4'
+Processing snippet 232/262 from LIST, start_frame=162273 end_frame=162515 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\09\\2022_11_18_00_19_08_000000_rot_090_1080x1920__20221118_111857.mp4'
+Processing snippet 233/262 from LIST, start_frame=162503 end_frame=162602 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\09\\2022_11_18_00_20_16_000000_rot_090_1080x1920__20221118_112011.mp4'
+Processing snippet 234/262 from LIST, start_frame=162603 end_frame=163162 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\09\\2022_11_18_03_17_48_000000_rot_090_1080x1920__20221118_141725.mp4'
+Processing snippet 235/262 from LIST, start_frame=163150 end_frame=163525 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\09\\2022_11_18_04_49_00_000000_rot_090_1080x1920__20221118_154844.mp4'
+Processing snippet 236/262 from LIST, start_frame=163513 end_frame=163653 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\09\\2022_11_18_05_27_28_000000_rot_090_1080x1920__20221118_162721.mp4'
+Processing snippet 237/262 from LIST, start_frame=171781 end_frame=173095 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_18_23_05_02_000000_rot_090_1080x1920__20221119_100408.mp4'
+Processing snippet 238/262 from LIST, start_frame=173083 end_frame=173157 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_18_23_15_02_000000_rot_090_1080x1920__20221119_101458.mp4'
+Processing snippet 239/262 from LIST, start_frame=173145 end_frame=173537 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_18_23_15_23_000000_rot_000_1920x1080__20221119_101505.mp4'
+Processing snippet 240/262 from LIST, start_frame=173525 end_frame=173879 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_18_23_18_14_000000_rot_090_1080x1920__20221119_101758.mp4'
+Processing snippet 241/262 from LIST, start_frame=173867 end_frame=174133 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_18_23_36_47_000000_rot_090_1080x1920__20221119_103635.mp4'
+Processing snippet 242/262 from LIST, start_frame=174121 end_frame=174418 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_19_05_40_57_000000_rot_000_1920x1080__20221119_164044.mp4'
+Processing snippet 243/262 from LIST, start_frame=174406 end_frame=174684 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_19_05_43_59_000000_rot_090_1080x1920__20221119_164347.mp4'
+Processing snippet 244/262 from LIST, start_frame=174672 end_frame=174834 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_19_05_46_52_000000_rot_000_1920x1080__20221119_164645.mp4'
+Processing snippet 245/262 from LIST, start_frame=174822 end_frame=175138 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_19_05_51_59_000000_rot_000_1920x1080__20221119_165145.mp4'
+Processing snippet 246/262 from LIST, start_frame=175139 end_frame=175711 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_19_05_52_40_000000_rot_000_1920x1080__20221119_165215.mp4'
+Processing snippet 247/262 from LIST, start_frame=175699 end_frame=175836 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_19_07_01_45_000000_rot_090_1080x1920__20221119_180138.mp4'
+Processing snippet 248/262 from LIST, start_frame=175824 end_frame=175898 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_19_07_02_00_000000_rot_090_1080x1920__20221119_180157.mp4'
+Processing snippet 249/262 from LIST, start_frame=175886 end_frame=176173 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_19_07_15_24_000000_rot_000_1920x1080__20221119_181512.mp4'
+Processing snippet 250/262 from LIST, start_frame=176161 end_frame=176809 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_19_07_18_53_000000_rot_090_1080x1920__20221119_181826.mp4'
+Processing snippet 251/262 from LIST, start_frame=181874 end_frame=182158 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_19_22_54_14_000000_rot_090_1080x1920__20221120_095402.mp4'
+Processing snippet 252/262 from LIST, start_frame=182146 end_frame=182422 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_19_23_42_01_000000_rot_090_1080x1920__20221120_104148.mp4'
+Processing snippet 253/262 from LIST, start_frame=182410 end_frame=182617 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_19_23_42_20_000000_rot_090_1080x1920__20221120_104211.mp4'
+Processing snippet 254/262 from LIST, start_frame=182605 end_frame=182798 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_19_23_56_49_000000_rot_090_1080x1920__20221120_105640.mp4'
+Processing snippet 255/262 from LIST, start_frame=182786 end_frame=183168 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_20_00_58_26_000000_rot_090_1080x1920__20221120_115809.mp4'
+Processing snippet 256/262 from LIST, start_frame=183156 end_frame=183362 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_20_01_08_10_000000_rot_090_1080x1920__20221120_120800.mp4'
+Processing snippet 257/262 from LIST, start_frame=183363 end_frame=183437 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_20_01_09_18_000000_rot_090_1080x1920__20221120_120914.mp4'
+Processing snippet 258/262 from LIST, start_frame=183425 end_frame=183819 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_20_01_27_39_000000_rot_090_1080x1920__20221120_122722.mp4'
+Processing snippet 259/262 from LIST, start_frame=183807 end_frame=183969 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_20_02_15_06_000000_rot_090_1080x1920__20221120_131458.mp4'
+Processing snippet 260/262 from LIST, start_frame=183957 end_frame=184207 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_20_02_43_12_000000_rot_090_1080x1920__20221120_134301.mp4'
+Processing snippet 261/262 from LIST, start_frame=184195 end_frame=184289 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_20_07_57_19_000000_rot_090_1080x1920__20221120_185715.mp4'
+Processing snippet 262/262 from LIST, start_frame=184277 end_frame=184389 snippet_path='D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\10\\2022_11_20_07_58_01_000000_rot_090_1080x1920__20221120_185755.mp4'
+ffmpeg version N-110974-g1c225a62e2-g0f2f0dd5b4+3 Copyright (c) 2000-2023 the FFmpeg developers
+  built with gcc 13.1.0 (Rev6, Built by MSYS2 project)
+  configuration:  --pkg-config=pkgconf --cc='ccache gcc' --cxx='ccache g++' --ld='ccache g++' --extra-cxxflags=-fpermissive --extra-cflags=-Wno-int-conversion --extra-cxxflags=-fstack-protector-all --extra-cxxflags='-D_FORTIFY_SOURCE=2' --extra-cxxflags=-lssp --extra-cflags=-fstack-protector-all --extra-cflags='-D_FORTIFY_SOURCE=2' --extra-cflags=-lssp --extra-ldflags=-fstack-protector-all --extra-ldflags='-D_FORTIFY_SOURCE=2' --extra-ldflags=-lssp --disable-autodetect --enable-amf --enable-bzlib --enable-cuda --enable-cuvid --enable-d3d11va --enable-dxva2 --enable-iconv --enable-lzma --enable-nvenc --enable-zlib --enable-sdl2 --enable-ffnvcodec --enable-nvdec --enable-cuda-llvm --enable-gmp --enable-libmp3lame --enable-libopus --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libx265 --enable-libdav1d --enable-libaom --disable-debug --enable-libfdk-aac --enable-fontconfig --enable-libass --enable-libbluray --enable-libfreetype --enable-libmfx --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libtheora --enable-libtwolame --enable-libvidstab --enable-libvo-amrwbenc --enable-libwebp --enable-libxml2 --enable-libzimg --enable-gpl --enable-avisynth --enable-libxvid --enable-libopenmpt --enable-version3 --enable-librav1e --enable-libsrt --enable-libgsm --enable-libvmaf --enable-chromaprint --enable-decklink --enable-frei0r --enable-libaribb24 --enable-libbs2b --enable-libcaca --enable-libcdio --enable-libflite --enable-libfribidi --enable-libgme --enable-libilbc --enable-libsvthevc --enable-libmodplug --enable-librist --enable-librtmp --enable-librubberband --enable-libxavs --enable-libzmq --enable-libzvbi --enable-openal --enable-libcodec2 --enable-ladspa --enable-vapoursynth --enable-libglslang --enable-vulkan --enable-libjxl --enable-gnutls --extra-cflags=-DLIBTWOLAME_STATIC --extra-libs=-lstdc++ --extra-cflags=-DCACA_STATIC --extra-cflags=-DMODPLUG_STATIC --extra-cflags=-DCHROMAPRINT_NODLL --extra-libs=-lstdc++ --extra-cflags=-DZMQ_STATIC --extra-libs=-lpsapi --extra-cflags=-DLIBXML_STATIC --extra-libs=-liconv --disable-w32threads --enable-nonfree --extra-cflags=-DAL_LIBTYPE_STATIC --extra-cflags='-IC:/MABS/local64/include' --extra-cflags='-IC:/MABS/local64/include/AL'
+  libavutil      58. 12.100 / 58. 12.100
+  libavcodec     60. 16.100 / 60. 16.100
+  libavformat    60.  5.100 / 60.  5.100
+  libavdevice    60.  2.100 / 60.  2.100
+  libavfilter     9.  8.101 /  9.  8.101
+  libswscale      7.  3.100 /  7.  3.100
+  libswresample   4. 11.100 /  4. 11.100
+  libpostproc    57.  2.100 / 57.  2.100
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-CONCATENATED_NO_AUDIO.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf60.5.100
+  Duration: 02:07:05.84, start: 0.000000, bitrate: 5657 kb/s
+  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuvj420p(pc, bt709, progressive), 1920x1080 [SAR 1:1 DAR 16:9], 5655 kb/s, 25 fps, 25 tbr, 12800 tbn (default)
+    Metadata:
+      handler_name    : VideoHandler
+      vendor_id       : [0][0][0][0]
+      encoder         : Lavc60.16.100 libx264
+Input #1, matroska,webm, from '.\\temporary_edited_background_audio.mkv':
+  Metadata:
+    ENCODER         : Lavf60.5.100
+  Duration: 02:07:05.88, start: -0.043000, bitrate: 258 kb/s
+  Stream #1:0: Audio: aac (LC), 48000 Hz, stereo, fltp
+    Metadata:
+      ENCODER         : Lavc60.16.100 libfdk_aac
+      DURATION        : 02:07:05.883000000
+Output #0, mp4, to 'D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-CONCATENATED_WITH_AUDIO.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf60.5.100
+  Stream #0:0(und): Video: h264 (High) (avc1 / 0x31637661), yuvj420p(pc, bt709, progressive), 1920x1080 [SAR 1:1 DAR 16:9], q=2-31, 5655 kb/s, 25 fps, 25 tbr, 12800 tbn (default)
+    Metadata:
+      handler_name    : VideoHandler
+      vendor_id       : [0][0][0][0]
+      encoder         : Lavc60.16.100 libx264
+  Stream #0:1: Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp
+    Metadata:
+      ENCODER         : Lavc60.16.100 libfdk_aac
+      DURATION        : 02:07:05.883000000
+Stream mapping:
+  Stream #0:0 -> #0:0 (copy)
+  Stream #1:0 -> #0:1 (copy)
+Press [q] to stop, [?] for help
+frame=    0 fps=0.0 q=-1.0 size=       0kB time=-00:00:00.08 bitrate=  -0.0kbits/s speed=N/A    frame=31950 fps=0.0 q=-1.0 size=  486912kB time=00:21:17.92 bitrate=3121.3kbits/s speed=2.55e+03x    frame=53944 fps=53927 q=-1.0 size= 1005056kB time=00:35:57.68 bitrate=3815.9kbits/s speed=2.16e+03x    frame=75624 fps=50405 q=-1.0 size= 1584896kB time=00:50:24.93 bitrate=4292.1kbits/s speed=2.02e+03x    frame=90646 fps=45312 q=-1.0 size= 2127616kB time=01:00:25.76 bitrate=4807.1kbits/s speed=1.81e+03x    frame=106374 fps=42541 q=-1.0 size= 2651136kB time=01:10:54.88 bitrate=5104.3kbits/s speed=1.7e+03x    frame=119263 fps=39747 q=-1.0 size= 3091968kB time=01:19:30.44 bitrate=5309.7kbits/s speed=1.59e+03x    frame=134353 fps=38353 q=-1.0 size= 3556096kB time=01:29:34.12 bitrate=5420.7kbits/s speed=1.53e+03x    frame=142541 fps=35605 q=-1.0 size= 3956736kB time=01:35:01.56 bitrate=5685.0kbits/s speed=1.42e+03x    frame=150191 fps=33324 q=-1.0 size= 4534784kB time=01:40:07.61 bitrate=6183.6kbits/s speed=1.33e+03x    frame=163343 fps=32623 q=-1.0 size= 4845056kB time=01:48:53.72 bitrate=6074.7kbits/s speed=1.3e+03x    frame=177442 fps=32219 q=-1.0 size= 5245952kB time=01:58:17.60 bitrate=6054.8kbits/s speed=1.29e+03x    frame=187330 fps=31156 q=-1.0 size= 5452544kB time=02:04:53.09 bitrate=5961.1kbits/s speed=1.25e+03x    [mp4 @ 000001c5871e0840] Starting second pass: moving the moov atom to the beginning of the file
+[out#0/mp4 @ 000001c5871e0700] video:5264402kB audio:238309kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: 0.119955%
+frame=190646 fps=17643 q=-1.0 Lsize= 5509312kB time=02:07:05.87 bitrate=5918.3kbits/s speed= 706x    
+Finished! Resulting file of muxed video/audio: D:\\ssTEST\\TEST_VIDS_IMAGES\\2022-11-Tasmania_renamed\\vpy_slideshow.2022-11-Tasmania_renamed-CONCATENATED_WITH_AUDIO.mp4
+Wed 07/06/2023 12:42:39.13 
+ 

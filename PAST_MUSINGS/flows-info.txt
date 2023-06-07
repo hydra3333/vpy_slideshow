@@ -1,0 +1,163 @@
+
+
+convert to 4 times the target framerate (in case the source is 60fps)
+
+SelectEvery(clip=clip, cycle=4, offsets=0)	# cycle of 4 frames, pick the first (base 0) ... reduces 100fps to 25fps
+
+
+
+
+https://github.com/Selur/VapoursynthScriptsInHybrid/blob/master/FrameRateConverter.py
+original source: https://github.com/mysteryx93/FrameRateConverter/blob/master/FrameRateConverter.vpy
+patch: exchanged 'core = vs.get_core()' with 'from vapoursynth import core' to avoid 'vapoursynth.Error: BlankClip: nodes foreign to this core passed as input, improper api usage detected'
+
+
+https://github.com/dubhater/vapoursynth-mvtools
+https://github.com/dubhater/vapoursynth-mvtools/blob/master/readme.rst
+
+mvtools:
+
+
+mv.FlowFPS(clip clip, clip super, clip mvbw, clip mvfw[, int num=25, int den=1, int mask=2, float ml=100.0, bint blend=True, int thscd1=400, int thscd2=130, bint opt=True])
+
+mv.BlockFPS(clip clip, clip super, clip mvbw, clip mvfw[, int num=25, int den=1, int mode=3, float ml=100.0, bint blend=True, int thscd1=400, int thscd2=130, bint opt=True])
+
+
+
+import vapoursynth as vs
+core = vs.get_core()
+src_fps = 24	# or num and den
+dst_fps = 60	# or num and den
+clip  = core.std.AssumeFPS(video_in, fpsnum=src_fps)	# or num & den
+super = core.mv.Super(clip, pel=2)
+bv    = core.mv.Analyse(super, isb=True, overlap=4)
+fv    = core.mv.Analyse(super, isb=False, overlap=4)
+clip  = core.mv.FlowFPS(clip, super, bv, fv, dst_fps)
+clip  = core.std.AssumeFPS(clip, fpsnum=dst_fps)
+clip.set_output()
+
+
+
+
+# 22 feb 2023 
+function SmoothFPS2(clip source, int num, int den) {
+super = MSuper(source, pel=2, hpad=0, vpad=0, rfilter=4)
+backward_1 = MAnalyse(super, chroma=false, isb=true, blksize=16, searchparam=3, plevel=0, search=3, badrange=(-24))
+forward_1 = MAnalyse(super, chroma=false, isb=false, blksize=16, searchparam=3, plevel=0, search=3, badrange=(-24))
+backward_2 = MRecalculate(super, chroma=false, backward_1, blksize=8, searchparam=1, search=3)
+forward_2 = MRecalculate(super, chroma=false, forward_1, blksize=8, searchparam=1, search=3)
+backward_3 = MRecalculate(super, chroma=false, backward_2, blksize=4, searchparam=0, search=3)
+forward_3 = MRecalculate(super, chroma=false, forward_2, blksize=4, searchparam=0, search=3)
+MBlockFps(source, super, backward_3, forward_3, num, den, mode=0)
+}
+
+
+https://www.svp-team.com/wiki/Manual:SVPflow
+
+
+----------------------------------------------------
+https://github.com/xyx98/my-vapoursynth-script
+https://github.com/xyx98/my-vapoursynth-script/blob/master/xvs.py
+https://raw.githubusercontent.com/xyx98/my-vapoursynth-script/4813e7b9d7bedf08d3d584c929c41c12a2aeb431/xvs.py
+
+#########################
+#mvfrc in vsrepo as mvfrc
+#########################
+# Has NO svp. Uses:
+# https://github.com/pinterf/mvtools				# is more up to date ... not in vsrepo
+# https://github.com/dubhater/vapoursynth-mvtools	# is in vsrepo https://vsdb.top/plugins/mv
+#########################
+def mvfrc(input,it=140,scp=15,num=60000,den=1001,preset='fast',
+        pel=2,block=True,flow_mask=None,block_mode=None,
+        blksize = 8,blksizev=8,search=None,truemotion=True,searchparam=2,overlap=0,overlapv=None,
+        dct=0,blend=True,badSAD=10000,badrange=24,divide=0,ml=100,Mblur=15):
+    """
+    change fps by mvtools with motion interpolation
+    it = thscd1    ;    scp=thscd2/255*100
+    """
+    funcName = 'mvfrc'
+    if not isinstance(input, vs.VideoNode):
+        raise TypeError(funcName + ': This is not a clip!')
+#############
+    if preset == 'fast':
+        pnum=0
+    elif preset == 'medium':
+        pnum=1
+    elif preset == 'slow':
+        pnum=2
+    else:
+        raise TypeError(funcName + r":preset should be fast\ medium\slow'")
+    overlapv = overlap
+#############
+    if search is None : search = [0,3,3][pnum]
+    if block_mode is None : block_mode = [0,0,3][pnum]
+    if flow_mask is None : flow_mask = [0,0,2][pnum]
+#############
+    analParams = {
+        'overlap' : overlap,
+        'overlapv':overlapv,
+        'search' : search,
+        'dct':dct,
+        'truemotion' : truemotion,
+        'blksize' : blksize,
+        'blksizev':blksizev,
+        'searchparam':searchparam,
+        'badsad':badSAD,
+        'badrange':badrange,
+        'divide':divide
+        }
+############
+    #block or flow Params 
+    bofp = {
+        'thscd1':it,
+        'thscd2':int(scp*255/100),
+        'blend':blend,
+        'num':num,
+        'den':den
+        }
+############
+    sup = core.mv.Super(input, pel=pel,sharp=2, rfilter=4)
+    bvec = core.mv.Analyse(sup, isb=True, **analParams)
+    fvec = core.mv.Analyse(sup, isb=False, **analParams)
+    if input.fps_num/input.fps_den > num/den:
+        input = core.mv.FlowBlur(input, sup, bvec, fvec, blur=Mblur)
+    if block == True:
+        clip =  core.mv.BlockFPS(input, sup, bvec, fvec,**bofp,mode=block_mode)
+    else:
+        clip = core.mv.FlowFPS(input, sup, bvec, fvec,**bofp,mask=flow_mask)
+    return clip
+
+
+----------------
+
+
+
+	
+
+
+
+
+
+
+   super = SVSuper(super_params)
+   vectors = SVAnalyse(super, analyse_params)
+   forward_mv = SVConvert(vectors, false)
+   backward_mv = SVConvert(vectors, true)
+   super_mv = MSuper(pel=1, hpad=0, vpad=0) #padding should be zero here!
+   MFlowFps(super_mv, backward_mv, forward_mv, num=60, den=1)
+   
+   
+   
+   THIS: but with the logic of ############ AAAAAAAAAAAAAA
+   core.std.LoadPlugin("svpflow1_vs.dll")
+   super  = core.svp1.Super(clip,"{gpu:1}") # maybe leav off ,"{gpu:1}"
+   vectors= core.svp1.Analyse(super["clip"],super["data"],clip,"{}")	# see http://avisynth.nl/index.php/SVPFlow#svpflow1 for parameters
+   forward_mv = core.svp1.SVConvert(vectors, false)
+   backward_mv = core.svp1.SVConvert(vectors, true)
+   super_mv = core.mv.MSuper(clip, pel=1, hpad=0, vpad=0) #padding should be zero here!
+   clip2 = core.mv.MFlowFps(clip, super_mv, backward_mv, forward_mv, num=60, den=1)
+   
+   
+   
+
+

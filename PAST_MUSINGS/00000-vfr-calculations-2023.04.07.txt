@@ -1,0 +1,70 @@
+
+'FrameRate': 25.0,
+'FrameRate_Num': 25,
+'FrameRate_Den': 1,
+'r_frame_rate': '25/1',
+'avg_frame_rate': '25/1',
+
+precision_tolerance	= 0.0005
+
+discard_video = False
+likely_VFR = False
+likely_VFR_fps_den = 0
+likely_VFR_fps_num = 0
+
+if not CFR and not VFR:	# IF AND ONLY IF VFR/CFR not known by mediainfo
+	if FrameRate is not None and FrameRate_Num is not None and FrameRate_Den is not None and r_frame_rate is not None and avg_frame_rate is not None:
+		#'FrameRate': 25.0,
+		#'FrameRate_Num': 25,
+		#'FrameRate_Den': 1,
+		#'r_frame_rate': '25/1',
+		#'avg_frame_rate': '25/1',
+		if (abs(FrameRate - (FrameRate_Num/FrameRate_Den)) < objSettings.precision_tolerance) and (abs(eval(r_frame_rate) - eval(avg_frame_rate)) < objSettings.precision_tolerance) : 
+			likely_CFR
+		else:
+			likely_VFR
+			likely_VFR_fps_num = FrameRate_Num
+			likely_VFR_fps_den = FrameRate_Den
+	elif FrameRate is not None and r_frame_rate is not None and avg_frame_rate is not None:
+		#'FrameRate': 14.907,
+		#'FrameRate_Num': None,
+		#'FrameRate_Den': None,
+		#'r_frame_rate': '20/1',
+		#'avg_frame_rate': '10650000/714443', (14.90671754079752)
+		if (abs(eval(r_frame_rate) - eval(avg_frame_rate)) < objSettings.precision_tolerance) and (abs(eval(avg_frame_rate) - FrameRate) < objSettings.precision_tolerance): 
+			likely_CFR
+		else:
+			likely_VFR
+			# calculate this ... using split of max r_frame_rate,avg_frame_rate
+			if eval(r_frame_rate) >= eval(avg_frame_rate):
+				likely_vfr_split_list = r_frame_rate.split("/")
+			else:
+				likely_vfr_split_list = avg_frame_rate.split("/")
+			likely_VFR_fps_num = likely_vfr_split_list[0]
+			likely_VFR_fps_den = likely_vfr_split_list[1]
+	elif r_frame_rate is not None and avg_frame_rate is not None:
+		#'FrameRate': None,
+		#'FrameRate_Num': None,
+		#'FrameRate_Den': None,
+		#'r_frame_rate': '20/1',
+		#'avg_frame_rate': '20/1',
+		if (abs(eval(r_frame_rate) - eval(avg_frame_rate)) < objSettings.precision_tolerance):
+			likely_CFR
+		else:
+			likely_VFR
+			# calculate this ... using split of max r_frame_rate,avg_frame_rate
+			if eval(r_frame_rate) >= eval(avg_frame_rate):
+				likely_vfr_split_list = r_frame_rate.split("/")
+			else:
+				likely_vfr_split_list = avg_frame_rate.split("/")
+			likely_VFR_fps_num = likely_vfr_split_list[0]
+			likely_VFR_fps_den = likely_vfr_split_list[1]
+	else:
+		#'FrameRate': None,
+		#'FrameRate_Num': None,
+		#'FrameRate_Den': None,
+		# ff_first_video={} ... so the .get will return None
+		#nothing known from mediainfo nor from ffprobe ... it happens
+		discard_video = True
+
+

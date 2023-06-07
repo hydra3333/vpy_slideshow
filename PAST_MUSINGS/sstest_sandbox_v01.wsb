@@ -1,0 +1,31 @@
+<Configuration>
+  <VGpu>Enable</VGpu>
+  <Networking>Default</Networking>
+  <PrinterRedirection>Enable</PrinterRedirection>
+  <ClipboardRedirection>Default</ClipboardRedirection>
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder>C:\software</HostFolder>
+      <SandboxFolder>C:\host_software</SandboxFolder>
+      <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+    <MappedFolder>
+      <HostFolder>C:\software\WindowsSandbox</HostFolder>
+      <SandboxFolder>C:\Users\WDAGUtilityAccount\Desktop\WindowsSandbox</SandboxFolder>
+      <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+    <MappedFolder>
+      <HostFolder>D:\ssTEST</HostFolder>
+      <SandboxFolder>C:\HOST_ssTEST</SandboxFolder>
+      <ReadOnly>false</ReadOnly>
+    </MappedFolder>
+    <MappedFolder>
+      <HostFolder>T:\000-SLIDESHOW-IVIEW-CONVERTED_IMAGES\MULTIMEDIA\2021.06.14-Pat.and.Ted-Photos</HostFolder>
+      <SandboxFolder>C:\HOST_2021.06.14-Pat.and.Ted-Photos</SandboxFolder>
+      <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+  </MappedFolders>
+  <LogonCommand>
+    <Command>C:\host_software\WindowsSandbox\sstest_Setup_v01.bat</Command>
+  </LogonCommand>
+</Configuration>

@@ -1,0 +1,857 @@
+def get_media_info(filename):
+    media_info = MediaInfoDLL3.MediaInfo()
+    media_info.Open(filename)
+    return media_info
+
+def guess_color_properties(filename):
+    # Get color properties from MediaInfo
+    media_info = get_media_info(filename)
+    color_space = media_info.Get(Stream.General, 0, "ColorSpace")
+    color_range = media_info.Get(Stream.Video, 0, "ColorRange")
+    color_primaries = media_info.Get(Stream.Video, 0, "ColorPrimaries")
+    color_transfer = media_info.Get(Stream.Video, 0, "TransferCharacteristics")
+    width = media_info.Get(Stream.Video, 0, "Width")
+    height = media_info.Get(Stream.Video, 0, "Height")
+
+    # Use ffprobe for color properties if missing from MediaInfo
+    if not color_space or not color_range or not color_primaries or not color_transfer:
+        ffprobe_cmd = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", filename]
+        ffprobe_output = subprocess.check_output(ffprobe_cmd).decode("utf-8")
+        ffprobe_data = json.loads(ffprobe_output)
+        stream = ffprobe_data["streams"][0]
+
+        if not color_space:
+            color_space = stream.get("color_space")
+
+        if not color_range:
+            color_range = stream.get("color_range")
+
+        if not color_primaries:
+            color_primaries = stream.get("color_primaries")
+
+        if not color_transfer:
+            color_transfer = stream.get("color_transfer")
+
+    # Guess color properties based on available information
+    if not color_space:
+        if width and height:
+            if width <= 720 and height <= 576:
+                color_space = "bt470bg"
+            elif width > 720 or height > 576:
+                if width >= 3840 or height >= 2160:
+                    color_space = "bt2020"
+                else:
+                    color_space = "bt709"
+
+    if not color_range:
+        if width and height:
+            if width > 720 or height > 576:
+                color_range = "tv"
+            else:
+                color_range = "pc"
+
+    if not color_primaries:
+        if width and height:
+            if width >= 3840 or height >= 2160:
+                color_primaries = "bt2020"
+            elif width > 720 or height > 576:
+                color_primaries = "bt709"
+            else:
+                color_primaries = "bt601"
+
+    if not color_transfer:
+        if width and height:
+            if width >= 3840 or height >= 2160:
+                color_transfer = "bt2020"
+            elif width > 720 or height > 576:
+                color_transfer = "bt709"
+            else:
+                color_transfer = "bt601"
+
+    # Infer BT.2020 Constant Luminance (CL) based on likelihood
+    if color_primaries == "bt2020":
+        if "bt2020_cl" not in color_transfer.lower():
+            color_transfer += "_cl"
+
+    return color_space, color_range, color_primaries, color_transfer
+-----------------------
+
+Yes, we can modify the script to accept the input video file path as a parameter. Here's an updated version of the script that includes a command-line argument for the input file:
+
+```python
+import sys
+import vapoursynth as vs
+import subprocess
+import json
+
+def get_media_info(filename):
+    media_info = MediaInfoDLL3.MediaInfo()
+    media_info.Open(filename)
+    return media_info
+
+def guess_color_properties(filename):
+    # Get color properties from MediaInfo
+    media_info = get_media_info(filename)
+    color_space = media_info.Get(Stream.General, 0, "ColorSpace")
+    color_range = media_info.Get(Stream.Video, 0, "ColorRange")
+    color_primaries = media_info.Get(Stream.Video, 0, "ColorPrimaries")
+    color_transfer = media_info.Get(Stream.Video, 0, "TransferCharacteristics")
+    width = media_info.Get(Stream.Video, 0, "Width")
+    height = media_info.Get(Stream.Video, 0, "Height")
+
+    # Use ffprobe for color properties if missing from MediaInfo
+    if not color_space or not color_range or not color_primaries or not color_transfer:
+        ffprobe_cmd = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", filename]
+        ffprobe_output = subprocess.check_output(ffprobe_cmd).decode("utf-8")
+        ffprobe_data = json.loads(ffprobe_output)
+        stream = ffprobe_data["streams"][0]
+
+        if not color_space:
+            color_space = stream.get("color_space")
+
+        if not color_range:
+            color_range = stream.get("color_range")
+
+        if not color_primaries:
+            color_primaries = stream.get("color_primaries")
+
+        if not color_transfer:
+            color_transfer = stream.get("color_transfer")
+
+    # Guess color properties based on available information
+    if not color_space:
+        if width and height:
+            if width <= 720 and height <= 576:
+                color_space = "bt470bg"
+            elif width > 720 or height > 576:
+                if width >= 3840 or height >= 2160:
+                    color_space = "bt2020"
+                else:
+                    color_space = "bt709"
+
+    if not color_range:
+        if width and height:
+            if width > 720 or height > 576:
+                color_range = "tv"
+            else:
+                color_range = "pc"
+
+    if not color_primaries:
+        if width and height:
+            if width >= 3840 or height >= 2160:
+                color_primaries = "bt2020"
+            elif width > 720 or height > 576:
+                color_primaries = "bt709"
+            else:
+                color_primaries = "bt601"
+
+    if not color_transfer:
+        if width and height:
+            if width >= 3840 or height >= 2160:
+                color_transfer = "bt2020"
+            elif width > 720 or height > 576:
+                color_transfer = "bt709"
+            else:
+                color_transfer = "bt601"
+
+    # Infer BT.2020 Constant Luminance (CL) based on likelihood
+    if color_primaries == "bt2020":
+        if "bt2020_cl" not in color_transfer.lower():
+            color_transfer += "_cl"
+
+    return color_space, color_range, color_primaries, color_transfer
+
+def create_vapoursynth_script(input_file):
+    # Get color properties
+    color_space, color_range, color_primaries, color_transfer = guess_color_properties(input_file)
+
+    # Get rotation angle from ffprobe
+    ffprobe_cmd = ["ffprobe", "-v", "quiet
+
+", "-print_format", "json", "-show_streams", input_file]
+    ffprobe_output = subprocess.check_output(ffprobe_cmd).decode("utf-8")
+    ffprobe_data = json.loads(ffprobe_output)
+    rotation = ffprobe_data["streams"][0].get("tags", {}).get("rotate", "0")
+
+    # Create VapourSynth script
+    script = vs.ScriptClip("""
+        import vapoursynth as vs
+
+        # Load input clip
+        clip = core.ffms2.Source("{input_file}")
+
+        # Convert color properties
+        clip = core.resize.Bicubic(clip, format=vs.YUV420P8, matrix_in_s="{color_space}", range_in_s="{color_range}", primaries_in_s="{color_primaries}", transfer_in_s="{color_transfer}")
+
+        # Convert to full color range
+        if clip.format.color_family == vs.YUV:
+            if clip.format.sample_type == vs.INTEGER:
+                if clip.format.bits_per_sample < 16:
+                    clip = core.fmtc.bitdepth(clip, bits=16)
+            clip = core.resize.Bicubic(clip, format=vs.YUV420P16)
+
+        # Rotate based on the rotation flag
+        if "{rotation}" == "90":
+            clip = core.std.Transpose(clip)
+        elif "{rotation}" == "180":
+            clip = core.std.Transpose(clip)
+            clip = core.std.Transpose(clip)
+        elif "{rotation}" == "270":
+            clip = core.std.Transpose(clip)
+            clip = core.std.Transpose(clip)
+            clip = core.std.Transpose(clip)
+
+        # Resize to PAL HD resolution (1920x1080) with DAR 16:9
+        clip = core.resize.Bicubic(clip, format=vs.YUV420P8, width=1920, height=1080)
+        clip = core.std.SetDAR(clip, dar=(16, 9))
+
+        # Convert pixel format to YUV420
+        clip = core.resize.Bicubic(clip, format=vs.YUV420P8)
+
+        # Output processed clip
+        clip.set_output()
+    """.format(input_file=input_file, color_space=color_space, color_range=color_range,
+               color_primaries=color_primaries, color_transfer=color_transfer, rotation=rotation))
+
+    return script
+
+def main():
+    # Check if input file path is provided
+    if len(sys.argv) < 2:
+        print("Please provide the input video file path.")
+        return
+
+    input_file = sys.argv[1]
+    script = create_vapoursynth_script(input_file)
+
+    # Save the script to a file
+    script_file = "script.vpy"
+    with open(script_file, "w") as f:
+        f.write(script)
+
+    # Run vsscript to pipe the script into ffmpeg with libx264 codec
+    ffmpeg_cmd = ["ffmpeg", "-f", "yuv4mpegpipe", "-i", "pipe:0", "-c:v", "libx264", "-crf", "20", "-vf", "setdar=16/9", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "full", "output.mp4"]
+
+    vsscript_cmd = ["vsscript", "-y", script_file, "-"]
+    subprocess.run(vsscript_cmd, stdout=subprocess.PIPE)
+    subprocess.run(ffmpeg_cmd, stdin=subprocess.PIPE)
+
+if __name__ == "__main__":
+    main()
+```
+
+You can run this script by providing the input video file path as a command-line argument. For example:
+
+```
+python script.py
+
+----------------------
+
+great. now we need to also subtitle the clip with the path/filename of the source file.
+perhaps by including something  like this:
+
+subtitle_text = 'the_filename'
+subtitle_style = f'sans-serif,{str(objSettings.SUBTITLE_FONTSIZE).strip()},&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0.9,0.5,3,2,2,2,1'
+clip = core.assrender.Subtitle(clip, subtitle_text, style=subtitle_style, scale=SUBTITLE_FONTSCALE, colorspace=TARGET_COLORSPACE)
+
+Yes, we can modify the script to accept the input video file path as a parameter. Here's an updated version of the script that includes a command-line argument for the input file:
+
+```python
+import sys
+import os
+import vapoursynth as vs
+import subprocess
+import json
+
+def get_media_info(filename):
+    media_info = MediaInfoDLL3.MediaInfo()
+    media_info.Open(filename)
+    return media_info
+
+def guess_color_properties(filename):
+    # Get color properties from MediaInfo
+    media_info = get_media_info(filename)
+    color_space = media_info.Get(Stream.General, 0, "ColorSpace")
+    color_range = media_info.Get(Stream.Video, 0, "ColorRange")
+    color_primaries = media_info.Get(Stream.Video, 0, "ColorPrimaries")
+    color_transfer = media_info.Get(Stream.Video, 0, "TransferCharacteristics")
+    width = media_info.Get(Stream.Video, 0, "Width")
+    height = media_info.Get(Stream.Video, 0, "Height")
+
+    # Use ffprobe for color properties if missing from MediaInfo
+    if not color_space or not color_range or not color_primaries or not color_transfer:
+        ffprobe_cmd = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", filename]
+        ffprobe_output = subprocess.check_output(ffprobe_cmd).decode("utf-8")
+        ffprobe_data = json.loads(ffprobe_output)
+        stream = ffprobe_data["streams"][0]
+
+        if not color_space:
+            color_space = stream.get("color_space")
+
+        if not color_range:
+            color_range = stream.get("color_range")
+
+        if not color_primaries:
+            color_primaries = stream.get("color_primaries")
+
+        if not color_transfer:
+            color_transfer = stream.get("color_transfer")
+
+    # Guess color properties based on available information
+    if not color_space:
+        if width and height:
+            if width <= 720 and height <= 576:
+                color_space = "bt470bg"
+            elif width > 720 or height > 576:
+                if width >= 3840 or height >= 2160:
+                    color_space = "bt2020"
+                else:
+                    color_space = "bt709"
+
+    if not color_range:
+        if width and height:
+            if width > 720 or height > 576:
+                color_range = "tv"
+            else:
+                color_range = "pc"
+
+    if not color_primaries:
+        if width and height:
+            if width >= 3840 or height >= 2160:
+                color_primaries = "bt2020"
+            elif width > 720 or height > 576:
+                color_primaries = "bt709"
+            else:
+                color_primaries = "bt601"
+
+    if not color_transfer:
+        if width and height:
+            if width >= 3840 or height >= 2160:
+                color_transfer = "bt2020"
+            elif width > 720 or height > 576:
+                color_transfer = "bt709"
+            else:
+                color_transfer = "bt601"
+
+    # Infer BT.2020 Constant Luminance (CL) based on likelihood
+    if color_primaries == "bt2020":
+        if "bt2020_cl" not in color_transfer.lower():
+            color_transfer += "_cl"
+
+    return color_space, color_range, color_primaries, color_transfer
+
+def create_vapoursynth_script(input_file):
+    # Get color properties
+    color_space, color_range, color_primaries, color_transfer = guess_color_properties(input_file)
+
+    # Get rotation angle from ffprobe
+    ffprobe_cmd = ["ffprobe", "-v", "quiet
+
+", "-print_format", "json", "-show_streams", input_file]
+    ffprobe_output = subprocess.check_output(ffprobe_cmd).decode("utf-8")
+    ffprobe_data = json.loads(ffprobe_output)
+    rotation = ffprobe_data["streams"][0].get("tags", {}).get("rotate", "0")
+
+    # Create VapourSynth script
+    script = vs.ScriptClip("""
+        import vapoursynth as vs
+
+        # Load input clip
+        clip = core.ffms2.Source("{input_file}")
+
+        # Convert color properties
+        clip = core.resize.Bicubic(clip, format=vs.YUV420P8, matrix_in_s="{color_space}", range_in_s="{color_range}", primaries_in_s="{color_primaries}", transfer_in_s="{color_transfer}")
+
+        # Convert to full color range
+        if clip.format.color_family == vs.YUV:
+            if clip.format.sample_type == vs.INTEGER:
+                if clip.format.bits_per_sample < 16:
+                    clip = core.fmtc.bitdepth(clip, bits=16)
+            clip = core.resize.Bicubic(clip, format=vs.YUV420P16)
+
+        # Rotate based on the rotation flag
+        if "{rotation}" == "90":
+            clip = core.std.Transpose(clip)
+        elif "{rotation}" == "180":
+            clip = core.std.Transpose(clip)
+            clip = core.std.Transpose(clip)
+        elif "{rotation}" == "270":
+            clip = core.std.Transpose(clip)
+            clip = core.std.Transpose(clip)
+            clip = core.std.Transpose(clip)
+
+        # Resize to PAL HD resolution (1920x1080) with DAR 16:9
+        clip = core.resize.Bicubic(clip, format=vs.YUV420P8, width=1920, height=1080)
+        clip = core.std.SetDAR(clip, dar=(16, 9))
+
+        # Convert pixel format to YUV420
+        clip = core.resize.Bicubic(clip, format=vs.YUV420P8)
+
+        # Output processed clip
+        clip.set_output()
+    """.format(input_file=input_file, color_space=color_space, color_range=color_range,
+               color_primaries=color_primaries, color_transfer=color_transfer, rotation=rotation))
+
+    return script
+
+def main():
+    # Check if input file path is provided
+    if len(sys.argv) < 2:
+        print("Please provide the input video file path.")
+        return
+
+    input_file = sys.argv[1]
+    script = create_vapoursynth_script(input_file)
+
+    # Save the script to a file
+    script_file = "script.vpy"
+    with open(script_file, "w") as f:
+        f.write(script)
+
+    # Run vsscript to pipe the script into ffmpeg with libx264 codec
+    ffmpeg_cmd = ["ffmpeg", "-f", "yuv4mpegpipe", "-i", "pipe:0", "-c:v", "libx264", "-crf", "20", "-vf", "setdar=16/9", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "full", "output.mp4"]
+
+    vsscript_cmd = ["vsscript", "-y", script_file, "-"]
+    subprocess.run(vsscript_cmd, stdout=subprocess.PIPE)
+    subprocess.run(ffmpeg_cmd, stdin=subprocess.PIPE)
+
+if __name__ == "__main__":
+    main()
+```
+
+You can run this script by providing the input video file path as a command-line argument. For example:
+
+```
+python script.py
+
+.....................................
+
+Certainly! To subtitle the clip with the path/filename of the source file, you can add the following code snippet to the VapourSynth script:
+
+```python
+import os
+
+# Get the filename from the input_file path
+filename = os.path.basename(input_file)
+
+# Set the subtitle text and style
+subtitle_text = filename
+subtitle_style = f'sans-serif,{str(objSettings.SUBTITLE_FONTSIZE).strip()},&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0.9,0.5,3,2,2,2,1'
+
+# Subtitle the clip
+clip = core.assrender.Subtitle(clip, subtitle_text, style=subtitle_style, scale=SUBTITLE_FONTSCALE, colorspace=TARGET_COLORSPACE)
+```
+
+You can place this code snippet in the VapourSynth script before the `clip.set_output()` line. It will extract the filename from the input file path and use it as the subtitle text. The `subtitle_style` variable sets the style of the subtitle, and you can modify it according to your requirements.
+
+Make sure to import the `os` module at the beginning of the script. Additionally, if you have specific values for `objSettings.SUBTITLE_FONTSIZE`, `SUBTITLE_FONTSCALE`, and `TARGET_COLORSPACE`, you can adjust them accordingly.
+
+With this addition, the VapourSynth script will subtitle the clip with the path/filename of the source file.
+
+-------------------------------------------
+-------------------------------------------
+Certainly! Here's an updated version of the script that includes adding subtitles to the clip:
+
+```python
+import sys
+import vapoursynth as vs
+import subprocess
+import json
+
+def get_media_info(filename):
+    media_info = MediaInfoDLL3.MediaInfo()
+    media_info.Open(filename)
+    return media_info
+
+def guess_color_properties(filename):
+    # Get color properties from MediaInfo
+    media_info = get_media_info(filename)
+    color_space = media_info.Get(Stream.General, 0, "ColorSpace")
+    color_range = media_info.Get(Stream.Video, 0, "ColorRange")
+    color_primaries = media_info.Get(Stream.Video, 0, "ColorPrimaries")
+    color_transfer = media_info.Get(Stream.Video, 0, "TransferCharacteristics")
+    width = media_info.Get(Stream.Video, 0, "Width")
+    height = media_info.Get(Stream.Video, 0, "Height")
+
+    # Use ffprobe for color properties if missing from MediaInfo
+    if not color_space or not color_range or not color_primaries or not color_transfer:
+        ffprobe_cmd = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", filename]
+        ffprobe_output = subprocess.check_output(ffprobe_cmd).decode("utf-8")
+        ffprobe_data = json.loads(ffprobe_output)
+        stream = ffprobe_data["streams"][0]
+
+        if not color_space:
+            color_space = stream.get("color_space")
+
+        if not color_range:
+            color_range = stream.get("color_range")
+
+        if not color_primaries:
+            color_primaries = stream.get("color_primaries")
+
+        if not color_transfer:
+            color_transfer = stream.get("color_transfer")
+
+    # Guess color properties based on available information
+    if not color_space:
+        if width and height:
+            if width <= 720 and height <= 576:
+                color_space = "bt470bg"
+            elif width > 720 or height > 576:
+                if width >= 3840 or height >= 2160:
+                    color_space = "bt2020"
+                else:
+                    color_space = "bt709"
+
+    if not color_range:
+        if width and height:
+            if width > 720 or height > 576:
+                color_range = "tv"
+            else:
+                color_range = "pc"
+
+    if not color_primaries:
+        if width and height:
+            if width >= 3840 or height >= 2160:
+                color_primaries = "bt2020"
+            elif width > 720 or height > 576:
+                color_primaries = "bt709"
+            else:
+                color_primaries = "bt601"
+
+    if not color_transfer:
+        if width and height:
+            if width >= 3840 or height >= 2160:
+                color_transfer = "bt2020"
+            elif width > 720 or height > 576:
+                color_transfer = "bt709"
+            else:
+                color_transfer = "bt601"
+
+    # Infer BT.2020 Constant Luminance (CL) based on likelihood
+    if color_primaries == "bt2020":
+        if "bt2020_cl" not in color_transfer.lower():
+            color_transfer += "_cl"
+
+    return color_space, color_range, color_primaries, color_transfer
+
+def create_vapoursynth_script(input_file):
+    # Get color properties
+    color_space, color_range, color_primaries, color_transfer = guess_color_properties(input_file)
+
+    # Get rotation angle from ffprobe
+    ffprobe_cmd = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", input_file]
+    ffprobe_output
+
+ = subprocess.check_output(ffprobe_cmd).decode("utf-8")
+    ffprobe_data = json.loads(ffprobe_output)
+    rotation = ffprobe_data["streams"][0].get("tags", {}).get("rotate", "0")
+
+    # Create VapourSynth script
+    script = vs.ScriptClip("""
+        import vapoursynth as vs
+        import core
+
+        # Load input clip
+        clip = core.ffms2.Source("{input_file}")
+
+        # Convert color properties
+        clip = core.resize.Bicubic(clip, format=vs.YUV420P8, matrix_in_s="{color_space}", range_in_s="{color_range}", primaries_in_s="{color_primaries}", transfer_in_s="{color_transfer}")
+
+        # Convert to full color range
+        if clip.format.color_family == vs.YUV:
+            if clip.format.sample_type == vs.INTEGER:
+                if clip.format.bits_per_sample < 16:
+                    clip = core.fmtc.bitdepth(clip, bits=16)
+            clip = core.resize.Bicubic(clip, format=vs.YUV420P16)
+
+        # Rotate based on the rotation flag
+        if "{rotation}" == "90":
+            clip = core.std.Transpose(clip)
+        elif "{rotation}" == "180":
+            clip = core.std.Transpose(clip)
+            clip = core.std.Transpose(clip)
+        elif "{rotation}" == "270":
+            clip = core.std.Transpose(clip)
+            clip = core.std.Transpose(clip)
+            clip = core.std.Transpose(clip)
+
+        # Resize to PAL HD resolution (1920x1080) with DAR 16:9
+        clip = core.resize.Bicubic(clip, format=vs.YUV420P8, width=1920, height=1080)
+        clip = core.std.SetDAR(clip, dar=(16, 9))
+
+        # Convert pixel format to YUV420
+        clip = core.resize.Bicubic(clip, format=vs.YUV420P8)
+
+        # Add subtitle
+        subtitle_text = "{subtitle_text}"
+        subtitle_style = "{subtitle_style}"
+        clip = core.assrender.Subtitle(clip, subtitle_text, style=subtitle_style)
+
+        # Output processed clip
+        clip.set_output()
+    """.format(input_file=input_file, color_space=color_space, color_range=color_range,
+               color_primaries=color_primaries, color_transfer=color_transfer, rotation=rotation,
+               subtitle_text=input_file, subtitle_style="sans-serif,30,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0.9,0.5,3,2,2,2,1"))
+
+    return script
+
+def main():
+    # Check if input file path is provided
+    if len(sys.argv) < 2:
+        print("Please provide the input video file path.")
+        return
+
+    input_file = sys.argv[1]
+    script = create_vapoursynth_script(input_file)
+
+    # Save the script to a file
+    script_file = "script.vpy"
+    with open(script_file, "w") as f:
+        f.write(script)
+
+    # Run vsscript to pipe the script into ffmpeg with libx264 codec
+    ffmpeg_cmd = ["ffmpeg", "-f", "yuv4mpegpipe", "-i", "pipe:0", "-c:v", "libx264", "-crf", "20", "-vf", "setdar=16/9", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt
+
+709", "-color_range", "full", "output.mp4"]
+
+    vsscript_cmd = ["vsscript", "-y", script_file, "-"]
+    subprocess.run(vsscript_cmd, stdout=subprocess.PIPE)
+    subprocess.run(ffmpeg_cmd, stdin=subprocess.PIPE)
+
+if __name__ == "__main__":
+    main()
+```
+
+In this updated script, the `create_vapoursynth_script` function now includes the code to add subtitles to the clip. The `subtitle_text` variable is set to the filename of the input video, and the `subtitle_style` variable determines the style of the subtitle text.
+
+Please make sure to adjust the `subtitle_style` variable according to your desired font, font size, and other style settings.
+
+You can run the script with the input video file path as a command-line argument, and it will generate the output video with subtitles.
+
+-------------------------------------------------------------
+Certainly! Here's an updated version of the script that allows specifying the output path/filename as a parameter:
+
+```python
+import sys
+import vapoursynth as vs
+import subprocess
+import json
+
+def get_media_info(filename):
+    media_info = MediaInfoDLL3.MediaInfo()
+    media_info.Open(filename)
+    return media_info
+
+def guess_color_properties(filename):
+    # Get color properties from MediaInfo
+    media_info = get_media_info(filename)
+    color_space = media_info.Get(Stream.General, 0, "ColorSpace")
+    color_range = media_info.Get(Stream.Video, 0, "ColorRange")
+    color_primaries = media_info.Get(Stream.Video, 0, "ColorPrimaries")
+    color_transfer = media_info.Get(Stream.Video, 0, "TransferCharacteristics")
+    width = media_info.Get(Stream.Video, 0, "Width")
+    height = media_info.Get(Stream.Video, 0, "Height")
+
+    # Use ffprobe for color properties if missing from MediaInfo
+    if not color_space or not color_range or not color_primaries or not color_transfer:
+        ffprobe_cmd = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", filename]
+        ffprobe_output = subprocess.check_output(ffprobe_cmd).decode("utf-8")
+        ffprobe_data = json.loads(ffprobe_output)
+        stream = ffprobe_data["streams"][0]
+
+        if not color_space:
+            color_space = stream.get("color_space")
+
+        if not color_range:
+            color_range = stream.get("color_range")
+
+        if not color_primaries:
+            color_primaries = stream.get("color_primaries")
+
+        if not color_transfer:
+            color_transfer = stream.get("color_transfer")
+
+    # Guess color properties based on available information
+    if not color_space:
+        if width and height:
+            if width <= 720 and height <= 576:
+                color_space = "bt470bg"
+            elif width > 720 or height > 576:
+                if width >= 3840 or height >= 2160:
+                    color_space = "bt2020"
+                else:
+                    color_space = "bt709"
+
+    if not color_range:
+        if width and height:
+            if width > 720 or height > 576:
+                color_range = "tv"
+            else:
+                color_range = "pc"
+
+    if not color_primaries:
+        if width and height:
+            if width >= 3840 or height >= 2160:
+                color_primaries = "bt2020"
+            elif width > 720 or height > 576:
+                color_primaries = "bt709"
+            else:
+                color_primaries = "bt601"
+
+    if not color_transfer:
+        if width and height:
+            if width >= 3840 or height >= 2160:
+                color_transfer = "bt2020"
+            elif width > 720 or height > 576:
+                color_transfer = "bt709"
+            else:
+                color_transfer = "bt601"
+
+    # Infer BT.2020 Constant Luminance (CL) based on likelihood
+    if color_primaries == "bt2020":
+        if "bt2020_cl" not in color_transfer.lower():
+            color_transfer += "_cl"
+
+    return color_space, color_range, color_primaries, color_transfer
+
+# Function to create VapourSynth script
+def create_vapoursynth_script(input_file, output_file):
+    # Get color properties
+    color_space, color_range, color_primaries, color_transfer = guess_color_properties(input_file)
+
+    # Get rotation angle from ffprobe
+    ffprobe_cmd = ["ffprobe", "-v", "quiet",
+
+ "-print_format", "json", "-show_streams", input_file]
+    ffprobe_output = subprocess.check_output(ffprobe_cmd).decode("utf-8")
+    ffprobe_data = json.loads(ffprobe_output)
+    rotation = ffprobe_data["streams"][0].get("tags", {}).get("rotate", "0")
+
+    # Create VapourSynth script
+    script = vs.ScriptClip("""
+        import vapoursynth as vs
+
+        # Load input clip
+        clip = core.ffms2.Source("{input_file}")
+
+        # Convert color properties
+        clip = core.resize.Bicubic(clip, format=vs.YUV420P8, matrix_in_s="{color_space}", range_in_s="{color_range}", primaries_in_s="{color_primaries}", transfer_in_s="{color_transfer}")
+
+        # Convert to full color range
+        if clip.format.color_family == vs.YUV:
+            if clip.format.sample_type == vs.INTEGER:
+                if clip.format.bits_per_sample < 16:
+                    clip = core.fmtc.bitdepth(clip, bits=16)
+            clip = core.resize.Bicubic(clip, format=vs.YUV420P16)
+
+        # Rotate based on the rotation flag
+        if "{rotation}" == "90":
+            clip = core.std.Transpose(clip)
+        elif "{rotation}" == "180":
+            clip = core.std.Transpose(clip)
+            clip = core.std.Transpose(clip)
+        elif "{rotation}" == "270":
+            clip = core.std.Transpose(clip)
+            clip = core.std.Transpose(clip)
+            clip = core.std.Transpose(clip)
+
+        # Resize to PAL HD resolution (1920x1080) with DAR 16:9
+        clip = core.resize.Bicubic(clip, format=vs.YUV420P8, width=1920, height=1080)
+        clip = core.std.SetDAR(clip, dar=(16, 9))
+
+        # Convert pixel format to YUV420
+        clip = core.resize.Bicubic(clip, format=vs.YUV420P8)
+
+        # Add subtitle with source filename
+        subtitle_text = "{subtitle_text}"
+        subtitle_style = "{subtitle_style}"
+        clip = core.assrender.Subtitle(clip, subtitle_text, style=subtitle_style)
+
+        # Output processed clip
+        clip.set_output()
+    """.format(input_file=input_file, color_space=color_space, color_range=color_range,
+               color_primaries=color_primaries, color_transfer=color_transfer, rotation=rotation,
+               subtitle_text=output_file, subtitle_style=subtitle_style))
+
+    return script
+
+def main():
+    if len(sys.argv) < 3:
+        print("Usage: python script.py input_file output_file")
+        return
+
+    input_file = sys.argv[1]
+    output_file = sys.argv[2]
+
+    # Create VapourSynth script
+    script = create_vapoursynth_script(input_file, output_file)
+    print(script)
+
+    # Save the script to a file
+    script_file = "script.vpy"
+    with open(script_file, "w") as f:
+        f.write(script)
+
+    # Run vsscript to pipe the script into ffmpeg with libx264 codec
+    ffmpeg_cmd = ["ffmpeg", "-f", "yuv4mpegpipe", "-i", "pipe:0", "-c:v", "libx264", "-crf", "20", "-vf", "setdar=16/9", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "full", output_file]
+
+    vsscript_cmd = ["vsscript
+
+", "-y", script_file, "-"]
+    subprocess.run(vsscript_cmd, stdout=subprocess.PIPE)
+    subprocess.run(ffmpeg_cmd, stdin=subprocess.PIPE)
+
+if __name__ == "__main__":
+    main()
+```
+
+Now you can specify the input file and output file as command-line arguments when running the script:
+
+```bash
+python script.py input.mp4 output.mp4
+```
+
+The script will create a VapourSynth script with the specified input file, add a subtitle with the source filename, and save the output to the specified output file. Then it will use `vsscript` to pipe the script into `ffmpeg` with the libx264 codec to encode the final video.
+---------------------------------------------------------------------
+
+Apologies for the confusion. Here's the updated version of the .bat script with the intermediate folder name modified:
+
+```batch
+@echo off
+setlocal enabledelayedexpansion
+
+set "intermediate_folder=%date:~0,4%-%date:~5,2%-%date:~8,2%-%time:~0,2%-%time:~3,2%-%time:~6,2%-%time:~9,3%"
+set "intermediate_folder=%intermediate_folder: =0%"
+set "final_output_file=C:\path\to\target\folder\final_output.mp4"
+
+REM Create intermediate folder
+mkdir "%intermediate_folder%"
+
+REM Process video files in the specified folder and its subfolders
+for /r "C:\path\to\videos" %%F in (*.mp4 *.mpg *.avi *.3gp) do (
+    set "input_file=%%~fF"
+    set "output_file=!input_file:%cd%=!"
+    set "output_file=!output_file:\=_!"
+    set "output_file=!output_file:.=_!"
+    
+    set "output_file=%intermediate_folder%\!output_file!"
+    
+    REM Invoke Python script to convert video
+    python P1.py -i "!input_file!" -o "!output_file!"
+)
+
+REM Concatenate the converted videos using ffmpeg
+ffmpeg -f concat -safe 0 -i "%intermediate_folder%\input.txt" -c copy "%final_output_file%"
+
+REM Cleanup: Delete the intermediate folder
+if exist "%intermediate_folder%" rd /s /q "%intermediate_folder%"
+
+endlocal
+```
+
+In this updated script, the `intermediate_folder` variable is set using the current date and time format `yyyy-mm-dd-hh-nn-ss.ddd`. The `set "intermediate_folder=%intermediate_folder: =0%"` line replaces any spaces in the folder name with zeroes.
+
+The rest of the script remains the same, processing the video files, invoking the Python script for conversion, concatenating the converted videos using ffmpeg, and cleaning up by deleting the intermediate folder.
+
+Remember to adjust the paths and other parameters as per your specific requirements.

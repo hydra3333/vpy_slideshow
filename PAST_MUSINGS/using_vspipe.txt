@@ -1,0 +1,196 @@
+
+cd
+"C:\SOFTWARE\Vapoursynth-x64\VSPipe.exe" --progress --filter-time --container y4m "E:\SOFTWARE-Win11\MULTIMEDIA\SLIDE-SHOWS\vpy_slideshow-main\_AI_08.vpy" - 
+Saved updated .ini "E:\SOFTWARE-Win11\MULTIMEDIA\SLIDE-SHOWS\vpy_slideshow-main\SLIDESHOW_PARAMETERS.ini"
+Start processing image/video files in "G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST" RECURSIVE=True DEBUG_MODE=False SILENT_MODE=False  glob_var="**/*.*" 
+      with Extensions=['.png', '.jpg', '.jpeg', '.gif', '.mp4', '.mpeg4', '.mpg', '.mpeg', '.avi', '.mjpeg', '.3gp', '.mov', '.m2ts']
+processing 1 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\100_0026.JPG
+processing 2 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\2004-05-08\000_0035.JPG
+processing 3 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\2004-08-03\000_0047.JPG
+processing 4 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\2004-08-03\000_0048.JPG
+processing 5 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\2004-08-03\000_0050.JPG
+processing 6 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\2004-08-03\000_0051.JPG
+processing 7 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\2004-08-03\100_0016.JPG
+processing 8 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\2004-08-03\100_0017.JPG
+processing 9 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\2004-08-03\100_0019.JPG
+processing 10 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\2004-08-03\100_0021.JPG
+processing 11 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\2004-08-03\100_0023.JPG
+processing 12 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST\2004-08-03\100_0026.JPG
+Start processing image/video files in "G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST" RECURSIVE=True DEBUG_MODE=False SILENT_MODE=False  glob_var="**/*.*" 
+      with Extensions=['.png', '.jpg', '.jpeg', '.gif', '.mp4', '.mpeg4', '.mpg', '.mpeg', '.avi', '.mjpeg', '.3gp', '.mov', '.m2ts']
+processing 13 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\1996-04-07-c-easter-Poppa.mp4
+processing 14 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2002-02-21-mvc-671w.mpg
+processing 15 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2002-02-21-mvc-687w.mpg.mp4
+processing 16 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2002-02-21-ride2-mvc-704w.mpg
+processing 17 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2002-02-21-ride2-mvc-710w.mpg
+processing 18 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2004-12-25-mvc-136w.mpg
+processing 19 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2005-11-05-iceskating-pic000236.asf.mp4
+processing 20 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2006-11-29-jess-bday-pic000724.asf.mp4
+processing 21 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2006-11-29-jess-bday-pic000730.asf.mp4
+processing 22 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2008-01-07-nuriootpa-s6300777.avi
+processing 23 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2009-09-04-jess-old-camera-s6300978-4-sept-002009.avi
+processing 24 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2009-11-29-jess-15th-birthday-2009-11-28-s6300047.avi.mp4
+processing 25 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2013-08-21-Jemma-fromJessica.MOV
+processing 26 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\20180801_125800.mp4
+processing 27 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\20221117_100412.mp4
+processing 28 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\Cathy-Footy-Video002.3gp
+processing 29 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\france-2011-05-05-donkeys-video0025-donkeys.3gp
+processing 30 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\GH018435.MP4
+processing 31 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\IMG_0149.MOV
+processing 32 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\IMG_3048.3gp
+processing 33 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\IMG_3119.MOV
+processing 34 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\IMG_6110.MOV
+processing 35 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\MVI_0055.avi.mp4
+processing 36 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\MVI_0375.AVI
+processing 37 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\MVI_0542.AVI
+processing 38 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\Pats Pics8 045.MOV
+processing 39 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\VIDEO0002.3gp
+processing 40 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\VIDEO0003.3gp
+processing 41 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_123006.jpg
+processing 42 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_123550.jpg
+processing 43 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_125632.jpg
+processing 44 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_125637.jpg
+processing 45 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_125652.jpg
+processing 46 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_133820.jpg
+processing 47 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_133830.jpg
+processing 48 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_133907.jpg
+processing 49 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_133924.jpg
+processing 50 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_133937.jpg
+processing 51 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_134040.jpg
+processing 52 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_134049.jpg
+processing 53 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_134107.jpg
+processing 54 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_134214.jpg
+processing 55 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_134223.jpg
+processing 56 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_134311.jpg
+processing 57 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_134334.jpg
+processing 58 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_134514.jpg
+processing 59 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_134523.jpg
+processing 60 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_134533.jpg
+processing 61 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\20180801_134610.jpg
+processing 62 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\2018_01_18\National Police CertificateIMG (2018_03_21 05_14_17 UTC).jpg
+processing 63 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\2018_01_26\IMG_0002 (2) (2018_03_21 05_14_17 UTC).jpg
+processing 64 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\2018_01_26\IMG_0002 (2018_03_21 05_14_17 UTC).jpg
+processing 65 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180731090551_IMG_0175.JPG
+processing 66 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180731213613_IMG_0176.JPG
+processing 67 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180731213627_IMG_0177.JPG
+processing 68 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180731213649_IMG_0178.JPG
+processing 69 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180731213758_IMG_0179.JPG
+processing 70 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180731213830_IMG_0180.JPG
+processing 71 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180731213904_IMG_0181.JPG
+processing 72 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180731214559_IMG_0182.JPG
+processing 73 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180731214655_IMG_0183.JPG
+processing 74 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180731214745_IMG_0184.JPG
+processing 75 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180731214805_IMG_0185.JPG
+processing 76 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180731214821_IMG_0186.JPG
+processing 77 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801122416_IMG_0187.JPG
+processing 78 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801122422_IMG_0188 crop.jpg
+processing 79 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801122422_IMG_0188.JPG
+processing 80 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801122424_IMG_0189.JPG
+processing 81 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801122525_IMG_0190.JPG
+processing 82 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801122528_IMG_0191 crop.jpg
+processing 83 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801122528_IMG_0191.JPG
+processing 84 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801122531_IMG_0192.JPG
+processing 85 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801122702_IMG_0193.JPG
+processing 86 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801122710_IMG_0194.JPG
+processing 87 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801122712_IMG_0195.JPG
+processing 88 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801122804_IMG_0196.JPG
+processing 89 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801122806_IMG_0197.JPG
+processing 90 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801122810_IMG_0198.JPG
+processing 91 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801124855_IMG_0199.JPG
+processing 92 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801124909_IMG_0200 crop.jpg
+processing 93 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801124909_IMG_0200.JPG
+processing 94 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801124952_IMG_0201.JPG
+processing 95 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125110_IMG_0202.JPG
+processing 96 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125142_IMG_0203.JPG
+processing 97 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125232_IMG_0204.JPG
+processing 98 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125350_IMG_0205.JPG
+processing 99 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125357_IMG_0206.JPG
+processing 100 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125414_IMG_0207.JPG
+processing 101 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125428_IMG_0208.JPG
+processing 102 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125430_IMG_0209.JPG
+processing 103 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125510_IMG_0210.JPG
+processing 104 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125636_IMG_0211.JPG
+processing 105 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125651_IMG_0212.JPG
+processing 106 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125707_IMG_0213.JPG
+processing 107 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125729_IMG_0214.JPG
+processing 108 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125731_IMG_0215.JPG
+processing 109 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125735_IMG_0216.JPG
+processing 110 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125736_IMG_0217.JPG
+processing 111 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125811_IMG_0218.JPG
+processing 112 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125814_IMG_0219 crop.jpg
+processing 113 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801125814_IMG_0219.JPG
+processing 114 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130339_IMG_0220.JPG
+processing 115 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130341_IMG_0221.JPG
+processing 116 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130343_IMG_0222.JPG
+processing 117 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130417_IMG_0223.JPG
+processing 118 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130419_IMG_0224.JPG
+processing 119 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130422_IMG_0225.JPG
+processing 120 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130432_IMG_0226.JPG
+processing 121 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130434_IMG_0227.JPG
+processing 122 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130437_IMG_0228 crop.jpg
+processing 123 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130437_IMG_0228.JPG
+processing 124 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130439_IMG_0229.JPG
+processing 125 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130440_IMG_0230.JPG
+processing 126 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130507_IMG_0231.JPG
+processing 127 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130509_IMG_0232 crop.jpg
+processing 128 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130509_IMG_0232.JPG
+processing 129 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130512_IMG_0233.JPG
+processing 130 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130620_IMG_0234 crop.jpg
+processing 131 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130620_IMG_0234.JPG
+processing 132 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130621_IMG_0235 crop crop.jpg
+processing 133 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130621_IMG_0235 crop.jpg
+processing 134 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130621_IMG_0235.JPG
+processing 135 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130622_IMG_0236.JPG
+processing 136 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130706_IMG_0237.JPG
+processing 137 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130707_IMG_0238.JPG
+processing 138 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130708_IMG_0239.JPG
+processing 139 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130711_IMG_0240.JPG
+processing 140 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130716_IMG_0241.JPG
+processing 141 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130821_IMG_0242.JPG
+processing 142 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130823_IMG_0243 crop.jpg
+processing 143 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130823_IMG_0243.JPG
+processing 144 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130826_IMG_0244.JPG
+processing 145 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130831_IMG_0245.JPG
+processing 146 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130832_IMG_0246.JPG
+processing 147 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801130832_IMG_0246_1.JPG
+processing 148 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801_125315.mp4
+processing 149 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801_125800.mp4
+processing 150 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801_143548.mp4
+processing 151 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801_143609.jpg
+processing 152 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801_145353.jpg
+processing 153 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801_145403.jpg
+processing 154 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801_145418.jpg
+processing 155 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801_145419.jpg
+processing 156 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801_145446.jpg
+processing 157 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801_145451.jpg
+processing 158 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801_145453.jpg
+processing 159 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801_145638.jpg
+processing 160 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801_155555.jpg
+processing 161 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801_155603.jpg
+processing 162 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801_155606.jpg
+processing 163 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801_180414.jpg
+processing 164 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST\2018\Tony-Deb-Wedding\20180801_193504.jpg
+Start processing image/video files in "G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\2TEST_rotations" RECURSIVE=True DEBUG_MODE=False SILENT_MODE=False  glob_var="**/*.*" 
+      with Extensions=['.png', '.jpg', '.jpeg', '.gif', '.mp4', '.mpeg4', '.mpg', '.mpeg', '.avi', '.mjpeg', '.3gp', '.mov', '.m2ts']
+processing 165 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\2TEST_rotations\100_2587.JPG
+processing 166 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\2TEST_rotations\2013-08-21-Jemma-fromJessica.MOV
+processing 167 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\2TEST_rotations\2016-08-13 022.mp4
+processing 168 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\2TEST_rotations\20160424_161045.jpg
+processing 169 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\2TEST_rotations\20160724_145919.jpg
+processing 170 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\2TEST_rotations\20160813_125152.jpg
+processing 171 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\2TEST_rotations\20160813_125556.jpg
+processing 172 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\2TEST_rotations\20160813_140621.mp4
+processing 173 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\2TEST_rotations\20180801_125800.mp4
+processing 174 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\2TEST_rotations\DSC00340.JPG
+processing 175 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\2TEST_rotations\DSC00472.JPG
+processing 176 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\2TEST_rotations\DSC01043.JPG
+processing 177 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\2TEST_rotations\IMG_3119.MOV
+processing 178 G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\2TEST_rotations\IMG_6110.MOV
+Finished processing 178 image/video files.
+Start removing temporary *.ffindex files from folder "G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\0TEST" with recursive="True" ...
+Start removing temporary *.ffindex files from folder "G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\1TEST" with recursive="True" ...
+Start removing temporary *.ffindex files from folder "G:\DVD\PAT-SLIDESHOWS\_AI_05_in_development\2TEST_rotations" with recursive="True" ...
+Finished removing 178 temporary .ffindex files with recursive="True"
+Done.
+Script evaluation done in 34.75 seconds
+Frame: 21/11588Frame: 87/11588Frame: 190/11588Frame: 293/11588Frame: 399/11588

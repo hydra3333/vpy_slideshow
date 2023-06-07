@@ -1,0 +1,218 @@
+Understood. If the input videos are in various color spaces, you can modify the script to handle different color spaces by adding appropriate color space conversion functions before applying any further operations. Here's an updated version of the script that includes color space conversion for input videos:
+
+```python
+import cv2
+import glob
+import os
+import numpy as np
+
+
+def convert_to_constant_framerate(video_path, output_path, framerate):
+    # Open the input video
+    video = cv2.VideoCapture(video_path)
+
+    # Get the original video's properties
+    frame_count = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+    original_fps = video.get(cv2.CAP_PROP_FPS)
+
+    # Calculate the frame interpolation factor
+    interpolation_factor = original_fps / framerate
+
+    # Create a VideoWriter with the desired constant framerate
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    video_out = cv2.VideoWriter(output_path, fourcc, framerate, (int(video.get(cv2.CAP_PROP_FRAME_WIDTH)), int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))))
+
+    # Read and write each frame of the input video to the output video
+    for i in range(frame_count):
+        ret, frame = video.read()
+        if not ret:
+            break
+
+        # Write each frame multiple times based on the interpolation factor
+        for _ in range(int(interpolation_factor)):
+            video_out.write(frame)
+
+    video.release()
+    video_out.release()
+
+    return output_path, original_fps
+
+
+def convert_to_pal_hd_color_space(frame):
+    # Convert frame to bt.709 color space
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2YUV)
+    frame[:, :, 0] = cv2.equalizeHist(frame[:, :, 0])
+    frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR)
+
+    return frame
+
+
+def convert_to_full_color_range(frame):
+    # Convert frame to full color range (0-255)
+    frame = frame * 255.0
+
+    return frame
+
+
+def create_slideshow(images_folder, output_file, duration_per_image, video_quality, framerate):
+    # Collect the paths of all JPG, GIF, and video clips in the folder tree
+    image_paths = glob.glob(os.path.join(images_folder, '**/*.jpg'), recursive=True)
+    image_paths.extend(glob.glob(os.path.join(images_folder, '**/*.gif'), recursive=True))
+    image_paths.extend(glob.glob(os.path.join(images_folder, '**/*.mp4'), recursive=True))
+    image_paths.extend(glob.glob(os.path.join(images_folder, '**/*.avi'), recursive=True))
+    image_paths.extend(glob.glob(os.path.join(images_folder, '**/*.mpg'), recursive=True))
+    image_paths.sort()
+
+    # Initialize the VideoWriter with H.264 codec and the specified framerate
+    first_image = cv2.imread(image_paths[0])
+    width, height = 1920, 1080  # Desired output size
+    fourcc = cv2.VideoWriter_fourcc(*'avc1')  # For H.264 codec
+    video = cv2.VideoWriter(output_file, fourcc, framerate, (width, height))
+
+    # Iterate over the images and videos and add them to the slideshow video
+    for image_path in image_paths:
+        # Check if the file is an image (JPG or GIF)
+        if image_path.endswith('.jpg') or image_path.endswith('.gif'):
+            if image_path.endswith('.gif'):
+                # Read GIF frames
+                gif_frames = cv2.VideoCapture(image_path)
+                frame_count = int(gif_frames.get(cv2.CAP_PROP_FRAME_COUNT))
+
+                # Read
+
+ and write each frame of the GIF
+                for _ in range(frame_count):
+                    _, frame = gif_frames.read()
+
+                    # Rotate the frame based on the Exif rotation flag
+                    rotation_flag = frame._getexif().get(0x112, 1) if hasattr(frame, '_getexif') else 1
+                    if rotation_flag == 3:
+                        frame = cv2.rotate(frame, cv2.ROTATE_180)
+                    elif rotation_flag == 6:
+                        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+                    elif rotation_flag == 8:
+                        frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+
+                    # Resize the frame while maintaining the aspect ratio
+                    aspect_ratio = frame.shape[1] / frame.shape[0]
+                    if aspect_ratio > width / height:
+                        new_width = width
+                        new_height = int(width / aspect_ratio)
+                    else:
+                        new_height = height
+                        new_width = int(height * aspect_ratio)
+
+                    resized_frame = cv2.resize(frame, (new_width, new_height))
+
+                    # Create a black canvas of the desired output size
+                    canvas = np.zeros((height, width, 3), dtype=np.uint8)
+
+                    # Calculate the position to place the resized frame in the center of the canvas
+                    x = (width - new_width) // 2
+                    y = (height - new_height) // 2
+
+                    # Place the resized frame on the canvas
+                    canvas[y:y + new_height, x:x + new_width] = resized_frame
+
+                    # Convert the frame to BT.709 color space
+                    canvas = convert_to_pal_hd_color_space(canvas)
+
+                    # Convert the frame to full color range
+                    canvas = convert_to_full_color_range(canvas)
+
+                    # Write the frame to the video for the specified duration
+                    for _ in range(int(duration_per_image * framerate)):
+                        video.write(canvas)
+
+                gif_frames.release()
+            else:
+                # Read JPG images
+                image = cv2.imread(image_path)
+
+                # Rotate the image based on the Exif rotation flag
+                rotation_flag = image._getexif().get(0x112, 1) if hasattr(image, '_getexif') else 1
+                if rotation_flag == 3:
+                    image = cv2.rotate(image, cv2.ROTATE_180)
+                elif rotation_flag == 6:
+                    image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+                elif rotation_flag == 8:
+                    image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+
+                # Resize the image while maintaining the aspect ratio
+                aspect_ratio = image.shape[1] / image.shape[0]
+                if aspect_ratio > width / height:
+                    new_width = width
+                    new_height = int(width / aspect_ratio)
+                else:
+                    new_height = height
+                    new_width = int(height * aspect_ratio)
+
+                resized_image = cv2.resize(image, (new_width, new_height))
+
+                # Create a black canvas of the desired output size
+                canvas = np.zeros((height, width, 3), dtype=np.uint8)
+
+                # Calculate the position to place the resized image in the center of the canvas
+                x = (width - new_width) // 2
+                y = (height - new_height) // 2
+
+                # Place the resized image on the canvas
+                canvas[y:y + new_height, x:x + new_width] = resized_image
+
+                # Convert the image to BT.709 color space
+                canvas = convert_to_pal_hd_color_space(canvas)
+
+                # Convert the image
+
+ to full color range
+                canvas = convert_to_full_color_range(canvas)
+
+                # Write the image to the video for the specified duration
+                for _ in range(int(duration_per_image * framerate)):
+                    video.write(canvas)
+
+        # Check if the file is a video clip (MP4, AVI, MPG)
+        elif image_path.endswith('.mp4') or image_path.endswith('.avi') or image_path.endswith('.mpg'):
+            # Convert the video to a constant framerate
+            converted_path, original_fps = convert_to_constant_framerate(image_path, 'temp.mp4', framerate)
+
+            # Open the converted video
+            converted_video = cv2.VideoCapture(converted_path)
+
+            # Read and write each frame of the converted video
+            while True:
+                ret, frame = converted_video.read()
+                if not ret:
+                    break
+
+                # Convert the frame to BT.709 color space
+                frame = convert_to_pal_hd_color_space(frame)
+
+                # Convert the frame to full color range
+                frame = convert_to_full_color_range(frame)
+
+                # Write the frame to the video
+                video.write(frame)
+
+            converted_video.release()
+
+            # Delete the temporary converted video file
+            os.remove(converted_path)
+
+    video.release()
+
+    return output_file
+
+
+# Example usage:
+images_folder = '/path/to/images'
+output_file = 'slideshow.mp4'
+duration_per_image = 3.0  # seconds
+video_quality = 95  # 0-100, higher is better
+framerate = 30
+
+create_slideshow(images_folder, output_file, duration_per_image, video_quality, framerate)
+```
+
+This script now includes the conversion of input frames to the BT.709 color space and the full color range (0-255) for both images and videos. You can modify the `convert_to_pal_hd_color_space` and `convert_to_full_color_range` functions as needed to handle different color spaces and color range conversions for the input videos.

@@ -1,0 +1,151 @@
+###############
+Certainly! Here's an updated version of the script that can handle both variable framerate and constant framerate input videos:
+
+```python
+import cv2
+import numpy as np
+import os
+import shutil
+
+
+def convert_to_constant_framerate(input_file, output_file, target_framerate):
+    # Create a temporary directory to store the frames
+    temp_dir = 'temp_frames'
+    os.makedirs(temp_dir, exist_ok=True)
+
+    # Extract frames from the input video
+    vidcap = cv2.VideoCapture(input_file)
+    success, frame = vidcap.read()
+    count = 0
+    while success:
+        frame_path = os.path.join(temp_dir, f'{count:06d}.jpg')
+        cv2.imwrite(frame_path, frame)  # Save frame as JPEG file
+        success, frame = vidcap.read()
+        count += 1
+    vidcap.release()
+
+    # Calculate the duration of each frame at the target framerate
+    frame_duration = 1 / target_framerate
+
+    # Create a new video using the constant framerate
+    ffmpeg_cmd = f'ffmpeg -r {target_framerate} -i {temp_dir}/%06d.jpg -vf "setpts={frame_duration:.3f}*PTS" ' \
+                 f'-c:v libx264 -crf 18 -pix_fmt yuv420p -y {output_file}'
+    os.system(ffmpeg_cmd)
+
+    # Remove the temporary directory
+    shutil.rmtree(temp_dir)
+
+    # Return the path of the converted video and original framerate
+    return output_file, target_framerate
+
+
+def convert_to_pal_hd_color_space(frame):
+    # Convert the frame to BT.709 color space
+    converted_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    converted_frame = cv2.cvtColor(converted_frame, cv2.COLOR_RGB2YUV)
+    return converted_frame
+
+
+def convert_to_full_color_range(frame):
+    # Convert the frame to full color range (0-255)
+    converted_frame = frame.astype(np.float32)
+    converted_frame *= 255.0 / np.max(converted_frame)
+    converted_frame = np.clip(converted_frame, 0, 255).astype(np.uint8)
+    return converted_frame
+
+
+def create_slideshow(input_folder, output_file, duration_per_image, video_quality, framerate):
+    # Get the list of files in the input folder
+    files = sorted([f for f in os.listdir(input_folder) if os.path.isfile(os.path.join(input_folder, f))])
+
+    # Set the output video properties
+    width, height = 1920, 1080
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    video = cv2.VideoWriter(output_file, fourcc, framerate, (width, height))
+
+    for file in files:
+        file_path = os.path.join(input_folder, file)
+
+        # Check if the file is an image (JPG, PNG, GIF)
+        if file_path.endswith('.jpg') or file_path.endswith('.png') or file_path.endswith('.gif'):
+            # Read the image
+            image = cv2.imread(file_path)
+
+            # Rotate the image based on the Exif rotation flag
+            rotation_flag = image._getexif().get(0x112, 1) if hasattr(image, '_getexif') else 1
+            if rotation_flag == 3:
+                image = cv2.rotate(image, cv2.ROTATE_180)
+            elif rotation_flag == 6:
+                image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+            elif rotation_flag == 8:
+                image = cv2.rotate(image, cv2.ROTATE_
+
+90_CLOCKWISE)
+
+            # Resize the image to fit the video frame
+            image = cv2.resize(image, (width, height))
+
+            # Convert the image to BT.709 color space
+            image = convert_to_pal_hd_color_space(image)
+
+            # Convert the image to full color range
+            image = convert_to_full_color_range(image)
+
+            # Write the image to the video for the specified duration
+            for _ in range(int(duration_per_image * framerate)):
+                video.write(image)
+
+        # Check if the file is a video clip (MP4, AVI, MPG)
+        elif file_path.endswith('.mp4') or file_path.endswith('.avi') or file_path.endswith('.mpg'):
+            # Determine the input video's framerate
+            vidcap = cv2.VideoCapture(file_path)
+            input_framerate = vidcap.get(cv2.CAP_PROP_FPS)
+            vidcap.release()
+
+            if abs(input_framerate - framerate) < 1e-6:
+                # Input video has the same framerate as the target framerate
+                converted_path = file_path
+                original_fps = input_framerate
+            else:
+                # Input video has a different framerate, convert it to a constant framerate
+                converted_path, original_fps = convert_to_constant_framerate(file_path, 'temp.mp4', framerate)
+
+            # Open the converted video
+            converted_video = cv2.VideoCapture(converted_path)
+
+            # Read and write each frame of the converted video
+            while True:
+                ret, frame = converted_video.read()
+                if not ret:
+                    break
+
+                # Convert the frame to BT.709 color space
+                frame = convert_to_pal_hd_color_space(frame)
+
+                # Convert the frame to full color range
+                frame = convert_to_full_color_range(frame)
+
+                # Write the frame to the video
+                video.write(frame)
+
+            converted_video.release()
+
+            # Delete the temporary converted video file
+            os.remove(converted_path)
+
+    video.release()
+
+    return output_file
+
+
+# Example usage:
+images_folder = '/path/to/images'
+output_file = 'slideshow.mp4'
+duration_per_image = 3.0  # seconds
+video_quality = 95  # 0-100, higher is better
+framerate = 30
+
+create_slideshow(images_folder, output_file, duration_per_image, video_quality, framerate)
+```
+
+This script now supports handling both variable framerate and constant framerate input videos while preserving all previous functionality.
