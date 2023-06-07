@@ -111,6 +111,8 @@ set MAX_VIDEO_FILES_PER_CHUNK >> "!log!" 2>&1
 set TOLERANCE_PERCENT_FINAL_CHUNK >> "!log!" 2>&1
 echo. >> "!log!" 2>&1
 
+goto :looping
+
 echo del /F "!preparation_json_input_file!" >> "!log!" 2>&1
 del /F "!preparation_json_input_file!" >> "!log!" 2>&1
 echo { >> "!preparation_json_input_file!"
@@ -165,16 +167,133 @@ REM echo TYPE "!all_chunks_output_file!">> "!log!" 2>&1
 REM TYPE "!all_chunks_output_file!">> "!log!" 2>&1
 REM echo. >> "!log!" 2>&1
 
+REM echo. >> "!log!" 2>&1
+REM echo. Individual Chunk files:>> "!log!" 2>&1
+REM echo. >> "!log!" 2>&1
+REM echo TYPE "!chunks_output_files_common_name_glob!">> "!log!" 2>&1
+REM TYPE "!chunks_output_files_common_name_glob!">> "!log!" 2>&1
+REM echo. >> "!log!" 2>&1
+REM echo. >> "!log!" 2>&1
+
 echo. >> "!log!" 2>&1
-echo. Individual Chunk files:>> "!log!" 2>&1
-echo. >> "!log!" 2>&1
-echo TYPE "!chunks_output_files_common_name_glob!">> "!log!" 2>&1
-TYPE "!chunks_output_files_common_name_glob!">> "!log!" 2>&1
+echo Loop through the .json chunk files and tun the script for each, to create slideshow chunks >> "!log!" 2>&1
 echo. >> "!log!" 2>&1
 echo. >> "!log!" 2>&1
 
+:looping
 
-echo. >> "!log!" 2>&1
+echo Start of processing chunk files >> "!log!" 2>&1
+dir /b
+for /f "delims=" %%F in ('dir /b /a-d /on "!chunks_output_files_common_name_glob!"') do (
+	set "FullFile=%%~fF
+	set "FullFile=%%~dpnxF
+    set "disk=%%~dF"
+    set "Directory=%%~pF"
+    set "File=%%~nF"
+    set "Extension=%%~xF"
+    set "diskDirectory=%%~dpF"
+    set "diskDirectoryFile=%%~dpnF"
 	
+	set "current_chunk_file=!FullFile!"
+	set "current_chunk_fixed_file=!diskDirectory!chunk_fixed_filename.json"
+	
+	echo current_chunk_file=!current_chunk_file!
+	echo current_chunk_fixed_file=!current_chunk_fixed_file!
+	
+	echo dir /b "!FullFile!"
+	dir /b "!FullFile!"
+	echo dir /b "!current_chunk_file!"
+	dir /b "!current_chunk_file!"
+	echo.
+	echo copy /y /v "!current_chunk_file!" "!current_chunk_fixed_file!"
+	copy /y /v "!current_chunk_file!" "!current_chunk_fixed_file!"
+	echo.
+
+	REM echo "Creating slideshow video chunk based on Chunk file, and creating a related snippets ffmpeg_exe ..."
+)
+echo End of processing chunk files >> "!log!" 2>&1
+
+@ECHO off
+
+set "f=.\a.json"
+set "f_bb=!f:\=\\!"
+del /f "!f!"
+echo { >> "!f!"
+echo "var_a" : "Content for variable a", >> "!f!"
+echo "var_20" : 20, >> "!f!"
+echo "var_21" : 20.1, >> "!f!"
+echo "var_true" : true, >> "!f!"
+echo "var_false" : false, >> "!f!"
+echo "var_list" : [ false, true, "a", 1, 2, 2.5 ] >> "!f!"
+echo } >> "!f!"
+
+
+set "j=.\json_to_environment.py"
+set "j_bb=!j:\=\\!"
+set "b=.\json_to_environment_run_after_the_py.bat"
+set "b_bb=!j:\=\\!"
+del /f "!j!"
+del /f "!b!"
+echo import json >> "!j!"
+echo import os >> "!j!"
+echo json_file = r'!f!' >> "!j!"
+echo bat_file = r'!b!' >> "!j!"
+echo with open(json_file) as file: >> "!j!"
+echo     data = json.load(file) >> "!j!"
+echo with open(bat_file, 'w') as file: >> "!j!"
+echo     file.write(f'@echo off\n') >> "!j!"
+echo     for key, value in data.items(): >> "!j!"
+REM echo         if isinstance(value, list): >> "!j!"
+REM echo             value_string = '[' + (', '.join(str(item) for item in value)) + ']' >> "!j!"
+REM echo         else: >> "!j!"
+REM echo             value_string =  str(value) >> "!j!"
+echo         if isinstance(value, list): >> "!j!"
+echo             value_string = '[' + (', '.join('"' + str(item) + '"' if isinstance(item, str) else str(item) for item in value)) + ']' >> "!j!"
+echo         else: >> "!j!"
+echo             value_string = '"' + str(value) + '"' if isinstance(value, str) else str(value) >> "!j!"
+echo         file.write(f'set "{key}={value_string}"\n') >> "!j!"
+echo     file.write(f'goto :eof\n') >> "!j!"
+echo #print(f'{bat_file} generated.') >> "!j!"
+@echo on
+
+type "!f!"
+
+type !j!"
+"!python_exe!" "!j!"
+type "!b!"
+
+call "!b!"
+echo call "!b!" yielded:
+echo var_a: !var_a!
+echo var_20: !var_20!
+echo var_21: !var_21!
+echo var_true: !var_true!
+echo var_false: !var_false!
+echo var_list: !var_list!
+set var_
+
+
 pause
+
 goto :eof
+
+import json
+import os
+
+json_file = r'.\a.json'
+bat_file = r'.\json_to_environment_run_after_the_py.bat'
+with open(json_file) as file:
+    data = json.load(file)
+with open(bat_file, 'w') as file:
+    file.write('@echo off\n')
+    for key, value in data.items():
+        if isinstance(value, list):
+            value_string = '[' + (', '.join('"' + str(item) + '"' if isinstance(item, str) else str(item) for item in value)) + ']'
+        else:
+            value_string = '"' + str(value) + '"' if isinstance(value, str) else str(value)
+        file.write(f'set "{key}={value_string}"\n')
+    file.write('goto :eof\n')
+
+# Call the generated .bat file
+os.system(bat_file)
+

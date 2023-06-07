@@ -334,18 +334,16 @@ if __name__ == "__main__":
 	# Create individual chunk files based on the individual chunk_id in the f_ll tree
 	print(f"About to save chunk in files like {preparation_dict['chunks_output_files_common_name'] + '*' + '.json'}",flush=True)
 	chunk_count = len(chunks)
-	c = 0
 	for chunk_id in range(0,chunk_count):	# i.e. 0 to (chunk_count-1)
 		num_files = chunks[str(chunk_id)]["num_files"]
 		file_list = chunks[str(chunk_id)]["file_list"]
-		c = c + num_files
 		# Save the individual chunk
 		individual_chunk_id_string = str(chunk_id).zfill(5)	# zero padded to 5 digits
 		individual_chunk_filename = fully_qualified_filename(preparation_dict['chunks_output_files_common_name'] + individual_chunk_id_string + ".json")
 		individual_chunk_dict = { "chunk_id" : individual_chunk_id_string, "chunk_filename" : individual_chunk_filename, "num_files" : num_files, "file_list" : file_list }
-		with open(chunk_filename, 'w') as fp:
+		with open(individual_chunk_filename, 'w') as fp:
 			json.dump(individual_chunk_dict, fp, indent=4)
 		print(f"Created individual chuink file: {individual_chunk_filename} listing {num_files} files.",flush=True)
 	#end for
 
-	print(f"Finished assigning files into chunks for processing: {count_of_files} files into {c} chunks. Created {chunk_count} chunk files.",flush=True)
+	print(f"Finished assigning files into chunks for processing: {count_of_files} files into {chunk_count} chunks. Created {chunk_count} chunk files.",flush=True)
