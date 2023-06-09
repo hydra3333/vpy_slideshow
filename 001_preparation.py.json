@@ -6,6 +6,7 @@
     ],
     "root_folder_for_outputs": "D:\\ssTEST",
     "all_chunks_output_file": "D:\\ssTEST\\001_preparation.py.chunks.json",
+    "chunks_output_files_common_name": "D:\\ssTEST\\001_preparation.py.chunk_",
     "chunks_output_files_common_name_glob": "D:\\ssTEST\\001_preparation.py.chunk_*.json",
     "snippets_output_file_list": "D:\\ssTEST\\001_preparation.py.list_of_snippets_files.txt",
     "background_audio_input": "D:\\ssTEST\\background_music_concatenated_ebur128_final.doubled.m4a",

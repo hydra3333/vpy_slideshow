@@ -37,28 +37,15 @@ REM
 
 cd 
 
-dir /b *load*.py
+dir /b test*.py
 
-set "script=.\do_test_load_settings_3333.py"
+echo %PYTHONPATH%
 
-echo settings={"DEBUG":True}>.\settings_3333.py
-type .\settings_3333.py
-
+del /f .\test_result*.py
+set "script=.\test.py"
 "!python_exe!" "!script!"
 
-type .\settings_3333.py
+type .\test_result*.py
 
 pause
 exit
-
-
-I have portable python installed and use PYTHONPATH environment variable to point to it.
-In a different folder "D:\ssTEST\" I have 2 files: do_test_load_settings_3333.py and load_settings_3333.py
-do_test_load_settings_3333.py has this line 'import load_settings_3333' and yet it fails:
-
-Traceback (most recent call last):
-  File "D:\ssTEST\do_test_load_settings_3333.py", line 29, in <module>
-    import load_settings_3333
-ModuleNotFoundError: No module named 'load_settings_3333'
-
-why ?

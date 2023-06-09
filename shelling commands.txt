@@ -1,0 +1,23 @@
+import subprocess
+
+def run_command(command):
+    # Run the command in a subprocess
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    # Wait for the process to complete and retrieve the output
+    output, error = process.communicate()
+
+    # Decode the output from bytes to string
+    output = output.decode('utf-8').strip()
+
+    # Print any error messages
+    if error:
+        print(f"Error: {error.decode('utf-8').strip()}")
+
+    # Return the output
+    return output
+
+# Example usage
+command = ['ls', '-l']
+result = run_command(command)
+print(result)

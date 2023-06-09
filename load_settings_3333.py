@@ -3,6 +3,7 @@ from vapoursynth import core
 core = vs.core
 import sys
 import os
+import importlib
 import re
 from functools import partial
 import pathlib
@@ -20,14 +21,31 @@ import json
 import pprint
 import uuid
 import logging
-#
+
+global settings_module
+
+# Ensure we can import modules from ".\" by adding the current default folder to the python path.
+# (tried using just PYTHONPATH environment variable but it was unreliable)
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 global DEBUG
-DEBUG = False
+DEBUG = True
 TERMINAL_WIDTH_3333 = 250
 objPrettyPrint_3333 = pprint.PrettyPrinter(width=TERMINAL_WIDTH_3333, compact=False, sort_dicts=False)	# facilitates formatting and printing of text and dicts etc
 
-def normalize_path_3333(path):
-	#if DEBUG: print(f"DEBUG: normalize_path_3333:  incoming path='{path}'",flush=True)
+
+# Based on ChatGPT, we are no longer using settings.json, we will use settings_3333.py
+# This will allow us to use descriptive comments in settings_3333.py which a user must edit.
+# If the user mucks up python syntax, we rely on the module crashing on import.
+
+# What we are doing instead is to re-import settings_3333.py every time load_settings() is called.
+# Like this
+#    import importlib
+#    importlib.reload(mymodule)  # Reload the module
+
+
+def normalize_path(path):
+	#if DEBUG: print(f"DEBUG: normalize_path:  incoming path='{path}'",flush=True)
 	# Replace single backslashes with double backslashes
 	path = path.rstrip(os.linesep).strip('\r').strip('\n').strip()
 	r1 = r'\\'
@@ -37,38 +55,41 @@ def normalize_path_3333(path):
 	# Add double backslashes before any single backslashes
 	for i in range(0,20):
 		path = path.replace(r2, r1)
-	if DEBUG: print(f"DEBUG: normalize_path_3333: outgoing path='{path}'",flush=True)
+	if DEBUG: print(f"DEBUG: normalize_path: outgoing path='{path}'",flush=True)
 	return path
 
-def fully_qualified_directory_no_trailing_backslash_3333(directory_name):
+def fully_qualified_directory_no_trailing_backslash(directory_name):
 	# make into a fully qualified directory string stripped and without a trailing backslash
 	# also remove extraneous backslashes which get added by things like abspath
 	new_directory_name = os.path.abspath(directory_name).rstrip(os.linesep).strip('\r').strip('\n').strip()
 	if directory_name[-1:] == (r'\ '.strip()):		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
 		new_directory_name = directory_name[:-1]	# remove any trailing backslash
-	new_directory_name = normalize_path_3333(new_directory_name)
+	new_directory_name = normalize_path(new_directory_name)
 	return new_directory_name
 
-def fully_qualified_filename_3333(file_name):
+def fully_qualified_filename(file_name):
 	# Make into a fully qualified filename string using double backslashes
 	# to later print/write with double backslashes use eg
-	#	converted_string = fully_qualified_filename_3333('D:\\a\\b\\\\c\\\\\\d\\e\\f\\filename.txt')
+	#	converted_string = fully_qualified_filename('D:\\a\\b\\\\c\\\\\\d\\e\\f\\filename.txt')
 	#	print(repr(converted_string),flush=True)
 	# yields 'D:\\a\\b\\c\\d\\e\\f\\filename.txt'
 	new_file_name = os.path.abspath(file_name).rstrip(os.linesep).strip('\r').strip('\n').strip()
 	if new_file_name.endswith('\\'):
 		new_file_name = new_file_name[:-1]  # Remove trailing backslash
-	new_file_name = normalize_path_3333(new_file_name)
+	new_file_name = normalize_path(new_file_name)
 	return new_file_name
 
-#
-def load_settings(filename=".\\settings_3333.json"):
+
+def load_settings():	
+	# This will always force reload of 'setup.py' from the current default folder
 	# Settings_filename is always "fixed" in the same place as the script is run from, 
-	# A filename parameter is provided for convenience and testing, however the default is ".\\settings_3333.json"
-	# A dict is returned with all of the settings in it, missing values are defaulted, yield calculated ones as well.
+	# A dict is returned with all of the settings in it.
+	# Missing values are defaulted here, yielding calculated ones as well.
+
+	global settings_module
 
 	# This is ALWAYS a fixed filename in the current default folder !!!
-	SLIDESHOW_SETTINGS_FILE						= os.path.join(r'.', 'SLIDESHOW_SETTINGS.JSON')
+	SLIDESHOW_SETTINGS_MODULE_NAME				= 'settings_3333'.lower()	# settings_3333.py
 
 	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS	= [ r'.' ]
 	ROOT_FOLDER_FOR_OUTPUTS						= r'.'
@@ -78,13 +99,40 @@ def load_settings(filename=".\\settings_3333.json"):
 	EEK_EXTENSIONS								= [ r'.m2ts' ]
 	VID_EEK_EXTENSIONS							= VID_EXTENSIONS + EEK_EXTENSIONS
 	EXTENSIONS									= PIC_EXTENSIONS + VID_EXTENSIONS + EEK_EXTENSIONS
-	CHUNKS_OUTPUT_FILE_ALL_CHUNKS				= os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'001_preparation.all_chunks.json')
-	CHUNKS_OUTPUT_FILES_COMMON_NAME				= os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'001_preparation.chunk_')
-	CHUNKS_OUTPUT_FILES_COMMON_NAME_GLOB		= os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'001_preparation.chunk_*.json')
-	PER_CHUNK_LIST_OF_SNIPPET_FILES				= os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'001_preparation.PER_CHUNK_LIST_OF_SNIPPET_FILES.json')
-	BACKGROUND_AUDIO_INPUT_FILE					= os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'pre_editing_background_audio_input.m4a')
-	FINAL_OUTPUT_MP4_FILE						= os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'vpy_slideshow.FINAL_MUXED_SLIDESHOW.mp4')
-	MAX_VIDEO_FILES_PER_CHUNK					= int(150)
+
+	# we need a json file to contain a dict of all chunks
+	CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT			= os.path.join(TEMP_FOLDER, r'chunks_file_for_all_chunks_dict.json')		# mostly for debug
+	SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT		= os.path.join(TEMP_FOLDER, r'snippets_file_for_all_snippets_dict.json')	# mostly for debug
+	CHUNK_ENCODED_FFV1_FILENAME_BASE			= os.path.join(TEMP_FOLDER, r'encoded_chunk_ffv1_')	# the interim encoded video created by the encoding process, to be associated with a snippet dict, full names dynamically created eg "interim_ffv1_0001.mkv"
+	
+	# Now we need a set of inter-step comms files
+	# 1. PREPARATION: 
+	# the CONTROLLER calls load_settings.load_settings() and can call a function to do the chunking into a dict and keep it in memory and write a debug copy to CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT
+
+	# 2. ENCODER : process_video also creating a snippets file ... change the format of the snippets file to exclude the last line with a filename and change the code
+	CURRENT_CHUNK_FILENAME						= os.path.join(TEMP_FOLDER, r'current_chunk_file.json') 	# used by the ENCODER to load a file whose .json content gives the ENCODER (a dict of the current chunk, and a filename to be encoded into)
+	CURRENT_SNIPPETS_FILENAME					= os.path.join(TEMP_FOLDER, r'current_snippets_file.json') 	# used by the ENCODER to write file whose .json content will be a dict of snippets for this chunk, and a filename/[start/end]-frames of the encoded file)
+																											# the file will contain the start/end frame numbers and the fully qualified SOURCE filename for each snippet, and a filename/[start/end-frames] for the encoded file (used in calcs later)
+																											# after encoding this chunk is completed, the CONTROLLER loads a dict from this json file, being snippet data for this chunk, and loads into a global dict for tracking
+	
+	# 3. re-encode all encoded ffv1 chunks into a concatenated AVC .mp4
+	# the CONTROLLER keeps track of a list of files created by the encoder with base filenames CHUNK_ENCODED_FFV1_FILENAME_BASE ... encoded_chunk_ffv1_00001.mkv
+	# the CONTROLLER re-encodes all these (to avoid timestmp issues) into one large final video without audio
+	INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME				= os.path.join(TEMP_FOLDER, r'slideshow.INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME.mp4')
+
+
+	# 4. the CONTROLLER does snippet processsing based on snippets written by the encoder per chunk and re-read and placed into a large dict on the fly by the CONTROLLER... 
+	#	 use the global snippets dict updated by the fly by the encoding CONTROLLER process
+	#	 global frame numbers are now re-calculated after encoding all chunks by processing snippet dicts in sequence and recalculating the global [frame-start/frame-end] pairs for each snippet
+	#	 then process snippets into the audio, re-encoding into .aac which can be muxed later.
+	#	this process touches the 
+	BACKGROUND_AUDIO_INPUT_FILENAME				= os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'background_audio_pre_snippet_editing.m4a')
+	BACKGROUND_AUDIO_WITH_SNIPPETS_FILENAME		= os.path.join(TEMP_FOLDER, r'background_audio_post_snippet_editing.mp4')	# pydyub hates .m4a, so use .mp4
+
+	# 5. the CONTROLLER does Final muxing of the interim video .mp4 and the interim background_audio_post_snippet_editing
+	FINAL_MP4_WITH_AUDIO_FILENAME				= os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'slideshow.FINAL_MP4_WITH_AUDIO_FILENAME.mp4')
+
+	MAX_FILES_PER_CHUNK							= int(150)
 	TOLERANCE_PERCENT_FINAL_CHUNK				= int(20)
 	RECURSIVE									= True
 	DEBUG										= False
@@ -113,8 +161,6 @@ def load_settings(filename=".\\settings_3333.json"):
 	UPSIZE_KERNEL								= r'Lanczos'	# ; "upsize_kernel" a string; do not change unless a dire emergency; you need the exact string name of the resizer = .
 	DOWNSIZE_KERNEL								= r'Spline36'	#; "downsize_kernel" a string; do not change unless a dire emergency; you need the exact string name of the resizer = .
 	BOX											= True		# ; "box" is true or false; if true, images and videos are resized vertically/horizontally to maintain aspect ratio and padded; false streches and squeezes  = .
-
-	OUTPUT_MKV_FILENAME_PATH_LIST				= os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'dummy.mkv')	# no longer used. retained for compatibility. was written into last line of every snippets file as part of: [start frame number (0), last frame number, 'filename of encoded video snippets belong to' ]
 
 	# compatibility
 	_INI_SECTION_NAME							= r'slideshow'	# use in OLD ...  self._default_ini_values = { self._ini_section_name : { ini_value, ini_value, ini_vsalue ...} ... use like: self._ini_values[self._ini_section_name]["TARGET_WIDTH"]
@@ -158,22 +204,28 @@ def load_settings(filename=".\\settings_3333.json"):
 	TARGET_COLOR_RANGE_I_ZIMG					= None		# CALCULATED LATER : 	# = if something, calculate
 
 	default_settings_dict = {
-		'SLIDESHOW_SETTINGS_FILE':					SLIDESHOW_SETTINGS_FILE,
+		'SLIDESHOW_SETTINGS_MODULE_NAME':			SLIDESHOW_SETTINGS_MODULE_NAME,
 		
 		'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS': ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS,	# this is the ONLY file/folder thing in the NEW version that is actually already a LIST
+		'ROOT_FOLDER_FOR_OUTPUTS': 					ROOT_FOLDER_FOR_OUTPUTS,
 		'TEMP_FOLDER':								TEMP_FOLDER,
 		'PIC_EXTENSIONS' :							PIC_EXTENSIONS,
 		'VID_EXTENSIONS' :							VID_EXTENSIONS,
 		'EEK_EXTENSIONS' :							EEK_EXTENSIONS,
+		'VID_EEK_EXTENSIONS':						VID_EEK_EXTENSIONS,
 		'EXTENSIONS' :								EXTENSIONS,
-		'ROOT_FOLDER_FOR_OUTPUTS': 					ROOT_FOLDER_FOR_OUTPUTS,
-		'CHUNKS_OUTPUT_FILE_ALL_CHUNKS': 			CHUNKS_OUTPUT_FILE_ALL_CHUNKS,
-		'CHUNKS_OUTPUT_FILES_COMMON_NAME':			CHUNKS_OUTPUT_FILES_COMMON_NAME,
-		'CHUNKS_OUTPUT_FILES_COMMON_NAME_GLOB': 	CHUNKS_OUTPUT_FILES_COMMON_NAME_GLOB,
-		'PER_CHUNK_LIST_OF_SNIPPET_FILES':			PER_CHUNK_LIST_OF_SNIPPET_FILES,
-		'BACKGROUND_AUDIO_INPUT_FILE': 				BACKGROUND_AUDIO_INPUT_FILE,
-		'FINAL_OUTPUT_MP4_FILE':					FINAL_OUTPUT_MP4_FILE,
-		'MAX_VIDEO_FILES_PER_CHUNK':				MAX_VIDEO_FILES_PER_CHUNK,
+
+		'CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT': 		CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT,
+		'SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT':	SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT,
+		'CHUNK_ENCODED_FFV1_FILENAME_BASE': 		CHUNK_ENCODED_FFV1_FILENAME_BASE,
+		'CURRENT_CHUNK_FILENAME':					CURRENT_CHUNK_FILENAME,
+		'CURRENT_SNIPPETS_FILENAME': 				CURRENT_SNIPPETS_FILENAME,
+		'INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME':		INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME,
+		'BACKGROUND_AUDIO_INPUT_FILENAME':			BACKGROUND_AUDIO_INPUT_FILENAME,
+		'BACKGROUND_AUDIO_WITH_SNIPPETS_FILENAME':	BACKGROUND_AUDIO_WITH_SNIPPETS_FILENAME,
+		'FINAL_MP4_WITH_AUDIO_FILENAME':			FINAL_MP4_WITH_AUDIO_FILENAME,
+
+		'MAX_FILES_PER_CHUNK':						MAX_FILES_PER_CHUNK,
 		'TOLERANCE_PERCENT_FINAL_CHUNK':			TOLERANCE_PERCENT_FINAL_CHUNK,
 		'RECURSIVE':								RECURSIVE,
 		'DEBUG':									DEBUG,
@@ -182,7 +234,7 @@ def load_settings(filename=".\\settings_3333.json"):
 		'SUBTITLE_DEPTH':							SUBTITLE_DEPTH,
 		'SUBTITLE_FONTSIZE':						SUBTITLE_FONTSIZE,
 		'SUBTITLE_FONTSCALE':						SUBTITLE_FONTSCALE,
-		'DURATION_PIC_SEC':						DURATION_PIC_SEC,
+		'DURATION_PIC_SEC':							DURATION_PIC_SEC,
 		'DURATION_CROSSFADE_SECS':					DURATION_CROSSFADE_SECS,
 		'CROSSFADE_TYPE':							CROSSFADE_TYPE,
 		'CROSSFADE_DIRECTION':						CROSSFADE_DIRECTION,
@@ -202,8 +254,6 @@ def load_settings(filename=".\\settings_3333.json"):
 		'UPSIZE_KERNEL':							UPSIZE_KERNEL,
 		'DOWNSIZE_KERNEL':							DOWNSIZE_KERNEL,
 		'BOX':										BOX,
-
-		'OUTPUT_MKV_FILENAME_PATH_LIST':			OUTPUT_MKV_FILENAME_PATH_LIST,
 
 		'_INI_SECTION_NAME':						_INI_SECTION_NAME,
 
@@ -235,15 +285,34 @@ def load_settings(filename=".\\settings_3333.json"):
 		'TARGET_COLOR_RANGE_I_ZIMG':				TARGET_COLOR_RANGE_I_ZIMG,	# CALCULATED LATER # = if something, calculated
 	}
 
-	# load the json settings with try/except, abort if file not found (part of json.load)
-	# do not rewrite then on the basis it loses any comments in the source file
-	user_specified_settings_dict = {}
-	try:
-		with open(fully_qualified_filename_3333(SLIDESHOW_SETTINGS_FILE), 'r') as fp:
-			user_specified_settings_dict = json.load(fp)
-	except Exception as e:
-		print(f"load_settings: ERROR: loading user specified Settings from JSON file: '{SLIDESHOW_SETTINGS_FILE}'\n{str(e)}",flush=True,file=sys.stderr)
-		sys.exit(1)	
+	#######################################################################################################################################
+	#######################################################################################################################################
+	
+	# read the user-edited settings from SLIDESHOW_SETTINGS_MODULE_NAME (settings_3333.py)
+	if SLIDESHOW_SETTINGS_MODULE_NAME not in sys.modules:
+		# Import the module dynamically, if it is not done already
+		try:
+			settings_module = importlib.import_module(SLIDESHOW_SETTINGS_MODULE_NAME)
+		except ImportError as e:
+			# Handle the ImportError if the module cannot be imported
+			print(f"load_settings: ERROR: ImportError, failed to dynamically import user specified Settings from import module: '{SLIDESHOW_SETTINGS_MODULE_NAME}'\n{str(e)}",flush=True,file=sys.stderr)
+			sys.exit(1)	
+		except Exception as e:
+			print(f"load_settings: ERROR: Exception, failed to dynamically import user specified Settings from import module: '{SLIDESHOW_SETTINGS_MODULE_NAME}'\n{str(e)}",flush=True,file=sys.stderr)
+			sys.exit(1)	
+	else:
+		# Reload the module since it had been dynamically loaded already ... remember, global variables in thee module are not scrubbed by reloading
+		try:
+			#importlib.invalidate_caches()
+			importlib.reload(settings_module)
+		except Exception as e:
+			print(f"load_settings: ERROR: Exception, failed to RELOAD user specified Settings from import module: '{SLIDESHOW_SETTINGS_MODULE_NAME}'\n{str(e)}",flush=True,file=sys.stderr)
+
+	# retrieve the settigns from SLIDESHOW_SETTINGS_MODULE_NAME (settings_3333.py)
+	user_specified_settings_dict = settings_module.settings
+
+	#######################################################################################################################################
+	#######################################################################################################################################
 
 	# x = {**y, **z} creates a new dictionary. Similar to the dict.update method,
 	# if both dictionaries has the same key with different values,
@@ -261,18 +330,25 @@ def load_settings(filename=".\\settings_3333.json"):
 	# process a LIST ... make ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS list entries all fully qualified and escaped where required
 	ddl_fully_qualified = []									
 	for ddl in final_settings_dict['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS']:
-		ddl_fully_qualified.append(fully_qualified_directory_no_trailing_backslash_3333(ddl))
+		ddl_fully_qualified.append(fully_qualified_directory_no_trailing_backslash(ddl))
 	final_settings_dict['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS'] = ddl_fully_qualified
 	#
-	final_settings_dict['SLIDESHOW_SETTINGS_FILE'] = fully_qualified_filename_3333(final_settings_dict['SLIDESHOW_SETTINGS_FILE'])
-	final_settings_dict['ROOT_FOLDER_FOR_OUTPUTS'] = fully_qualified_directory_no_trailing_backslash_3333(final_settings_dict['ROOT_FOLDER_FOR_OUTPUTS'])
-	final_settings_dict['TEMP_FOLDER'] = fully_qualified_directory_no_trailing_backslash_3333(final_settings_dict['TEMP_FOLDER'])
-	final_settings_dict['CHUNKS_OUTPUT_FILE_ALL_CHUNKS'] = fully_qualified_filename_3333(final_settings_dict['CHUNKS_OUTPUT_FILE_ALL_CHUNKS'])
-	final_settings_dict['CHUNKS_OUTPUT_FILES_COMMON_NAME'] = fully_qualified_filename_3333(final_settings_dict['CHUNKS_OUTPUT_FILES_COMMON_NAME'])
-	final_settings_dict['CHUNKS_OUTPUT_FILES_COMMON_NAME_GLOB'] = fully_qualified_filename_3333(final_settings_dict['CHUNKS_OUTPUT_FILES_COMMON_NAME_GLOB'])
-	final_settings_dict['PER_CHUNK_LIST_OF_SNIPPET_FILES'] = fully_qualified_filename_3333(final_settings_dict['PER_CHUNK_LIST_OF_SNIPPET_FILES'])
-	final_settings_dict['BACKGROUND_AUDIO_INPUT_FILE'] = fully_qualified_filename_3333(final_settings_dict['BACKGROUND_AUDIO_INPUT_FILE'])
-	final_settings_dict['FINAL_OUTPUT_MP4_FILE'] = fully_qualified_filename_3333(final_settings_dict['FINAL_OUTPUT_MP4_FILE'])
+	final_settings_dict['SLIDESHOW_SETTINGS_MODULE_NAME'] = final_settings_dict['SLIDESHOW_SETTINGS_MODULE_NAME']
+	final_settings_dict['ROOT_FOLDER_FOR_OUTPUTS'] = fully_qualified_directory_no_trailing_backslash(final_settings_dict['ROOT_FOLDER_FOR_OUTPUTS'])
+	final_settings_dict['TEMP_FOLDER'] = fully_qualified_directory_no_trailing_backslash(final_settings_dict['TEMP_FOLDER'])
+
+	final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'] = fully_qualified_filename(final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'])
+	final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'] = fully_qualified_filename(final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'])
+	final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'] = fully_qualified_filename(final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'])
+	final_settings_dict['CURRENT_CHUNK_FILENAME'] = fully_qualified_filename(final_settings_dict['CURRENT_CHUNK_FILENAME'])
+	final_settings_dict['CURRENT_SNIPPETS_FILENAME'] = fully_qualified_filename(final_settings_dict['CURRENT_SNIPPETS_FILENAME'])
+	final_settings_dict['INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME'] = fully_qualified_filename(final_settings_dict['INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME'])
+
+	final_settings_dict['BACKGROUND_AUDIO_INPUT_FILENAME'] = fully_qualified_filename(final_settings_dict['BACKGROUND_AUDIO_INPUT_FILENAME'])
+	final_settings_dict['BACKGROUND_AUDIO_WITH_SNIPPETS_FILENAME'] = fully_qualified_filename(final_settings_dict['BACKGROUND_AUDIO_WITH_SNIPPETS_FILENAME'])
+	final_settings_dict['FINAL_MP4_WITH_AUDIO_FILENAME'] = fully_qualified_filename(final_settings_dict['FINAL_MP4_WITH_AUDIO_FILENAME'])
+
+	final_settings_dict['FFMPEG_PATH'] = fully_qualified_filename(final_settings_dict['FFMPEG_PATH'])
 
 	# check the files which should exist do exist
 	def check_file_exists_3333(file, text):
@@ -281,7 +357,7 @@ def load_settings(filename=".\\settings_3333.json"):
 			sys.exit(1)
 		return
 	check_file_exists_3333(final_settings_dict['FFMPEG_PATH'], r'FFMPEG_PATH')
-	check_file_exists_3333(final_settings_dict['BACKGROUND_AUDIO_INPUT_FILE'], r'BACKGROUND_AUDIO_INPUT_FILE')
+	check_file_exists_3333(final_settings_dict['BACKGROUND_AUDIO_INPUT_FILENAME'], r'BACKGROUND_AUDIO_INPUT_FILENAME')
 	# check the folders which should exist do exist
 	# 1. check the folders in this LIST
 	def check_folder_exists_3333(folder, text):
@@ -302,7 +378,6 @@ def load_settings(filename=".\\settings_3333.json"):
 			print(f"load_settings: ERROR: creating TEMP_FOLDER '{final_settings_dict['TEMP_FOLDER']}'\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)	
 		print(f'load_settings: created TEMP_FOLDER "{final_settings_dict["TEMP_FOLDER"]}"',flush=True)
-
 
 	# Check for out-of-spec values
 	# for now, no validation checking of values ...
@@ -349,9 +424,11 @@ def load_settings(filename=".\\settings_3333.json"):
 
 	# now  MAP these back into format/names compatible with the OLD calc_ini["SETTING_NAME"]
 	old_calc_ini_dict =	{	'directory_list' :					final_settings_dict['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS'],	# This is already a list []
+							'temp_directory' :					final_settings_dict['TEMP_FOLDER'],
 							'temp_directory_list' :				[ final_settings_dict['TEMP_FOLDER'] ],
-							'snippets_filename_path_list' :		[ final_settings_dict['PER_CHUNK_LIST_OF_SNIPPET_FILES'] ],			# SUPERSEDED
-							'output_mkv_filename_path_list' :	[ final_settings_dict['OUTPUT_MKV_FILENAME_PATH_LIST'] ],			# SUPERSEDED
+							#'snippets_filename_path_list' :	[ final_settings_dict['PER_CHUNK_LIST_OF_SNIPPET_FILES'] ],			# SUPERSEDED, removed
+							'CURRENT_CHUNK_FILENAME' :			final_settings_dict['CURRENT_CHUNK_FILENAME'],		# ADDED	for encoder; no need, it should use final_settings_dict for this
+							'CURRENT_SNIPPETS_FILENAME' :		final_settings_dict['CURRENT_SNIPPETS_FILENAME'],	# ADDED	for encoder; no need, it should use final_settings_dict for this
 							'recursive' :						final_settings_dict['RECURSIVE'],
 							'subtitle_depth' :					final_settings_dict['SUBTITLE_DEPTH'],
 							'subtitle_fontsize' :				final_settings_dict['SUBTITLE_FONTSIZE'],
@@ -391,8 +468,8 @@ def load_settings(filename=".\\settings_3333.json"):
 							'MODX':								final_settings_dict['MODX'],
 							'MODY':								final_settings_dict['MODY'],
 							'SUBTITLE_MAX_DEPTH':				final_settings_dict['SUBTITLE_MAX_DEPTH'],
-							'Rotation_anti_clockwise':			final_settings_dict['Rotation_anti_clockwise'],
-							'Rotation_clockwise':				final_settings_dict['Rotation_clockwise'],
+							'Rotation_anti_clockwise':			final_settings_dict['ROTATION_ANTI_CLOCKWISE'],
+							'Rotation_clockwise':				final_settings_dict['ROTATION_CLOCKWISE'],
 							'TARGET_VFR_FPSNUM':				final_settings_dict['TARGET_VFR_FPSNUM'],
 							'TARGET_VFR_FPSDEN':				final_settings_dict['TARGET_VFR_FPSDEN'],
 							'TARGET_VFR_FPS':					final_settings_dict['TARGET_VFR_FPS'],
@@ -403,12 +480,13 @@ def load_settings(filename=".\\settings_3333.json"):
 							'TARGET_COLOR_RANGE_I_ZIMG':		final_settings_dict['TARGET_COLOR_RANGE_I_ZIMG'],
 						}
 
-	# MAP that back into something compatible with OLD _ini_values[self._ini_section_name]["SETTING_NAME"]
+	# MAP that back into something compatible with OLD '_ini_values[self._ini_section_name]["SETTING_NAME"]'
 	old_ini_dict = { final_settings_dict['_INI_SECTION_NAME']: old_calc_ini_dict }
 
+	# now save debug versions of those dicts
 	if DEBUG:
 		try:
-			f_debug = SLIDESHOW_SETTINGS_FILE + r'.DEBUG.user_settings.JSON'
+			f_debug = fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.user_settings.JSON'))
 			with open(f_debug, 'w') as fp:
 				json.dump(user_specified_settings_dict, fp, indent=4)
 		except Exception as e:
@@ -416,7 +494,7 @@ def load_settings(filename=".\\settings_3333.json"):
 			sys.exit(1)	
 		#
 		try:
-			f_debug = SLIDESHOW_SETTINGS_FILE + r'.DEBUG.default_settings.JSON'
+			f_debug = fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.default_settings.JSON'))
 			with open(f_debug, 'w') as fp:
 				json.dump(default_settings_dict, fp, indent=4)
 		except Exception as e:
@@ -424,7 +502,7 @@ def load_settings(filename=".\\settings_3333.json"):
 			sys.exit(1)	
 		#
 		try:
-			f_debug = SLIDESHOW_SETTINGS_FILE + r'.DEBUG.final_settings.JSON'
+			f_debug = fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.final_settings.JSON'))
 			with open(f_debug, 'w') as fp:
 				json.dump(final_settings_dict, fp, indent=4)
 		except Exception as e:
@@ -432,7 +510,7 @@ def load_settings(filename=".\\settings_3333.json"):
 			sys.exit(1)	
 		#
 		try:
-			f_debug = SLIDESHOW_SETTINGS_FILE + r'.DEBUG.old_ini_dict.JSON'
+			f_debug = fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.old_ini_dict.JSON'))
 			with open(f_debug, 'w') as fp:
 				json.dump(old_ini_dict, fp, indent=4)
 		except Exception as e:
@@ -440,12 +518,12 @@ def load_settings(filename=".\\settings_3333.json"):
 			sys.exit(1)	
 		#
 		try:
-			f_debug = SLIDESHOW_SETTINGS_FILE + r'.DEBUG.old_calc_ini_dict.JSON'
+			f_debug = fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.old_calc_ini_dict.JSON'))
 			with open(f_debug, 'w') as fp:
 				json.dump(old_calc_ini_dict, fp, indent=4)
 		except Exception as e:
 			print(f"DEBUG: load_settings: ERROR: error dumping JSON file: '{f_debug}'\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)	
 
-	return settings_dict, old_ini_dict, old_calc_ini_dict
+	return final_settings_dict, old_ini_dict, old_calc_ini_dict
 
