@@ -362,6 +362,16 @@ if __name__ == "__main__":
 	ALL_CHUNKS_COUNT, ALL_CHUNKS_COUNT_OF_FILES, ALL_CHUNKS = UNREADY_find_all_chunks()	# it uses settings in SETTINGS_DICT to do its thing
 	if DEBUG: print(f"DEBUG: retrieved ALL_CHUNKS tree containing {ALL_CHUNKS_COUNT} chunks, {ALL_CHUNKS_COUNT_OF_FILES} files,n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
 	
+	# Extend ALL_CHUNKS
+	#	for each chunk, add an nested dict "OUTPUT_PARAMETERS"
+	#		- proposed output_filename (an interim ffv1 encoded file in the temp folder) ... append chunk_id formatted like str(chunk_id).zfill(5)	# zero padded to 5 digits
+	#		- number of frames			(updated by encoder, always (number of frames)
+	#		- start frame number to 0	(updated by encoder, always 0)
+	#		- end frame number to 0		(updated by encoder, always (number of frames - 1)
+	
+	then AFTER ENCODING we can re-import the saved .json file and change the process to add up all the frame counts and use that (total frame count) in the audio processing
+	and just do audio processing then transcoding/muxing in one step
+	
 	# create .JSON file containing ALL_CHUNKS
 	try:
 		fac = SETTINGS_DICT['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT']
