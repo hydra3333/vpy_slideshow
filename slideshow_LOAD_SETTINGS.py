@@ -78,6 +78,19 @@ objPrettyPrint = pprint.PrettyPrinter(width=TERMINAL_WIDTH, compact=False, sort_
 #    import importlib
 #    importlib.reload(mymodule)  # Reload the module
 
+# check the files which should exist do exist
+def check_file_exists_3333(file, text):
+	if not os.path.exists(file):
+		print(f"load_settings: ERROR: the specified {text} File '{file}' does not exist",flush=True,file=sys.stderr)
+		sys.exit(1)
+	return
+
+def check_folder_exists_3333(folder, text):
+	if not os.path.isdir(folder):
+		print(f"load_settings: ERROR: the specified {text} folder does not exist: '{folder}' does not exist",flush=True,file=sys.stderr)
+		sys.exit(1)
+	return
+
 def normalize_path(path):
 	#if DEBUG: print(f"DEBUG: normalize_path:  incoming path='{path}'",flush=True)
 	# Replace single backslashes with double backslashes
@@ -113,6 +126,31 @@ def fully_qualified_filename(file_name):
 	new_file_name = normalize_path(new_file_name)
 	return new_file_name
 
+def create_py_file_from_specially_formatted_list(dot_py_filename, specially_formatted_list):
+	# a dict may contain strings defined like r''
+	# parse a specially formatted LIST [key, value, annotation_text]
+	# and create a .py file containing settings = { key: value, # annotation_text ... }
+	def make_r_prefix(value):
+		if isinstance(value, str):
+			if  '\\' in repr(value):
+				return 'r' + repr(value).replace('\\\\', '\\')
+			else:
+				return repr(value)
+		elif isinstance(value, list):
+			return '[' + ', '.join(make_r_prefix(item) for item in value) + ']'
+		elif isinstance(value, dict):
+			return '{' + ', '.join(f'{make_r_prefix(k)}: {make_r_prefix(v)}' for k, v in value.items()) + '}'
+		elif isinstance(value, tuple):
+			return '(' + ', '.join(make_r_prefix(item) for item in value) + ')'
+		else:
+			return repr(value)
+	with open(dot_py_filename, "w") as file:
+		file.write("settings = {\n")
+		for item in specially_formatted_list:
+			key, value, annotation_text = item
+			file.write(f'\t{make_r_prefix(key)}: {make_r_prefix(value)},\t\t\t\t# {annotation_text}\n')
+		file.write("}\n")
+	return
 
 def load_settings():	
 	# This will always force reload of 'setup.py' from the current default folder
@@ -124,10 +162,11 @@ def load_settings():
 
 	# This is ALWAYS a fixed filename in the current default folder !!!
 	SLIDESHOW_SETTINGS_MODULE_NAME				= 'SLIDESHOW_SETTINGS'.lower()	# SLIDESHOW_SETTINGS.py
+	SLIDESHOW_SETTINGS_MODULE_FILENAME			= fully_qualified_filename(os.path.join(r'.', SLIDESHOW_SETTINGS_MODULE_NAME + '.py'))
 
-	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS	= [ r'.' ]
-	ROOT_FOLDER_FOR_OUTPUTS						= r'.'
-	TEMP_FOLDER									= os.path.join(r'.', 'TEMP')
+	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS	= [ fully_qualified_directory_no_trailing_backslash(r'.') ]
+	ROOT_FOLDER_FOR_OUTPUTS						= fully_qualified_directory_no_trailing_backslash(r'.')
+	TEMP_FOLDER									= fully_qualified_directory_no_trailing_backslash(r'.\\TEMP')
 	PIC_EXTENSIONS								= [ r'.png', r'.jpg', r'.jpeg', r'.gif' ]
 	VID_EXTENSIONS								= [ r'.mp4', r'.mpeg4', r'.mpg', r'.mpeg', r'.avi', r'.mjpeg', r'.3gp', r'.mov' ]
 	EEK_EXTENSIONS								= [ r'.m2ts' ]
@@ -152,7 +191,7 @@ def load_settings():
 	# 3. re-encode all encoded ffv1 chunks into a concatenated AVC .mp4
 	# the CONTROLLER keeps track of a list of files created by the encoder with base filenames CHUNK_ENCODED_FFV1_FILENAME_BASE ... encoded_chunk_ffv1_00001.mkv
 	# the CONTROLLER re-encodes all these (to avoid timestmp issues) into one large final video without audio
-	INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME				= os.path.join(TEMP_FOLDER, r'slideshow.INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME.mp4')
+	INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME			= os.path.join(TEMP_FOLDER, r'slideshow.INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME.mp4')
 
 
 	# 4. the CONTROLLER does snippet processsing based on snippets written by the encoder per chunk and re-read and placed into a large dict on the fly by the CONTROLLER... 
@@ -160,17 +199,17 @@ def load_settings():
 	#	 global frame numbers are now re-calculated after encoding all chunks by processing snippet dicts in sequence and recalculating the global [frame-start/frame-end] pairs for each snippet
 	#	 then process snippets into the audio, re-encoding into .aac which can be muxed later.
 	#	this process touches the 
-	BACKGROUND_AUDIO_INPUT_FILENAME				= os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'background_audio_pre_snippet_editing.m4a')
+	BACKGROUND_AUDIO_INPUT_FILENAME				= fully_qualified_filename(os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'background_audio_pre_snippet_editing.m4a'))
 	BACKGROUND_AUDIO_WITH_SNIPPETS_FILENAME		= os.path.join(TEMP_FOLDER, r'background_audio_post_snippet_editing.mp4')	# pydyub hates .m4a, so use .mp4
 
 	# 5. the CONTROLLER does Final muxing of the interim video .mp4 and the interim background_audio_post_snippet_editing
-	FINAL_MP4_WITH_AUDIO_FILENAME				= os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'slideshow.FINAL_MP4_WITH_AUDIO_FILENAME.mp4')
+	FINAL_MP4_WITH_AUDIO_FILENAME				= fully_qualified_filename(os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'slideshow.FINAL_MP4_WITH_AUDIO_FILENAME.mp4'))
 
 	MAX_FILES_PER_CHUNK							= int(150)
 	TOLERANCE_PERCENT_FINAL_CHUNK				= int(20)
 	RECURSIVE									= True
 	DEBUG										= False
-	FFMPEG_PATH									= os.path.join(r'.', r'ffmpeg.exe')
+	FFMPEG_PATH									= fully_qualified_filename(os.path.join(r'.', r'ffmpeg.exe'))
 
 	SUBTITLE_DEPTH								= float(0)
 	SUBTITLE_FONTSIZE							= float(18)
@@ -239,6 +278,7 @@ def load_settings():
 
 	default_settings_dict = {
 		'SLIDESHOW_SETTINGS_MODULE_NAME':			SLIDESHOW_SETTINGS_MODULE_NAME,
+		'SLIDESHOW_SETTINGS_MODULE_FILENAME':		SLIDESHOW_SETTINGS_MODULE_FILENAME,
 		
 		'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS': ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS,	# this is the ONLY file/folder thing in the NEW version that is actually already a LIST
 		'ROOT_FOLDER_FOR_OUTPUTS': 					ROOT_FOLDER_FOR_OUTPUTS,
@@ -322,6 +362,30 @@ def load_settings():
 	#######################################################################################################################################
 	#######################################################################################################################################
 	
+	if not os.path.exists(SLIDESHOW_SETTINGS_MODULE_FILENAME):
+		specially_formatted_settings_list =	[
+										[ 'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS',	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS,	r'a list, one or more folders to look in for slideshow pics/videos' ]
+										[ 'RECURSIVE',									RECURSIVE,									r'case sensitive: whether to recurse the source folder(s) looking for slideshow pics/videos' ]
+										[ 'ROOT_FOLDER_FOR_OUTPUTS', 					ROOT_FOLDER_FOR_OUTPUTS,					r'folder in which outputs are to be placed' ]
+										[ 'TEMP_FOLDER',								TEMP_FOLDER,								r'folder where temporary files go ... use on a disk with LOTS of spare disk space !!' ]
+										[ 'BACKGROUND_AUDIO_INPUT_FILENAME',			BACKGROUND_AUDIO_INPUT_FILENAME,			r'specify a .m4a audio file ifg you want a background track (it is not looped if too short)' ]
+										[ 'FINAL_MP4_WITH_AUDIO_FILENAME',				FINAL_MP4_WITH_AUDIO_FILENAME,				r'the filename of the FINAL slideshow .mp4' ]
+										[ 'SUBTITLE_DEPTH',								SUBTITLE_DEPTH,								r'how many folders deep to display in subtitles; use 0 for no subtitling' ]
+										[ 'SUBTITLE_FONTSIZE',							SUBTITLE_FONTSIZE,							r'fontsize for subtitles, leave this alone unless confident' ]
+										[ 'SUBTITLE_FONTSCALE',							SUBTITLE_FONTSCALE,							r'fontscale for subtitles, leave this alone unless confident' ]
+										[ 'DURATION_PIC_SEC',							DURATION_PIC_SEC,							r'in seconds, duration each pic is shown in the slideshow' ]
+										[ 'DURATION_CROSSFADE_SECS',					DURATION_CROSSFADE_SECS,					r'in seconds duration crossfade between pic, leave this alone unless confident' ]
+										[ 'CROSSFADE_TYPE',								CROSSFADE_TYPE,								r'random is a good choice, leave this alone unless confident' ]
+										[ 'CROSSFADE_DIRECTION',						CROSSFADE_DIRECTION,						r'Please leave this alone unless really confident' ]
+										[ 'DURATION_MAX_VIDEO_SEC',						DURATION_MAX_VIDEO_SEC,						r'in seconds, maximum duration each video clip is shown in the slideshow' ]
+										[ 'DEBUG',										DEBUG,										r'see and regret seeing, ginormous debug output' ]
+										#[ 'FFMPEG_PATH',								FFMPEG_PATH,								r'Please leave this alone unless really confident' ]
+									]	
+		create_py_file_from_specially_formatted_list(SLIDESHOW_SETTINGS_MODULE_FILENAME, specially_formatted_settings_list)
+		print(f"load_settings: ERROR: File '{SLIDESHOW_SETTINGS_MODULE_FILENAME}' does not exist, creating it with template settings... you MUST edit it now ...",flush=True,file=sys.stderr)
+		sys.exit(1)
+	return
+
 	# read the user-edited settings from SLIDESHOW_SETTINGS_MODULE_NAME (SLIDESHOW_SETTINGS.py)
 	if SLIDESHOW_SETTINGS_MODULE_NAME not in sys.modules:
 		# Import the module dynamically, if it is not done already
@@ -368,6 +432,8 @@ def load_settings():
 	final_settings_dict['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS'] = ddl_fully_qualified
 	#
 	final_settings_dict['SLIDESHOW_SETTINGS_MODULE_NAME'] = final_settings_dict['SLIDESHOW_SETTINGS_MODULE_NAME']
+	final_settings_dict['CURRENT_FOLDER'] = fully_qualified_directory_no_trailing_backslash(final_settings_dict['CURRENT_FOLDER'])
+	
 	final_settings_dict['ROOT_FOLDER_FOR_OUTPUTS'] = fully_qualified_directory_no_trailing_backslash(final_settings_dict['ROOT_FOLDER_FOR_OUTPUTS'])
 	final_settings_dict['TEMP_FOLDER'] = fully_qualified_directory_no_trailing_backslash(final_settings_dict['TEMP_FOLDER'])
 
@@ -384,21 +450,10 @@ def load_settings():
 
 	final_settings_dict['FFMPEG_PATH'] = fully_qualified_filename(final_settings_dict['FFMPEG_PATH'])
 
-	# check the files which should exist do exist
-	def check_file_exists_3333(file, text):
-		if not os.path.exists(file):
-			print(f"load_settings: ERROR: the specified {text} File '{file}' does not exist",flush=True,file=sys.stderr)
-			sys.exit(1)
-		return
 	check_file_exists_3333(final_settings_dict['FFMPEG_PATH'], r'FFMPEG_PATH')
 	check_file_exists_3333(final_settings_dict['BACKGROUND_AUDIO_INPUT_FILENAME'], r'BACKGROUND_AUDIO_INPUT_FILENAME')
 	# check the folders which should exist do exist
 	# 1. check the folders in this LIST
-	def check_folder_exists_3333(folder, text):
-		if not os.path.isdir(folder):
-			print(f"load_settings: ERROR: the specified {text} folder does not exist: '{folder}' does not exist",flush=True,file=sys.stderr)
-			sys.exit(1)
-		return
 	for ddl in final_settings_dict['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS']:
 		check_folder_exists_3333(ddl, r'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS')
 	# 2. now check the other folders

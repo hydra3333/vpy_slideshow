@@ -284,13 +284,17 @@ def UNREADY_find_all_chunks():
 				if not is_valid:	# ignore clips which had an issue with being opened and return None
 					print(f'DEBUG: UNREADY_find_all_chunks: Unable to process {count_of_files} {str(path)} ... ignoring it',flush=True)
 				else:
+					# if required, start a new chunk
 					if (count_of_files % SETTINGS_DICT['MAX_FILES_PER_CHUNK']) == 0:
-						# start a new chunk
 						chunk_id = chunk_id + 1
-						chunks[str(chunk_id)] = {"num_files": 0, "file_list" : [] }
-						#chunks[str(chunk_id)]["num_files"] = 0
-						#chunks[str(chunk_id)]["file_list"] = []
-					# add file to chunk
+						chunks[str(chunk_id)] = {	"num_files": 0,
+													"proposed_ffv1_output_filename" :	CHUNK_ENCODED_FFV1_FILENAME_BASE + str(chunk_id).zfill(5),
+													"num_frames_in_chunk" :				0,	# initialize to 0, filled in by encoder
+													"start_frame_num_in_chunk" :		0,	# initialize to 0, filled in by encoder
+													"end_frame_num_in_chunk" :			0,	# initialize to 0, filled in by encoder
+													"file_list" : []
+												}
+					# add currently examined file to chunk
 					fully_qualified_path_string = fully_qualified_filename(path)
 					chunks[str(chunk_id)]["file_list"].append(fully_qualified_path_string)
 					chunks[str(chunk_id)]["num_files"] = chunks[str(chunk_id)]["num_files"] + 1
@@ -357,33 +361,13 @@ if __name__ == "__main__":
 		print(f"DEBUG: slideshow_CONTROLLER: OLD_CALC_INI_DICT=\n{objPrettyPrint.pformat(OLD_CALC_INI_DICT)}")
 
 	##########################################################################################################################################
-	# Locate all chunks of files 
+	# Locate all openable files and put them into chunks in a dict, including { proposed filename for the encoded chunk, first/last frames, number of frames in chunk } 
 	
 	ALL_CHUNKS_COUNT, ALL_CHUNKS_COUNT_OF_FILES, ALL_CHUNKS = UNREADY_find_all_chunks()	# it uses settings in SETTINGS_DICT to do its thing
-	if DEBUG: print(f"DEBUG: retrieved ALL_CHUNKS tree containing {ALL_CHUNKS_COUNT} chunks, {ALL_CHUNKS_COUNT_OF_FILES} files,n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
 	
-	# Extend ALL_CHUNKS with addityional info
-	#	for each chunk, add an nested dict "OUTPUT_PARAMETERS"
-	#		- proposed ffv1_output_filename (an interim ffv1 encoded file in the temp folder) ... append chunk_id formatted like str(chunk_id).zfill(5)	# zero padded to 5 digits
-	#		- number of frames				(updated by encoder, always (number of frames)
-	#		- start frame number to 0		(updated by encoder, always 0)
-	#		- end frame number to 0			(updated by encoder, always (number of frames - 1)
+	if DEBUG: print(f"DEBUG: retrieved ALL_CHUNKS tree: chunks: {ALL_CHUNKS_COUNT} files: {ALL_CHUNKS_COUNT_OF_FILES} dict:\n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
 
-	for chunk_id in range(0,ALL_CHUNKS_COUNT):	# i.e. 0 to (chunk_count-1)
-		#num_files = ALL_CHUNKS_COUNT[str(chunk_id)]["num_files"]
-		#file_list = ALL_CHUNKS_COUNT[str(chunk_id)]["file_list"]
-		ALL_CHUNKS_COUNT[str(chunk_id)]["ENCODER_OUTPUT_PARAMETERS"] =	{	"proposed_ffv1_output_filename" :	CHUNK_ENCODED_FFV1_FILENAME_BASE + str(chunk_id).zfill(5),
-																			"num_frames_in_chunk" :				0,	# initialize to 0, filled in by encoder
-																			"start_frame_num_in_chunk" :		0,	# initialize to 0, filled in by encoder
-																			"end_frame_num_in_chunk" :			0,	# initialize to 0, filled in by encoder
-																		}
-	#end_for
-	
-	then AFTER ENCODING we can re-import the saved .json file and change the process to add up all the frame counts and use that (total frame count) in the audio processing
-	and just do audio processing then transcoding/muxing in one step
-
-	
-	# create .JSON file containing ALL_CHUNKS
+	# create .JSON file containing the ALL_CHUNKS  dict. Note the start/stop frames etc are yet to be updated by the encoder
 	try:
 		fac = SETTINGS_DICT['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT']
 		with open(fac), 'w') as fp:
@@ -391,23 +375,9 @@ if __name__ == "__main__":
 	except Exception as e:
 		print(f"ERROR: error returned from json.dump ALL_CHUNKS to JSON file: '{fac}'\n{str(e)}",flush=True,file=sys.stderr)
 		sys.exit(1)	
-	##########################################################################################################################################
-
-	sys.exit(0)
 	
-	#??????????????
-	## Create individual chunk files based on the individual chunk_id in the full tree
-	#print(f"About to save chunk in files like {SETTINGS_DICT['chunks_output_files_common_name'] + '*' + '.json'}",flush=True)
-	#chunk_count = len(chunks)
-	#for chunk_id in range(0,chunk_count):	# i.e. 0 to (chunk_count-1)
-	#	num_files = chunks[str(chunk_id)]["num_files"]
-	#	file_list = chunks[str(chunk_id)]["file_list"]
-	#	# Save the individual chunk
-	#	individual_chunk_id_string = str(chunk_id).zfill(5)	# zero padded to 5 digits
-	#	individual_chunk_filename = fully_qualified_filename(SETTINGS_DICT['chunks_output_files_common_name'] + individual_chunk_id_string + ".json")
-	#	individual_chunk_dict = { "chunk_id" : individual_chunk_id_string, "chunk_filename" : individual_chunk_filename, "num_files" : num_files, "file_list" : file_list }
-	#	with open(individual_chunk_filename, 'w') as fp:
-	#		json.dump(individual_chunk_dict, fp, indent=4)
-	#	print(f"Created individual chuink file: {individual_chunk_filename} listing {num_files} files.",flush=True)
-	##end for
-	#????????????
+	#AFTER ENCODING we can re-import the saved .json file and change the following 
+	#- audio editing process to add up all the frame counts and use that (total frame count) in the audio processing
+	#- just do audio processing then transcoding/muxing in one step
+
+	##########################################################################################################################################
