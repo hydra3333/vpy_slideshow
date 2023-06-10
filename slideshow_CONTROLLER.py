@@ -165,10 +165,8 @@ def fully_qualified_filename(file_name):
 
 ###
 
-
-
 # ---------------
-def UNREADY_find_all_chunks():
+def find_all_chunks():
 	# only use globals: SETTINGS_DICT, DEBUG
 
 	def get_random_ffindex_path(path):
@@ -255,7 +253,7 @@ def UNREADY_find_all_chunks():
 	print(f"{objPrettyPrint.pformat(SETTINGS_DICT['EXTENSIONS'])}",flush=True)
 	print(f"RECURSIVE={SETTINGS_DICT['RECURSIVE']}",flush=True)
 	if DEBUG:
-		print(	f"DEBUG: UNREADY_find_all_chunks: " +
+		print(	f"DEBUG: find_all_chunks: " +
 				f"MAX_FILES_PER_CHUNK={SETTINGS_DICT['MAX_FILES_PER_CHUNK']}, " +
 				f"TOLERANCE_PERCENT_FINAL_CHUNK={SETTINGS_DICT['TOLERANCE_PERCENT_FINAL_CHUNK']}, " +
 				f"TOLERANCE_FINAL_CHUNK={TOLERANCE_FINAL_CHUNK}",flush=True)
@@ -274,15 +272,15 @@ def UNREADY_find_all_chunks():
 	for Directory in SETTINGS_DICT['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS']:
 		current_Directory = Directory
 		paths = Path(current_Directory).glob(glob_var) # generator of all paths in a directory, files starting with . won't be matched by default
-		path = get_path(paths)	#pre-fetch first path
+		path = fac_get_path(paths)	#pre-fetch first path
 		if path is None:
-			raise ValueError(f"ERROR: UNREADY_find_all_chunks: File Extensions:\n{SETTINGS_DICT['EXTENSIONS']}\nnot found in '{current_Directory}'")
+			raise ValueError(f"ERROR: find_all_chunks: File Extensions:\n{SETTINGS_DICT['EXTENSIONS']}\nnot found in '{current_Directory}'")
 		while not (path is None):	# first clip already pre-retrieved ready for this while loop
 			if path.suffix.lower() in SETTINGS_DICT['EXTENSIONS']:
-				print(f"DEBUG: UNREADY_find_all_chunks: Checking file {count_of_files}. '{path}' for validity ...",flush=True)
+				print(f"DEBUG: find_all_chunks: Checking file {count_of_files}. '{path}' for validity ...",flush=True)
 				is_valid = fac_check_file_validity_by_opening(path)
 				if not is_valid:	# ignore clips which had an issue with being opened and return None
-					print(f'DEBUG: UNREADY_find_all_chunks: Unable to process {count_of_files} {str(path)} ... ignoring it',flush=True)
+					print(f'DEBUG: find_all_chunks: Unable to process {count_of_files} {str(path)} ... ignoring it',flush=True)
 				else:
 					# if required, start a new chunk
 					if (count_of_files % SETTINGS_DICT['MAX_FILES_PER_CHUNK']) == 0:
@@ -307,7 +305,7 @@ def UNREADY_find_all_chunks():
 	if chunk_count > 1:
 		# if within tolerance, merge the final chunk into the previous chunk
 		if chunks[str(chunk_id)]["num_files"] <= TOLERANCE_FINAL_CHUNK:
-			print(f'DEBUG: UNREADY_find_all_chunks: Merging final chunk (chunk_id={chunk_id}, num_files={chunks[str(chunk_id)]["num_files"]}) into previous chunk (chunk_id={chunk_id - 1}, num_files={chunks[str(chunk_id - 1)]["num_files"]+chunks[str(chunk_id)]["num_files"]})',flush=True)
+			print(f'DEBUG: find_all_chunks: Merging final chunk (chunk_id={chunk_id}, num_files={chunks[str(chunk_id)]["num_files"]}) into previous chunk (chunk_id={chunk_id - 1}, num_files={chunks[str(chunk_id - 1)]["num_files"]+chunks[str(chunk_id)]["num_files"]})',flush=True)
 			chunks[str(chunk_id - 1)]["file_list"] = chunks[str(chunk_id - 1)]["file_list"] + chunks[str(chunk_id)]["file_list"]
 			chunks[str(chunk_id - 1)]["num_files"] = chunks[str(chunk_id - 1)]["num_files"] + chunks[str(chunk_id)]["num_files"]
 			# remove the last chunk since we just merged it into the chunk prior
@@ -315,14 +313,14 @@ def UNREADY_find_all_chunks():
 	chunk_count = len(chunks)
 
 	# OK lets print the chunks tree
-	if DEBUG: print(f"DEBUG: UNREADY_find_all_chunks: Chunks tree contains {count_of_files} files:\n{objPrettyPrint.pformat(chunks)}",flush=True)
+	if DEBUG: print(f"DEBUG: find_all_chunks: Chunks tree contains {count_of_files} files:\n{objPrettyPrint.pformat(chunks)}",flush=True)
 
 	# CHECK the chunks tree
-	if DEBUG: print(f"DEBUG: UNREADY_find_all_chunks: Chunks tree contains {count_of_files} files:\n{objPrettyPrint.pformat(chunks)}",flush=True)
+	if DEBUG: print(f"DEBUG: find_all_chunks: Chunks tree contains {count_of_files} files:\n{objPrettyPrint.pformat(chunks)}",flush=True)
 	for i in range(0,chunk_count):	# i.e. 0 to (chunk_count-1)
-		print(f'DEBUG: UNREADY_find_all_chunks: About to check-print data for chunks[{i}] : chunks[{i}]["num_files"] and chunks[{i}]["file_list"]:',flush=True)
-		print(f'DEBUG:UNREADY_find_all_chunks: chunks[{i}]["num_files"] = {chunks[str(i)]["num_files"]}',flush=True)
-		print(f'DEBUG:UNREADY_find_all_chunks:  chunks[{i}]["file_list"] = \n{objPrettyPrint.pformat(chunks[str(i)]["file_list"])}',flush=True)
+		print(f'DEBUG: find_all_chunks: About to check-print data for chunks[{i}] : chunks[{i}]["num_files"] and chunks[{i}]["file_list"]:',flush=True)
+		print(f'DEBUG:find_all_chunks: chunks[{i}]["num_files"] = {chunks[str(i)]["num_files"]}',flush=True)
+		print(f'DEBUG:find_all_chunks:  chunks[{i}]["file_list"] = \n{objPrettyPrint.pformat(chunks[str(i)]["file_list"])}',flush=True)
 		num_files = chunks[str(i)]["num_files"]
 		file_list = chunks[str(i)]["file_list"]
 		for j in range(0,num_files):
@@ -362,8 +360,8 @@ if __name__ == "__main__":
 
 	##########################################################################################################################################
 	# Locate all openable files and put them into chunks in a dict, including { proposed filename for the encoded chunk, first/last frames, number of frames in chunk } 
-	
-	ALL_CHUNKS_COUNT, ALL_CHUNKS_COUNT_OF_FILES, ALL_CHUNKS = UNREADY_find_all_chunks()	# it uses settings in SETTINGS_DICT to do its thing
+
+	ALL_CHUNKS_COUNT, ALL_CHUNKS_COUNT_OF_FILES, ALL_CHUNKS = find_all_chunks()	# it uses settings in SETTINGS_DICT to do its thing
 	
 	if DEBUG: print(f"DEBUG: retrieved ALL_CHUNKS tree: chunks: {ALL_CHUNKS_COUNT} files: {ALL_CHUNKS_COUNT_OF_FILES} dict:\n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
 

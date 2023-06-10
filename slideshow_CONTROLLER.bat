@@ -33,13 +33,27 @@ REM ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 REM
 
 @ECHO ON
-del /f .\slideshow_settings.py
 
 set "script=.\slideshow_CONTROLLER.py"
+set "log=!script!.log"
+del /f "!log!"
 
-"!python_exe!" "!script!"
+REM del /f .\slideshow_settings.py
 
-type .\slideshow_settings.py
+copy /y ".\slideshow_settings_template.py" ".\slideshow_settings.py"
+
+echo type ".\slideshow_settings.py" >>"!log!" 2>&1
+type ".\slideshow_settings.py" >>"!log!" 2>&1
+type ".\slideshow_settings.py"
+
+"!python_exe!" "!script!" >>"!log!" 2>&1
+
+echo type ".\slideshow_settings.py" >>"!log!" 2>&1
+type ".\slideshow_settings.py" >>"!log!" 2>&1
+type ".\slideshow_settings.py"
+
+
+type "!log!"
 
 pause
 exit

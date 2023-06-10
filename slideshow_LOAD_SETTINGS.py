@@ -56,7 +56,7 @@ num_unreachable_objects = gc.collect()	# collect straight away
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 global DEBUG
-DEBUG = False
+DEBUG = True
 
 global TERMINAL_WIDTH					# for use by PrettyPrinter
 TERMINAL_WIDTH = 250
@@ -164,8 +164,9 @@ def load_settings():
 	# Settings_filename is always "fixed" in the same place as the script is run from, 
 	# A dict is returned with all of the settings in it.
 	# Missing values are defaulted here, yielding calculated ones as well.
-
-	global SETTINGS_MODULE
+	global DEBUG
+	
+	if DEBUG: print(f'DEBUG: at top of load_settings DEBUG={DEBUG}',flush=True)
 
 	# This is ALWAYS a fixed filename in the current default folder !!!
 	SLIDESHOW_SETTINGS_MODULE_NAME				= 'SLIDESHOW_SETTINGS'.lower()	# SLIDESHOW_SETTINGS.py
@@ -215,7 +216,7 @@ def load_settings():
 	MAX_FILES_PER_CHUNK							= int(150)
 	TOLERANCE_PERCENT_FINAL_CHUNK				= int(20)
 	RECURSIVE									= True
-	DEBUG										= False
+	DEBUG										= False if DEBUG==False else True
 	FFMPEG_PATH									= fully_qualified_filename(os.path.join(r'.', r'ffmpeg.exe'))
 
 	SUBTITLE_DEPTH								= int(0)
@@ -271,9 +272,9 @@ def load_settings():
 	ZIMG_RANGE_LIMITED  = 0		# /**< Studio (TV) legal range, 16-235 in 8 bits. */
 	ZIMG_RANGE_FULL	 = 1		# /**< Full (PC) dynamic range, 0-255 in 8 bits. */
 	# https://www.vapoursynth.com/doc/apireference.html?highlight=_FieldBased
-	VS_INTERLACED = { 'Progressive' : 0, 'BFF' : 1, 'TFF' : 2 }		# vs documnetation says frame property _FieldBased is one of 0=frame based (progressive), 1=bottom field first, 2=top field first.
+	VS_INTERLACED = { 'Progressive' : 0, 'BFF' : 1, 'TFF' : 2 }		# vs documentation says frame property _FieldBased is one of 0=frame based (progressive), 1=bottom field first, 2=top field first.
 
-	TARGET_FPS									= None		# CALCULATED LATER : # = round(self.calc_ini["TARGET_FPSNUM"] / self.calc_ini["TARGET_FPSDEN"], 3)
+	TARGET_FPS									= None		# CALCULATED LATER :	 # = round(self.calc_ini["TARGET_FPSNUM"] / self.calc_ini["TARGET_FPSDEN"], 3)
 	DURATION_PIC_FRAMES							= None		# CALCULATED LATER : 	# = int(math.ceil(self.calc_ini["DURATION_PIC_SEC"] * self.calc_ini["TARGET_FPS"]))
 	DURATION_CROSSFADE_FRAMES					= None		# CALCULATED LATER : 	# = int(math.ceil(self.calc_ini["DURATION_CROSSFADE_SECS"] * self.calc_ini["TARGET_FPS"]))
 	DURATION_BLANK_CLIP_FRAMES					= None		# CALCULATED LATER : 	# = self.calc_ini["DURATION_CROSSFADE_FRAMES"] + 1	# make equal to the display time for an image; DURATION_CROSSFADE_FRAMES will be less than this
@@ -366,7 +367,7 @@ def load_settings():
 		'TARGET_COLOR_RANGE_I_ZIMG':				TARGET_COLOR_RANGE_I_ZIMG,	# CALCULATED LATER # = if something, calculated
 	}
 
-	if DEBUG:	print(f'DEBUG: default_settings_dict=\n{objPrettyPrint.pformat(default_settings_dict)}')
+	if DEBUG:	print(f'DEBUG: created default_settings_dict=\n{objPrettyPrint.pformat(default_settings_dict)}',flush=True)
 
 	#######################################################################################################################################
 	#######################################################################################################################################
@@ -390,15 +391,21 @@ def load_settings():
 										[ 'DEBUG',										DEBUG,										r'see and regret seeing, ginormous debug output' ],
 										#[ 'FFMPEG_PATH',								FFMPEG_PATH,								r'Please leave this alone unless really confident' ],
 									]	
+		if DEBUG:	print(f'DEBUG: specially_formatted_settings_list=\n{objPrettyPrint.pformat(specially_formatted_settings_list)}',flush=True)
 		create_py_file_from_specially_formatted_list(SLIDESHOW_SETTINGS_MODULE_FILENAME, specially_formatted_settings_list)
 		print(f"load_settings: ERROR: File '{SLIDESHOW_SETTINGS_MODULE_FILENAME}' does not exist, creating it with template settings... you MUST edit it now ...",flush=True,file=sys.stderr)
 		sys.exit(1)
-	return
+
+	#######################################################################################################################################
+	#######################################################################################################################################
 
 	# read the user-edited settings from SLIDESHOW_SETTINGS_MODULE_NAME (SLIDESHOW_SETTINGS.py)
 	if SLIDESHOW_SETTINGS_MODULE_NAME not in sys.modules:
+		if DEBUG:	print(f'DEBUG: SLIDESHOW_SETTINGS_MODULE_NAME not in sys.modules',flush=True)
 		# Import the module dynamically, if it is not done already
 		try:
+			if DEBUG:	print(f'DEBUG: importing SLIDESHOW_SETTINGS_MODULE_NAME={SLIDESHOW_SETTINGS_MODULE_NAME} dynamically',flush=True)
+			#importlib.invalidate_caches()
 			SETTINGS_MODULE = importlib.import_module(SLIDESHOW_SETTINGS_MODULE_NAME)
 		except ImportError as e:
 			# Handle the ImportError if the module cannot be imported
@@ -408,15 +415,29 @@ def load_settings():
 			print(f"load_settings: ERROR: Exception, failed to dynamically import user specified Settings from import module: '{SLIDESHOW_SETTINGS_MODULE_NAME}'\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)	
 	else:
+		if DEBUG:	print(f'DEBUG: SLIDESHOW_SETTINGS_MODULE_NAME IS in sys.modules',flush=True)
 		# Reload the module since it had been dynamically loaded already ... remember, global variables in thee module are not scrubbed by reloading
 		try:
+			if DEBUG:	print(f'DEBUG: reloading SETTINGS_MODULE={SETTINGS_MODULE} ',flush=True)
 			#importlib.invalidate_caches()
 			importlib.reload(SETTINGS_MODULE)
 		except Exception as e:
 			print(f"load_settings: ERROR: Exception, failed to RELOAD user specified Settings from import module: '{SLIDESHOW_SETTINGS_MODULE_NAME}'\n{str(e)}",flush=True,file=sys.stderr)
+			sys.exit(1)
+	
+	#print(f'DEBUG: before import slideshow_settings.py static',flush=True)
+	#import slideshow_settings
+	#user_specified_settings_dict = slideshow_settings.settings
+	#print(f'DEBUG: after import slideshow_settings.py static',flush=True)
 
 	# retrieve the settigns from SLIDESHOW_SETTINGS_MODULE_NAME (SLIDESHOW_SETTINGS.py)
-	user_specified_settings_dict = SETTINGS_MODULE.settings
+	if DEBUG:	print(f"DEBUG: Attempting to load user_specified_settings_dict = SETTINGS_MODULE.settings'",flush=True)
+	try:
+		user_specified_settings_dict = SETTINGS_MODULE.settings
+	except Exception as e:
+		print(f"load_settings: ERROR: Exception, failed to execute 'user_specified_settings_dict = SETTINGS_MODULE.settings'\n{str(e)}",flush=True,file=sys.stderr)
+		sys.exit(1)
+	print(f'Successfully loaded user_specified_settings_dict=\n{objPrettyPrint.pformat(user_specified_settings_dict)}',flush=True)
 
 	#######################################################################################################################################
 	#######################################################################################################################################
@@ -441,7 +462,7 @@ def load_settings():
 	final_settings_dict['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS'] = ddl_fully_qualified
 	#
 	final_settings_dict['SLIDESHOW_SETTINGS_MODULE_NAME'] = final_settings_dict['SLIDESHOW_SETTINGS_MODULE_NAME']
-	final_settings_dict['CURRENT_FOLDER'] = fully_qualified_directory_no_trailing_backslash(final_settings_dict['CURRENT_FOLDER'])
+	final_settings_dict['SLIDESHOW_SETTINGS_MODULE_FILENAME'] = fully_qualified_filename(final_settings_dict['SLIDESHOW_SETTINGS_MODULE_FILENAME'])
 	
 	final_settings_dict['ROOT_FOLDER_FOR_OUTPUTS'] = fully_qualified_directory_no_trailing_backslash(final_settings_dict['ROOT_FOLDER_FOR_OUTPUTS'])
 	final_settings_dict['TEMP_FOLDER'] = fully_qualified_directory_no_trailing_backslash(final_settings_dict['TEMP_FOLDER'])
