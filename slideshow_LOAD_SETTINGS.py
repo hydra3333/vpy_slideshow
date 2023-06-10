@@ -56,7 +56,7 @@ num_unreachable_objects = gc.collect()	# collect straight away
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 global DEBUG
-DEBUG = True
+DEBUG = False
 
 global TERMINAL_WIDTH					# for use by PrettyPrinter
 TERMINAL_WIDTH = 250

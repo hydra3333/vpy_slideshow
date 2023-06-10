@@ -277,10 +277,10 @@ def find_all_chunks():
 			raise ValueError(f"ERROR: find_all_chunks: File Extensions:\n{SETTINGS_DICT['EXTENSIONS']}\nnot found in '{current_Directory}'")
 		while not (path is None):	# first clip already pre-retrieved ready for this while loop
 			if path.suffix.lower() in SETTINGS_DICT['EXTENSIONS']:
-				print(f"DEBUG: find_all_chunks: Checking file {count_of_files}. '{path}' for validity ...",flush=True)
+				print(f"Checking file {count_of_files}. '{path}' for validity ...",flush=True)
 				is_valid = fac_check_file_validity_by_opening(path)
 				if not is_valid:	# ignore clips which had an issue with being opened and return None
-					print(f'DEBUG: find_all_chunks: Unable to process {count_of_files} {str(path)} ... ignoring it',flush=True)
+					print(f'Unable to process {count_of_files} {str(path)} ... ignoring it',flush=True)
 				else:
 					# if required, start a new chunk
 					if (count_of_files % SETTINGS_DICT['MAX_FILES_PER_CHUNK']) == 0:
@@ -305,7 +305,7 @@ def find_all_chunks():
 	if chunk_count > 1:
 		# if within tolerance, merge the final chunk into the previous chunk
 		if chunks[str(chunk_id)]["num_files"] <= TOLERANCE_FINAL_CHUNK:
-			print(f'DEBUG: find_all_chunks: Merging final chunk (chunk_id={chunk_id}, num_files={chunks[str(chunk_id)]["num_files"]}) into previous chunk (chunk_id={chunk_id - 1}, num_files={chunks[str(chunk_id - 1)]["num_files"]+chunks[str(chunk_id)]["num_files"]})',flush=True)
+			print(f'Merging final chunk (chunk_id={chunk_id}, num_files={chunks[str(chunk_id)]["num_files"]}) into previous chunk (chunk_id={chunk_id - 1}, num_files={chunks[str(chunk_id - 1)]["num_files"]+chunks[str(chunk_id)]["num_files"]})',flush=True)
 			chunks[str(chunk_id - 1)]["file_list"] = chunks[str(chunk_id - 1)]["file_list"] + chunks[str(chunk_id)]["file_list"]
 			chunks[str(chunk_id - 1)]["num_files"] = chunks[str(chunk_id - 1)]["num_files"] + chunks[str(chunk_id)]["num_files"]
 			# remove the last chunk since we just merged it into the chunk prior
@@ -328,7 +328,7 @@ def find_all_chunks():
 			file1 = file_list[j]
 			file2 = chunks[str(i)]["file_list"][j]
 
-	print(f"Finished assigning files into chunks for processing: {count_of_files} files into {chunk_count} chunks. Created {chunk_count} chunk files.",flush=True)
+	print(f"Finished assigning files into chunks for processing: {count_of_files} files into {chunk_count} chunks.",flush=True)
 
 	return chunk_count, count_of_files, chunks
 

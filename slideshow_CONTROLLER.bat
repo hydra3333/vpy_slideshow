@@ -46,7 +46,9 @@ echo type ".\slideshow_settings.py" >>"!log!" 2>&1
 type ".\slideshow_settings.py" >>"!log!" 2>&1
 type ".\slideshow_settings.py"
 
-"!python_exe!" "!script!" >>"!log!" 2>&1
+echo "!python_exe!" "!script!" >>"!log!" 2>&1
+REM "!python_exe!" "!script!" >>"!log!" 2>&1
+"!python_exe!" "!script!"
 
 echo type ".\slideshow_settings.py" >>"!log!" 2>&1
 type ".\slideshow_settings.py" >>"!log!" 2>&1
