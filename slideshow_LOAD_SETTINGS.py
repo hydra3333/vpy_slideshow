@@ -56,6 +56,7 @@ num_unreachable_objects = gc.collect()	# collect straight away
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 global DEBUG
+DEBUG = False
 
 global TERMINAL_WIDTH					# for use by PrettyPrinter
 TERMINAL_WIDTH = 250
@@ -136,6 +137,12 @@ def create_py_file_from_specially_formatted_list(dot_py_filename, specially_form
 				return 'r' + repr(value).replace('\\\\', '\\')
 			else:
 				return repr(value)
+		#elif isinstance(value, int):
+		#	return str(value)
+		#elif isinstance(value, float):
+		#	return repr(value)
+		#elif isinstance(value, bool):
+		#	return str(value)
 		elif isinstance(value, list):
 			return '[' + ', '.join(make_r_prefix(item) for item in value) + ']'
 		elif isinstance(value, dict):
@@ -148,7 +155,7 @@ def create_py_file_from_specially_formatted_list(dot_py_filename, specially_form
 		file.write("settings = {\n")
 		for item in specially_formatted_list:
 			key, value, annotation_text = item
-			file.write(f'\t{make_r_prefix(key)}: {make_r_prefix(value)},\t\t\t\t# {annotation_text}\n')
+			file.write(f'\t{make_r_prefix(key)}:\t{make_r_prefix(value)},\t\t# {annotation_text}\n')
 		file.write("}\n")
 	return
 
@@ -211,8 +218,8 @@ def load_settings():
 	DEBUG										= False
 	FFMPEG_PATH									= fully_qualified_filename(os.path.join(r'.', r'ffmpeg.exe'))
 
-	SUBTITLE_DEPTH								= float(0)
-	SUBTITLE_FONTSIZE							= float(18)
+	SUBTITLE_DEPTH								= int(0)
+	SUBTITLE_FONTSIZE							= int(18)
 	SUBTITLE_FONTSCALE							= float(1.0)
 	DURATION_PIC_SEC							= float(3.0)
 	DURATION_CROSSFADE_SECS						= float(0.5)
@@ -359,27 +366,29 @@ def load_settings():
 		'TARGET_COLOR_RANGE_I_ZIMG':				TARGET_COLOR_RANGE_I_ZIMG,	# CALCULATED LATER # = if something, calculated
 	}
 
+	if DEBUG:	print(f'DEBUG: default_settings_dict=\n{objPrettyPrint.pformat(default_settings_dict)}')
+
 	#######################################################################################################################################
 	#######################################################################################################################################
 	
 	if not os.path.exists(SLIDESHOW_SETTINGS_MODULE_FILENAME):
 		specially_formatted_settings_list =	[
-										[ 'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS',	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS,	r'a list, one or more folders to look in for slideshow pics/videos' ]
-										[ 'RECURSIVE',									RECURSIVE,									r'case sensitive: whether to recurse the source folder(s) looking for slideshow pics/videos' ]
-										[ 'ROOT_FOLDER_FOR_OUTPUTS', 					ROOT_FOLDER_FOR_OUTPUTS,					r'folder in which outputs are to be placed' ]
-										[ 'TEMP_FOLDER',								TEMP_FOLDER,								r'folder where temporary files go ... use on a disk with LOTS of spare disk space !!' ]
-										[ 'BACKGROUND_AUDIO_INPUT_FILENAME',			BACKGROUND_AUDIO_INPUT_FILENAME,			r'specify a .m4a audio file ifg you want a background track (it is not looped if too short)' ]
-										[ 'FINAL_MP4_WITH_AUDIO_FILENAME',				FINAL_MP4_WITH_AUDIO_FILENAME,				r'the filename of the FINAL slideshow .mp4' ]
-										[ 'SUBTITLE_DEPTH',								SUBTITLE_DEPTH,								r'how many folders deep to display in subtitles; use 0 for no subtitling' ]
-										[ 'SUBTITLE_FONTSIZE',							SUBTITLE_FONTSIZE,							r'fontsize for subtitles, leave this alone unless confident' ]
-										[ 'SUBTITLE_FONTSCALE',							SUBTITLE_FONTSCALE,							r'fontscale for subtitles, leave this alone unless confident' ]
-										[ 'DURATION_PIC_SEC',							DURATION_PIC_SEC,							r'in seconds, duration each pic is shown in the slideshow' ]
-										[ 'DURATION_CROSSFADE_SECS',					DURATION_CROSSFADE_SECS,					r'in seconds duration crossfade between pic, leave this alone unless confident' ]
-										[ 'CROSSFADE_TYPE',								CROSSFADE_TYPE,								r'random is a good choice, leave this alone unless confident' ]
-										[ 'CROSSFADE_DIRECTION',						CROSSFADE_DIRECTION,						r'Please leave this alone unless really confident' ]
-										[ 'DURATION_MAX_VIDEO_SEC',						DURATION_MAX_VIDEO_SEC,						r'in seconds, maximum duration each video clip is shown in the slideshow' ]
-										[ 'DEBUG',										DEBUG,										r'see and regret seeing, ginormous debug output' ]
-										#[ 'FFMPEG_PATH',								FFMPEG_PATH,								r'Please leave this alone unless really confident' ]
+										[ 'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS',	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS,	r'a list, one or more folders to look in for slideshow pics/videos' ],
+										[ 'RECURSIVE',									RECURSIVE,									r'case sensitive: whether to recurse the source folder(s) looking for slideshow pics/videos' ],
+										[ 'ROOT_FOLDER_FOR_OUTPUTS', 					ROOT_FOLDER_FOR_OUTPUTS,					r'folder in which outputs are to be placed' ],
+										[ 'TEMP_FOLDER',								TEMP_FOLDER,								r'folder where temporary files go ... use on a disk with LOTS of spare disk space !!' ],
+										[ 'BACKGROUND_AUDIO_INPUT_FILENAME',			BACKGROUND_AUDIO_INPUT_FILENAME,			r'specify a .m4a audio file ifg you want a background track (it is not looped if too short)' ],
+										[ 'FINAL_MP4_WITH_AUDIO_FILENAME',				FINAL_MP4_WITH_AUDIO_FILENAME,				r'the filename of the FINAL slideshow .mp4' ],
+										[ 'SUBTITLE_DEPTH',								SUBTITLE_DEPTH,								r'how many folders deep to display in subtitles; use 0 for no subtitling' ],
+										[ 'SUBTITLE_FONTSIZE',							SUBTITLE_FONTSIZE,							r'fontsize for subtitles, leave this alone unless confident' ],
+										[ 'SUBTITLE_FONTSCALE',							SUBTITLE_FONTSCALE,							r'fontscale for subtitles, leave this alone unless confident' ],
+										[ 'DURATION_PIC_SEC',							DURATION_PIC_SEC,							r'in seconds, duration each pic is shown in the slideshow' ],
+										[ 'DURATION_CROSSFADE_SECS',					DURATION_CROSSFADE_SECS,					r'in seconds duration crossfade between pic, leave this alone unless confident' ],
+										[ 'CROSSFADE_TYPE',								CROSSFADE_TYPE,								r'random is a good choice, leave this alone unless confident' ],
+										[ 'CROSSFADE_DIRECTION',						CROSSFADE_DIRECTION,						r'Please leave this alone unless really confident' ],
+										[ 'DURATION_MAX_VIDEO_SEC',						DURATION_MAX_VIDEO_SEC,						r'in seconds, maximum duration each video clip is shown in the slideshow' ],
+										[ 'DEBUG',										DEBUG,										r'see and regret seeing, ginormous debug output' ],
+										#[ 'FFMPEG_PATH',								FFMPEG_PATH,								r'Please leave this alone unless really confident' ],
 									]	
 		create_py_file_from_specially_formatted_list(SLIDESHOW_SETTINGS_MODULE_FILENAME, specially_formatted_settings_list)
 		print(f"load_settings: ERROR: File '{SLIDESHOW_SETTINGS_MODULE_FILENAME}' does not exist, creating it with template settings... you MUST edit it now ...",flush=True,file=sys.stderr)

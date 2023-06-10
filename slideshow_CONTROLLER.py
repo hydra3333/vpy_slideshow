@@ -251,13 +251,13 @@ def UNREADY_find_all_chunks():
 	TOLERANCE_FINAL_CHUNK = max(1, int(SETTINGS_DICT['MAX_FILES_PER_CHUNK'] * (float(SETTINGS_DICT['TOLERANCE_PERCENT_FINAL_CHUNK'])/100.0)))
 
 	print(f"Commencing assigning files into chunks for processing usng:",flush=True)
-	print(f"{objPrettyPrint.pformat(SETTINGS_DICT['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS'])}\n{}",flush=True)
-	print(f"{objPrettyPrint.pformat(SETTINGS_DICT['EXTENSIONS')]}",flush=True)
+	print(f"{objPrettyPrint.pformat(SETTINGS_DICT['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS'])}",flush=True)
+	print(f"{objPrettyPrint.pformat(SETTINGS_DICT['EXTENSIONS'])}",flush=True)
 	print(f"RECURSIVE={SETTINGS_DICT['RECURSIVE']}",flush=True)
 	if DEBUG:
 		print(	f"DEBUG: UNREADY_find_all_chunks: " +
 				f"MAX_FILES_PER_CHUNK={SETTINGS_DICT['MAX_FILES_PER_CHUNK']}, " +
-				f"TOLERANCE_PERCENT_FINAL_CHUNK={SETTINGS_DICT['TOLERANCE_PERCENT_FINAL_CHUNK'}, " +
+				f"TOLERANCE_PERCENT_FINAL_CHUNK={SETTINGS_DICT['TOLERANCE_PERCENT_FINAL_CHUNK']}, " +
 				f"TOLERANCE_FINAL_CHUNK={TOLERANCE_FINAL_CHUNK}",flush=True)
 
 	if SETTINGS_DICT['RECURSIVE']:
@@ -347,11 +347,11 @@ if __name__ == "__main__":
 	# USER_SPECIFIED_SETTINGS_DICT	the settings which were specified by the user
 
 	# find/assign a few  global variables
-	if SETTINGS_DICT{'DEBUG']:
+	if SETTINGS_DICT['DEBUG']:
 		DEBUG = True
-	else 
+	else:
 		DEBUG = False
-	FFMPEG_PATH = SETTINGS_DICT{'FFMPEG_PATH']
+	FFMPEG_PATH = SETTINGS_DICT['FFMPEG_PATH']
 
 	if DEBUG:
 		print(f"DEBUG: slideshow_CONTROLLER: DEBUG={DEBUG}")
@@ -370,7 +370,7 @@ if __name__ == "__main__":
 	# create .JSON file containing the ALL_CHUNKS  dict. Note the start/stop frames etc are yet to be updated by the encoder
 	try:
 		fac = SETTINGS_DICT['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT']
-		with open(fac), 'w') as fp:
+		with open(fac, 'w') as fp:
 			json.dump(ALL_CHUNKS, fp, indent=4)
 	except Exception as e:
 		print(f"ERROR: error returned from json.dump ALL_CHUNKS to JSON file: '{fac}'\n{str(e)}",flush=True,file=sys.stderr)
