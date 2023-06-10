@@ -54,6 +54,11 @@ CDLL(r'MediaInfo.dll')				# note the hard-coded folder	# per https://forum.video
 from MediaInfoDLL3 import MediaInfo, Stream, Info, InfoOption		# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
 #from MediaInfoDLL3 import *											# per https://github.com/MediaArea/MediaInfoLib/blob/master/Source/Example/HowToUse_Dll3.py
 
+# Ensure we can import modules from ".\" by adding the current default folder to the python path.
+# (tried using just PYTHONPATH environment variable but it was unreliable)
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+global settings_module
 global MI
 MI = MediaInfo()
 
@@ -66,7 +71,7 @@ global objPrettyPrint
 objPrettyPrint = pprint.PrettyPrinter(width=TERMINAL_WIDTH, compact=False, sort_dicts=False)	# facilitates formatting and printing of text and dicts etc
 
 # Path to the FFmpeg executable
-FFMPEG_PATH = 'C:\\SOFTWARE\\ffmpeg\\ffmpeg.exe'
+???? FFMPEG_PATH = 'C:\\SOFTWARE\\ffmpeg\\ffmpeg.exe' in settings now
 
 def normalize_path(path):
 	#if DEBUG: print(f"DEBUG: normalize_path:  incoming path='{path}'",flush=True)

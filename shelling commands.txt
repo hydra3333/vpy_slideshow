@@ -1,23 +1,172 @@
-import subprocess
+USE THIS
 
+import subprocess
 def run_command(command):
     # Run the command in a subprocess
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process1 = subprocess.Popen(['vspipe.exe', '-p', '1', '-p', '1', '-'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process2 = subprocess.Popen(['ffmpeg', '-i', 'pipe', 'etc'], stdin=process1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # Wait for the processes to complete and retrieve the output and error streams
+    output, error2 = process2.communicate()
+    error1 = process1.stderr.read().decode('utf-8').strip()
+    # Print any error messages
+    if error1:
+        print(f"Error from vspipe.exe: {error1}")
+    if error2:
+        print(f"Error from ffmpeg: {error2.decode('utf-8').strip()}")
+    # Decode the output from bytes to string
+    output = output.decode('utf-8').strip()
+    # Return the output
+    return output
+# Example usage
+command = 'vspipe.exe -p 1 -p 1 - | ffmpeg -i pipe etc'
+result = run_command(command)
+print(result)
 
-    # Wait for the process to complete and retrieve the output
-    output, error = process.communicate()
+--------------------
+
+THIS HAS BLOCKING READS
+
+In the code you provided, the `process2.communicate()` method is used to wait for the processes to complete before retrieving the output and error streams. 
+This means that the code will wait until both `process1` and `process2` have finished executing before continuing.
+If you want to retrieve the output and error streams as they are produced, without waiting for the processes to complete, 
+you can use the `process2.stdout.readline()` and `process2.stderr.readline()` methods in a loop 
+to read the streams line by line.
+
+import subprocess
+def run_command(command):
+    # Run the command in a subprocess
+    process1 = subprocess.Popen(['vspipe.exe', '-p', '1', '-p', '1', '-'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process2 = subprocess.Popen(['ffmpeg', '-i', 'pipe', 'etc'], stdin=process1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    # Read output and error streams line by line
+    while process2.poll() is None:  # While the process is still running
+        output_line = process2.stdout.readline().decode('utf-8').strip()
+        error_line = process2.stderr.readline().decode('utf-8').strip()
+
+        if output_line:
+            print(f"Output: {output_line}")
+        if error_line:
+            print(f"Error: {error_line}")
+
+    # Retrieve the remaining output and error streams
+    output, error2 = process2.communicate()
+    error1 = process1.stderr.read().decode('utf-8').strip()
+
+    # Print any error messages
+    if error1:
+        print(f"Error from vspipe.exe: {error1}")
+    if error2:
+        print(f"Error from ffmpeg: {error2.decode('utf-8').strip()}")
 
     # Decode the output from bytes to string
     output = output.decode('utf-8').strip()
-
-    # Print any error messages
-    if error:
-        print(f"Error: {error.decode('utf-8').strip()}")
 
     # Return the output
     return output
 
 # Example usage
-command = ['ls', '-l']
+command = 'vspipe.exe -p 1 -p 1 - | ffmpeg -i pipe etc'
+result = run_command(command)
+print(result)
+
+In this modified code, the `while` loop reads the output and error streams line by line using `process2.stdout.readline()` and `process2.stderr.readline()`. 
+It continues looping until `process2.poll()` returns a non-None value, indicating that the process has finished. 
+Inside the loop, each line is printed, but you can modify this part to store or process the lines as needed.
+After the loop, the remaining output and error streams are retrieved using `process2.communicate()` and `process1.stderr.read()`, similar to the original code.
+
+Note that this modification allows you to retrieve the output and error streams as they are produced, but it doesn't guarantee that all the output 
+will be available before the processes complete. 
+Depending on the behavior of the executed commands, some output may be available only after the processes have finished.
+
+---------------------------
+THIS NON-BLOCKING READS ON THE STDOUT AND STDERR STREAMS
+
+Yes, there is a way to perform non-blocking reads on the stdout and stderr streams using the `select` module. 
+Here's an example of how you can modify the code to use non-blocking reads:
+
+```python
+import subprocess
+import select
+
+def run_command(command):
+    # Run the command in a subprocess
+    process1 = subprocess.Popen(['vspipe.exe', '-p', '1', '-p', '1', '-'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process2 = subprocess.Popen(['ffmpeg', '-i', 'pipe', 'etc'], stdin=process1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    # Create lists to store file objects for select
+    stdout_list = [process2.stdout]
+    stderr_list = [process2.stderr]
+
+    # Read output and error streams
+    while stdout_list or stderr_list:  # While there are still streams to read
+        ready_to_read, _, _ = select.select(stdout_list, stderr_list, [])
+        for file_obj in ready_to_read:
+            if file_obj in stdout_list:
+                output_line = file_obj.readline().decode('utf-8').strip()
+                if output_line:
+                    print(f"Output: {output_line}")
+            if file_obj in stderr_list:
+                error_line = file_obj.readline().decode('utf-8').strip()
+                if error_line:
+                    print(f"Error: {error_line}")
+            if not output_line and file_obj in stdout_list:
+                stdout_list.remove(file_obj)
+            if not error_line and file_obj in stderr_list:
+                stderr_list.remove(file_obj)
+
+    # Retrieve the remaining output and error streams
+    output, error2 = process2.communicate()
+    error1 = process1.stderr.read().decode('utf-8').strip()
+
+    # Print any error messages
+    if error1:
+        print(f"Error from vspipe.exe: {error1}")
+    if error2:
+        print(f"Error from ffmpeg: {error2.decode('utf-8').strip()}")
+
+    # Decode the output from bytes to string
+    output = output.decode('utf-8').strip()
+
+    # Return the output
+    return output
+
+# Example usage
+command = 'vspipe.exe -p 1 -p 1 - | ffmpeg -i pipe etc'
+result = run_command(command)
+print(result)
+```
+
+In this modified code, the `select.select()` function is used to perform non-blocking reads on the stdout and stderr streams. It takes three lists as input: the lists of streams to monitor for readability (`stdout_list` and `stderr_list`), the lists of streams to monitor for writability (empty in this case), and a timeout value (empty in this case, which means the function will block until at least one stream is ready to read).
+
+Inside the loop, `select.select()` returns a list of streams that are ready to be read. The loop then iterates over these streams and performs non-blocking reads using `file_obj.readline()`. If a line is read, it is processed accordingly (printed in this example). If a stream reaches the end (indicated by an empty line), it is removed from the corresponding list (`stdout_list` or `stderr_list`).
+
+The loop continues until there are no more streams to read (i.e., both `stdout_list` and `stderr_list` are empty). After the loop, the remaining output and error streams are retrieved and handled similar to the original code.
+
+Using non-blocking reads allows you to process the output and error streams without blocking the execution of the code. It enables you to handle the streams as they become available, providing more flexibility in managing the subprocesses.
+
+
+
+
+
+
+
+
+DO NOT USE THIS
+
+import subprocess
+def run_command(command):
+    # Run the command in a subprocess
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    # Wait for the process to complete and retrieve the output
+    output, error = process.communicate()
+    # Decode the output from bytes to string
+    output = output.decode('utf-8').strip()
+    # Print any error messages
+    if error:
+        print(f"Error: {error.decode('utf-8').strip()}")
+    # Return the output
+    return output
+# Example usage
+command = 'vspipe.exe -p 1 -p 1 - | ffmpeg -i pipe etc'
 result = run_command(command)
 print(result)
