@@ -362,15 +362,26 @@ if __name__ == "__main__":
 	ALL_CHUNKS_COUNT, ALL_CHUNKS_COUNT_OF_FILES, ALL_CHUNKS = UNREADY_find_all_chunks()	# it uses settings in SETTINGS_DICT to do its thing
 	if DEBUG: print(f"DEBUG: retrieved ALL_CHUNKS tree containing {ALL_CHUNKS_COUNT} chunks, {ALL_CHUNKS_COUNT_OF_FILES} files,n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
 	
-	# Extend ALL_CHUNKS
+	# Extend ALL_CHUNKS with addityional info
 	#	for each chunk, add an nested dict "OUTPUT_PARAMETERS"
-	#		- proposed output_filename (an interim ffv1 encoded file in the temp folder) ... append chunk_id formatted like str(chunk_id).zfill(5)	# zero padded to 5 digits
-	#		- number of frames			(updated by encoder, always (number of frames)
-	#		- start frame number to 0	(updated by encoder, always 0)
-	#		- end frame number to 0		(updated by encoder, always (number of frames - 1)
+	#		- proposed ffv1_output_filename (an interim ffv1 encoded file in the temp folder) ... append chunk_id formatted like str(chunk_id).zfill(5)	# zero padded to 5 digits
+	#		- number of frames				(updated by encoder, always (number of frames)
+	#		- start frame number to 0		(updated by encoder, always 0)
+	#		- end frame number to 0			(updated by encoder, always (number of frames - 1)
+
+	for chunk_id in range(0,ALL_CHUNKS_COUNT):	# i.e. 0 to (chunk_count-1)
+		#num_files = ALL_CHUNKS_COUNT[str(chunk_id)]["num_files"]
+		#file_list = ALL_CHUNKS_COUNT[str(chunk_id)]["file_list"]
+		ALL_CHUNKS_COUNT[str(chunk_id)]["ENCODER_OUTPUT_PARAMETERS"] =	{	"proposed_ffv1_output_filename" :	CHUNK_ENCODED_FFV1_FILENAME_BASE + str(chunk_id).zfill(5),
+																			"num_frames_in_chunk" :				0,	# initialize to 0, filled in by encoder
+																			"start_frame_num_in_chunk" :		0,	# initialize to 0, filled in by encoder
+																			"end_frame_num_in_chunk" :			0,	# initialize to 0, filled in by encoder
+																		}
+	#end_for
 	
 	then AFTER ENCODING we can re-import the saved .json file and change the process to add up all the frame counts and use that (total frame count) in the audio processing
 	and just do audio processing then transcoding/muxing in one step
+
 	
 	# create .JSON file containing ALL_CHUNKS
 	try:
