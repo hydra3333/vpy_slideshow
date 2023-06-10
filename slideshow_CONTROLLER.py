@@ -173,7 +173,7 @@ def find_all_chunks():
 		# use the filename component of the incoming path and create a random fully qualified path into the temp folder
 		# there is a significant to 100% chance of home picture/video filenames in directory trees being non-unique
 		# apparently uuid4 has a good chance of returning a unique string
-		f = fully_qualified_filename(os.path.join(SETTINGS_DICT['temp_folder'], os.path.basename(path) + r'_' + str(uuid.uuid4()) + r'.ffindex'))
+		f = fully_qualified_filename(os.path.join(SETTINGS_DICT['TEMP_FOLDER'], os.path.basename(path) + r'_' + str(uuid.uuid4()) + r'.ffindex'))
 		return f
 
 	def fac_get_path(path_generator):
@@ -286,7 +286,7 @@ def find_all_chunks():
 					if (count_of_files % SETTINGS_DICT['MAX_FILES_PER_CHUNK']) == 0:
 						chunk_id = chunk_id + 1
 						chunks[str(chunk_id)] = {	"num_files": 0,
-													"proposed_ffv1_output_filename" :	CHUNK_ENCODED_FFV1_FILENAME_BASE + str(chunk_id).zfill(5),
+													"proposed_ffv1_output_filename" :	SETTINGS_DICT['CHUNK_ENCODED_FFV1_FILENAME_BASE'] + str(chunk_id).zfill(5),
 													"num_frames_in_chunk" :				0,	# initialize to 0, filled in by encoder
 													"start_frame_num_in_chunk" :		0,	# initialize to 0, filled in by encoder
 													"end_frame_num_in_chunk" :			0,	# initialize to 0, filled in by encoder

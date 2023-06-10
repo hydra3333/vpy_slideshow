@@ -374,7 +374,7 @@ def load_settings():
 	
 	if not os.path.exists(SLIDESHOW_SETTINGS_MODULE_FILENAME):
 		specially_formatted_settings_list =	[
-										[ 'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS',	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS,	r'a list, one or more folders to look in for slideshow pics/videos' ],
+										[ 'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS',	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS,	r'a list, one or more folders to look in for slideshow pics/videos. the r in front of the string is CRITICAL' ],
 										[ 'RECURSIVE',									RECURSIVE,									r'case sensitive: whether to recurse the source folder(s) looking for slideshow pics/videos' ],
 										[ 'ROOT_FOLDER_FOR_OUTPUTS', 					ROOT_FOLDER_FOR_OUTPUTS,					r'folder in which outputs are to be placed' ],
 										[ 'TEMP_FOLDER',								TEMP_FOLDER,								r'folder where temporary files go ... use on a disk with LOTS of spare disk space !!' ],
