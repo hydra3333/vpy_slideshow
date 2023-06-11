@@ -182,8 +182,8 @@ def load_settings():
 	EXTENSIONS									= PIC_EXTENSIONS + VID_EXTENSIONS + EEK_EXTENSIONS
 
 	# we need a json file to contain a dict of all chunks
-	CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT			= os.path.join(TEMP_FOLDER, r'chunks_file_for_all_chunks_dict.json')		# mostly for debug
-	SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT		= os.path.join(TEMP_FOLDER, r'snippets_file_for_all_snippets_dict.json')	# mostly for debug
+	CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT			= os.path.join(TEMP_FOLDER, r'chunks_file_for_all_chunks_dict.json')		# only for debug
+	SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT		= os.path.join(TEMP_FOLDER, r'snippets_file_for_all_snippets_dict.json')	# only for debug
 	CHUNK_ENCODED_FFV1_FILENAME_BASE			= os.path.join(TEMP_FOLDER, r'encoded_chunk_ffv1_')	# the interim encoded video created by the encoding process, to be associated with a snippet dict, full names dynamically created eg "interim_ffv1_0001.mkv"
 	
 	# Now we need a set of inter-step comms files
@@ -297,8 +297,8 @@ def load_settings():
 		'VID_EEK_EXTENSIONS':						VID_EEK_EXTENSIONS,
 		'EXTENSIONS' :								EXTENSIONS,
 
-		'CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT': 		CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT,
-		'SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT':	SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT,
+		'CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT': 		CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT,		# only for debug
+		'SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT':	SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT,	# only for debug
 		'CHUNK_ENCODED_FFV1_FILENAME_BASE': 		CHUNK_ENCODED_FFV1_FILENAME_BASE,
 		'CURRENT_CHUNK_FILENAME':					CURRENT_CHUNK_FILENAME,
 		'CURRENT_SNIPPETS_FILENAME': 				CURRENT_SNIPPETS_FILENAME,

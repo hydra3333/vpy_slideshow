@@ -285,7 +285,9 @@ def find_all_chunks():
 					# if required, start a new chunk
 					if (count_of_files % SETTINGS_DICT['MAX_FILES_PER_CHUNK']) == 0:
 						chunk_id = chunk_id + 1
-						chunks[str(chunk_id)] = {	"num_files": 0,
+						chunks[str(chunk_id)] = {	
+													"chunk_id": chunk_id,
+													"num_files": 0,
 													"proposed_ffv1_output_filename" :	SETTINGS_DICT['CHUNK_ENCODED_FFV1_FILENAME_BASE'] + str(chunk_id).zfill(5),
 													"num_frames_in_chunk" :				0,	# initialize to 0, filled in by encoder
 													"start_frame_num_in_chunk" :		0,	# initialize to 0, filled in by encoder
@@ -337,6 +339,10 @@ def find_all_chunks():
 if __name__ == "__main__":
 	DEBUG = True
 	
+	##########################################################################################################################################
+	##########################################################################################################################################
+	# GATHER SETTINGS
+
 	import slideshow_LOAD_SETTINGS	# from same folder .\
 	SETTINGS_DICT, OLD_INI_DICT, OLD_CALC_INI_DICT, USER_SPECIFIED_SETTINGS_DICT = slideshow_LOAD_SETTINGS.load_settings()
 	# SETTINGS_DICT					contains user settings with defaults appled plus "closed" settings added
@@ -359,6 +365,9 @@ if __name__ == "__main__":
 		print(f"DEBUG: slideshow_CONTROLLER: OLD_CALC_INI_DICT=\n{objPrettyPrint.pformat(OLD_CALC_INI_DICT)}")
 
 	##########################################################################################################################################
+	##########################################################################################################################################
+	# FIND PIC/IMAGES
+	
 	# Locate all openable files and put them into chunks in a dict, including { proposed filename for the encoded chunk, first/last frames, number of frames in chunk } 
 
 	ALL_CHUNKS_COUNT, ALL_CHUNKS_COUNT_OF_FILES, ALL_CHUNKS = find_all_chunks()	# it uses settings in SETTINGS_DICT to do its thing
@@ -374,8 +383,79 @@ if __name__ == "__main__":
 		print(f"ERROR: error returned from json.dump ALL_CHUNKS to JSON file: '{fac}'\n{str(e)}",flush=True,file=sys.stderr)
 		sys.exit(1)	
 	
+	##########################################################################################################################################
+	##########################################################################################################################################
+	# ENCODE CHUNKS INTO INTERIM FFV1 VIDEO FILES, 
+	# SAVING FRAME NUMBERS AND NUM VIDEO FRAMES INFO SNIPPET DICT, CREATING SNIPPET JSON, IMPORTING JSON AND ADDING TO ALL_SNIPPETS DICT:
+	
+	
+	for individual_chunk_id in range(0,ALL_CHUNKS_COUNT)	# 0 to (ALL_CHUNKS_COUNT - 1)
+		individual_chunk_id_string = str(chunk_id).zfill(5)	# zero padded to 5 digits
+		individual_chunk_dict = ALL_CHUNKS[str(individual_chunk_id)]
+		
+		chunk_json_filename = fully_qualified_filename(SETTINGS_DICT['CURRENT_CHUNK_FILENAME'])
+		snippets_json_filename = fully_qualified_filename(SETTINGS_DICT['CURRENT_SNIPPETS_FILENAME'])
+
+		try:
+			with open(chunk_json_filename, 'w') as fp:
+				json.dump(individual_chunk_dict, fp, indent=4)
+		except Exception as e:
+			print(f"ERROR: dumping current chunk to JSON file: '{chunk_json_filename}' for encoder, chunk_id={individual_chunk_id}, individual_chunk_dict=\nobjPrettyPrint.pformat(individual_chunk_dict)\n{str(e)}",flush=True,file=sys.stderr)
+			sys.exit(1)	
+		print(f"Created individual chunk file for encoder: {individual_chunk_filename} listing {num_files} files.",flush=True)
+
+
+
+
+
+
+
+
+	
+
+		try:
+			f_debug = fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.old_calc_ini_dict.JSON'))
+			with open(f_debug, 'w') as fp:
+				json.dump(old_calc_ini_dict, fp, indent=4)
+		except Exception as e:
+			print(f"DEBUG: load_settings: ERROR: error dumping JSON file: '{f_debug}'\n{str(e)}",flush=True,file=sys.stderr)
+			sys.exit(1)	
+
+	
+	
+	
+	# import snippet dict and intto the ALL_CHUNKS dict
+	# then at the end then re-calculate global frame numbers into snippet_dict before processing audio
+	snippet_dict = {	snippet_chunk_id: chunk_id,							# filled in by encoder from chunk["chunk_id"]
+						snippet_chunk_encoded_ffv1_filename: "aaa.ffv1",	# filled in by encoder from chunk["proposed_ffv1_output_filename"]
+						snippet_chunk_encoded_video_first_frame_num: ffff,
+						snippet_chunk_encoded_video_last_frame_num: gggg,
+						snippet_chunk_encoded_video_num_frames: gggg,
+						snippet_chunk_num_snippets: iiii,
+						snippet_global_video_first_frame_num:	hhhhhhh,	# initialized as 0 when creating snippet file in encoder
+						snippet_global_video_last_frame_num:	iiiiiii,	# initialized as 0 when creating snippet file in encoder
+						snippet_list:	[	
+											{snippet_start_frame: 0, snippet_end_frame: XXX, snipper_num_frames: YYY, snippet_source_video_filename: '\a\b\c\ZZZ1.3GP'},
+											{snippet_start_frame: 0, snippet_end_frame: XXX, snipper_num_frames: YYY, snippet_source_video_filename: '\a\b\c\ZZZ2.3GP'},
+											{snippet_start_frame: 0, snippet_end_frame: XXX, snipper_num_frames: YYY, snippet_source_video_filename: '\a\b\c\ZZZ3.3GP'},
+										]
+					}
+	ALL_CHUNKS[str(imported_snippet_dict["chunk_id)"]]["snippet_dict"] = imported_snippet_dict
+
+
+	##########################################################################################################################################
+	##########################################################################################################################################
+	# BACKGROUND AUDIO:
+
 	#AFTER ENCODING we can re-import the saved .json file and change the following 
 	#- audio editing process to add up all the frame counts and use that (total frame count) in the audio processing
 	#- just do audio processing then transcoding/muxing in one step
 
+
 	##########################################################################################################################################
+	##########################################################################################################################################
+	# USE SNIPPET INFO BACKGROUND AUDIO:
+
+	##########################################################################################################################################
+	##########################################################################################################################################
+	# TRANSCODE BACKGROUND AUDIO:
