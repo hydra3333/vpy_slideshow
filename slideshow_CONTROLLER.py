@@ -503,37 +503,40 @@ if __name__ == "__main__":
 	#		ALL_CHUNKS[str(individual_chunk_id)]['end_frame_num_of_chunk_in_final_video']
 	#
 	# To be calculated and updated in every 'snippet_list' item within a chunk (this is a list, so loop to process each snippet via its list index): 
-	#		ALL_CHUNKS[str(individual_chunk_id)]['snippet_list'][index_number_in_for_loop']['start_frame_of_snippet_in_final_video']
-	#		ALL_CHUNKS[str(individual_chunk_id)]['snippet_list'][index_number_in_for_loop']['end_frame_of_snippet_in_final_video']
-
-
-
-
-
+	#		ALL_CHUNKS[str(individual_chunk_id)]['snippet_list'][index_number_in_for_loop]['start_frame_of_snippet_in_final_video']
+	#		ALL_CHUNKS[str(individual_chunk_id)]['snippet_list'][index_number_in_for_loop]['end_frame_of_snippet_in_final_video']
 
 	# keep track of the frame numbers of a video where all of the slideshow videos will be concatenated in sequence
 	seq_previous_ending_frame_num = -1	# initialize so the start frame number for the first clip with be (-1 + 1) = 0 .. base 0
-	global_video_first_frame_num = 0
-	global_video_last_frame_num = 0
+	start_frame_num_of_chunk_in_final_video = 0
+	end_frame_num_of_chunk_in_final_video = 0
 	
-	if DEBUG: print(f"DEBUG: seq_previous_ending_frame_num init to {seq_previous_ending_frame_num}",flush=True)
+	if DEBUG: print(f"DEBUG: about to calculate start/end final_video based frame numbers for all chunks and their snippets",flush=True)
 
 	for individual_chunk_id in range(0,ALL_CHUNKS_COUNT):	# 0 to (ALL_CHUNKS_COUNT - 1)
-		seq_start_frame_num = seq_previous_ending_frame_num + 1		# base 0, this is now the start_frame_num_of_chunk_in_final_video
+		seq_start_frame_num = seq_previous_ending_frame_num + 1		# base 0, this is now the start_frame_num in the full final video
 
-		# for this chunk, re-calculate chunk info and poke it back into ALL_CHUNKS
-		start_frame_num_of_chunk_in_final_video = 'calculated NOW '
-		end_frame_num_of_chunk_in_final_video = 'calculated NOW '
+	# for this chunk, re-calculate chunk info and poke it back into ALL_CHUNKS
+	#		eg (0..9)  goes to (0..9) when starting at frame 0 and having 10 frames     0,1,2,3,4,5,6,7,8,9 -> 0,1,2,3,4,5,6,7,8,9
+	#		eg (0..19) goes to (0..19) when starting at frame 0 and having 20 frames    0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 -> 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19
+	#		eg (0..1)  goes to (10..11) when starting at frame 10 and having 2 frames   10,11
+	#		eg (0..3)  goes to (11..14) when starting at frame 11 and having 4 frames   0,1,2,3 -> 11,12,13,14
+	#		eg (0..5)  goes to (50..55) when starting at frame 50 and having 6 frames   0,1,2,3,4,5 -> 50,51,52,53,54,55
+		start_frame_num_of_chunk_in_final_video	= seq_start_frame_num + ALL_CHUNKS[str(individual_chunk_id)]['start_frame_num_in_chunk']
+		end_frame_num_of_chunk_in_final_video	= seq_start_frame_num + ALL_CHUNKS[str(individual_chunk_id)]['end_frame_num_in_chunk']
 		ALL_CHUNKS[str(individual_chunk_id)]['start_frame_num_of_chunk_in_final_video'] = start_frame_num_of_chunk_in_final_video
 		ALL_CHUNKS[str(individual_chunk_id)]['end_frame_num_of_chunk_in_final_video'] =  end_frame_num_of_chunk_in_final_video
 
-		# for the snippets in this chunk, re-calculate chunk info and then poke it back into ALL_CHUNKS
-		snippet_dict = ALL_CHUNKS[str(individual_chunk_id)]["snippet_dict"]	# try to retrieve the snippet for a chunk, forces python error if not found
+		for i in range(0, ALL_CHUNKS[str(individual_chunk_id)]['num_snippets']):
+			# for this snippet in this chunk, re-calculate snippet info and then poke it back into ALL_CHUNKS
+			start_frame_of_snippet_in_final_video = seq_start_frame_num + ALL_CHUNKS[str(individual_chunk_id)]['snippet_list'][i]['start_frame_of_snippet_in_chunk']
+			end_frame_of_snippet_in_final_video = seq_start_frame_num + ALL_CHUNKS[str(individual_chunk_id)]['snippet_list'][i]['end_frame_of_snippet_in_chunk']
+			ALL_CHUNKS[str(individual_chunk_id)]['snippet_list'][i]['start_frame_of_snippet_in_final_video'] = start_frame_of_snippet_in_final_video
+			ALL_CHUNKS[str(individual_chunk_id)]['snippet_list'][i]['end_frame_of_snippet_in_final_video'] = end_frame_of_snippet_in_final_video
+		#end for
+
+		seq_previous_ending_frame_num = end_frame_num_of_chunk_in_final_video	# set seq_previous_ending_frame_num ready for use by the next chunk
 	#end for
-
-
-
-
 
 	##########################################################################################################################################
 	##########################################################################################################################################
