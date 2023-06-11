@@ -129,7 +129,7 @@ MI = MediaInfo()
 # Path to the FFmpeg executable
 
 def normalize_path(path):
-	#if DEBUG: print(f"DEBUG: normalize_path:  incoming path='{path}'",flush=True)
+	#if DEBUG:	print(f"DEBUG: normalize_path:  incoming path='{path}'",flush=True)
 	# Replace single backslashes with double backslashes
 	path = path.rstrip(os.linesep).strip('\r').strip('\n').strip()
 	r1 = r'\\'
@@ -139,7 +139,7 @@ def normalize_path(path):
 	# Add double backslashes before any single backslashes
 	for i in range(0,20):
 		path = path.replace(r2, r1)
-	#if DEBUG: print(f"DEBUG: normalize_path: outgoing path='{path}'",flush=True)
+	#if DEBUG:	print(f"DEBUG: normalize_path: outgoing path='{path}'",flush=True)
 	return path
 
 def fully_qualified_directory_no_trailing_backslash(directory_name):
@@ -182,11 +182,11 @@ def find_all_chunks():
 		while 1:	# loop until we do a "return", hitting past the end of the iterator returns None
 			try:
 				path = next(path_generator)
-				if DEBUG: print(f'fac_get_path: get success, path.name=' + path.name)
+				if DEBUG:	print(f'fac_get_path: get success, path.name=' + path.name,flush=True)
 			except StopIteration:
 				return None
 			if path.suffix.lower() in SETTINGS_DICT['EXTENSIONS']:	# only return files which are in known extensions
-				if DEBUG: print(f'DEBUG: find_all_chunks: fac_get_path: in EXTENSIONS success, path.name=' + path.name)
+				if DEBUG:	print(f'DEBUG: find_all_chunks: fac_get_path: in EXTENSIONS success, path.name=' + path.name,flush=True)
 				return path
 
 	def fac_check_clip_from__path(path, ext):		# opens VID_EEK_EXTENSIONS only ... Source filter depends on extension
@@ -200,7 +200,7 @@ def find_all_chunks():
 				os.remove(ffcachefile)
 				return True
 			except Exception as e:
-				print(f'WARNING: fac_check_clip_from__path: error opening file via "ffms2": "{str(path)}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}')
+				print(f'WARNING: fac_check_clip_from__path: error opening file via "ffms2": "{str(path)}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}',flush=True)
 				return False
 		elif  ext in SETTINGS_DICT['EEK_EXTENSIONS']:
 			try:
@@ -208,7 +208,7 @@ def find_all_chunks():
 				del clip
 				return True
 			except Exception as e:
-				print(f'WARNING: fac_check_clip_from__path: error opening file via "lsmas": "{path.name}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}')
+				print(f'WARNING: fac_check_clip_from__path: error opening file via "lsmas": "{path.name}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}',flush=True)
 				return False
 		else:
 			raise ValueError(f'ERROR: fac_check_clip_from__path: get_clip_from_path: expected {path} to have extension in {SETTINGS_DICT["VID_EEK_EXTENSIONS"]} ... aborting')
@@ -223,7 +223,7 @@ def find_all_chunks():
 				os.remove(ffcachefile)
 				return True
 			except Exception as e:
-				print(f'WARNING: fac_check_clip_from_pic: error opening file via "ffms2": "{path.name}" ; ignoring this picture. The error was:\n{e}\n{type(e)}\n{str(e)}')
+				print(f'WARNING: fac_check_clip_from_pic: error opening file via "ffms2": "{path.name}" ; ignoring this picture. The error was:\n{e}\n{type(e)}\n{str(e)}',flush=True)
 				return False
 		else:
 			raise ValueError(f'ERROR: fac_check_clip_from_pic: : expected {path} to have extension in {SETTINGS_DICT["PIC_EXTENSIONS"]} ... aborting')
@@ -287,11 +287,13 @@ def find_all_chunks():
 						chunk_id = chunk_id + 1
 						chunks[str(chunk_id)] = {	
 													"chunk_id": chunk_id,
-													"num_files": 0,
-													"proposed_ffv1_output_filename" :	SETTINGS_DICT['CHUNK_ENCODED_FFV1_FILENAME_BASE'] + str(chunk_id).zfill(5),
-													"num_frames_in_chunk" :				0,	# initialize to 0, filled in by encoder
-													"start_frame_num_in_chunk" :		0,	# initialize to 0, filled in by encoder
-													"end_frame_num_in_chunk" :			0,	# initialize to 0, filled in by encoder
+													"chunk_fixed_json_filename" :			fully_qualified_filename(SETTINGS_DICT['CURRENT_CHUNK_FILENAME'])		# always the same fixed filename
+													"snippet_fixed_json_filename" :			fully_qualified_filename(SETTINGS_DICT['CURRENT_SNIPPETS_FILENAME'])	# always the same fixed filename
+													"proposed_ffv1_output_mkv_filename" :	fully_qualified_filename(SETTINGS_DICT['CHUNK_ENCODED_FFV1_FILENAME_BASE'] + str(chunk_id).zfill(5) + r'.mkv'),	# filename related to chunk_id
+													"num_files": 							0,	# initialixzed but filled in by thos loop
+													"num_frames_in_chunk" :					0,	# initialize to 0, filled in by encoder
+													"start_frame_num_in_chunk" :			0,	# initialize to 0, filled in by encoder
+													"end_frame_num_in_chunk" :				0,	# initialize to 0, filled in by encoder
 													"file_list" : []
 												}
 					# add currently examined file to chunk
@@ -315,10 +317,10 @@ def find_all_chunks():
 	chunk_count = len(chunks)
 
 	# OK lets print the chunks tree
-	if DEBUG: print(f"DEBUG: find_all_chunks: Chunks tree contains {count_of_files} files:\n{objPrettyPrint.pformat(chunks)}",flush=True)
+	if DEBUG:	print(f"DEBUG: find_all_chunks: Chunks tree contains {count_of_files} files:\n{objPrettyPrint.pformat(chunks)}",flush=True)
 
 	# CHECK the chunks tree
-	if DEBUG: print(f"DEBUG: find_all_chunks: Chunks tree contains {count_of_files} files:\n{objPrettyPrint.pformat(chunks)}",flush=True)
+	if DEBUG:	print(f"DEBUG: find_all_chunks: Chunks tree contains {count_of_files} files:\n{objPrettyPrint.pformat(chunks)}",flush=True)
 	for i in range(0,chunk_count):	# i.e. 0 to (chunk_count-1)
 		print(f'DEBUG: find_all_chunks: About to check-print data for chunks[{i}] : chunks[{i}]["num_files"] and chunks[{i}]["file_list"]:',flush=True)
 		print(f'DEBUG:find_all_chunks: chunks[{i}]["num_files"] = {chunks[str(i)]["num_files"]}',flush=True)
@@ -358,11 +360,11 @@ if __name__ == "__main__":
 	FFMPEG_PATH = SETTINGS_DICT['FFMPEG_PATH']
 
 	if DEBUG:
-		print(f"DEBUG: slideshow_CONTROLLER: DEBUG={DEBUG}")
-		print(f"DEBUG: slideshow_CONTROLLER: USER_SPECIFIED_SETTINGS_DICT=\n{objPrettyPrint.pformat(USER_SPECIFIED_SETTINGS_DICT)}")
-		print(f"DEBUG: slideshow_CONTROLLER: SETTINGS_DICT=\n{objPrettyPrint.pformat(SETTINGS_DICT)}")
-		print(f"DEBUG: slideshow_CONTROLLER: OLD_INI_DICT=\n{objPrettyPrint.pformat(OLD_INI_DICT)}")
-		print(f"DEBUG: slideshow_CONTROLLER: OLD_CALC_INI_DICT=\n{objPrettyPrint.pformat(OLD_CALC_INI_DICT)}")
+		print(f"DEBUG: slideshow_CONTROLLER: DEBUG={DEBUG}",flush=True)
+		print(f"DEBUG: slideshow_CONTROLLER: USER_SPECIFIED_SETTINGS_DICT=\n{objPrettyPrint.pformat(USER_SPECIFIED_SETTINGS_DICT)}",flush=True)
+		print(f"DEBUG: slideshow_CONTROLLER: SETTINGS_DICT=\n{objPrettyPrint.pformat(SETTINGS_DICT)}",flush=True)
+		print(f"DEBUG: slideshow_CONTROLLER: OLD_INI_DICT=\n{objPrettyPrint.pformat(OLD_INI_DICT)}",flush=True)
+		print(f"DEBUG: slideshow_CONTROLLER: OLD_CALC_INI_DICT=\n{objPrettyPrint.pformat(OLD_CALC_INI_DICT)}",flush=True)
 
 	##########################################################################################################################################
 	##########################################################################################################################################
@@ -372,7 +374,7 @@ if __name__ == "__main__":
 
 	ALL_CHUNKS_COUNT, ALL_CHUNKS_COUNT_OF_FILES, ALL_CHUNKS = find_all_chunks()	# it uses settings in SETTINGS_DICT to do its thing
 	
-	if DEBUG: print(f"DEBUG: retrieved ALL_CHUNKS tree: chunks: {ALL_CHUNKS_COUNT} files: {ALL_CHUNKS_COUNT_OF_FILES} dict:\n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
+	if DEBUG:	print(f"DEBUG: retrieved ALL_CHUNKS tree: chunks: {ALL_CHUNKS_COUNT} files: {ALL_CHUNKS_COUNT_OF_FILES} dict:\n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
 
 	# create .JSON file containing the ALL_CHUNKS  dict. Note the start/stop frames etc are yet to be updated by the encoder
 	try:
@@ -386,66 +388,101 @@ if __name__ == "__main__":
 	##########################################################################################################################################
 	##########################################################################################################################################
 	# ENCODE CHUNKS INTO INTERIM FFV1 VIDEO FILES, 
-	# SAVING FRAME NUMBERS AND NUM VIDEO FRAMES INFO SNIPPET DICT, CREATING SNIPPET JSON, IMPORTING JSON AND ADDING TO ALL_SNIPPETS DICT:
-	
+	# SAVING FRAME NUMBERS AND NUM VIDEO FRAMES INFO SNIPPET DICT, 
+	# CREATING SNIPPET JSON, IMPORTING JSON AND ADDING TO ALL_SNIPPETS DICT:
+
+	if DEBUG:	print(f"DEBUG: Starting encoder loop for each of ALL_CHUNKS tree. chunks: {ALL_CHUNKS_COUNT} files: {ALL_CHUNKS_COUNT_OF_FILES}",flush=True)
 	
 	for individual_chunk_id in range(0,ALL_CHUNKS_COUNT)	# 0 to (ALL_CHUNKS_COUNT - 1)
-		individual_chunk_id_string = str(chunk_id).zfill(5)	# zero padded to 5 digits
-		individual_chunk_dict = ALL_CHUNKS[str(individual_chunk_id)]
-		
-		chunk_json_filename = fully_qualified_filename(SETTINGS_DICT['CURRENT_CHUNK_FILENAME'])
-		snippets_json_filename = fully_qualified_filename(SETTINGS_DICT['CURRENT_SNIPPETS_FILENAME'])
+		# we cannot just import the legacy encoder and call it with parameters, it is a vpy consumed by ffmpeg and that does not accept parameters
+		# so we need to create`a fixed-filenamed input file for it to consume (a chu`nk)
+		#						and a fixed filename for it to create (snippets for that chunk)
 
+		individual_chunk_dict = ALL_CHUNKS[str(individual_chunk_id)]
+
+		chunk_json_filename = fully_qualified_filename(individual_chunk_dict['chunk_fixed_json_filename'])					# always the same fixed filename
+		snippets_json_filename = fully_qualified_filename(individual_chunk_dict['snippet_fixed_json_filename'])				# always the same fixed filename
+		proposed_ffv1_output_mkv_filename = fully_qualified_filename(individual_chunk_dict['proposed_ffv1_output_mkv_filename'])	# fixed filename plus a seqnential 5-digit-zero-padded ending based on chunk_id + r'.mkv'
+		
+		# remove any pre-existing files to be consumed and produced by the encoder
+		if os.path.exists(chunk_json_filename):
+			os.remove(chunk_json_filename)
+		if os.path.exists(snippets_json_filename):
+			os.remove(snippets_json_filename)
+		if os.path.exists(proposed_ffv1_output_mkv_filename):
+			os.remove(proposed_ffv1_output_mkv_filename)
+		
+		# create the fixed-filename chunk file consumed by the encoder; it contains the fixed-filename of the snippet file to produce
+		if DEBUG:	print(f"DEBUG: in encoder loop: attempting to create chunk_json_filename={chunk_json_filename} for encoder to consume.",flush=True)
 		try:
 			with open(chunk_json_filename, 'w') as fp:
 				json.dump(individual_chunk_dict, fp, indent=4)
 		except Exception as e:
 			print(f"ERROR: dumping current chunk to JSON file: '{chunk_json_filename}' for encoder, chunk_id={individual_chunk_id}, individual_chunk_dict=\nobjPrettyPrint.pformat(individual_chunk_dict)\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)	
-		print(f"Created individual chunk file for encoder: {individual_chunk_filename} listing {num_files} files.",flush=True)
+		print(f"Created fixed-filename chunk file for encoder to consume: {chunk_json_filename} listing {num_files} files.",flush=True)
 
+		# ????????????????????????????????????
+		# ????????????????????????????????????
+		# ????????????????????????????????????
+		if DEBUG:	print(f"DEBUG: encoder loop: calling the encoder, VSPIPE piped to FFMPEG ... with controller using non-blocking reads of stdout and stderr (per chatgpt).",flush=True)
+		# HERE: call the encoder ... vspipe piped to ffmpeg ... with controller using non-blocking reads of stdout and stderr (per chatgpt)
+		if DEBUG:	print(f"DEBUG: encoder loop: returned from the encoder, VSPIPE piped to FFMPEG ... with controller using non-blocking reads of stdout and stderr (per chatgpt).",flush=True)
+		# ????????????????????????????????????
+		# ????????????????????????????????????
+		# ????????????????????????????????????
 
-
-
-
-
-
-
-	
-
+		# Now the encoder has encoded a chunk and produced a snippet file and an ffv1 encoded video .mkv 
+		# ... import newly produced snippet file into imported_snippet_dict, check it, and ADD that dict into the ALL_CHUNKS dict for this chunk
+		# The snippet_dict produced by the encoder looks like this:
+		#		snippet_dict = {	snippet_chunk_id: chunk_id,							# filled in by encoder from chunk["chunk_id"]
+		#							snippet_chunk_encoded_ffv1_filename: "aaa.ffv1",	# filled in by encoder from chunk["proposed_ffv1_output_filename"]
+		#							snippet_chunk_encoded_video_first_frame_num: ffff,
+		#							snippet_chunk_encoded_video_last_frame_num: gggg,
+		#							snippet_chunk_encoded_video_num_frames: gggg,
+		#							snippet_chunk_num_snippets: iiii,
+		#							snippet_global_video_first_frame_num:	hhhhhhh,	# initialized as 0 when creating snippet file in encoder
+		#							snippet_global_video_last_frame_num:	iiiiiii,	# initialized as 0 when creating snippet file in encoder
+		#							snippet_list:	[	
+		#												{snippet_start_frame: 0, snippet_end_frame: XXX, snipper_num_frames: YYY, snippet_source_video_filename: '\a\b\c\ZZZ1.3GP'},
+		#												{snippet_start_frame: 0, snippet_end_frame: XXX, snipper_num_frames: YYY, snippet_source_video_filename: '\a\b\c\ZZZ2.3GP'},
+		#												{snippet_start_frame: 0, snippet_end_frame: XXX, snipper_num_frames: YYY, snippet_source_video_filename: '\a\b\c\ZZZ3.3GP'},
+		#											]
+		#				}
+		if not os.path.exists(snippets_json_filename):
+			OOPS AN ERROR SOMEWHERE, encoder-produced snippet file {snippets_json_filename} not found !
+			sys.exit(1)
+		if not os.path.exists(proposed_ffv1_output_mkv_filename):
+			OOPS AN ERROR SOMEWHERE, encoder-produced .mkv video file not found {snippets_jsoproposed_ffv1_output_mkv_filenamen_filename} not found !
+		if DEBUG:	print(f"DEBUG: in encoder loop: attempting to load snippets_json_filename={snippets_json_filename} produced by the encoder.",flush=True)
 		try:
-			f_debug = fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.old_calc_ini_dict.JSON'))
-			with open(f_debug, 'w') as fp:
-				json.dump(old_calc_ini_dict, fp, indent=4)
+			with open(chunk_json_filename, 'w') as fp:
+				imported_snippet_dict = json.load(fp)
 		except Exception as e:
-			print(f"DEBUG: load_settings: ERROR: error dumping JSON file: '{f_debug}'\n{str(e)}",flush=True,file=sys.stderr)
+			print(f"ERROR: loading current snippet from JSON file: '{chunk_json_filename}' from encoder, chunk_id={individual_chunk_id}, related to individual_chunk_dict=\nobjPrettyPrint.pformat(individual_chunk_dict)\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)	
+		print(f"Loaded current snippet file from JSON file: '{chunk_json_filename}'",flush=True)
+		if imported_snippet_dict["snippet_chunk_id"] != individual_chunk_id:
+			OOPS AN ERROR SOMEWHERE ! the chunk_id {imported_snippet_dict["chunk_id"]} in the snippet file '{chunk_json_filename}' does not match the current in-loop chunk_id {individual_chunk_id}
+			sys.exit(1)
+		ALL_CHUNKS[str(individual_chunk_id)]["snippet_dict"] = imported_snippet_dict
+	#end for
 
-	
-	
-	
-	# import snippet dict and intto the ALL_CHUNKS dict
-	# then at the end then re-calculate global frame numbers into snippet_dict before processing audio
-	snippet_dict = {	snippet_chunk_id: chunk_id,							# filled in by encoder from chunk["chunk_id"]
-						snippet_chunk_encoded_ffv1_filename: "aaa.ffv1",	# filled in by encoder from chunk["proposed_ffv1_output_filename"]
-						snippet_chunk_encoded_video_first_frame_num: ffff,
-						snippet_chunk_encoded_video_last_frame_num: gggg,
-						snippet_chunk_encoded_video_num_frames: gggg,
-						snippet_chunk_num_snippets: iiii,
-						snippet_global_video_first_frame_num:	hhhhhhh,	# initialized as 0 when creating snippet file in encoder
-						snippet_global_video_last_frame_num:	iiiiiii,	# initialized as 0 when creating snippet file in encoder
-						snippet_list:	[	
-											{snippet_start_frame: 0, snippet_end_frame: XXX, snipper_num_frames: YYY, snippet_source_video_filename: '\a\b\c\ZZZ1.3GP'},
-											{snippet_start_frame: 0, snippet_end_frame: XXX, snipper_num_frames: YYY, snippet_source_video_filename: '\a\b\c\ZZZ2.3GP'},
-											{snippet_start_frame: 0, snippet_end_frame: XXX, snipper_num_frames: YYY, snippet_source_video_filename: '\a\b\c\ZZZ3.3GP'},
-										]
-					}
-	ALL_CHUNKS[str(imported_snippet_dict["chunk_id)"]]["snippet_dict"] = imported_snippet_dict
-
+	if DEBUG:	print(f"After processing snippets, new ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
 
 	##########################################################################################################################################
 	##########################################################################################################################################
-	# BACKGROUND AUDIO:
+	# Finished encoding, re-parse the ALL_CHUNKS tree dict to re-calculate global frame numbers
+	# within the newly added snippet_dict part of it, before processing any audio snippets
+
+	if DEBUG:	print(f"DEBUG: Startingre-parse the ALL_CHUNKS tree dict to re-calculate global frame numbers chunks: {ALL_CHUNKS_COUNT}.",flush=True)
+
+	for individual_chunk_id in range(0,ALL_CHUNKS_COUNT)	# 0 to (ALL_CHUNKS_COUNT - 1)
+		ALL_CHUNKS[str(individual_chunk_id)]["snippet_dict"]["snippet_chunk_id"]
+
+	##########################################################################################################################################
+	##########################################################################################################################################
+	# BACKGROUND AUDIO
 
 	#AFTER ENCODING we can re-import the saved .json file and change the following 
 	#- audio editing process to add up all the frame counts and use that (total frame count) in the audio processing

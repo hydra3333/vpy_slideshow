@@ -93,7 +93,7 @@ def check_folder_exists_3333(folder, text):
 	return
 
 def normalize_path(path):
-	#if DEBUG: print(f"DEBUG: normalize_path:  incoming path='{path}'",flush=True)
+	#if DEBUG:	print(f"DEBUG: normalize_path:  incoming path='{path}'",flush=True)
 	# Replace single backslashes with double backslashes
 	path = path.rstrip(os.linesep).strip('\r').strip('\n').strip()
 	r1 = r'\\'
@@ -103,7 +103,7 @@ def normalize_path(path):
 	# Add double backslashes before any single backslashes
 	for i in range(0,20):
 		path = path.replace(r2, r1)
-	if DEBUG: print(f"DEBUG: normalize_path: outgoing path='{path}'",flush=True)
+	if DEBUG:	print(f"DEBUG: normalize_path: outgoing path='{path}'",flush=True)
 	return path
 
 def fully_qualified_directory_no_trailing_backslash(directory_name):
@@ -166,7 +166,7 @@ def load_settings():
 	# Missing values are defaulted here, yielding calculated ones as well.
 	global DEBUG
 	
-	if DEBUG: print(f'DEBUG: at top of load_settings DEBUG={DEBUG}',flush=True)
+	if DEBUG:	print(f'DEBUG: at top of load_settings DEBUG={DEBUG}',flush=True)
 
 	# This is ALWAYS a fixed filename in the current default folder !!!
 	SLIDESHOW_SETTINGS_MODULE_NAME				= 'SLIDESHOW_SETTINGS'.lower()	# SLIDESHOW_SETTINGS.py
