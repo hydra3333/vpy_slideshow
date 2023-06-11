@@ -2776,6 +2776,7 @@ try:
 		individual_chunk_dict = json.load(fp)
 except Exception as e:
 	raise ValueError(f'ERROR: loading incoming current chunk JSON file: "{CURRENT_CHUNK_FILENAME}" from controller !')
+print_NORMAL(f'ENCODER (legacy): Loaded incoming current chunk JSON file: "{CURRENT_CHUNK_FILENAME}" from controller.')
 
 # OK we have retrieved a chunk dict, telling us what to encode.  It has this format:
 #	{	
@@ -2807,8 +2808,6 @@ except Exception as e:
 #	'num_frames_in_chunk'
 #	'start_frame_num_in_chunk'
 #	'end_frame_num_in_chunk'
-#	'num_files': 								0,	# initialized but filled in by this loop, number of files in file_list
-#	'file_list':	 							[],	# each item is a fully qualified filename of a source file for this chunk
 #	'num_snippets': 							0,	# # initialize to 0, number of files in file_list, filled in by encoder
 #		'snippet_list'
 #			'start_frame_of_snippet_in_chunk': 0,				# filled in by encoder
@@ -2817,102 +2816,75 @@ except Exception as e:
 #			'snippet_source_video_filename': '\a\b\c\ZZZ1.3GP'	# filled in by encoder
 #		
 
+ct = objSettings.CROSSFADE_TYPE if objSettings.DURATION_CROSSFADE_FRAMES>0 else None
+cd = objSettings.CROSSFADE_DIRECTION if objSettings.DURATION_CROSSFADE_FRAMES>0 else None
 
-
-
-
-
-
-
-
-
-
-
-
-#++++++++++++++++++++
-#++++++++++++++++++++
-#++++++++++++++++++++
-#++++++++++++++++++++
-#++++++++++++++++++++
-#++++++++++++++++++++
-#++++++++++++++++++++
-
-OLD LEGACY CODE
-
-
-if objSettings.RECURSIVE:
-	glob_var="**/*.*"			# recursive
-	ff_glob_var="**/*.ffindex"	# for .ffindex file deletion recursive
-else:
-	glob_var="*.*"				# non-recursive
-	ff_glob_var="*.ffindex"		# for .ffindex file deletion non-recursive
-# glob : with DIRECTORY not having a trailing slash !!!
-num_unreachable_objects = gc.collect()	# With no arguments, run a full garbage collection. # The number of unreachable objects found is returned
-if A_DEBUG_IS_ON: print_DEBUG(f'*** GARBAGE_COLLECTION: post blank_clip creation and pre-Directory-loop, number of unreachable objects found={num_unreachable_objects}')
 Count_of_files = 0
 clips = prior_clip_for_crossfade	# initialize the accumulated clips with a starting small blank clip
+Count_of_snippets = 0
 
-# Open the snippet data file in write mode, overwriting an existing file
-snippet_data_file_object = open(objSettings.SNIPPETS_FILENAME_PATH_LIST[0] , "w")
-
-for Directory in objSettings.DIRECTORY_LIST:
-	current_Directory = fully_qualified_directory_no_trailing_backslash(Directory)
-	ct = objSettings.CROSSFADE_TYPE if objSettings.DURATION_CROSSFADE_FRAMES>0 else None
-	cd = objSettings.CROSSFADE_DIRECTION if objSettings.DURATION_CROSSFADE_FRAMES>0 else None
-	print_NORMAL(f'Start processing image/video files in "{current_Directory}" crossfade="{ct}/{cd}" RECURSIVE={objSettings.RECURSIVE} DEBUG_MODE={objSettings.DEBUG_MODE} glob_var="{glob_var}" \n      with Extensions={objPrettyPrint.pformat(objSettings.EXTENSIONS)}')
-	# NOTE: current_Directory MUST NOT have a trailing backslash ... remove during ini setup
-	paths = Path(current_Directory).glob(glob_var) # generator of all paths in a directory, files starting with . won't be matched by default
-	path = get_path(paths)	#pre-fetch first path
-	if path is None:
-		raise ValueError(f'ERROR: File Extensions:\n{objSettings.EXTENSIONS}\nnot found in "{current_Directory}"')
-	#------
-	while not (path is None):	# first clip already pre-retrieved ready for this while loop
-		if A_DEBUG_IS_ON: print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
-		Count_of_files = Count_of_files + 1
-		print_NORMAL(f'processing {Count_of_files} {str(path)}')
-		this_clip = get_clip_2(path)
-		if this_clip is None:	# ignore clips which had an issue with being opened
-			print_NORMAL(f'Unable to process {Count_of_files} {str(path)} ... ignoring it ')
-		else:
-			if objSettings.DURATION_CROSSFADE_FRAMES > 0:		# and objSettings.CROSSFADE_TYPE.lower() != "none".lower():
-				#if A_DEBUG_IS_ON: print_DEBUG(f'Performing crossfade_merge in while loop')
-				clips, snippet_video_frame_number, snippet_num_frames = crossfade_merge(a=clips, b=this_clip, crossfade_duration_frames=objSettings.DURATION_CROSSFADE_FRAMES, crossfade_type=objSettings.CROSSFADE_TYPE, crossfade_direction=objSettings.CROSSFADE_DIRECTION) 
-				if path.suffix.lower() in objSettings.VID_EXTENSIONS:
-					# Save snippet info so we can find and use the file's audio later and put it in the right place in the slideshow being created by this script
-					fully_qualified_path_string = fully_qualified_filename(path)
-					snippet_data_file_object.write(f"{snippet_video_frame_number} {snippet_num_frames} {repr(fully_qualified_path_string)}\n")
-					snippet_data_file_object.flush()
-		path = get_path(paths)		# get next path to process in this while loop
-		#num_unreachable_objects = gc.collect()	# With no arguments, run a full garbage collection. # The number of unreachable objects found is returned
-		###if A_DEBUG_IS_ON: print_DEBUG(f'*** GARBAGE_COLLECTION: in-Directory-loop end of processing a single file, number of unreachable objects found={num_unreachable_objects}')
-		if A_DEBUG_IS_ON: print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
-	#------
-	# perhaps a finishing crossfade to black ?
-	if objSettings.DURATION_CROSSFADE_FRAMES > 0 and objSettings.CROSSFADE_TYPE.lower() != "none".lower():	
-		if A_DEBUG_IS_ON: print_DEBUG(f'Performing final crossfade_merge after while loop')
-		clips, snippet_video_frame_number, snippet_num_frames = crossfade_merge(a=clips, b=prior_clip_for_crossfade, crossfade_duration_frames=objSettings.DURATION_CROSSFADE_FRAMES, crossfade_type=objSettings.CROSSFADE_TYPE, crossfade_direction=objSettings.CROSSFADE_DIRECTION) 
+num_files = individual_chunk_dict['num_files']
+print_NORMAL(f'ENCODER (legacy): Start processing {num_files} image/video files in "{current_Directory}" crossfade="{ct}/{cd}" RECURSIVE={objSettings.RECURSIVE} DEBUG_MODE={objSettings.DEBUG_MODE}" \n      with Extensions={objPrettyPrint.pformat(objSettings.EXTENSIONS)}')
+for i in range(0,num_files):	# base 0; 0..(num_files - 1)
+	file_to_process = individual_chunk_dict['file_list'][i]
+	path = fully_qualified_filename(file_to_process)
+	if A_DEBUG_IS_ON: print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
+	Count_of_files = Count_of_files + 1
+	print_NORMAL(f'Processing {Count_of_files} {str(path)}')
+	this_clip = get_clip_2(path)
+	if this_clip is None:	# ignore clips which had an issue with being opened
+		raise ValueError(f'Unable to process {Count_of_files} {str(path)} even through open-checked by the controller.')
 	else:
-		if A_DEBUG_IS_ON: print_DEBUG(f'Performing NO final crossfade_merge after while loop')
-		clips = clips + prior_clip_for_crossfade	# add a small blank clip to the end
+		if objSettings.DURATION_CROSSFADE_FRAMES > 0:		# and objSettings.CROSSFADE_TYPE.lower() != "none".lower():
+			if A_DEBUG_IS_ON: print_DEBUG(f'Performing crossfade_merge in while loop')
+			clips, snippet_video_frame_number, snippet_num_frames = crossfade_merge(a=clips, b=this_clip, crossfade_duration_frames=objSettings.DURATION_CROSSFADE_FRAMES, crossfade_type=objSettings.CROSSFADE_TYPE, crossfade_direction=objSettings.CROSSFADE_DIRECTION) 
+			if path.suffix.lower() in objSettings.VID_EXTENSIONS:
+				# Save snippet info back into the LIST 'snippet_list'
+				Count_of_snippets = Count_of_snippets + 1
+				individual_chunk_dict['snippet_list'].append(	{	
+																'start_frame_of_snippet_in_chunk':			snippet_video_frame_number,
+																'end_frame_of_snippet_in_chunk':			snippet_num_frames-1,
+																'start_frame_of_snippet_in_final_video':	0,
+																'end_frame_of_snippet_in_final_video':		0,
+																'snippet_num_frames':						snippet_num_frames,
+																'snippet_source_video_filename':			path
+																}
+	del this_clip
+	#num_unreachable_objects = gc.collect()	# With no arguments, run a full garbage collection. # The number of unreachable objects found is returned
+	###if A_DEBUG_IS_ON: print_DEBUG(f'*** GARBAGE_COLLECTION: in-Directory-loop end of processing a single file, number of unreachable objects found={num_unreachable_objects}')
+	if A_DEBUG_IS_ON: print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
+#end for
+#------
+# perhaps a finishing crossfade to black ?
+if objSettings.DURATION_CROSSFADE_FRAMES > 0 and objSettings.CROSSFADE_TYPE.lower() != "none".lower():	
+	if A_DEBUG_IS_ON: print_DEBUG(f'Performing final crossfade_merge after while loop')
+	clips, snippet_video_frame_number, snippet_num_frames = crossfade_merge(a=clips, b=prior_clip_for_crossfade, crossfade_duration_frames=objSettings.DURATION_CROSSFADE_FRAMES, crossfade_type=objSettings.CROSSFADE_TYPE, crossfade_direction=objSettings.CROSSFADE_DIRECTION) 
+else:
+	if A_DEBUG_IS_ON: print_DEBUG(f'Performing NO final crossfade_merge after while loop')
+	clips = clips + prior_clip_for_crossfade	# add a small blank clip to the end
 clips = clips.std.AssumeFPS(fpsnum=objSettings.TARGET_FPSNUM, fpsden=objSettings.TARGET_FPSDEN)
-#
-# Write the last line to the snippet data file and close it.
-# remember:
-#	using line format: start_frame_number_in_clip, last_frame_number_in_clip, filename of this slideshow in mp4 in single-quotes
-#	eg 0, 2999, 'd:\slideshow_file'
-#	where num_frames would be 3000
+
+# Final updates to chunk info
 clips_first_frame_num = 0
 clips_last_frame_num = clips.num_frames - 1
-snippet_data_file_object.write(f"{clips_first_frame_num} {clips_last_frame_num} {repr(objSettings.OUTPUT_MKV_FILENAME_PATH_LIST[0])}\n")
-snippet_data_file_object.flush()
-snippet_data_file_object.close()
-#
-del this_clip
-#++++++++++++++++++++
+individual_chunk_dict['num_snippets'] = Count_of_snippets
+individual_chunk_dict['num_frames_in_chunk'] = clips.num_frames
+individual_chunk_dict['start_frame_num_in_chunk'] = clips_first_frame_num
+individual_chunk_dict['end_frame_num_in_chunk'] = clips_last_frame_num
+
+# now dump the updated individual_chunk_dict back to disk again so it can be re-read by the controller
+chunk_json_filename = fully_qualified_filename(individual_chunk_dict['chunk_fixed_json_filename'])					# always the same fixed filename
+if DEBUG:	print(f"DEBUG: ENCODER: attempting to create updated chunk_json_filename='{chunk_json_filename}' for controller to consume.",flush=True)
+try:
+	with open(chunk_json_filename, 'w') as fp:
+		json.dump(individual_chunk_dict, fp, indent=4)
+except Exception as e:
+	raise ValueError(f"ERROR: ENCODER: error dumping current chunk JSON file: '{chunk_json_filename}' individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}\n{str(e)}")
+print_NORMAL(f"Created fixed-filename chunk file for controller to consume: '{chunk_json_filename}' listing {ALL_CHUNKS[str(individual_chunk_id)]['num_files']} files, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}",flush=True)
 
 
 #++++++++++++++++++++
-print_NORMAL(f'Finished processing {Count_of_files} image/video files in "{current_Directory}" num_frames={len(clips)} crossfade="{ct}/{cd}" RECURSIVE={objSettings.RECURSIVE} DEBUG_MODE={objSettings.DEBUG_MODE} glob_var="{glob_var}" \n      with Extensions={objPrettyPrint.pformat(objSettings.EXTENSIONS)}')
+print_NORMAL(f'Finished processing {Count_of_files} image/video files in "{current_Directory}" num_frames={len(clips)} crossfade="{ct}/{cd}" RECURSIVE={objSettings.RECURSIVE} DEBUG_MODE={objSettings.DEBUG_MODE}" \n      with Extensions={objPrettyPrint.pformat(objSettings.EXTENSIONS)}')
 #++++++++++++++++++++
 
 #++++++++++++++++++++
@@ -2946,10 +2918,137 @@ if A_DEBUG_IS_ON: print_DEBUG(f'*** GARBAGE_COLLECTION: post-Delete-ffindex-file
 clips.set_output()
 
 #++++++++++++++++++++
-# hmm, audio ? maybe later using source filter "bas" ?
-print_NORMAL(f'Done.')
 output_clip_specs = get_clip_specs(clips, path=None, ext=".mp4", mediainfo_specs=None)
 if A_DEBUG_IS_ON: print_DEBUG(f'OUTPUT VIDEO: clip and frame properties: w={clips.width} h={clips.height} specs=\n{objPrettyPrint.pformat(output_clip_specs)}')
+print_NORMAL(f'Done. ENCODER completed.')
+#++++++++++++++++++++
+
+
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+
+# OLD LEGACY CODE IS COMMENTED OUT
+# OLD LEGACY CODE IS COMMENTED OUT
+# OLD LEGACY CODE IS COMMENTED OUT
+
+#
+#if objSettings.RECURSIVE:
+#	glob_var="**/*.*"			# recursive
+#	ff_glob_var="**/*.ffindex"	# for .ffindex file deletion recursive
+#else:
+#	glob_var="*.*"				# non-recursive
+#	ff_glob_var="*.ffindex"		# for .ffindex file deletion non-recursive
+# glob : with DIRECTORY not having a trailing slash !!!
+#num_unreachable_objects = gc.collect()	# With no arguments, run a full garbage collection. # The number of unreachable objects found is returned
+#if A_DEBUG_IS_ON: print_DEBUG(f'*** GARBAGE_COLLECTION: post blank_clip creation and pre-Directory-loop, number of unreachable objects found={num_unreachable_objects}')
+#Count_of_files = 0
+#clips = prior_clip_for_crossfade	# initialize the accumulated clips with a starting small blank clip
+#
+## Open the snippet data file in write mode, overwriting an existing file
+#snippet_data_file_object = open(objSettings.SNIPPETS_FILENAME_PATH_LIST[0] , "w")
+#
+#for Directory in objSettings.DIRECTORY_LIST:
+#	current_Directory = fully_qualified_directory_no_trailing_backslash(Directory)
+#	ct = objSettings.CROSSFADE_TYPE if objSettings.DURATION_CROSSFADE_FRAMES>0 else None
+#	cd = objSettings.CROSSFADE_DIRECTION if objSettings.DURATION_CROSSFADE_FRAMES>0 else None
+#	print_NORMAL(f'Start processing image/video files in "{current_Directory}" crossfade="{ct}/{cd}" RECURSIVE={objSettings.RECURSIVE} DEBUG_MODE={objSettings.DEBUG_MODE} glob_var="{glob_var}" \n      with Extensions={objPrettyPrint.pformat(objSettings.EXTENSIONS)}')
+#	# NOTE: current_Directory MUST NOT have a trailing backslash ... remove during ini setup
+#	paths = Path(current_Directory).glob(glob_var) # generator of all paths in a directory, files starting with . won't be matched by default
+#	path = get_path(paths)	#pre-fetch first path
+#	if path is None:
+#		raise ValueError(f'ERROR: File Extensions:\n{objSettings.EXTENSIONS}\nnot found in "{current_Directory}"')
+#	#------
+#	while not (path is None):	# first clip already pre-retrieved ready for this while loop
+#		if A_DEBUG_IS_ON: print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
+#		Count_of_files = Count_of_files + 1
+#		print_NORMAL(f'processing {Count_of_files} {str(path)}')
+#		this_clip = get_clip_2(path)
+#		if this_clip is None:	# ignore clips which had an issue with being opened
+#			print_NORMAL(f'Unable to process {Count_of_files} {str(path)} ... ignoring it ')
+#		else:
+#			if objSettings.DURATION_CROSSFADE_FRAMES > 0:		# and objSettings.CROSSFADE_TYPE.lower() != "none".lower():
+#				#if A_DEBUG_IS_ON: print_DEBUG(f'Performing crossfade_merge in while loop')
+#				clips, snippet_video_frame_number, snippet_num_frames = crossfade_merge(a=clips, b=this_clip, crossfade_duration_frames=objSettings.DURATION_CROSSFADE_FRAMES, crossfade_type=objSettings.CROSSFADE_TYPE, crossfade_direction=objSettings.CROSSFADE_DIRECTION) 
+#				if path.suffix.lower() in objSettings.VID_EXTENSIONS:
+#					# Save snippet info so we can find and use the file's audio later and put it in the right place in the slideshow being created by this script
+#					fully_qualified_path_string = fully_qualified_filename(path)
+#					snippet_data_file_object.write(f"{snippet_video_frame_number} {snippet_num_frames} {repr(fully_qualified_path_string)}\n")
+#					snippet_data_file_object.flush()
+#		path = get_path(paths)		# get next path to process in this while loop
+#		#num_unreachable_objects = gc.collect()	# With no arguments, run a full garbage collection. # The number of unreachable objects found is returned
+#		###if A_DEBUG_IS_ON: print_DEBUG(f'*** GARBAGE_COLLECTION: in-Directory-loop end of processing a single file, number of unreachable objects found={num_unreachable_objects}')
+#		if A_DEBUG_IS_ON: print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
+#	#------
+#	# perhaps a finishing crossfade to black ?
+#	if objSettings.DURATION_CROSSFADE_FRAMES > 0 and objSettings.CROSSFADE_TYPE.lower() != "none".lower():	
+#		if A_DEBUG_IS_ON: print_DEBUG(f'Performing final crossfade_merge after while loop')
+#		clips, snippet_video_frame_number, snippet_num_frames = crossfade_merge(a=clips, b=prior_clip_for_crossfade, crossfade_duration_frames=objSettings.DURATION_CROSSFADE_FRAMES, crossfade_type=objSettings.CROSSFADE_TYPE, crossfade_direction=objSettings.CROSSFADE_DIRECTION) 
+#	else:
+#		if A_DEBUG_IS_ON: print_DEBUG(f'Performing NO final crossfade_merge after while loop')
+#		clips = clips + prior_clip_for_crossfade	# add a small blank clip to the end
+#clips = clips.std.AssumeFPS(fpsnum=objSettings.TARGET_FPSNUM, fpsden=objSettings.TARGET_FPSDEN)
+##
+## Write the last line to the snippet data file and close it.
+## remember:
+##	using line format: start_frame_number_in_clip, last_frame_number_in_clip, filename of this slideshow in mp4 in single-quotes
+##	eg 0, 2999, 'd:\slideshow_file'
+##	where num_frames would be 3000
+#clips_first_frame_num = 0
+#clips_last_frame_num = clips.num_frames - 1
+#snippet_data_file_object.write(f"{clips_first_frame_num} {clips_last_frame_num} {repr(objSettings.OUTPUT_MKV_FILENAME_PATH_LIST[0])}\n")
+#snippet_data_file_object.flush()
+#snippet_data_file_object.close()
+##
+#del this_clip
+#++++++++++++++++++++
+#++++++++++++++++++++
+#print_NORMAL(f'Finished processing {Count_of_files} image/video files in "{current_Directory}" num_frames={len(clips)} crossfade="{ct}/{cd}" RECURSIVE={objSettings.RECURSIVE} DEBUG_MODE={objSettings.DEBUG_MODE} glob_var="{glob_var}" \n      with Extensions={objPrettyPrint.pformat(objSettings.EXTENSIONS)}')
+#++++++++++++++++++++
+#++++++++++++++++++++
+## Convert from ["WORKING_PIXEL_FORMAT"] vs.YUV444P8 to  ["WORKING_PIXEL_FORMAT"] vs.YUV420P8 for output
+#clips = clips.resize.Point(format=objSettings.TARGET_PIXEL_FORMAT)
+#++++++++++++++++++++
+#++++++++++++++++++++
+## Cleanup any temporary .ffindex files created by ffms2
+## THE .FFINDEX ARE CREATED in the temporary folder
+#print_NORMAL(f'Start removing temporary *.ffindex files from directory "{current_Directory}" with recursive="{objSettings.RECURSIVE}" ...')
+#ff_glob_var="**/*.ffindex"		# for .ffindex file deletion recursive
+##ff_glob_var="*.ffindex"		# for .ffindex file deletion non-recursive
+#pp = objSettings.TEMP_DIRECTORY_LIST[0] + "/" + ff_glob_var
+#ffindex_files = glob.glob(pp, recursive=objSettings.RECURSIVE)
+##num_unreachable_objects = gc.collect()	# With no arguments, run a full garbage collection. # The number of unreachable objects found is returned
+####if A_DEBUG_IS_ON: print_DEBUG(f'*** GARBAGE_COLLECTION: post-Directory-loop and pre-Delete-ffindex-files-loop, number of unreachable objects found={num_unreachable_objects}')
+#Count_of_files_removed = 0
+#for ff in ffindex_files:
+#	if ff.lower()[-len(objSettings.DOT_FFINDEX):] == objSettings.DOT_FFINDEX:	# double check the file really does have ext .ffindex
+#		try:
+#			Count_of_files_removed = Count_of_files_removed + 1
+#			if A_DEBUG_IS_ON: print_DEBUG(f'removing {Count_of_files_removed} {ff}')
+#			os.remove(ff)
+#		except OSError as ee:
+#			print_NORMAL(f'ERROR:  error during removal of ffindex file: {ff} :{ee} : {ee.strerror}')
+#			raise ValueError(f'ERROR: error during removal of ffindex file: {ff} :{ee} : {ee.strerror}')
+#print_NORMAL(f'Finished removing {Count_of_files_removed} temporary .ffindex files with recursive="{objSettings.RECURSIVE}"')
+#num_unreachable_objects = gc.collect()	# With no arguments, run a full garbage collection. # The number of unreachable objects found is returned
+#if A_DEBUG_IS_ON: print_DEBUG(f'*** GARBAGE_COLLECTION: post-Delete-ffindex-files-loop, number of unreachable objects found={num_unreachable_objects}')
+#clips.set_output()
+#++++++++++++++++++++
+#++++++++++++++++++++
+#print_NORMAL(f'Done.')
+#output_clip_specs = get_clip_specs(clips, path=None, ext=".mp4", mediainfo_specs=None)
+#if A_DEBUG_IS_ON: print_DEBUG(f'OUTPUT VIDEO: clip and frame properties: w={clips.width} h={clips.height} specs=\n{objPrettyPrint.pformat(output_clip_specs)}')
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
 
 #++++++++++++++++++++
 ### FOR EMERGENCY DEBUG ONLY

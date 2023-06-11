@@ -388,13 +388,6 @@ if __name__ == "__main__":
 			sys.exit(1)	
 		print(f"Created fixed-filename chunk file for encoder to consume: '{chunk_json_filename}' listing {ALL_CHUNKS[str(individual_chunk_id)]['num_files']} files, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}",flush=True)
 
-		# ????????????????????????????????????
-		# ????????????????????????????????????
-		# ????????????????????????????????????
-		
-		
-		sys.exit(0)
-		
 		if DEBUG:	print(f"DEBUG: encoder loop: calling the encoder, VSPIPE piped to FFMPEG ... with controller using non-blocking reads of stdout and stderr (per chatgpt).",flush=True)
 		# These fields in a chunk dict need to be updated by the encoder:
 		#	'num_frames_in_chunk'
@@ -409,6 +402,10 @@ if __name__ == "__main__":
 		#			'snippet_num_frames': YYY,							# filled in by encoder
 		#			'snippet_source_video_filename': '\a\b\c\ZZZ1.3GP'	# filled in by encoder
 		
+
+	
+		sys.exit(0)
+			vpy stuff
 
 		# HERE: call the encoder ... vspipe piped to ffmpeg ... with controller using non-blocking reads of stdout and stderr (per chatgpt)
 
