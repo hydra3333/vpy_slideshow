@@ -42,17 +42,13 @@ REM del /f .\slideshow_settings.py
 
 copy /y ".\slideshow_settings_template.py" ".\slideshow_settings.py"
 
-echo type ".\slideshow_settings.py" >>"!log!" 2>&1
-type ".\slideshow_settings.py" >>"!log!" 2>&1
-type ".\slideshow_settings.py"
+REM echo type ".\slideshow_settings.py" >>"!log!" 2>&1
+REM type ".\slideshow_settings.py" >>"!log!" 2>&1
+REM type ".\slideshow_settings.py"
 
 echo "!python_exe!" "!script!" >>"!log!" 2>&1
-REM "!python_exe!" "!script!" >>"!log!" 2>&1
-"!python_exe!" "!script!"
-
-echo type ".\slideshow_settings.py" >>"!log!" 2>&1
-type ".\slideshow_settings.py" >>"!log!" 2>&1
-type ".\slideshow_settings.py"
+"!python_exe!" "!script!" >>"!log!" 2>&1
+REM "!python_exe!" "!script!"
 
 
 type "!log!"
