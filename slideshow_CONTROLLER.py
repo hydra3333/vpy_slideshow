@@ -511,7 +511,7 @@ if __name__ == "__main__":
 	start_frame_num_of_chunk_in_final_video = 0
 	end_frame_num_of_chunk_in_final_video = 0
 	
-	if DEBUG: print(f"DEBUG: about to calculate start/end final_video based frame numbers for all chunks and their snippets",flush=True)
+	if DEBUG: print(f"{'#'*100}\nDEBUG: Start calculate start/end final_video based frame numbers for all chunks and their snippets, outgoing ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}\n{'#'*100}",flush=True)
 
 	for individual_chunk_id in range(0,ALL_CHUNKS_COUNT):	# 0 to (ALL_CHUNKS_COUNT - 1)
 		seq_start_frame_num = seq_previous_ending_frame_num + 1		# base 0, this is now the start_frame_num in the full final video
@@ -538,19 +538,18 @@ if __name__ == "__main__":
 		seq_previous_ending_frame_num = end_frame_num_of_chunk_in_final_video	# set seq_previous_ending_frame_num ready for use by the next chunk
 	#end for
 
-	##########################################################################################################################################
-	##########################################################################################################################################
-	# BACKGROUND AUDIO
-
-	#AFTER ENCODING we can re-import the saved .json file and change the following 
-	#- audio editing process to add up all the frame counts and use that (total frame count) in the audio processing
-	#- just do audio processing then transcoding/muxing in one step
-
+	if DEBUG: print(f"{'*'*100}\nDEBUG: Finished calculate start/end final_video based frame numbers for all chunks and their snippets, outgoing ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}\n{'*'*100}",flush=True)
 
 	##########################################################################################################################################
 	##########################################################################################################################################
-	# USE SNIPPET INFO BACKGROUND AUDIO:
+	# USE SNIPPET INFO TO OVERLAY SNIPPET AUDIO INTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4 (so pydub accepts it):
 
 	##########################################################################################################################################
 	##########################################################################################################################################
-	# TRANSCODE BACKGROUND AUDIO:
+	# CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO AND AT SAME TIME MUX WITH BACKGROUND AUDIO.mp4
+	
+	
+	##########################################################################################################################################
+	##########################################################################################################################################
+	# CLEANUP
+	
