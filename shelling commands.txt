@@ -1,171 +1,185 @@
-USE THIS
-
-import subprocess
-def run_command(command):
-    # Run the command in a subprocess
-    process1 = subprocess.Popen(['vspipe.exe', '-p', '1', '-p', '1', '-'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process2 = subprocess.Popen(['ffmpeg', '-i', 'pipe', 'etc'], stdin=process1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    # Wait for the processes to complete and retrieve the output and error streams
-    output, error2 = process2.communicate()
-    error1 = process1.stderr.read().decode('utf-8').strip()
-    # Print any error messages
-    if error1:
-        print(f"Error from vspipe.exe: {error1}")
-    if error2:
-        print(f"Error from ffmpeg: {error2.decode('utf-8').strip()}")
-    # Decode the output from bytes to string
-    output = output.decode('utf-8').strip()
-    # Return the output
-    return output
-# Example usage
-command = 'vspipe.exe -p 1 -p 1 - | ffmpeg -i pipe etc'
-result = run_command(command)
-print(result)
-
---------------------
-
-THIS HAS BLOCKING READS
-
-In the code you provided, the `process2.communicate()` method is used to wait for the processes to complete before retrieving the output and error streams. 
-This means that the code will wait until both `process1` and `process2` have finished executing before continuing.
-If you want to retrieve the output and error streams as they are produced, without waiting for the processes to complete, 
-you can use the `process2.stdout.readline()` and `process2.stderr.readline()` methods in a loop 
-to read the streams line by line.
-
-import subprocess
-def run_command(command):
-    # Run the command in a subprocess
-    process1 = subprocess.Popen(['vspipe.exe', '-p', '1', '-p', '1', '-'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process2 = subprocess.Popen(['ffmpeg', '-i', 'pipe', 'etc'], stdin=process1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    # Read output and error streams line by line
-    while process2.poll() is None:  # While the process is still running
-        output_line = process2.stdout.readline().decode('utf-8').strip()
-        error_line = process2.stderr.readline().decode('utf-8').strip()
-
-        if output_line:
-            print(f"Output: {output_line}")
-        if error_line:
-            print(f"Error: {error_line}")
-
-    # Retrieve the remaining output and error streams
-    output, error2 = process2.communicate()
-    error1 = process1.stderr.read().decode('utf-8').strip()
-
-    # Print any error messages
-    if error1:
-        print(f"Error from vspipe.exe: {error1}")
-    if error2:
-        print(f"Error from ffmpeg: {error2.decode('utf-8').strip()}")
-
-    # Decode the output from bytes to string
-    output = output.decode('utf-8').strip()
-
-    # Return the output
-    return output
-
-# Example usage
-command = 'vspipe.exe -p 1 -p 1 - | ffmpeg -i pipe etc'
-result = run_command(command)
-print(result)
-
-In this modified code, the `while` loop reads the output and error streams line by line using `process2.stdout.readline()` and `process2.stderr.readline()`. 
-It continues looping until `process2.poll()` returns a non-None value, indicating that the process has finished. 
-Inside the loop, each line is printed, but you can modify this part to store or process the lines as needed.
-After the loop, the remaining output and error streams are retrieved using `process2.communicate()` and `process1.stderr.read()`, similar to the original code.
-
-Note that this modification allows you to retrieve the output and error streams as they are produced, but it doesn't guarantee that all the output 
-will be available before the processes complete. 
-Depending on the behavior of the executed commands, some output may be available only after the processes have finished.
-
 ---------------------------
 THIS NON-BLOCKING READS ON THE STDOUT AND STDERR STREAMS
+THIS IS SUPPOSED TO BE RELIABLE ON WINDOWS
 
-Yes, there is a way to perform non-blocking reads on the stdout and stderr streams using the `select` module. 
-Here's an example of how you can modify the code to use non-blocking reads:
+# In this case there is relatively minor stdout and stderr from process2, 
+# relatively minor stderr output from process 1,
+# and around between 10 to 500 gigabytes of data being piped from process1.stdout to process2.stdin.
 
-```python
+
 import subprocess
-import select
+import sys
+import time
+from queue import Queue, Empty
+from threading import Thread
+
+def enqueue_output(out, queue):
+	for line in iter(out.readline, b''):
+		queue.put(line)
+	out.close()
 
 def run_command():
-    # Run the commands in a subprocess
-    process1 = subprocess.Popen(['vspipe.exe', '-p', '1', '-p', '1', '-'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process2 = subprocess.Popen(['ffmpeg', '-i', 'pipe', 'etc'], stdin=process1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	# Run the commands in subprocesses
+	process1 = subprocess.Popen(['vspipe.exe', '-p', '1', '-p', '1', '-'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	process2 = subprocess.Popen(['ffmpeg', '-i', 'pipe', 'etc'], stdin=process1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    # Create lists to store file objects for select
-    stdout_list = [process2.stdout]
-    stderr_list = [process2.stderr]
+	# Create queues to store the output and error streams
+	stderr_queue1 = Queue()
+	stdout_queue2 = Queue()
+	stderr_queue2 = Queue()
 
-    # Read output and error streams
-    while stdout_list or stderr_list:  # While there are still streams to read
-        ready_to_read, _, _ = select.select(stdout_list, stderr_list, [])
-        for file_obj in ready_to_read:
-            if file_obj in stdout_list:
-                output_line = file_obj.readline().decode('utf-8').strip()
-                if output_line:
-                    print(f"Output: {output_line}")
-            if file_obj in stderr_list:
-                error_line = file_obj.readline().decode('utf-8').strip()
-                if error_line:
-                    print(f"Error: {error_line}")
-            if not output_line and file_obj in stdout_list:
-                stdout_list.remove(file_obj)
-            if not error_line and file_obj in stderr_list:
-                stderr_list.remove(file_obj)
+	# Launch separate threads to read the output and error streams
+	stderr_thread1 = Thread(target=enqueue_output, args=(process1.stderr, stderr_queue1))
+	stdout_thread2 = Thread(target=enqueue_output, args=(process2.stdout, stdout_queue2))
+	stderr_thread2 = Thread(target=enqueue_output, args=(process2.stderr, stderr_queue2))
 
-    # Retrieve the remaining output and error streams
-    output, error2 = process2.communicate()
-    error1 = process1.stderr.read().decode('utf-8').strip()
+	stderr_thread1.daemon = True
+	stdout_thread2.daemon = True
+	stderr_thread2.daemon = True
 
-    # Print any error messages
-    if error1:
-        print(f"Error from vspipe.exe: {error1}")
-    if error2:
-        print(f"Error from ffmpeg: {error2.decode('utf-8').strip()}")
+	stderr_thread1.start()
+	stdout_thread2.start()
+	stderr_thread2.start()
 
-    # Decode the output from bytes to string
-    output = output.decode('utf-8').strip()
+	# Read output and error streams
+	while True:
+		try:
+			stderr_line1 = stderr_queue1.get_nowait().decode('utf-8').strip()
+			if stderr_line1:
+				print(f"Error from process 1: {stderr_line1}")
+		except Empty:
+			pass
 
-    # Return the output
-    return output
+		try:
+			stdout_line2 = stdout_queue2.get_nowait().decode('utf-8').strip()
+			if stdout_line2:
+				print(f"Output from process 2: {stdout_line2}")
+		except Empty:
+			pass
+
+		try:
+			stderr_line2 = stderr_queue2.get_nowait().decode('utf-8').strip()
+			if stderr_line2:
+				print(f"Error from process 2: {stderr_line2}")
+		except Empty:
+			pass
+
+		if 		(not stderr_thread1.is_alive()) and
+				(not stdout_thread2.is_alive()) and
+				(not stderr_thread2.is_alive()) and 
+				(stderr_queue1.empty()) and
+				(stdout_queue2.empty()) and 
+				(stderr_queue2.empty()):
+			break
+		# Introduce a small delay to reduce CPU load
+		time.sleep(0.05)  # Sleep for 50 milliseconds
+
+	# Retrieve the remaining output and error streams
+	output, error2 = process2.communicate()
+	error1 = process1.stderr.read().decode('utf-8').strip()
+
+	# Print any error messages
+	if error1:
+		print(f"Error from vspipe.exe (process 1): {error1}")
+	if error2:
+		print(f"Error from ffmpeg (process 2): {error2.decode('utf-8').strip()}")
+
+	# Decode the output from bytes to string
+	output = output.decode('utf-8').strip()
+
+	# Return the output
+	return output
 
 # Example usage
 result = run_command()
 print(result)
-```
-
-In this modified code, the `select.select()` function is used to perform non-blocking reads on the stdout and stderr streams. It takes three lists as input: the lists of streams to monitor for readability (`stdout_list` and `stderr_list`), the lists of streams to monitor for writability (empty in this case), and a timeout value (empty in this case, which means the function will block until at least one stream is ready to read).
-
-Inside the loop, `select.select()` returns a list of streams that are ready to be read. The loop then iterates over these streams and performs non-blocking reads using `file_obj.readline()`. If a line is read, it is processed accordingly (printed in this example). If a stream reaches the end (indicated by an empty line), it is removed from the corresponding list (`stdout_list` or `stderr_list`).
-
-The loop continues until there are no more streams to read (i.e., both `stdout_list` and `stderr_list` are empty). After the loop, the remaining output and error streams are retrieved and handled similar to the original code.
-
-Using non-blocking reads allows you to process the output and error streams without blocking the execution of the code. It enables you to handle the streams as they become available, providing more flexibility in managing the subprocesses.
 
 
+Here's an example of how you can catch the KeyboardInterrupt exception and gracefully handle it:
 
 
+except KeyboardInterrupt:
+	# Retrieve the process IDs
+	pid1 = process1.pid
+	pid2 = process2.pid
+	
+	# Perform cleanup or other actions
+	# before terminating the program
+	process1.terminate()
+	process2.terminate()
+	process1.wait()
+	process2.wait()
 
+	# Delay before terminating forcefully with taskkill
+	time.sleep(2)  # Add a delay of a couple of seconds
 
+	# Terminate subprocesses forcefully using taskkill if they arem
+	os.system(f'taskkill /F /PID {process1.pid}')
+	os.system(f'taskkill /F /PID {process2.pid}')
 
+	# Optionally, raise the exception again
+	# Optionally, raise the exception again
+	raise
 
-DO NOT USE THIS
+Or, use this method:
 
 import subprocess
-def run_command(command):
-    # Run the command in a subprocess
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    # Wait for the process to complete and retrieve the output
-    output, error = process.communicate()
-    # Decode the output from bytes to string
-    output = output.decode('utf-8').strip()
-    # Print any error messages
-    if error:
-        print(f"Error: {error.decode('utf-8').strip()}")
-    # Return the output
-    return output
-# Example usage
-command = 'vspipe.exe -p 1 -p 1 - | ffmpeg -i pipe etc'
-result = run_command(command)
-print(result)
+# Launch the subprocess
+process = subprocess.Popen(['some_command'], shell=True)
+# Get the PID of the subprocess
+pid = process.pid
+# Terminate the process using taskkill
+subprocess.run(['taskkill', '/F', '/PID', str(pid)])
+	
+	
+In this example, when a KeyboardInterrupt is raised, the program catches it, terminates the subprocesses using the terminate() method, waits for them to complete using the wait() method, and then optionally raises the exception again to allow the program to terminate. You can customize this behavior according to your specific needs.
+
+
+------------------
+Adjusting the buffer settings in VapourSynth typically involves modifying the script that is used with vspipe. 
+Here's an example of how you can set the buffer size using VapourSynth's core.std.SetCache function:
+
+In this example, 
+(1) the core.std.SetCache function is used to adjust the buffer size of the video clip. 
+(2) The cache parameter specifies the number of frames to be cached in memory.
+
+After adjusting the buffer size, you can add your desired video processing filters or operations
+using other functions provided by VapourSynth.
+
+Note that this example assumes you have VapourSynth and the necessary plugins installed,
+and you're using the ffms2 source filter to load the video.
+You may need to adjust the script and the source filter based on your specific setup and video sources.
+
+For ffmpeg, you can experiment with its -bufsize option, which allows you to set the buffer size for input and output. 
+The -bufsize option specifies the maximum buffering size in bytes for each input or output file.
+
+ffmpeg -i input.mp4 -bufsize 50M output.mp4
+Remember to refer to the ffmpeg documentation for further details on these options and other related options
+that may be relevant to your use case.
+
+import vapoursynth as vs
+
+# Create a VapourSynth script
+def process_video(video_path):
+	# Load the video clip
+	clip = vs.core.ffms2.Source(video_path)
+
+	# Adjust the buffer size
+	clip = vs.core.std.SetCache(clip, cache=2048)  # Set the buffer size to 2048 frames
+
+	# Add your video processing filters or operations here
+	# clip = vs.core.some_filter(clip)
+
+	# Return the processed clip
+	return clip
+
+# Specify the path to your video file
+video_path = 'path/to/your/video.mp4'
+
+# Call the function to process the video
+processed_clip = process_video(video_path)
+
+# Output the processed clip using vspipe or perform additional operations
+processed_clip.set_output()
+
+

@@ -1,50 +1,3 @@
-#
-#	Attempt to create a 'HD' video slideshow of images and hopefully video clips from a directory tree.
-#	Is 8-bit only. Does not handle HDR conversions etc.  Does not handle framerate conversions.
-#	This script is consumed by vspipe as a .vpy input file and delivered to ffmpeg
-#
-#		VSPipe.exe --container y4m video_script.vpy - | ffmpeg -f yuv4mpegpipe -i pipe: ...
-#
-#	CRITICAL NOTE:
-#		When piping a YUV format, the vspipe --y4m flag conveys the header info,
-#		pixel type, fps from the script; But the receiving ffmpeg pipe also NEEDS to
-#		indicate -f yuv4mpegpipe , OTHERWISE it will be considered a raw video pipe.
-#		See https://forum.videohelp.com/threads/397728-ffmpeg-accepting-vapoursynth-vpy-input-directly-and-gpu-accelerated-speed?highlight=vspipe#post2679858
-#
-# Acknowledgements:
-#	With all due significant respect to _AI_
-#	Original per _AI_ as updated in this thread and below
-#		https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678241
-#
-# Environment:
-#
-#	One has to setup a suitable environment ... eg
-#		portable python into a nominated directory
-#		portable vapoursynth overlaid in the same directory ... Assume vapoursynth API4 using release >= R60
-#		an ffmpeg build with options for vapoursynth and NVenc enabled, copied into the same directory
-#		portable pip downloaded into the same directory
-#		a pip install of Pillow etc (refer below)
-#		suitable filters (refer below)
-#	There's a 'run_once' to set things up initially.
-#	Thread for interest https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678484
-#
-# Usage:
-#
-#	Notes:
-#		When piping a YUV format, the vspipe --container y4m  flag conveys the header info,
-#		pixel type, fps from the script; But the receiving ffmpeg pipe also has to
-#		indicate -f yuv4mpegpipe , otherwise it will be considered a raw video pipe
-#		(in that latter cause you wouldn't use --y4m).  
-#		Example:
-#			"C:\SOFTWARE\Vapoursynth-x64\VSPipe.exe" --progress --filter-time --container y4m SCRIPT.vpy - | "C:\SOFTWARE\Vapoursynth-x64\ffmpeg_OpenCL.exe" -f yuv4mpegpipe -i pipe: ...
-#			"C:\SOFTWARE\Vapoursynth-x64\VSPipe.exe" --progress --filter-time --container y4m ".\vpy_slideshow.vpy" - | "C:\SOFTWARE\Vapoursynth-x64\ffmpeg_OpenCL.exe" -f yuv4mpegpipe -i pipe: -f null NUL
-#			"C:\SOFTWARE\Vapoursynth-x64\VSPipe.exe" --progress --filter-time --container y4m ".\vpy_slideshow.vpy" - > NUL
-#			"C:\SOFTWARE\Vapoursynth-x64\ffmpeg_OpenCL.exe" -f vapoursynth -i ".\vpy_slideshow.vpy" -f null NUL
-#	or for non-vapoursynth testing:
-#			"C:\SOFTWARE\Vapoursynth-x64\python.exe" "G:\DVD\PAT-SLIDESHOWS\vpy_slideshow_in_development\vpy_slideshow.vpy"
-#
-#		All Information and Debug mesages are printed to stderr
-
 import vapoursynth as vs
 from vapoursynth import core
 core = vs.core
@@ -94,13 +47,13 @@ from PIL.ExifTags import TAGS
 import pydub
 from pydub import AudioSegment
 
-CDLL(r'MediaInfo.dll')				# note the hard-coded folder	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
-from MediaInfoDLL3 import MediaInfo, Stream, Info, InfoOption		# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
-#from MediaInfoDLL3 import *											# per https://github.com/MediaArea/MediaInfoLib/blob/master/Source/Example/HowToUse_Dll3.py
-
 # Ensure we can import modules from ".\" by adding the current default folder to the python path.
 # (tried using just PYTHONPATH environment variable but it was unreliable)
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+CDLL(r'MediaInfo.dll')				# note the hard-coded folder	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
+from MediaInfoDLL3 import MediaInfo, Stream, Info, InfoOption		# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
+#from MediaInfoDLL3 import *											# per https://github.com/MediaArea/MediaInfoLib/blob/master/Source/Example/HowToUse_Dll3.py
 
 global DEBUG
 

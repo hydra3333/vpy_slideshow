@@ -47,13 +47,13 @@ num_unreachable_objects = gc.collect()	# collect straight away
 #import pydub
 #from pydub import AudioSegment
 
-#CDLL(r'MediaInfo.dll')				# note the hard-coded folder	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
-#from MediaInfoDLL3 import MediaInfo, Stream, Info, InfoOption		# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
-##from MediaInfoDLL3 import *											# per https://github.com/MediaArea/MediaInfoLib/blob/master/Source/Example/HowToUse_Dll3.py
-
 # Ensure we can import modules from ".\" by adding the current default folder to the python path.
 # (tried using just PYTHONPATH environment variable but it was unreliable)
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+#CDLL(r'MediaInfo.dll')				# note the hard-coded folder	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
+#from MediaInfoDLL3 import MediaInfo, Stream, Info, InfoOption		# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
+##from MediaInfoDLL3 import *											# per https://github.com/MediaArea/MediaInfoLib/blob/master/Source/Example/HowToUse_Dll3.py
 
 global DEBUG
 DEBUG = False
@@ -545,7 +545,6 @@ def load_settings():
 	old_calc_ini_dict =	{	'directory_list' :					final_settings_dict['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS'],	# This is already a list []
 							'temp_directory' :					final_settings_dict['TEMP_FOLDER'],
 							'temp_directory_list' :				[ final_settings_dict['TEMP_FOLDER'] ],
-							#'snippets_filename_path_list' :	[ final_settings_dict['PER_CHUNK_LIST_OF_SNIPPET_FILES'] ],			# SUPERSEDED, removed
 							'CURRENT_CHUNK_FILENAME' :			final_settings_dict['CURRENT_CHUNK_FILENAME'],		# ADDED	for encoder; no need, it should use final_settings_dict for this
 							'CURRENT_SNIPPETS_FILENAME' :		final_settings_dict['CURRENT_SNIPPETS_FILENAME'],	# ADDED	for encoder; no need, it should use final_settings_dict for this
 							'recursive' :						final_settings_dict['RECURSIVE'],
