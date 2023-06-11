@@ -241,7 +241,6 @@ def find_all_chunks():
 						chunks[str(chunk_id)] = {	
 													'chunk_id': chunk_id,
 													'chunk_fixed_json_filename' :				fully_qualified_filename(SETTINGS_DICT['CURRENT_CHUNK_FILENAME']),		# always the same fixed filename
-													#'snippet_fixed_json_filename' :				fully_qualified_filename(SETTINGS_DICT['CURRENT_SNIPPETS_FILENAME'])	# always the same fixed filename
 													'proposed_ffv1_mkv_filename' :				fully_qualified_filename(SETTINGS_DICT['CHUNK_ENCODED_FFV1_FILENAME_BASE'] + str(chunk_id).zfill(5) + r'.mkv'),	# filename related to chunk_id
 													'num_frames_in_chunk' :						0,	# initialize to 0, filled in by encoder
 													'start_frame_num_in_chunk':					0,	# initialize to 0, filled in by encoder
@@ -254,10 +253,10 @@ def find_all_chunks():
 													'snippet_list': 							[], # an empty dict to be be filled in by encoder, it looks like this:
 													# snippet_list:	[								# each snippet list item is a dict which looks like the below:
 													#					{	
-													#						'start_frame_of_snippet_in_chunk': 0,					# filled in by encoder
+													#						'start_frame_of_snippet_in_chunk': 0,				# filled in by encoder
 													#						'end_frame_of_snippet_in_chunk': XXX, 				# filled in by encoder
 													#						'start_frame_of_snippet_in_final_video': AAA,  		# AFTER all encoding completed, calculated and filled in by controller
-													#						'end_frame_of_snippet_in_final_video': XXX, 			# AFTER all encoding completed, calculated and filled in by controller
+													#						'end_frame_of_snippet_in_final_video': XXX, 		# AFTER all encoding completed, calculated and filled in by controller
 													#						'snippet_num_frames': YYY,							# filled in by encoder
 													#						'snippet_source_video_filename': '\a\b\c\ZZZ1.3GP'	# filled in by encoder
 													#					},
@@ -369,7 +368,6 @@ if __name__ == "__main__":
 
 		chunk_json_filename = fully_qualified_filename(individual_chunk_dict['chunk_fixed_json_filename'])					# always the same fixed filename
 		#### the CHUNK JASON FILE IS UPDATED AND RE-WRITTEN AND RE-READ, not a separate SNIPPETS FILE 
-		#snippets_json_filename = fully_qualified_filename(individual_chunk_dict['snippet_fixed_json_filename'])				# always the same fixed filename
 		proposed_ffv1_mkv_filename = fully_qualified_filename(individual_chunk_dict['proposed_ffv1_mkv_filename'])	# fixed filename plus a seqnential 5-digit-zero-padded ending based on chunk_id + r'.mkv'
 		
 		# remove any pre-existing files to be consumed and produced by the encoder
@@ -402,12 +400,15 @@ if __name__ == "__main__":
 		#	'num_frames_in_chunk'
  		#	'start_frame_num_in_chunk'
 		#	'end_frame_num_in_chunk'
-		#	'num_snippets'
-		#			'snippet_list'
-		#			'start_frame_of_snippet_in_chunk'
-		#			'end_frame_of_snippet_in_chunk'
-		#			'snippet_num_frames'
-		#			'snippet_source_video_filename'
+		#	'num_files': 								0,	# initialized but filled in by this loop, number of files in file_list
+		#	'file_list':	 							[],	# each item is a fully qualified filename of a source file for this chunk
+		#	'num_snippets': 							0,	# # initialize to 0, number of files in file_list, filled in by encoder
+		#		'snippet_list'
+		#			'start_frame_of_snippet_in_chunk': 0,				# filled in by encoder
+		#			'end_frame_of_snippet_in_chunk': XXX, 				# filled in by encoder
+		#			'snippet_num_frames': YYY,							# filled in by encoder
+		#			'snippet_source_video_filename': '\a\b\c\ZZZ1.3GP'	# filled in by encoder
+		
 
 		# HERE: call the encoder ... vspipe piped to ffmpeg ... with controller using non-blocking reads of stdout and stderr (per chatgpt)
 

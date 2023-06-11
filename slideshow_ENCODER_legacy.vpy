@@ -63,29 +63,43 @@ TERMINAL_WIDTH = 250
 global objPrettyPrint
 objPrettyPrint = pprint.PrettyPrinter(width=TERMINAL_WIDTH, compact=False, sort_dicts=False)	# facilitates formatting and printing of text and dicts etc
 
+def normalize_path(path):
+	#if DEBUG:	print(f"DEBUG: normalize_path:  incoming path='{path}'",flush=True)
+	# Replace single backslashes with double backslashes
+	path = path.rstrip(os.linesep).strip('\r').strip('\n').strip()
+	r1 = r'\\'
+	r2 = r1 + r1
+	r4 = r2 + r2
+	path = path.replace(r1, r4)
+	# Add double backslashes before any single backslashes
+	for i in range(0,20):
+		path = path.replace(r2, r1)
+	#if DEBUG:	print(f"DEBUG: normalize_path: outgoing path='{path}'",flush=True)
+	return path
+
 # A Special function needed at the top DEFAULT_INI_FILE_SPECIFYING_PARAMETERS and DEFAULT_DIRECTORY_LIST
 def fully_qualified_directory_no_trailing_backslash(directory_name):
 	# make into a fully qualified directory string stripped and without a trailing backslash
 	# also remove extraneous backslashes which get added by things like abspath
-	new_directory_name = os.path.abspath(directory_name)
+	new_directory_name = os.path.abspath(directory_name).rstrip(os.linesep).strip('\r').strip('\n').strip()
 	if directory_name[-1:] == (r'\ '.strip()):		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
-		new_directory_name = directory_name[:-1]		# remove any trailing backslash
-	new_directory_name = new_directory_name.replace(r'\\\\ '.strip(), r'\\ '.strip())	# trailing spaces in the r'' are required here andwill be stripped or it fails
-	new_directory_name = new_directory_name.strip()
+		new_directory_name = directory_name[:-1]	# remove any trailing backslash
+	new_directory_name = normalize_path(new_directory_name)
 	return new_directory_name
+
 
 def fully_qualified_filename(file_name):
 	# Make into a fully qualified filename string using double backslashes
 	# to later print/write with double backslashes use eg
 	#	converted_string = fully_qualified_filename('D:\\a\\b\\\\c\\\\\\d\\e\\f\\filename.txt')
-	#	print(repr(converted_string), file=sys.stderr, flush=True)
+	#	print(repr(converted_string))
 	# yields 'D:\\a\\b\\c\\d\\e\\f\\filename.txt'
-	new_file_name = os.path.abspath(file_name)
+	new_file_name = os.path.abspath(file_name).rstrip(os.linesep).strip('\r').strip('\n').strip()
 	if new_file_name.endswith('\\'):
 		new_file_name = new_file_name[:-1]  # Remove trailing backslash
-	new_file_name = new_file_name.replace('\\\\', '\\\\')  # Replace double backslashes with quadruple backslashes
-	new_file_name = new_file_name.strip()
+	new_file_name = normalize_path(new_file_name)
 	return new_file_name
+
 
 ###
 # Define GLOBALS and initialize them
@@ -2746,6 +2760,86 @@ prior_clip_for_crossfade = crossfade_blank_clip
 #	if A_DEBUG_IS_ON: print_DEBUG(f'objSettings.DURATION_CROSSFADE_FRAMES ({objSettings.DURATION_CROSSFADE_FRAMES}) <= 0 ... no crossfade_blank_clipcreated')
 #
 #++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+
+
+CURRENT_CHUNK_FILENAME = fully_qualified_filename(SETTINGS_DICT['CURRENT_CHUNK_FILENAME'])
+if not os.path.exists(CURRENT_CHUNK_FILENAME):
+	raise ValueError(f'ERROR: Incoming current chunk JSON-file "{CURRENT_CHUNK_FILENAME}" not found !')
+
+try:
+	with open(CURRENT_CHUNK_FILENAME, 'r') as fp:
+		individual_chunk_dict = json.load(fp)
+except Exception as e:
+	raise ValueError(f'ERROR: loading incoming current chunk JSON file: "{CURRENT_CHUNK_FILENAME}" from controller !')
+
+# OK we have retrieved a chunk dict, telling us what to encode.  It has this format:
+#	{	
+#		'chunk_id': chunk_id,
+#		'chunk_fixed_json_filename' :				fully_qualified_filename(SETTINGS_DICT['CURRENT_CHUNK_FILENAME']),		# always the same fixed filename
+#		'proposed_ffv1_mkv_filename' :				fully_qualified_filename(SETTINGS_DICT['CHUNK_ENCODED_FFV1_FILENAME_BASE'] + str(chunk_id).zfill(5) + r'.mkv'),	# filename related to chunk_id
+#		'num_frames_in_chunk' :						0,	# initialize to 0, filled in by encoder
+#		'start_frame_num_in_chunk':					0,	# initialize to 0, filled in by encoder
+#		'end_frame_num_in_chunk':					0,	# initialize to 0, filled in by encoder
+#		'start_frame_num_of_chunk_in_final_video':	0,	# initialize to 0, # calculated AFTER encoder finished completely
+#		'end_frame_num_of_chunk_in_final_video': 	0,	# initialize to 0, # calculated AFTER encoder finished completely
+#		'num_files': 								0,	# initialized but filled in by this loop, number of files in file_list
+#		'file_list':	 							[],	# each item is a fully qualified filename of a source file for this chunk
+#		'num_snippets': 							0,	# # initialize to 0, number of files in file_list, filled in by encoder
+#		'snippet_list': 							[], # an empty dict to be be filled in by encoder, it looks like this:
+#		# snippet_list:	[								# each snippet list item is a dict which looks like the below:
+#		#					{	
+#		#						'start_frame_of_snippet_in_chunk': 0,				# filled in by encoder
+#		#						'end_frame_of_snippet_in_chunk': XXX, 				# filled in by encoder
+#		#						'start_frame_of_snippet_in_final_video': AAA,  		# AFTER all encoding completed, calculated and filled in by controller
+#		#						'end_frame_of_snippet_in_final_video': XXX, 		# AFTER all encoding completed, calculated and filled in by controller
+#		#						'snippet_num_frames': YYY,							# filled in by encoder
+#		#						'snippet_source_video_filename': '\a\b\c\ZZZ1.3GP'	# filled in by encoder
+#		#					},
+#		#				]
+#	}
+#
+# These fields in a chunk dict NEED to be UPDATED BY THE ENCODER:
+#	'num_frames_in_chunk'
+#	'start_frame_num_in_chunk'
+#	'end_frame_num_in_chunk'
+#	'num_files': 								0,	# initialized but filled in by this loop, number of files in file_list
+#	'file_list':	 							[],	# each item is a fully qualified filename of a source file for this chunk
+#	'num_snippets': 							0,	# # initialize to 0, number of files in file_list, filled in by encoder
+#		'snippet_list'
+#			'start_frame_of_snippet_in_chunk': 0,				# filled in by encoder
+#			'end_frame_of_snippet_in_chunk': XXX, 				# filled in by encoder
+#			'snippet_num_frames': YYY,							# filled in by encoder
+#			'snippet_source_video_filename': '\a\b\c\ZZZ1.3GP'	# filled in by encoder
+#		
+
+
+
+
+
+
+
+
+
+
+
+
+
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+#++++++++++++++++++++
+
+OLD LEGACY CODE
+
+
 if objSettings.RECURSIVE:
 	glob_var="**/*.*"			# recursive
 	ff_glob_var="**/*.ffindex"	# for .ffindex file deletion recursive
