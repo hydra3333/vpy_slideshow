@@ -222,8 +222,8 @@ def load_settings():
 	TOLERANCE_PERCENT_FINAL_CHUNK				= int(20)
 	RECURSIVE									= True
 	DEBUG										= False if DEBUG==False else True
-	FFMPEG_PATH									= fully_qualified_filename(os.path.join(r'.', r'ffmpeg.exe'))
-	VSPIPE_PATH									= fully_qualified_filename(os.path.join(r'.', r'vspipe.exe'))
+	FFMPEG_PATH									= fully_qualified_filename(os.path.join(r'.\Vapoursynth_x64', r'ffmpeg.exe'))
+	VSPIPE_PATH									= fully_qualified_filename(os.path.join(r'.\Vapoursynth_x64', r'vspipe.exe'))
 
 	SUBTITLE_DEPTH								= int(0)
 	SUBTITLE_FONTSIZE							= int(18)
