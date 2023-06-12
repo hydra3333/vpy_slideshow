@@ -443,6 +443,8 @@ if __name__ == "__main__":
 	##########################################################################################################################################
 	##########################################################################################################################################
 	# GATHER SETTINGS
+	print(f"{100*'-'}",flush=True)
+	print(f'STARTING GATHER SETTINGS')
 
 	import slideshow_LOAD_SETTINGS	# from same folder .\
 	SETTINGS_DICT, OLD_INI_DICT, OLD_CALC_INI_DICT, USER_SPECIFIED_SETTINGS_DICT = slideshow_LOAD_SETTINGS.load_settings()
@@ -467,6 +469,9 @@ if __name__ == "__main__":
 	##########################################################################################################################################
 	##########################################################################################################################################
 	# FIND PIC/IMAGES
+
+	print(f"{100*'-'}",flush=True)
+	print(f'STARTING FIND/CHECK OF PIC AND IMAGES')
 	
 	# Locate all openable files and put them into chunks in a dict, including { proposed filename for the encoded chunk, first/last frames, number of frames in chunk } 
 
@@ -489,7 +494,11 @@ if __name__ == "__main__":
 	# SAVING FRAME NUMBERS AND NUM VIDEO FRAMES INFO SNIPPET DICT, 
 	# CREATING SNIPPET JSON, IMPORTING JSON AND ADDING TO ALL_SNIPPETS DICT:
 
-	if DEBUG:	print(f"DEBUG: Starting encoder loop for each of ALL_CHUNKS tree. chunks: {ALL_CHUNKS_COUNT} files: {ALL_CHUNKS_COUNT_OF_FILES}",flush=True)
+	print(f"{100*'-'}",flush=True)
+	print(f'STARTING INTERIM ENCODING OF CHUNKS INTO INTERIM FFV1 VIDEO FILES')
+		
+	if DEBUG:	
+		print(f"DEBUG: Starting encoder loop for each of ALL_CHUNKS tree. chunks: {ALL_CHUNKS_COUNT} files: {ALL_CHUNKS_COUNT_OF_FILES}",flush=True)
 	
 	for individual_chunk_id in range(0,ALL_CHUNKS_COUNT):	# 0 to (ALL_CHUNKS_COUNT - 1)
 		# we cannot just import the legacy encoder and call it with parameters, it is a vpy consumed by ffmpeg and that does not accept parameters
@@ -593,7 +602,9 @@ if __name__ == "__main__":
 		ALL_CHUNKS[str(individual_chunk_id)] = updated_individual_chunk_dict
 	#end for
 
-	if DEBUG:	print(f"After updating encoder added snippets into each chunk  and controller UPDATING chunk info into ALL_CHUNKS, the new ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
+	if DEBUG:
+		print(f'Finished INTERIM ENCODING OF CHUNKS INTO INTERIM FFV1 VIDEO FILES')
+		print(f'After updating encoder added snippets into each chunk and controller UPDATING chunk info into ALL_CHUNKS, the new ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
 
 	##########################################################################################################################################
 	##########################################################################################################################################
@@ -602,7 +613,8 @@ if __name__ == "__main__":
 	# using the newly added  ...  before processing any audio using snippets, 
 	# so we can refer to absolute final-video frame numbers rather than chunk-internal frame numbers
 
-	if DEBUG:	print(f"DEBUG: Starting re-parse the ALL_CHUNKS tree dict to re-calculate global frame numbers chunks: {ALL_CHUNKS_COUNT}.",flush=True)
+	print(f"{100*'-'}",flush=True)
+	print(f"Starting re-parse the ALL_CHUNKS tree dict to re-calculate global frame numbers chunks: {ALL_CHUNKS_COUNT}.",flush=True)
 
 	# To be calculated and updated in each chunk at the chunk level:
 	#		ALL_CHUNKS[str(individual_chunk_id)]['start_frame_num_of_chunk_in_final_video']
@@ -617,7 +629,7 @@ if __name__ == "__main__":
 	start_frame_num_of_chunk_in_final_video = 0
 	end_frame_num_of_chunk_in_final_video = 0
 	
-	if DEBUG: print(f"{'#'*100}\nDEBUG: Start calculate start/end final_video based frame numbers for all chunks and their snippets, outgoing ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}\n{'#'*100}",flush=True)
+	if DEBUG: print(f"{'#'*100}\nDEBUG: Start calculate start/end final_video based frame numbers for all chunks and their snippets, incoming ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}\n{'#'*100}",flush=True)
 
 	for individual_chunk_id in range(0,ALL_CHUNKS_COUNT):	# 0 to (ALL_CHUNKS_COUNT - 1)
 		seq_start_frame_num = seq_previous_ending_frame_num + 1		# base 0, this is now the start_frame_num in the full final video
@@ -649,6 +661,9 @@ if __name__ == "__main__":
 	##########################################################################################################################################
 	##########################################################################################################################################
 	# USE SNIPPET INFO TO OVERLAY SNIPPET AUDIO INTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4 (so pydub accepts it):
+	print(f"{100*'-'}",flush=True)
+	print(f'STARTING OVERLAY SNIPPET AUDIO INTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4 ')
+
 
 	##########################################################################################################################################
 	##########################################################################################################################################
