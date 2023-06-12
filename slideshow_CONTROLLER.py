@@ -586,10 +586,9 @@ if __name__ == "__main__":
 			print(f"ERROR: controller: loading updated current chunk from JSON file: '{chunk_json_filename}' from encoder, chunk_id={individual_chunk_id}, related to individual_chunk_dict=\nobjPrettyPrint.pformat(individual_chunk_dict)\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)	
 		print(f"Loaded updated current chunk from JSON file: '{chunk_json_filename}'",flush=True)
-		if (updated_individual_chunk_dict['chunk_id'] !=  individual_chunk_dict['chunk_id']) or (updated_individual_chunk_dict['chunk_id'] != str(individual_chunk_id)):
-			print(f"ERROR: controller: the chunk_id returned from the encoder {updated_individual_chunk_dict['chunk_id']} in updated_individual_chunk_dict does not match both expected individual_chunk_dict {individual_chunk_dict['chunk_id']}) or loop's individual_chunk_id ({individual_chunk_id})",flush=True)
+		if (updated_individual_chunk_dict['chunk_id'] !=  individual_chunk_dict['chunk_id']) or (updated_individual_chunk_dict['chunk_id'] != individual_chunk_id):
+			print(f"ERROR: controller: the chunk_id returned from the encoder={updated_individual_chunk_dict['chunk_id']} in updated_individual_chunk_dict does not match both expected individual_chunk_dict chunk_id={individual_chunk_dict['chunk_id']} or loop's individual_chunk_id={individual_chunk_id}",flush=True)
 			sys.exit(1)
-
 		# poke the chunk updated by the encoder back into ALL_CHUNKS ... it should contain snippet data now.
 		ALL_CHUNKS[str(individual_chunk_id)] = updated_individual_chunk_dict
 	#end for

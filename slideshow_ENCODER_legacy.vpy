@@ -2892,7 +2892,7 @@ for i in range(0,num_files):	# base 0; 0..(num_files - 1)
 				Count_of_snippets = Count_of_snippets + 1
 				individual_chunk_dict['snippet_list'].append(	{	
 																'start_frame_of_snippet_in_chunk':			snippet_video_frame_number,
-																'end_frame_of_snippet_in_chunk':			snippet_num_frames-1,
+																'end_frame_of_snippet_in_chunk':			snippet_video_frame_number + snippet_num_frames - 1,
 																'start_frame_of_snippet_in_final_video':	0,
 																'end_frame_of_snippet_in_final_video':		0,
 																'snippet_num_frames':						snippet_num_frames,
