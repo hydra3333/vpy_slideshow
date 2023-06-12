@@ -17,5 +17,5 @@ settings = {
 	'CROSSFADE_TYPE':	'random',		# random is a good choice, leave this alone unless confident
 	'CROSSFADE_DIRECTION':	'left',		# Please leave this alone unless really confident
 	'DURATION_MAX_VIDEO_SEC':	7200.0,		# in seconds, maximum duration each video clip is shown in the slideshow
-	'DEBUG':	True,		# see and regret seeing, ginormous debug output
+	'DEBUG':	False,		# see and regret seeing, ginormous debug output
 }

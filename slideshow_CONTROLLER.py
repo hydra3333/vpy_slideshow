@@ -438,7 +438,7 @@ def encode_using_vsipe_ffmpeg(individual_chunk_id):
 ##################################################
 
 if __name__ == "__main__":
-	DEBUG = True
+	DEBUG = False
 	
 	##########################################################################################################################################
 	##########################################################################################################################################
@@ -505,10 +505,13 @@ if __name__ == "__main__":
 		# remove any pre-existing files to be consumed and produced by the encoder
 		if os.path.exists(chunk_json_filename):
 			os.remove(chunk_json_filename)
-		#if os.path.exists(snippets_json_filename):
-		#	os.remove(snippets_json_filename)
 		if os.path.exists(proposed_ffv1_mkv_filename):
 			os.remove(proposed_ffv1_mkv_filename)
+
+
+		# ???????????????????????????????
+		DEBUG = True
+
 		
 		# create the fixed-filename chunk file consumed by the encoder; it contains the fixed-filename of the snippet file to produce
 		if DEBUG:	print(f"DEBUG: in encoder loop: attempting to create chunk_json_filename='{chunk_json_filename}' for encoder to consume.",flush=True)
@@ -536,13 +539,15 @@ if __name__ == "__main__":
 		
 		
 		
-		
 		# Define the commandlines for the subprocesses subprocesses
 		ffmpeg_command = SETTINGS_DICT['FFMPEG_PATH']
 		vspipe_command = SETTINGS_DICT['VSPIPE_PATH']
 		# Run vspipe command by itself
 		vspipe_commandline = [vspipe_command, '--progress', '--filter-time', '--container', 'y4m', '.\slideshow_ENCODER_legacy.vpy', 'NUL']
 		subprocess.run(vspipe_commandline, check=True)
+
+
+		time.sleep(1)
 
 
 		#encode_using_vsipe_ffmpeg(individual_chunk_id)
@@ -561,19 +566,28 @@ if __name__ == "__main__":
 		# The format of the snippet_list produced by the encoder into the updated chunk JSON file is defined above.
 		
 		if not os.path.exists(chunk_json_filename):
-			print(f"ERROR: encoder-updated current chunk to JSON file file not found '{chunk_json_filename}' not found !",flush=True)
-		if not os.path.exists(proposed_ffv1_mkv_filename):
-			print(f"ERROR: encoder-produced .mkv video file not found '{snippets_jsoproposed_ffv1_mkv_filenamen_filename}' not found !",flush=True)
-		if DEBUG:	print(f"DEBUG: in encoder loop: attempting to load snippets_json_filename={snippets_json_filename} produced by the encoder.",flush=True)
+			print(f"ERROR: controller: encoder-updated current chunk to JSON file file not found '{chunk_json_filename}' not found !",flush=True)
+			sys.exit(1)
+		
+		
+		
+		#if not os.path.exists(proposed_ffv1_mkv_filename):
+		#	print(f"ERROR: controller: encoder-produced .mkv video file not found '{proposed_ffv1_mkv_filename}' not found !",flush=True)
+		#	sys.exit(1)
+		
+		
+		
+		
+		if DEBUG:	print(f"DEBUG: controller: in encoder loop: attempting to load chunk_json_filename={chunk_json_filename} produced by the encoder.",flush=True)
 		try:
 			with open(chunk_json_filename, 'r') as fp:
 				updated_individual_chunk_dict = json.load(fp)
 		except Exception as e:
-			print(f"ERROR: loading updated current chunk from JSON file: '{chunk_json_filename}' from encoder, chunk_id={individual_chunk_id}, related to individual_chunk_dict=\nobjPrettyPrint.pformat(individual_chunk_dict)\n{str(e)}",flush=True,file=sys.stderr)
+			print(f"ERROR: controller: loading updated current chunk from JSON file: '{chunk_json_filename}' from encoder, chunk_id={individual_chunk_id}, related to individual_chunk_dict=\nobjPrettyPrint.pformat(individual_chunk_dict)\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)	
 		print(f"Loaded updated current chunk from JSON file: '{chunk_json_filename}'",flush=True)
 		if (updated_individual_chunk_dict['chunk_id'] !=  individual_chunk_dict['chunk_id']) or (updated_individual_chunk_dict['chunk_id'] != str(individual_chunk_id)):
-			print(f"ERROR: the chunk_id returned from the encoder {updated_individual_chunk_dict['chunk_id']} in updated_individual_chunk_dict does not match both expected individual_chunk_dict {individual_chunk_dict['chunk_id']}) or loop's individual_chunk_id ({individual_chunk_id})",flush=True)
+			print(f"ERROR: controller: the chunk_id returned from the encoder {updated_individual_chunk_dict['chunk_id']} in updated_individual_chunk_dict does not match both expected individual_chunk_dict {individual_chunk_dict['chunk_id']}) or loop's individual_chunk_id ({individual_chunk_id})",flush=True)
 			sys.exit(1)
 
 		# poke the chunk updated by the encoder back into ALL_CHUNKS ... it should contain snippet data now.
