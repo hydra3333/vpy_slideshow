@@ -273,6 +273,9 @@ def load_settings():
 
 	MIN_ACTUAL_DISPLAY_TIME						= float(0.5)	# seconds
 
+	SNIPPET_AUDIO_FADE_IN_DURATION_MS			= int(500)		# milliseconds of fade for overlaying snippet audio onto background audio
+	SNIPPET_AUDIO_FADE_OUT_DURATION_MS			= int(500)		# milliseconds of fade for overlaying snippet audio onto background audio
+
 	# EXTERNAL CONSTANTS ...
 	# https://github.com/vapoursynth/vapoursynth/issues/940#issuecomment-1465041338
 	# When calling rezisers etc, ONLY use these values:
@@ -285,7 +288,7 @@ def load_settings():
 	# https://www.vapoursynth.com/doc/apireference.html?highlight=_FieldBased
 	VS_INTERLACED = { 'Progressive' : 0, 'BFF' : 1, 'TFF' : 2 }		# vs documentation says frame property _FieldBased is one of 0=frame based (progressive), 1=bottom field first, 2=top field first.
 
-	TARGET_FPS									= None		# CALCULATED LATER :	 # = round(self.calc_ini["TARGET_FPSNUM"] / self.calc_ini["TARGET_FPSDEN"], 3)
+	TARGET_FPS									= None		# CALCULATED LATER :	# = round(self.calc_ini["TARGET_FPSNUM"] / self.calc_ini["TARGET_FPSDEN"], 3)
 	DURATION_PIC_FRAMES							= None		# CALCULATED LATER : 	# = int(math.ceil(self.calc_ini["DURATION_PIC_SEC"] * self.calc_ini["TARGET_FPS"]))
 	DURATION_CROSSFADE_FRAMES					= None		# CALCULATED LATER : 	# = int(math.ceil(self.calc_ini["DURATION_CROSSFADE_SECS"] * self.calc_ini["TARGET_FPS"]))
 	DURATION_BLANK_CLIP_FRAMES					= None		# CALCULATED LATER : 	# = self.calc_ini["DURATION_CROSSFADE_FRAMES"] + 1	# make equal to the display time for an image; DURATION_CROSSFADE_FRAMES will be less than this
@@ -294,7 +297,7 @@ def load_settings():
 	TARGET_VFR_FPSDEN							= None		# CALCULATED LATER : 	# = self.calc_ini["TARGET_FPSDEN"]
 	TARGET_VFR_FPS								= None		# CALCULATED LATER : 	# = self.calc_ini["TARGET_VFR_FPSNUM"] / self.calc_ini["TARGET_VFR_FPSDEN"]	
 	TARGET_COLOR_RANGE_I_ZIMG					= None		# CALCULATED LATER : 	# = if something, calculate
-
+	
 	default_settings_dict = {
 		'SLIDESHOW_SETTINGS_MODULE_NAME':			SLIDESHOW_SETTINGS_MODULE_NAME,
 		'SLIDESHOW_SETTINGS_MODULE_FILENAME':		SLIDESHOW_SETTINGS_MODULE_FILENAME,
@@ -367,6 +370,9 @@ def load_settings():
 		'PRECISION_TOLERANCE':						PRECISION_TOLERANCE,
 		'MIN_ACTUAL_DISPLAY_TIME':					MIN_ACTUAL_DISPLAY_TIME,
 
+		'SNIPPET_AUDIO_FADE_IN_DURATION_MS':		SNIPPET_AUDIO_FADE_IN_DURATION_MS
+		'SNIPPET_AUDIO_FADE_OUT_DURATION_MS':		SNIPPET_AUDIO_FADE_OUT_DURATION_MS
+
 		'ZIMG_RANGE_LIMITED':						ZIMG_RANGE_LIMITED,	# = 0		# /**< Studio (TV) legal range, 16-235 in 8 bits. */
 		'ZIMG_RANGE_FULL':							ZIMG_RANGE_FULL,	# = 1		# /**< Full (PC) dynamic range, 0-255 in 8 bits. */
 		'VS_INTERLACED':							VS_INTERLACED,		# = { 'Progressive' : 0, 'BFF' : 1, 'TFF' : 2 }		# vs documnetation says frame property _FieldBased is one of 0=frame based (progressive), 1=bottom field first, 2=top field first.
@@ -393,8 +399,8 @@ def load_settings():
 										[ 'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS',	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS,	r'a list, one or more folders to look in for slideshow pics/videos. the r in front of the string is CRITICAL' ],
 										[ 'RECURSIVE',									RECURSIVE,									r'case sensitive: whether to recurse the source folder(s) looking for slideshow pics/videos' ],
 										[ 'ROOT_FOLDER_FOR_OUTPUTS', 					ROOT_FOLDER_FOR_OUTPUTS,					r'folder in which outputs are to be placed' ],
-										[ 'TEMP_FOLDER',								TEMP_FOLDER,								r'folder where temporary files go ... use on a disk with LOTS of spare disk space !!' ],
-										[ 'BACKGROUND_AUDIO_INPUT_FILENAME',			BACKGROUND_AUDIO_INPUT_FILENAME,			r'specify a .m4a audio file ifg you want a background track (it is not looped if too short)' ],
+										[ 'TEMP_FOLDER',								TEMP_FOLDER,								r'folder where temporary files go; USE A DISK WITH LOTS OF SPARE DISK SPACE - CIRCA 6 GB PER 100 PICS/VIDEOS' ],
+										[ 'BACKGROUND_AUDIO_INPUT_FILENAME',			BACKGROUND_AUDIO_INPUT_FILENAME,			r'Use the word None to generate a silence background, or specify a .m4a audio file if you want a background track (it is not looped if too short)' ],
 										[ 'FINAL_MP4_WITH_AUDIO_FILENAME',				FINAL_MP4_WITH_AUDIO_FILENAME,				r'the filename of the FINAL slideshow .mp4' ],
 										[ 'SUBTITLE_DEPTH',								SUBTITLE_DEPTH,								r'how many folders deep to display in subtitles; use 0 for no subtitling' ],
 										[ 'SUBTITLE_FONTSIZE',							SUBTITLE_FONTSIZE,							r'fontsize for subtitles, leave this alone unless confident' ],
@@ -408,7 +414,7 @@ def load_settings():
 										[ 'FFMPEG_PATH',								FFMPEG_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'FFPROBE_PATH',								FFPROBE_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'VSPIPE_PATH',								VSPIPE_PATH,								r'Please leave this alone unless really confident' ],
-										[ 'slideshow_CONTROLLER_path',					slideshow_CONTROLLER_path,				r'Please leave this alone unless really confident' ],
+										[ 'slideshow_CONTROLLER_path',					slideshow_CONTROLLER_path,					r'Please leave this alone unless really confident' ],
 										[ 'slideshow_LOAD_SETTINGS_path',				slideshow_LOAD_SETTINGS_path,				r'Please leave this alone unless really confident' ],
 										[ 'slideshow_ENCODER_legacy_path',				slideshow_ENCODER_legacy_path,				r'Please leave this alone unless really confident' ],
 									]	
@@ -514,7 +520,9 @@ def load_settings():
 	check_file_exists_3333(final_settings_dict['slideshow_LOAD_SETTINGS_path'], r'slideshow_LOAD_SETTINGS_path')
 	check_file_exists_3333(final_settings_dict['slideshow_ENCODER_legacy_path'], r'slideshow_ENCODER_legacy_path')
 
-	check_file_exists_3333(final_settings_dict['BACKGROUND_AUDIO_INPUT_FILENAME'], r'BACKGROUND_AUDIO_INPUT_FILENAME')
+	if final_settings_dict['BACKGROUND_AUDIO_INPUT_FILENAME'] is not None:	# allow None for a silence background to be generated
+		check_file_exists_3333(final_settings_dict['BACKGROUND_AUDIO_INPUT_FILENAME'], r'BACKGROUND_AUDIO_INPUT_FILENAME')
+	
 	# check the folders which should exist do exist
 	# 1. check the folders in this LIST
 	for ddl in final_settings_dict['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS']:

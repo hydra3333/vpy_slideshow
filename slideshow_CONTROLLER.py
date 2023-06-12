@@ -1222,14 +1222,55 @@ if __name__ == "__main__":
 
 		seq_previous_ending_frame_num = end_frame_num_of_chunk_in_final_video	# set seq_previous_ending_frame_num ready for use by the next chunk
 	#end for
+	
+	# Save the end frame number of the final video based on the final chunk's end frame number
+	end_frame_num_of_final_video = end_frame_num_of_chunk_in_final_video
+
 
 	if DEBUG: print(f"{'*'*100}\nDEBUG: Finished calculate start/end final_video based frame numbers for all chunks and their snippets, outgoing ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}\n{'*'*100}",flush=True)
-
+	
 	##########################################################################################################################################
 	##########################################################################################################################################
 	# USE SNIPPET INFO TO OVERLAY SNIPPET AUDIO INTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4 (so pydub accepts it):
 	print(f"{100*'-'}",flush=True)
-	print(f'CONTROLLER: STARTING OVERLAY SNIPPET AUDIO INTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4')
+	print(f'CONTROLLER: STARTING OVERLAY SNIPPETS AUDIOS ONTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4')
+
+	final_video_frame_count = end_frame_num_of_final_video + 1		# base 0
+	final_video_fps = SETTINGS_DICT['TARGET_FPS']
+	final_video_duration_ms = (float(final_video_frame_count) / video_fps) * 1000
+	background_audio_input_filename = SETTINGS_DICT['BACKGROUND_AUDIO_INPUT_FILENAME']
+	background_audio_with_snippets_filename = SETTINGS_DICT['BACKGROUND_AUDIO_WITH_SNIPPETS_FILENAME']
+	final_mp4_with_audio_filename = SETTINGS_DICT['FINAL_MP4_WITH_AUDIO_FILENAME']
+	# not used	INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME = SETTINGS_DICT['INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME'] ????????????????????????????????????????
+	snippet_audio_fade_in_duration_ms = SETTINGS_DICT['snippet_audio_fade_in_duration_ms']
+	snippet_audio_fade_out_duration_ms = SETTINGS_DICT['snippet_audio_fade_out_duration_ms']
+
+	# Load the main background audio
+	try:
+		if DEBUG: print(f"DEBUG: CONTROLLER: replace_audio_with_snippets_from_file: 'from_file' to background_audio '{background_audio_input_filename}'",flush=True)
+		background_audio = AudioSegment.from_file(background_audio_input_filename)
+	except FileNotFoundError:
+		print(f"CONTROLLER: replace_audio_with_snippets_from_file: background_audio File not found from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except TypeError:
+		print(f"CONTROLLER: replace_audio_with_snippets_from_file: background_audio Type mismatch or unsupported operation from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except ValueError:
+		print(f"CONTROLLER: replace_audio_with_snippets_from_file: background_audio Invalid or unsupported value from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except IOError:
+		print(f"CONTROLLER: replace_audio_with_snippets_from_file: background_audio I/O error occurred '{background_audio_input_filename}'",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except OSError as e:
+		print(f"CONTROLLER: replace_audio_with_snippets_from_file: background_audio Unexpected OSError from AudioSegment.from_file('{background_audio_input_filename}')\n{str(e)}",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except Exception as e:
+		print(f"CONTROLLER: replace_audio_with_snippets_from_file: background_audio Unexpected error from AudioSegment.from_file('{background_audio_input_filename}')\n{str(e)}",flush=True,file=sys.stderr)
+		sys.exit(1)
+
+
+
+
 
 	for individual_chunk_id in range(0,ALL_CHUNKS_COUNT):	# 0 to (ALL_CHUNKS_COUNT - 1)
 		individual_chunk_dict = ALL_CHUNKS[str(individual_chunk_id)]
@@ -1250,6 +1291,7 @@ if __name__ == "__main__":
 
 
 
+
 		#end for
 
 	#end for
@@ -1266,3 +1308,169 @@ if __name__ == "__main__":
 	##########################################################################################################################################
 	# CLEANUP
 	
+	
+	
+	
+	def replace_audio_with_snippets_from_file(input_video_path, video_fps, final_video_frame_count, video_duration_ms, seq_snippets_list, output_video_path, background_audio_input_filename, fade_out_duration_ms, fade_in_duration_ms):
+	# Load the background audio
+	# LOOK AT THIS AND MAKE MORE ROBUST LIKE THE OTHER FUNCTION IN THE OTHER CODE 
+	# ... if it was None then create silence audio for the expected duration (same length as video_duration_ms
+	# ... else check file exists and load etc
+	if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file.",flush=True)
+	try:
+		if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: 'from_file' to background_audio '{background_audio_input_filename}'",flush=True)
+		background_audio = AudioSegment.from_file(background_audio_input_filename)
+	except FileNotFoundError:
+		print(f"replace_audio_with_snippets_from_file: background_audio File not found from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except TypeError:
+		print(f"replace_audio_with_snippets_from_file: background_audio Type mismatch or unsupported operation from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except ValueError:
+		print(f"replace_audio_with_snippets_from_file: background_audio Invalid or unsupported value from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except IOError:
+		print(f"replace_audio_with_snippets_from_file: background_audio I/O error occurred '{background_audio_input_filename}'",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except OSError as e:
+		print(f"replace_audio_with_snippets_from_file: background_audio Unexpected OSError from AudioSegment.from_file('{background_audio_input_filename}')\n{str(e)}",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except Exception as e:
+		print(f"replace_audio_with_snippets_from_file: background_audio Unexpected error from AudioSegment.from_file('{background_audio_input_filename}')\n{str(e)}",flush=True,file=sys.stderr)
+		sys.exit(1)
+	
+	# Trim or pad the background audio to match the duration of the video
+	background_audio_len = len(background_audio)
+	if background_audio_len < video_duration_ms:
+		padding_duration = video_duration_ms - background_audio_len
+		if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: background_audio_len {background_audio_len}ms, padding with silence to {background_audio_len+padding_duration}ms",flush=True)
+		background_audio = background_audio + AudioSegment.silent(duration=padding_duration)
+	else:
+		if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: background_audio_len {background_audio_len}ms, trimming to {video_duration_ms}ms",flush=True)
+		background_audio = background_audio[:video_duration_ms]
+
+	# make the edits to the background audio
+	# using the pre-parsed snippets list
+	#	seq_snippets_list
+	# 		Each list entry contains a dict of attributes for snippets to be applied to the main background audio
+	#			{	"snippet_original_start_frame_for_replacement" 	: start_frame_for_replacement, 
+	#				"snippet_original_num_frames_to_replace"	   	: snippet_num_frames_to_replace, 
+	#				"snippet_seq_start_frame_for_replacement"	  	: seq_start_frame_for_replacement, 
+	#				"snippet_seq_end_frame_for_replacement"			: seq_end_frame_for_replacement, 
+	#				"snippet_path"								 	: snippet_path, 
+	#				"from_snippets_input_file"					 	: snippets_input_file
+	#			}
+	total_snippets = len(seq_snippets_list)
+	for i, snippet_data in enumerate(seq_snippets_list):
+		start_frame = snippet_data["snippet_seq_start_frame_for_replacement"]
+		end_frame = snippet_data["snippet_seq_end_frame_for_replacement"]
+		snippet_path = snippet_data["snippet_path"]
+		print(f"Processing snippet {i+1}/{total_snippets} from LIST, start_frame={start_frame} end_frame={end_frame} snippet_path='{snippet_path}'",flush=True)
+
+		# Load the snippet audio
+		if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: about to get audio from snippet via AudioSegment.from_file('{snippet_path}')",flush=True)
+		try:
+			snippet_audio = AudioSegment.from_file(snippet_path)
+		except FileNotFoundError:
+			print(f"replace_audio_with_snippets_from_file: snippet File not found from AudioSegment.from_file('{snippet_path}')",flush=True,file=sys.stderr)
+			sys.exit(1)
+		except TypeError:
+			print(f"replace_audio_with_snippets_from_file: snippet Type mismatch or unsupported operation from AudioSegment.from_file('{snippet_path}')",flush=True,file=sys.stderr)
+			sys.exit(1)
+		except ValueError:
+			print(f"replace_audio_with_snippets_from_file: snippet Invalid or unsupported value from AudioSegment.from_file('{snippet_path}')",flush=True,file=sys.stderr)
+			sys.exit(1)
+		except IOError:
+			print(f"replace_audio_with_snippets_from_file: snippet I/O error occurred from AudioSegment.from_file('{snippet_path}')",flush=True,file=sys.stderr)
+			sys.exit(1)
+		except OSError as e:
+			print(f"replace_audio_with_snippets_from_file: snippet Unexpected OSError from AudioSegment.from_file('{snippet_path}')\n{str(e)}",flush=True,file=sys.stderr)
+			sys.exit(1)
+		except Exception as e:
+			print(f"replace_audio_with_snippets_from_file: snippet Unexpected error from AudioSegment.from_file('{snippet_path})'\n{str(e)}",flush=True,file=sys.stderr)
+			sys.exit(1)
+
+		# Calculate the snippet audio duration based in what was specified for this edit in the seq_snippets_list
+		snippet_duration_ms = ((end_frame - start_frame + 1) / video_fps) * 1000   # +1 to account for inclusive range
+		if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: snippet {i+1}/{total_snippets} calculated snippet_duration_ms={snippet_duration_ms}",flush=True)
+
+		# Extract the corresponding portion of the snippet audio based on the calculated duration
+		# there should be enough audio unless the a very small clip had to padded during slideshow creation, which can happen
+		# Trim or pad the snippet audio to match snippet_duration_ms
+		snippet_audio_len = len(snippet_audio)
+		if snippet_audio_len < snippet_duration_ms:
+			padding_duration = snippet_duration_ms - snippet_audio_len
+			snippet_audio = snippet_audio + AudioSegment.silent(duration=padding_duration)
+			if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: snippet {i+1}/{total_snippets} audio snippet was {snippet_audio_len}ms, padded to {snippet_duration_ms}ms",flush=True)
+		else:
+			snippet_audio = snippet_audio[:snippet_duration_ms]
+			if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: snippet {i+1}/{total_snippets} audio snippet was {snippet_audio_len}ms, trimmed to {snippet_duration_ms}ms",flush=True)
+
+		# Calculate the pre and post fade times
+		#	Fade out (to silent) the end of this AudioSegment
+		#	Fade in (from silent) the beginning of this AudioSegment
+		# fade_out_duration_ms passed as a parameter
+		# fade_in_duration_ms passed as a parameter
+		fade_out_start_time_ms = ((start_frame / video_fps) * 1000) - fade_out_duration_ms
+		fade_out_end_time = fade_out_start_time_ms + fade_out_duration_ms
+		fade_in_start_time_ms = ((end_frame / video_fps) * 1000)
+		fade_in_end_time_ms = fade_in_start_time_ms + fade_in_duration_ms
+		if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: snippet {i+1}/{total_snippets} calculated fade_out_start_time_ms={fade_out_start_time_ms} fade_out_end_time={fade_out_end_time}",flush=True)
+		if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: snippet {i+1}/{total_snippets} calculated fade_in_start_time_ms={fade_in_start_time_ms} fade_in_end_time_ms={fade_in_end_time_ms}",flush=True)
+		
+		# Apply fade-in and fade-out effects to the background audio either side of the insertion point
+		# https://github.com/jiaaro/pydub/blob/master/API.markdown
+		if fade_out_start_time_ms >= 0:
+			if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: snippet {i+1}/{total_snippets}, applying 'fade-out', 'fade_in', to background_audio",flush=True)
+			background_audio = background_audio.fade(to_gain=-120.0,start=fade_out_start_time_ms,duration=fade_out_duration_ms).fade(from_gain=-120.0,start=fade_in_start_time_ms,duration=fade_in_duration_ms)
+		else:
+			if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: snippet {i+1}/{total_snippets}, NO fade-in, fade_out, applied to background_audio since fade_out_start_time_ms {fade_out_start_time_ms} < 0",flush=True)
+
+		# Overlay the snippet audio onto the background audio at the specified position
+		# Use gain_during_overlay even if fading is applied above
+		# 		Change the original audio by this many dB while overlaying audio. 
+		#		This can be used to make the original audio quieter while the overlaid audio plays.
+		#		example: -6.0 default: 0 (no change in volume during overlay) 
+		if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: snippet {i+1}/{total_snippets}, applying 'overlay' to background_audio",flush=True)
+		background_audio = background_audio.overlay(snippet_audio, position=((start_frame / video_fps) * 1000), gain_during_overlay=-120.0, loop=False)
+	del snippet_audio
+	# end for ... FINISHED looping through the snippets LIST
+	
+	# Save the edited background audio using .export
+	# https://stackoverflow.com/questions/62598172/m4a-mp4-audio-file-encoded-with-pydubffmpeg-doesnt-play-on-android
+	edited_background_audio_input_filename_tmp = r".\\temporary_edited_background_audio.mkv"
+	try:
+		if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: 'export' background_audio to file '{edited_background_audio_input_filename_tmp}' with format='matroska', codec='libfdk_aac', bitrate='256k', parameters=['-ar', '48000', '-ac', '2']",flush=True)
+		background_audio.export(edited_background_audio_input_filename_tmp, format="matroska", codec="libfdk_aac", bitrate="256k", parameters=["-ar", "48000", "-ac", "2"])
+	except FileNotFoundError:
+		print(f"replace_audio_with_snippets_from_file: File not found from background_audio.export('{edited_background_audio_input_filename_tmp}',...)",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except TypeError:
+		print(f"replace_audio_with_snippets_from_file: Type mismatch or unsupported operation from background_audio.export('{edited_background_audio_input_filename_tmp}',...)",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except ValueError:
+		print(f"replace_audio_with_snippets_from_file: Invalid or unsupported value from background_audio.export('{edited_background_audio_input_filename_tmp}',...)",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except IOError:
+		print(f"replace_audio_with_snippets_from_file: I/O error occurred from background_audio.export('{edited_background_audio_input_filename_tmp}',...)",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except OSError as e:
+		print(f"replace_audio_with_snippets_from_file: Unexpected OSError from background_audio.export('{edited_background_audio_input_filename_tmp}',...)\n{str(e)}",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except Exception as e:
+		print(f"replace_audio_with_snippets_from_file: Unexpected error from background_audio.export('{edited_background_audio_input_filename_tmp}',...)\n{str(e)}",flush=True,file=sys.stderr)
+		sys.exit(1)
+	del background_audio	# release a bunch of memory
+	
+	# Mux together the original video with the edited background audio
+	if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: callng muxer '{input_video_path}'+'{edited_background_audio_input_filename_tmp}'='{output_video_path}' ",flush=True)
+	mux_video_audio(input_video_path, edited_background_audio_input_filename_tmp, output_video_path)
+
+	# Clean up temporary file(s)
+	try:
+		os.remove(edited_background_audio_input_filename_tmp)
+	except Exception as e:
+		print(f"Error: Failed to clean up temporary file(s) '{edited_background_audio_input_filename_tmp}' : {str(e)}",flush=True,file=sys.stderr)
+		sys.exit(1)
+
+	return output_video_path
