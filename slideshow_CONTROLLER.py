@@ -391,7 +391,7 @@ class ffprobe:
 		try:
 			result = subprocess.run(command_array, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
 		except Exception as e:
-			print(f"ffprobe.exe failed to run on '{file_path}', with error: '{result.stderr}'", file=sys.stderr, flush=True)
+			print(f"CONTROLLER: ffprobe.exe failed to run on '{file_path}', with error: '{result.stderr}'", file=sys.stderr, flush=True)
 			self.return_code = result.returncode
 			self.error_code = e
 			self.error = result.stderr
@@ -403,17 +403,17 @@ class ffprobe:
 		try:
 			self.dict = json.loads(result.stdout)
 		except:
-			print(f'ffprobe: ERROR: {file_path} loading ffprobe "json" data. json=\n{objPrettyPrint.pformat(self.streams_list)}', file=sys.stderr, flush=True)
+			print(f'CONTROLLER: ffprobe: ERROR: {file_path} loading ffprobe "json" data. json=\n{objPrettyPrint.pformat(self.streams_list)}', file=sys.stderr, flush=True)
 			self.dict = {}
 			pass
 		self.format_dict = self.dict.get("format")
 		if self.format_dict is None:
-			print(f'ffprobe: ERROR: {file_path} contains no ffprobe "format" data. json=\n{objPrettyPrint.pformat(self.streams_list)}', file=sys.stderr, flush=True)
+			print(f'CONTROLLER: ffprobe: ERROR: {file_path} contains no ffprobe "format" data. json=\n{objPrettyPrint.pformat(self.streams_list)}', file=sys.stderr, flush=True)
 			self.format_dict = {}
 			pass
 		self.streams_list = self.dict.get("streams")
 		if self.streams_list is None:
-			print(f'ffprobe: ERROR: {file_path} contains no ffprobe "streams" data. json=\n{objPrettyPrint.pformat(self.streams_list)}', file=sys.stderr, flush=True)
+			print(f'CONTROLLER: ffprobe: ERROR: {file_path} contains no ffprobe "streams" data. json=\n{objPrettyPrint.pformat(self.streams_list)}', file=sys.stderr, flush=True)
 			self.streams_list = []
 			pass
 		else:
@@ -730,7 +730,7 @@ def find_all_chunks():
 				os.remove(ffcachefile)
 				return True
 			except Exception as e:
-				print(f'WARNING: fac_check_clip_from__path: error opening file via "ffms2": "{str(path)}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}',flush=True)
+				print(f'CONTROLLER: WARNING: fac_check_clip_from__path: error opening file via "ffms2": "{str(path)}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}',flush=True)
 				return False
 		elif  ext in SETTINGS_DICT['EEK_EXTENSIONS']:
 			try:
@@ -738,7 +738,7 @@ def find_all_chunks():
 				del clip
 				return True
 			except Exception as e:
-				print(f'WARNING: fac_check_clip_from__path: error opening file via "lsmas": "{path.name}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}',flush=True)
+				print(f'CONTROLLER: WARNING: fac_check_clip_from__path: error opening file via "lsmas": "{path.name}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}',flush=True)
 				return False
 		else:
 			raise ValueError(f'ERROR: fac_check_clip_from__path: get_clip_from_path: expected {path} to have extension in {SETTINGS_DICT["VID_EEK_EXTENSIONS"]} ... aborting')
@@ -753,7 +753,7 @@ def find_all_chunks():
 				os.remove(ffcachefile)
 				return True
 			except Exception as e:
-				print(f'WARNING: fac_check_clip_from_pic: error opening file via "ffms2": "{path.name}" ; ignoring this picture. The error was:\n{e}\n{type(e)}\n{str(e)}',flush=True)
+				print(f'CONTROLLER: WARNING: fac_check_clip_from_pic: error opening file via "ffms2": "{path.name}" ; ignoring this picture. The error was:\n{e}\n{type(e)}\n{str(e)}',flush=True)
 				return False
 		else:
 			raise ValueError(f'ERROR: fac_check_clip_from_pic: : expected {path} to have extension in {SETTINGS_DICT["PIC_EXTENSIONS"]} ... aborting')
@@ -778,7 +778,7 @@ def find_all_chunks():
 	#
 	TOLERANCE_FINAL_CHUNK = max(1, int(SETTINGS_DICT['MAX_FILES_PER_CHUNK'] * (float(SETTINGS_DICT['TOLERANCE_PERCENT_FINAL_CHUNK'])/100.0)))
 
-	print(f"Commencing assigning files into chunks for processing usng:",flush=True)
+	print(f"CONTROLLER: Commencing assigning files into chunks for processing usng:",flush=True)
 	print(f"{objPrettyPrint.pformat(SETTINGS_DICT['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS'])}",flush=True)
 	print(f"{objPrettyPrint.pformat(SETTINGS_DICT['EXTENSIONS'])}",flush=True)
 	print(f"RECURSIVE={SETTINGS_DICT['RECURSIVE']}",flush=True)
@@ -807,10 +807,10 @@ def find_all_chunks():
 			raise ValueError(f"ERROR: find_all_chunks: File Extensions:\n{SETTINGS_DICT['EXTENSIONS']}\nnot found in '{current_Directory}'")
 		while not (path is None):	# first clip already pre-retrieved ready for this while loop
 			if path.suffix.lower() in SETTINGS_DICT['EXTENSIONS']:
-				print(f"Checking file {count_of_files}. '{path}' for validity ...",flush=True)
+				print(f"CONTROLLER: Checking file {count_of_files}. '{path}' for validity ...",flush=True)
 				is_valid = fac_check_file_validity_by_opening(path)
 				if not is_valid:	# ignore clips which had an issue with being opened and return None
-					print(f'Unable to process {count_of_files} {str(path)} ... ignoring it',flush=True)
+					print(f'CONTROLLER: Unable to process {count_of_files} {str(path)} ... ignoring it',flush=True)
 				else:
 					# if required, start a new chunk
 					if (count_of_files % SETTINGS_DICT['MAX_FILES_PER_CHUNK']) == 0:
@@ -818,7 +818,7 @@ def find_all_chunks():
 						chunks[str(chunk_id)] = {	
 													'chunk_id': chunk_id,
 													'chunk_fixed_json_filename' :				fully_qualified_filename(SETTINGS_DICT['CURRENT_CHUNK_FILENAME']),		# always the same fixed filename
-													'proposed_ffv1_mkv_filename' :				fully_qualified_filename(SETTINGS_DICT['CHUNK_ENCODED_FFV1_FILENAME_BASE'] + str(chunk_id).zfill(5) + r'.mkv'),	# filename related to chunk_id
+													'proposed_ffv1_mkv_filename' :				fully_qualified_filename(SETTINGS_DICT['CHUNK_ENCODED_FFV1_FILENAME_BASE'] + str(chunk_id).zfill(5) + r'.mkv'),	# filename related to chunk_id, with 5 digit zero padded sequential number
 													'num_frames_in_chunk' :						0,	# initialize to 0, filled in by encoder
 													'start_frame_num_in_chunk':					0,	# initialize to 0, filled in by encoder
 													'end_frame_num_in_chunk':					0,	# initialize to 0, filled in by encoder
@@ -852,7 +852,7 @@ def find_all_chunks():
 	if chunk_count > 1:
 		# if within tolerance, merge the final chunk into the previous chunk
 		if chunks[str(chunk_id)]['num_files'] <= TOLERANCE_FINAL_CHUNK:
-			print(f'Merging final chunk (chunk_id={chunk_id}, num_files={chunks[str(chunk_id)]["num_files"]}) into previous chunk (chunk_id={chunk_id - 1}, num_files={chunks[str(chunk_id - 1)]["num_files"]+chunks[str(chunk_id)]["num_files"]})',flush=True)
+			print(f'CONTROLLER: Merging final chunk (chunk_id={chunk_id}, num_files={chunks[str(chunk_id)]["num_files"]}) into previous chunk (chunk_id={chunk_id - 1}, num_files={chunks[str(chunk_id - 1)]["num_files"]+chunks[str(chunk_id)]["num_files"]})',flush=True)
 			chunks[str(chunk_id - 1)]["file_list"] = chunks[str(chunk_id - 1)]["file_list"] + chunks[str(chunk_id)]["file_list"]
 			chunks[str(chunk_id - 1)]["num_files"] = chunks[str(chunk_id - 1)]["num_files"] + chunks[str(chunk_id)]["num_files"]
 			# remove the last chunk since we just merged it into the chunk prior
@@ -875,7 +875,7 @@ def find_all_chunks():
 			file1 = file_list[j]
 			file2 = chunks[str(i)]["file_list"][j]
 
-	print(f"Finished assigning files into chunks for processing: {count_of_files} files into {chunk_count} chunks.",flush=True)
+	print(f"CONTROLLER: Finished assigning files into chunks for processing: {count_of_files} files into {chunk_count} chunks.",flush=True)
 
 	return chunk_count, count_of_files, chunks
 
@@ -1017,7 +1017,7 @@ if __name__ == "__main__":
 	##########################################################################################################################################
 	# GATHER SETTINGS
 	print(f"{100*'-'}",flush=True)
-	print(f'STARTING GATHER SETTINGS')
+	print(f'CONTROLLER: STARTING GATHER SETTINGS')
 
 	import slideshow_LOAD_SETTINGS	# from same folder .\
 	SETTINGS_DICT, OLD_INI_DICT, OLD_CALC_INI_DICT, USER_SPECIFIED_SETTINGS_DICT = slideshow_LOAD_SETTINGS.load_settings()
@@ -1049,7 +1049,7 @@ if __name__ == "__main__":
 	# FIND PIC/IMAGES
 
 	print(f"{100*'-'}",flush=True)
-	print(f'STARTING FIND/CHECK OF PIC AND IMAGES')
+	print(f'CONTROLLER: STARTING FIND/CHECK OF PIC AND IMAGES')
 	
 	# Locate all openable files and put them into chunks in a dict, including { proposed filename for the encoded chunk, first/last frames, number of frames in chunk } 
 
@@ -1063,7 +1063,7 @@ if __name__ == "__main__":
 		with open(fac, 'w') as fp:
 			json.dump(ALL_CHUNKS, fp, indent=4)
 	except Exception as e:
-		print(f"ERROR: error returned from json.dump ALL_CHUNKS to JSON file: '{fac}'\n{str(e)}",flush=True,file=sys.stderr)
+		print(f"CONTROLLER: ERROR: error returned from json.dump ALL_CHUNKS to JSON file: '{fac}'\n{str(e)}",flush=True,file=sys.stderr)
 		sys.exit(1)	
 	
 	##########################################################################################################################################
@@ -1073,7 +1073,7 @@ if __name__ == "__main__":
 	# CREATING SNIPPET JSON, IMPORTING JSON AND ADDING TO ALL_SNIPPETS DICT:
 
 	print(f"{100*'-'}",flush=True)
-	print(f'STARTING INTERIM ENCODING OF CHUNKS INTO INTERIM FFV1 VIDEO FILES')
+	print(f'CONTROLLER: STARTING INTERIM ENCODING OF CHUNKS INTO INTERIM FFV1 VIDEO FILES')
 		
 	if DEBUG:	
 		print(f"DEBUG: Starting encoder loop for each of ALL_CHUNKS tree. chunks: {ALL_CHUNKS_COUNT} files: {ALL_CHUNKS_COUNT_OF_FILES}",flush=True)
@@ -1087,7 +1087,7 @@ if __name__ == "__main__":
 
 		chunk_json_filename = fully_qualified_filename(individual_chunk_dict['chunk_fixed_json_filename'])					# always the same fixed filename
 		#### the CHUNK JASON FILE IS UPDATED AND RE-WRITTEN AND RE-READ, not a separate SNIPPETS FILE 
-		proposed_ffv1_mkv_filename = fully_qualified_filename(individual_chunk_dict['proposed_ffv1_mkv_filename'])	# fixed filename plus a seqnential 5-digit-zero-padded ending based on chunk_id + r'.mkv'
+		proposed_ffv1_mkv_filename = fully_qualified_filename(individual_chunk_dict['proposed_ffv1_mkv_filename'])	# preset by find_all_chunks to: fixed filename plus a seqential 5-digit-zero-padded ending based on chunk_id + r'.mkv'
 		
 		# remove any pre-existing files to be consumed and produced by the encoder
 		if os.path.exists(chunk_json_filename):
@@ -1101,9 +1101,9 @@ if __name__ == "__main__":
 			with open(chunk_json_filename, 'w') as fp:
 				json.dump(individual_chunk_dict, fp, indent=4)
 		except Exception as e:
-			print(f"ERROR: dumping current chunk to JSON file: '{chunk_json_filename}' for encoder, chunk_id={individual_chunk_id}, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}\n{str(e)}",flush=True,file=sys.stderr)
+			print(f"CONTROLLER: ERROR: dumping current chunk to JSON file: '{chunk_json_filename}' for encoder, chunk_id={individual_chunk_id}, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)	
-		print(f"Created fixed-filename chunk file for encoder to consume: '{chunk_json_filename}' listing {ALL_CHUNKS[str(individual_chunk_id)]['num_files']} files, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}",flush=True)
+		print(f"CONTROLLER: Created fixed-filename chunk file for encoder to consume: '{chunk_json_filename}' listing {ALL_CHUNKS[str(individual_chunk_id)]['num_files']} files, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}",flush=True)
 
 		if DEBUG:	print(f"DEBUG: encoder loop: calling the encoder, VSPIPE piped to FFMPEG ... with controller using non-blocking reads of stdout and stderr (per chatgpt).",flush=True)
 		# These fields in a chunk dict need to be updated by the encoder:
@@ -1141,14 +1141,14 @@ if __name__ == "__main__":
 		# The format of the snippet_list produced by the encoder into the updated chunk JSON file is defined above.
 		
 		if not os.path.exists(chunk_json_filename):
-			print(f"ERROR: controller: encoder-updated current chunk to JSON file file not found '{chunk_json_filename}' not found !",flush=True)
+			print(f"CONTROLLER: ERROR: controller: encoder-updated current chunk to JSON file file not found '{chunk_json_filename}' not found !",flush=True)
 			sys.exit(1)
 		
 		
 		# TEMPORARILY DISABLE THE CHECK FOR A VALID FFV1 FILE
 		
 		#if not os.path.exists(proposed_ffv1_mkv_filename):
-		#	print(f"ERROR: controller: encoder-produced .mkv video file not found '{proposed_ffv1_mkv_filename}' not found !",flush=True)
+		#	print(f"CONTROLLER: ERROR: controller: encoder-produced .mkv video file not found '{proposed_ffv1_mkv_filename}' not found !",flush=True)
 		#	sys.exit(1)
 		
 		
@@ -1159,19 +1159,19 @@ if __name__ == "__main__":
 			with open(chunk_json_filename, 'r') as fp:
 				updated_individual_chunk_dict = json.load(fp)
 		except Exception as e:
-			print(f"ERROR: controller: loading updated current chunk from JSON file: '{chunk_json_filename}' from encoder, chunk_id={individual_chunk_id}, related to individual_chunk_dict=\nobjPrettyPrint.pformat(individual_chunk_dict)\n{str(e)}",flush=True,file=sys.stderr)
+			print(f"CONTROLLER: ERROR: controller: loading updated current chunk from JSON file: '{chunk_json_filename}' from encoder, chunk_id={individual_chunk_id}, related to individual_chunk_dict=\nobjPrettyPrint.pformat(individual_chunk_dict)\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)	
-		print(f"Loaded updated current chunk from JSON file: '{chunk_json_filename}'",flush=True)
+		print(f"CONTROLLER: Loaded updated current chunk from JSON file: '{chunk_json_filename}'",flush=True)
 		if (updated_individual_chunk_dict['chunk_id'] !=  individual_chunk_dict['chunk_id']) or (updated_individual_chunk_dict['chunk_id'] != individual_chunk_id):
-			print(f"ERROR: controller: the chunk_id returned from the encoder={updated_individual_chunk_dict['chunk_id']} in updated_individual_chunk_dict does not match both expected individual_chunk_dict chunk_id={individual_chunk_dict['chunk_id']} or loop's individual_chunk_id={individual_chunk_id}",flush=True)
+			print(f"CONTROLLER: ERROR: controller: the chunk_id returned from the encoder={updated_individual_chunk_dict['chunk_id']} in updated_individual_chunk_dict does not match both expected individual_chunk_dict chunk_id={individual_chunk_dict['chunk_id']} or loop's individual_chunk_id={individual_chunk_id}",flush=True)
 			sys.exit(1)
 		# poke the chunk updated by the encoder back into ALL_CHUNKS ... it should contain snippet data now.
 		ALL_CHUNKS[str(individual_chunk_id)] = updated_individual_chunk_dict
 	#end for
 
 	if DEBUG:
-		print(f'Finished INTERIM ENCODING OF CHUNKS INTO INTERIM FFV1 VIDEO FILES')
-		print(f"After updating encoder added snippets into each chunk and controller UPDATING chunk info into ALL_CHUNKS, the new ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
+		print(f'CONTROLLER: Finished INTERIM ENCODING OF CHUNKS INTO INTERIM FFV1 VIDEO FILES')
+		print(f"CONTROLLER: After updating encoder added snippets into each chunk and controller UPDATING chunk info into ALL_CHUNKS, the new ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
 
 	##########################################################################################################################################
 	##########################################################################################################################################
@@ -1181,7 +1181,7 @@ if __name__ == "__main__":
 	# so we can refer to absolute final-video frame numbers rather than chunk-internal frame numbers
 
 	print(f"{100*'-'}",flush=True)
-	print(f"Starting re-parse the ALL_CHUNKS tree dict to re-calculate global frame numbers chunks: {ALL_CHUNKS_COUNT}.",flush=True)
+	print(f"CONTROLLER: STARTING RE-PARSE OF ALL_CHUNKS TREE DICT TO RE-CALCULATE AND SAVE GLOBAL FRAME NUMBERS. NUMVER OF CHUNKS TO PROCESS: {ALL_CHUNKS_COUNT}.",flush=True)
 
 	# To be calculated and updated in each chunk at the chunk level:
 	#		ALL_CHUNKS[str(individual_chunk_id)]['start_frame_num_of_chunk_in_final_video']
@@ -1229,14 +1229,25 @@ if __name__ == "__main__":
 	##########################################################################################################################################
 	# USE SNIPPET INFO TO OVERLAY SNIPPET AUDIO INTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4 (so pydub accepts it):
 	print(f"{100*'-'}",flush=True)
-	print(f'STARTING OVERLAY SNIPPET AUDIO INTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4')
+	print(f'CONTROLLER: STARTING OVERLAY SNIPPET AUDIO INTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4')
+
+	for individual_chunk_id in range(0,ALL_CHUNKS_COUNT):	# 0 to (ALL_CHUNKS_COUNT - 1)
+		individual_chunk_dict = ALL_CHUNKS[str(individual_chunk_id)]
+		num_files = individual_chunk_dict['num_files']
+		print_NORMAL(f'CONTROLLER:  (legacy): Start processing {num_files} image/video files, crossfade="{ct}/{cd}" RECURSIVE={objSettings.RECURSIVE} DEBUG_MODE={objSettings.DEBUG_MODE}" \n      with Extensions={objPrettyPrint.pformat(objSettings.EXTENSIONS)}')
+		for i in range(0,num_files):	# base 0; 0..(num_files - 1)
+			file_to_process = individual_chunk_dict['file_list'][i]
+			path = Path(fully_qualified_filename(file_to_process))
+
+
+	#end for
 
 
 	##########################################################################################################################################
 	##########################################################################################################################################
 	# CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO MP4 AND AT SAME TIME MUX WITH BACKGROUND AUDIO.mp4
 	print(f"{100*'-'}",flush=True)
-	print(f'STARTING CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO MP4 AND AT SAME TIME MUX WITH BACKGROUND AUDIO')
+	print(f'CONTROLLER: STARTING CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO MP4 AND AT SAME TIME MUX WITH BACKGROUND AUDIO')
 	
 	
 	##########################################################################################################################################
