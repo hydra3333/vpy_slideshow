@@ -1234,11 +1234,23 @@ if __name__ == "__main__":
 	for individual_chunk_id in range(0,ALL_CHUNKS_COUNT):	# 0 to (ALL_CHUNKS_COUNT - 1)
 		individual_chunk_dict = ALL_CHUNKS[str(individual_chunk_id)]
 		num_files = individual_chunk_dict['num_files']
-		print_NORMAL(f'CONTROLLER:  (legacy): Start processing {num_files} image/video files, crossfade="{ct}/{cd}" RECURSIVE={objSettings.RECURSIVE} DEBUG_MODE={objSettings.DEBUG_MODE}" \n      with Extensions={objPrettyPrint.pformat(objSettings.EXTENSIONS)}')
-		for i in range(0,num_files):	# base 0; 0..(num_files - 1)
-			file_to_process = individual_chunk_dict['file_list'][i]
-			path = Path(fully_qualified_filename(file_to_process))
+		num_snippets = individual_chunk_dict['num_snippets']
+		if num_snippets > 0:
+			num_snippets(f'CONTROLLER: Start processing chunk: {individual_chunk_id} list of {num_snippets} audio snippet files to be overlaid onto backgroiund audio.',flush=True)
+			for i in range(0,num_snippets):	# base 0; 0..(num_files - 1)
+				individual_snippet_dict = individual_chunk_dict['snippet_list'][i]
+				# which looks like this:	{	
+				#								'start_frame_of_snippet_in_chunk':			integer,
+				#								'end_frame_of_snippet_in_chunk':			integer,
+				#								'start_frame_of_snippet_in_final_video':	integer,	<- this is useful
+				#								'end_frame_of_snippet_in_final_video':		integer,	<- this is useful
+				#								'snippet_num_frames':						integer,	<- this is useful
+				#								'snippet_source_video_filename':			filename,	<- this is useful
+				#							}
 
+
+
+		#end for
 
 	#end for
 
