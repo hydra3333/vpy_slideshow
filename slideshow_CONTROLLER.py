@@ -516,11 +516,6 @@ if __name__ == "__main__":
 			os.remove(chunk_json_filename)
 		if os.path.exists(proposed_ffv1_mkv_filename):
 			os.remove(proposed_ffv1_mkv_filename)
-
-
-		# ???????????????????????????????
-		DEBUG = True
-
 		
 		# create the fixed-filename chunk file consumed by the encoder; it contains the fixed-filename of the snippet file to produce
 		if DEBUG:	print(f"DEBUG: in encoder loop: attempting to create chunk_json_filename='{chunk_json_filename}' for encoder to consume.",flush=True)
@@ -551,27 +546,23 @@ if __name__ == "__main__":
 		# Define the commandlines for the subprocesses subprocesses
 		ffmpeg_command = SETTINGS_DICT['FFMPEG_PATH']
 		vspipe_command = SETTINGS_DICT['VSPIPE_PATH']
-		# Run vspipe command by itself
-		vspipe_commandline = [vspipe_command, '--progress', '--filter-time', '--container', 'y4m', '.\slideshow_ENCODER_legacy.vpy', 'NUL']
-		subprocess.run(vspipe_commandline, check=True)
+		
+		
+		# NOT YET ENCODE WITH FFMPEG, ONLY TEST WITH VSPIPE
+		#encode_using_vsipe_ffmpeg(individual_chunk_id)
 
+		# Run vspipe command by itself
+		vspipe_commandline = [vspipe_command, '--progress', '--container', 'y4m', '.\slideshow_ENCODER_legacy.vpy', 'NUL']
+		subprocess.run(vspipe_commandline, check=True)
 
 		time.sleep(1)
 
 
-		#encode_using_vsipe_ffmpeg(individual_chunk_id)
-
-
-
-
-
+	
 		if DEBUG:	print(f"DEBUG: encoder loop: returned from the encoder, VSPIPE piped to FFMPEG ... with controller using non-blocking reads of stdout and stderr (per chatgpt).",flush=True)
-		# ????????????????????????????????????
-		# ????????????????????????????????????
-		# ????????????????????????????????????
 
 		# Now the encoder has encoded a chunk and produced an updated chunk file and an ffv1 encoded video .mkv 
-		# ... import updated chunk file (which will include a new snippet_list) check the chunk, and update the ALL_CHUNKS dict with updated chunk data
+		# ... we must import updated chunk file (which will include a new snippet_list) check the chunk, and update the ALL_CHUNKS dict with updated chunk data
 		# The format of the snippet_list produced by the encoder into the updated chunk JSON file is defined above.
 		
 		if not os.path.exists(chunk_json_filename):
@@ -579,6 +570,7 @@ if __name__ == "__main__":
 			sys.exit(1)
 		
 		
+		# TEMPORARILY DISABLE THE CHECK FOR A VALID FFV1 FILE
 		
 		#if not os.path.exists(proposed_ffv1_mkv_filename):
 		#	print(f"ERROR: controller: encoder-produced .mkv video file not found '{proposed_ffv1_mkv_filename}' not found !",flush=True)
@@ -662,12 +654,14 @@ if __name__ == "__main__":
 	##########################################################################################################################################
 	# USE SNIPPET INFO TO OVERLAY SNIPPET AUDIO INTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4 (so pydub accepts it):
 	print(f"{100*'-'}",flush=True)
-	print(f'STARTING OVERLAY SNIPPET AUDIO INTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4 ')
+	print(f'STARTING OVERLAY SNIPPET AUDIO INTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4')
 
 
 	##########################################################################################################################################
 	##########################################################################################################################################
-	# CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO AND AT SAME TIME MUX WITH BACKGROUND AUDIO.mp4
+	# CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO MP4 AND AT SAME TIME MUX WITH BACKGROUND AUDIO.mp4
+	print(f"{100*'-'}",flush=True)
+	print(f'STARTING CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO MP4 AND AT SAME TIME MUX WITH BACKGROUND AUDIO')
 	
 	
 	##########################################################################################################################################

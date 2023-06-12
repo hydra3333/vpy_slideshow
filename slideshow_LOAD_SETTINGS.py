@@ -223,6 +223,7 @@ def load_settings():
 	RECURSIVE									= True
 	DEBUG										= False if DEBUG==False else True
 	FFMPEG_PATH									= fully_qualified_filename(os.path.join(r'.\Vapoursynth_x64', r'ffmpeg.exe'))
+	FFPROBE_PATH								= fully_qualified_filename(os.path.join(r'.\Vapoursynth_x64', r'ffprobe.exe'))
 	VSPIPE_PATH									= fully_qualified_filename(os.path.join(r'.\Vapoursynth_x64', r'vspipe.exe'))
 	
 	slideshow_CONTROLLER_path					= fully_qualified_filename(os.path.join(r'.\slideshow_CONTROLLER.py'))
@@ -322,6 +323,7 @@ def load_settings():
 		'RECURSIVE':								RECURSIVE,
 		'DEBUG':									DEBUG,
 		'FFMPEG_PATH':								FFMPEG_PATH,
+		'FFPROBE_PATH':								FFPROBE_PATH,
 		'VSPIPE_PATH':								VSPIPE_PATH,
 		'slideshow_CONTROLLER_path':				slideshow_CONTROLLER_path,
 		'slideshow_LOAD_SETTINGS_path':				slideshow_LOAD_SETTINGS_path,
@@ -404,6 +406,7 @@ def load_settings():
 										[ 'DURATION_MAX_VIDEO_SEC',						DURATION_MAX_VIDEO_SEC,						r'in seconds, maximum duration each video clip is shown in the slideshow' ],
 										[ 'DEBUG',										DEBUG,										r'see and regret seeing, ginormous debug output' ],
 										[ 'FFMPEG_PATH',								FFMPEG_PATH,								r'Please leave this alone unless really confident' ],
+										[ 'FFPROBE_PATH',								FFPROBE_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'VSPIPE_PATH',								VSPIPE_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'slideshow_CONTROLLER_path',					slideshow_CONTROLLER_path,				r'Please leave this alone unless really confident' ],
 										[ 'slideshow_LOAD_SETTINGS_path',				slideshow_LOAD_SETTINGS_path,				r'Please leave this alone unless really confident' ],
@@ -497,6 +500,7 @@ def load_settings():
 	final_settings_dict['FINAL_MP4_WITH_AUDIO_FILENAME'] = fully_qualified_filename(final_settings_dict['FINAL_MP4_WITH_AUDIO_FILENAME'])
 
 	final_settings_dict['FFMPEG_PATH'] = fully_qualified_filename(final_settings_dict['FFMPEG_PATH'])
+	final_settings_dict['FFPROBE_PATH'] = fully_qualified_filename(final_settings_dict['FFPROBE_PATH'])
 	final_settings_dict['VSPIPE_PATH'] = fully_qualified_filename(final_settings_dict['VSPIPE_PATH'])
 
 	final_settings_dict['slideshow_CONTROLLER_path'] = fully_qualified_filename(final_settings_dict['slideshow_CONTROLLER_path'])
@@ -504,6 +508,7 @@ def load_settings():
 	final_settings_dict['slideshow_ENCODER_legacy_path'] = fully_qualified_filename(final_settings_dict['slideshow_ENCODER_legacy_path'])
 
 	check_file_exists_3333(final_settings_dict['FFMPEG_PATH'], r'FFMPEG_PATH')
+	check_file_exists_3333(final_settings_dict['FFPROBE_PATH'], r'FFPROBE_PATH')
 	check_file_exists_3333(final_settings_dict['VSPIPE_PATH'], r'VSPIPE_PATH')
 	check_file_exists_3333(final_settings_dict['slideshow_CONTROLLER_path'], r'slideshow_CONTROLLER_path')
 	check_file_exists_3333(final_settings_dict['slideshow_LOAD_SETTINGS_path'], r'slideshow_LOAD_SETTINGS_path')
