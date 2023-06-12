@@ -323,15 +323,41 @@ def encode_using_vsipe_ffmpeg(individual_chunk_id):
 			queue.put(line)
 		out.close()
 
-	FFMPEG_COMMAND = SETTINGS_DICT['FFMPEG_PATH']
-	VSPIPE_COMMAND = SETTINGS_DICT['VSPIPE_PATH']
+	#
+	individual_chunk_dict = ALL_CHUNKS[str(individual_chunk_id)]
+	proposed_ffv1_mkv_filename = fully_qualified_filename(individual_chunk_dict['proposed_ffv1_mkv_filename'])
 
-	try:
-		# Define the commandlines for the subprocesses subprocesses
+	#????????????? perhaps relocate the other logic to HERE here ...
+
+	# Define the commandlines for the subprocesses subprocesses
+	ffmpeg_command = SETTINGS_DICT['FFMPEG_PATH']
+	vspipe_command = SETTINGS_DICT['VSPIPE_PATH']
+	
+	vspipe_commandline = [vspipe_command, '--progress', '--filter-time', '--container', 'y4m', 'script%', '-']
+
+	ffmpeg_commandline = [	ffmpeg_command,
+							'-hide_banner', 
+							'-loglevel', 'info', 
+							'-nostats', 
+							'-colorspace', 'bt709', 
+							'-color_primaries', 'bt709', 
+							'-color_trc', 
+							'bt709', 
+							'-color_range', 'pc',
+							'-f', 'yuv4mpegpipe', 
+							'-i', 'pipe:',
+							'-probesize', '200M', 
+							'-analyzeduration', '200M',
+							'-sws_flags', 'lanczos+accurate_rnd+full_chroma_int+full_chroma_inp',
+							'-filter_complex', 'format=yuv420p,setdar=16/9',
+							'-c:v', 'ffv1', '-level', '3', '-coder', '1', '-context', '1', '-slicecrc', '1',
+							'-an'
+							'-y', proposed_ffv1_mkv_filename
+							]
 		
 		# Run the commands in subprocesses
-		process1 = subprocess.Popen(['vspipe.exe', '-p', '1', '-p', '1', '-'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		process2 = subprocess.Popen(['ffmpeg', '-i', 'pipe', 'etc'], stdin=process1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		process1 = subprocess.Popen(vspipe_commandline, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		process2 = subprocess.Popen(ffmpeg_commandline, stdin=process1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 		# Create queues to store the output and error streams
 		stderr_queue1 = Queue()
@@ -513,15 +539,7 @@ if __name__ == "__main__":
 		#			'snippet_num_frames': YYY,							# filled in by encoder
 		#			'snippet_source_video_filename': '\a\b\c\ZZZ1.3GP'	# filled in by encoder
 		
-
-	
-		sys.exit(0)
-			vpy stuff
-
-		try:
-
-		# HERE: call the encoder ... vspipe piped to ffmpeg ... with controller using non-blocking reads of stdout and stderr (per chatgpt)
-
+		encode_using_vsipe_ffmpeg(individual_chunk_id):
 
 		if DEBUG:	print(f"DEBUG: encoder loop: returned from the encoder, VSPIPE piped to FFMPEG ... with controller using non-blocking reads of stdout and stderr (per chatgpt).",flush=True)
 		# ????????????????????????????????????
@@ -561,7 +579,7 @@ if __name__ == "__main__":
 	# using the newly added  ...  before processing any audio using snippets, 
 	# so we can refer to absolute final-video frame numbers rather than chunk-internal frame numbers
 
-	if DEBUG:	print(f"DEBUG: Startingre-parse the ALL_CHUNKS tree dict to re-calculate global frame numbers chunks: {ALL_CHUNKS_COUNT}.",flush=True)
+	if DEBUG:	print(f"DEBUG: Starting re-parse the ALL_CHUNKS tree dict to re-calculate global frame numbers chunks: {ALL_CHUNKS_COUNT}.",flush=True)
 
 	# To be calculated and updated in each chunk at the chunk level:
 	#		ALL_CHUNKS[str(individual_chunk_id)]['start_frame_num_of_chunk_in_final_video']
