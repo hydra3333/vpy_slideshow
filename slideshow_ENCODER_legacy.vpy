@@ -480,10 +480,10 @@ class OBOLETE_legacy_settings:
 				#	if A_DEBUG_IS_ON: print_DEBUG(f'class settings: read_ini_and_calculate_settings: \tRAW, READ FROM .ini WITH DEFAULTS: config["{self._ini_section_name}"]["{objPrettyPrint.pformat(k)}"] = {objPrettyPrint.pformat(v)}')
 				reset_to_ini_defaults = False
 			else:
-				print_NORMAL(f'class settings: read_ini_and_calculate_settings: WARNING: Missing section "{self._ini_section_name}" in .ini file "{self.ini_file_specifying_parameters}". Using defaults.')
+				print_NORMAL(f'ENCODER: class settings: read_ini_and_calculate_settings: WARNING: Missing section "{self._ini_section_name}" in .ini file "{self.ini_file_specifying_parameters}". Using defaults.')
 				reset_to_ini_defaults = True
 		else:
-			print_NORMAL(f'class settings: read_ini_and_calculate_settings: WARNING: Missing .ini file "{self.ini_file_specifying_parameters}". Using defaults.')
+			print_NORMAL(f'ENCODER: class settings: read_ini_and_calculate_settings: WARNING: Missing .ini file "{self.ini_file_specifying_parameters}". Using defaults.')
 			reset_to_ini_defaults = True
 		if reset_to_ini_defaults:
 			if A_DEBUG_IS_ON: print_DEBUG(f'class settings: read_ini_and_calculate_settings: Reverting to default ini settngs')
@@ -1507,7 +1507,7 @@ def get_clip_from_path_with_VFR_fixed(path, ext, mediainfo_specs):	# opens VID_E
 		c = core.ffms2.Source(str(path), cachefile=ffcachefile, fpsnum=objSettings.TARGET_VFR_FPSNUM, fpsden=objSettings.TARGET_VFR_FPSDEN)	# force dups and drops to "convert" to VFR
 		last_file_opened_with_ffms2 = True
 	except Exception as e:
-		print_NORMAL(f'WARNING: error opening file via "ffms2": "{str(path)}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}')
+		print_NORMAL(f'ENCODER: WARNING: error opening file via "ffms2": "{str(path)}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}')
 		return None
 	if A_DEBUG_IS_ON: print_DEBUG(f'get_clip_from_path_with_VFR_fixed: OPENED FILE with ffms2 specifying fpsnum={objSettings.TARGET_VFR_FPSNUM}, fpsden={objSettings.TARGET_VFR_FPSDEN}')
 	if A_DEBUG_IS_ON: print_DEBUG(f'get_clip_from_path_with_VFR_fixed:                         clip says fpsnum={c.fps_num}, fpsden={c.fps_den} clip=\n{c}')
@@ -1560,7 +1560,7 @@ def get_clip_from_path(path, ext, mediainfo_specs):		# opens VID_EEK_EXTENSIONS 
 			last_file_opened_with_ffms2 = True
 			if A_DEBUG_IS_ON: print_DEBUG(f'get_clip: opened ffmps2 Video {path.name} clip:\n{c}')
 		except Exception as e:
-			print_NORMAL(f'WARNING: error opening file via "ffms2": "{str(path)}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}')
+			print_NORMAL(f'ENCODER: WARNING: error opening file via "ffms2": "{str(path)}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}')
 			return None
 	elif  ext in objSettings.EEK_EXTENSIONS:
 		try:
@@ -1569,7 +1569,7 @@ def get_clip_from_path(path, ext, mediainfo_specs):		# opens VID_EEK_EXTENSIONS 
 			last_file_opened_with_LWLibavSource = True
 			if A_DEBUG_IS_ON: print_DEBUG(f'get_clip: opened lsmas Video {path.name} clip:\n{c}')
 		except Exception as e:
-			print_NORMAL(f'WARNING: error opening file via "lsmas": "{path.name}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}')
+			print_NORMAL(f'ENCODER: WARNING: error opening file via "lsmas": "{path.name}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}')
 			return None
 	else:
 		raise ValueError(f'get_clip_from_path: expected {path} to have extension in {objSettings.VID_EEK_EXTENSIONS} ... aborting')
@@ -1577,7 +1577,7 @@ def get_clip_from_path(path, ext, mediainfo_specs):		# opens VID_EEK_EXTENSIONS 
 	################ SO THAT WE ONLY PROCESS A MINIMAL NUMBER OF FRAMES INSTEAD OF A VERY LARGE CLIP
 	# now the clip is open and it is notionally CFR, fix the odd cases where mediainfo returns a zero framerate  OR  ffms2 returns a different fps than mediainfo ... use the clip's fps
 	if (mediainfo_specs["FrameRate"] <= 0) or (abs(c.fps - mediainfo_specs["FrameRate"]) > objSettings.precision_tolerance):
-		if A_DEBUG_IS_ON: print_DEBUG(f'WARNING: {path} mediainfo framerate {mediainfo_specs["FrameRate"]} fps is not close to clip.fps {c.fps} fps; using clip fps anyway')
+		if A_DEBUG_IS_ON: print_DEBUG(f'ENCODER: WARNING: {path} mediainfo framerate {mediainfo_specs["FrameRate"]} fps is not close to clip.fps {c.fps} fps; using clip fps anyway')
 		mediainfo_specs["FrameRate_Num"] = c.fps_num
 		mediainfo_specs["FrameRate_Den"] = c.fps_den
 		mediainfo_specs["FrameRate"] = c.fps
@@ -1607,7 +1607,7 @@ def get_clip_from_pic(path, ext):
 			##last_file_opened_with_imwri = True
 			####if A_DEBUG_IS_ON: print_DEBUG(f'get_clip_from_pic: imwri Video info:\n{clip}')
 		except Exception as e:
-			print_NORMAL(f'WARNING: error opening file via "ffms2": "{path.name}" ; ignoring this picture. The error was:\n{e}\n{type(e)}\n{str(e)}')
+			print_NORMAL(f'ENCODER: WARNING: error opening file via "ffms2": "{path.name}" ; ignoring this picture. The error was:\n{e}\n{type(e)}\n{str(e)}')
 			return None
 	else:
 		raise ValueError(f'get_clip_from_pic: expected {path} to have extension in {objSettings.PIC_EXTENSIONS} ... aborting')
@@ -2396,11 +2396,11 @@ def crossfade_merge(a=None, b=None, crossfade_duration_frames:int=4, crossfade_t
 		raise ValueError(f'ERROR: crossfade_merge: crossfade_type "{crossfade_type}" Clip "a" must be a clip. \na={a} a={a.width}x{a.height}\nb={b} b={b.width}x{b.height}')
 	if crossfade_type is None:
 		crossfade_type = "random".lower()
-		print_NORMAL(f'WARNING: crossfade_merge: unspecified crossfade_type "{crossfade_type}", using "random" instead.')
+		print_NORMAL(f'ENCODER: WARNING: crossfade_merge: unspecified crossfade_type "{crossfade_type}", using "random" instead.')
 	else:
 		crossfade_type = crossfade_type.lower()
 		if crossfade_type not in crossfade_type_list:
-			print_NORMAL(f'WARNING: crossfade_merge: unrecognised crossfade_type "{crossfade_type}", using "random" instead.')
+			print_NORMAL(f'ENCODER: WARNING: crossfade_merge: unrecognised crossfade_type "{crossfade_type}", using "random" instead.')
 			crossfade_type = "random".lower()
 	if crossfade_type in list(map(str.lower,[ 'fade_to_black', 'fade_from_black', ])):	# these only consume clip a, and so clip b can be none
 		pass	# these 2 crossfade_types do not need nor want a clip b
@@ -2434,13 +2434,13 @@ def crossfade_merge(a=None, b=None, crossfade_duration_frames:int=4, crossfade_t
 		if crossfade_direction not in d:
 			o = crossfade_direction
 			crossfade_direction = random.choice(d)
-			print_NORMAL(f'WARNING: crossfade_merge: crossfade_type="{crossfade_type}" invalid crossfade_direction="{o}" so random direction="{crossfade_direction}" chosen')
+			print_NORMAL(f'ENCODER: WARNING: crossfade_merge: crossfade_type="{crossfade_type}" invalid crossfade_direction="{o}" so random direction="{crossfade_direction}" chosen')
 	else:
 		d = [vs_transitions.Direction.LEFT.value, vs_transitions.Direction.RIGHT.value, vs_transitions.Direction.UP.value, vs_transitions.Direction.DOWN.value]
 		if crossfade_direction not in d:
 			o = crossfade_direction
 			crossfade_direction = random.choice(d)
-			print_NORMAL(f'WARNING: crossfade_merge: crossfade_type="{crossfade_type}" invalid crossfade_direction="{o}" so random direction="{crossfade_direction}" chosen')
+			print_NORMAL(f'ENCODER: WARNING: crossfade_merge: crossfade_type="{crossfade_type}" invalid crossfade_direction="{o}" so random direction="{crossfade_direction}" chosen')
 	#
 	# https://www.freecodecamp.org/news/how-to-substring-a-string-in-python/
 	# string[start:end]	: all characters from start to (end - 1) : base 0
@@ -2930,11 +2930,11 @@ try:
 		json.dump(individual_chunk_dict, fp, indent=4)
 except Exception as e:
 	raise ValueError(f"ERROR: ENCODER: error dumping current chunk JSON file: '{chunk_json_filename}' individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}\n{str(e)}")
-print_NORMAL(f"Created fixed-filename chunk file for controller to consume: '{chunk_json_filename}' listing {individual_chunk_dict['num_files']} files, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}")
+if A_DEBUG_IS_ON:	print_DEBUG(f"DEBUG: ENCODER: Created fixed-filename chunk file for controller to consume: '{chunk_json_filename}' listing {individual_chunk_dict['num_files']} files, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}")
 
 
 #++++++++++++++++++++
-print_NORMAL(f'Finished processing {Count_of_files} image/video files, num_frames={len(clips)} crossfade="{ct}/{cd}" RECURSIVE={objSettings.RECURSIVE} DEBUG_MODE={objSettings.DEBUG_MODE}" \n      with Extensions={objPrettyPrint.pformat(objSettings.EXTENSIONS)}')
+print_NORMAL(f'ENCODER: Finished processing {Count_of_files} image/video files, num_frames={len(clips)} crossfade="{ct}/{cd}" RECURSIVE={objSettings.RECURSIVE} DEBUG_MODE={objSettings.DEBUG_MODE}" \n      with Extensions={objPrettyPrint.pformat(objSettings.EXTENSIONS)}')
 #++++++++++++++++++++
 
 #++++++++++++++++++++
@@ -2945,7 +2945,7 @@ clips = clips.resize.Point(format=objSettings.TARGET_PIXEL_FORMAT)
 #++++++++++++++++++++
 # Cleanup any temporary .ffindex files created by ffms2
 # THE .FFINDEX ARE CREATED in the temporary folder
-print_NORMAL(f'Start removing temporary *.ffindex files from directory "{objSettings.TEMP_DIRECTORY_LIST[0]}" with recursive="{objSettings.RECURSIVE}" ...')
+print_NORMAL(f'ENCODER: Start removing temporary *.ffindex files from directory "{objSettings.TEMP_DIRECTORY_LIST[0]}" with recursive="{objSettings.RECURSIVE}" ...')
 ff_glob_var="**/*.ffindex"		# for .ffindex file deletion recursive
 #ff_glob_var="*.ffindex"		# for .ffindex file deletion non-recursive
 pp = objSettings.TEMP_DIRECTORY_LIST[0] + "/" + ff_glob_var

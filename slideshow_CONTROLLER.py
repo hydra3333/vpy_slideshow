@@ -593,7 +593,7 @@ if __name__ == "__main__":
 		ALL_CHUNKS[str(individual_chunk_id)] = updated_individual_chunk_dict
 	#end for
 
-	if DEBUG:	print(f"After updating encoder added snippets into each chunk , and controller UPDATING chunk info into ALL_CHUNKS, the new ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
+	if DEBUG:	print(f"After updating encoder added snippets into each chunk  and controller UPDATING chunk info into ALL_CHUNKS, the new ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
 
 	##########################################################################################################################################
 	##########################################################################################################################################
