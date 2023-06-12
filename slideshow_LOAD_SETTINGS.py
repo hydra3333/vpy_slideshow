@@ -227,7 +227,7 @@ def load_settings():
 	
 	slideshow_CONTROLLER_path					= fully_qualified_filename(os.path.join(r'.\slideshow_CONTROLLER.py'))
 	slideshow_LOAD_SETTINGS_path				= fully_qualified_filename(os.path.join(r'.\slideshow_LOAD_SETTINGS.py'))
-	slideshow_ENCODER_legacy_path				= fully_qualified_filename(os.path.join(r'.\slideshow_slideshow_ENCODER_legacy.vpy'))
+	slideshow_ENCODER_legacy_path				= fully_qualified_filename(os.path.join(r'.\slideshow_ENCODER_legacy.vpy'))
 
 	SUBTITLE_DEPTH								= int(0)
 	SUBTITLE_FONTSIZE							= int(18)
