@@ -242,26 +242,64 @@ class settings:
 		# CALC_INI_DICT	 				per "INI_DICT" but with extra fields calculated and added per the legacy CALC_INI
 		# USER_SPECIFIED_SETTINGS_DICT	the settings which were specified by the user
 
-		if SETTINGS_DICT['DEBUG']:
+		if self.SETTINGS_DICT['DEBUG']:
 			IS_DEBUG = True
 		else:
 			IS_DEBUG = False
 		A_DEBUG_IS_ON = IS_DEBUG or IS_DEBUG_SYSTEM_OVERRIDE
-		FFMPEG_PATH = SETTINGS_DICT['FFMPEG_PATH']
+		FFMPEG_PATH = self.SETTINGS_DICT['FFMPEG_PATH']
 
-		# THIS IS REQUIRED AND RELIED ON THROUGHOUT THIS LEGACY CODE
+
 		# make class variables from the self.calc_ini dictionary	# https://www.geeksforgeeks.org/how-to-change-a-dictionary-into-a-class/
-		for key in self.calc_ini:
-			if not key.startswith(';'):
-				setattr(self, key, self.calc_ini[key])	# this updates existing variables with new values
-		# Having made class variables from the self.calc_ini dictionary
+		# Having made class variables from the self.SETTINGS_DICT dictionary
 		# we can read them as normal class variables like thing.variable_name
 		#               or as   dictionary variables like thing.calc_ini["key_name"]
 		# *** Remembering the dict and the class-global variables are SEPARATE VARIABLES and 
 		#     that overwriting one does NOT overwrite the other and mismatches WILL then occur ...
 		# OR ...
 		# self.__dict__.update(self.calc_ini)	# per https://www.sobyte.net/post/2022-04/python-dict-2-member-variables/ # this updates existing variables with new values per https://www.geeksforgeeks.org/python-dictionary-update-method/
-		
+		for key in self.SETTINGS_DICT:
+			if not key.startswith(';'):
+				setattr(self, key, self.SETTINGS_DICT[key])	# this updates existing variables with new values
+
+		# THIS NEXT BIT IS REQUIRED AND RELIED ON THROUGHOUT THIS LEGACY CODE
+		# make class variables from the self.calc_ini dictionary	# https://www.geeksforgeeks.org/how-to-change-a-dictionary-into-a-class/
+		for key in self.calc_ini:
+			if not key.startswith(';'):
+				setattr(self, key, self.calc_ini[key])	# this updates existing variables with new values
+		#
+
+	def class_variables_and_values(self):
+		# yield class variables and values as a dict
+		return self.__dict__
+
+	def debug_print_class_vars(self):
+		#members = [attr for attr in dir(obj) if not callable(getattr(obj, attr)) and not attr.startswith("__")]
+		#print(members, file=sys.stderr, flush=True)
+		# we need to convert  vars(self).items() to a LIST, since dict does not allow duplicate keys
+		#objPrettyPrint.pprint(vars(self), file=sys.stderr, flush=True)
+		if A_DEBUG_IS_ON: print_DEBUG(f'class settings: CLASS VARIABLES IN ALPHABETIC NAME ORDER')
+		c = sorted(vars(self).items(), key=lambda yvar: str(yvar[0]).lower() )
+		choppy = 48
+		for d,e in c:
+			sd = str(d)
+			L = min(choppy,len(sd))
+			sd = sd[0:L]
+			s = ' ' * (choppy-len(sd)+1)
+			if A_DEBUG_IS_ON: print_DEBUG(f'"{sd}"{s} = "{e}"')
+		if A_DEBUG_IS_ON: print_DEBUG(f'class settings: {len(c)} VARIABLES IN ALPHABETIC NAME ORDER')
+		del c
+		if A_DEBUG_IS_ON: print_DEBUG(f'class settings: CLASS VARIABLES IN ALPHABETIC VALUE ORDER')
+		f = sorted(vars(self).items(), key=lambda yvar: str(yvar[1]).lower() )
+		choppy = 64
+		for g,h in f:
+			sh = str(h)
+			m = max(0,choppy-len(sh)+1)
+			s = ' '*m
+			if A_DEBUG_IS_ON: print_DEBUG(f'"{sh}"{s} = "{g}"')
+		if A_DEBUG_IS_ON: print_DEBUG(f'class settings: {len(f)} VARIABLES IN ALPHABETIC VALUE ORDER')
+		del f
+	
 ###
 class OBOLETE_legacy_settings:
 	# class global variables shared across instances
@@ -2079,6 +2117,7 @@ def get_clip_2(path):
 		raise ValueError(f'ERROR: get_clip_2: "path" not passed as an argument to get_clip_2')
 		pass
 	ext = path.suffix.lower()
+	#ext = os.path.splitext(path)[1].lower()
 	#++++++++++++++++++++
 	last_file_opened_with_ffms2 = False
 	last_file_opened_with_imwri = False
@@ -2693,6 +2732,10 @@ def perform_rotation_MediaInfo(clip, path, save_rotated_image=False):
 # modified to use nre NEW settings Class
 objSettings = settings()
 
+objSettings.debug_print_class_vars()
+
+if objSettings.DEBUG: print_DEBUG(f"DEBUG={objSettings.DEBUG} IS_DEBUG={IS_DEBUG} IS_DEBUG_SYSTEM_OVERRIDE={IS_DEBUG_SYSTEM_OVERRIDE} A_DEBUG_IS_ON={A_DEBUG_IS_ON}")
+
 #++++++++++++++++++++
 if not os.path.isdir(objSettings.TEMP_DIRECTORY_LIST[0]):
 	try: 
@@ -2772,7 +2815,7 @@ prior_clip_for_crossfade = crossfade_blank_clip
 #++++++++++++++++++++
 
 
-CURRENT_CHUNK_FILENAME = fully_qualified_filename(SETTINGS_DICT['CURRENT_CHUNK_FILENAME'])
+CURRENT_CHUNK_FILENAME = fully_qualified_filename(objSettings.SETTINGS_DICT['CURRENT_CHUNK_FILENAME'])
 if not os.path.exists(CURRENT_CHUNK_FILENAME):
 	raise ValueError(f'ERROR: Incoming current chunk JSON-file "{CURRENT_CHUNK_FILENAME}" not found !')
 
@@ -2829,10 +2872,11 @@ clips = prior_clip_for_crossfade	# initialize the accumulated clips with a start
 Count_of_snippets = 0
 
 num_files = individual_chunk_dict['num_files']
-print_NORMAL(f'ENCODER (legacy): Start processing {num_files} image/video files in "{current_Directory}" crossfade="{ct}/{cd}" RECURSIVE={objSettings.RECURSIVE} DEBUG_MODE={objSettings.DEBUG_MODE}" \n      with Extensions={objPrettyPrint.pformat(objSettings.EXTENSIONS)}')
+print_NORMAL(f'ENCODER (legacy): Start processing {num_files} image/video files, crossfade="{ct}/{cd}" RECURSIVE={objSettings.RECURSIVE} DEBUG_MODE={objSettings.DEBUG_MODE}" \n      with Extensions={objPrettyPrint.pformat(objSettings.EXTENSIONS)}')
 for i in range(0,num_files):	# base 0; 0..(num_files - 1)
 	file_to_process = individual_chunk_dict['file_list'][i]
-	path = fully_qualified_filename(file_to_process)
+	path = Path(fully_qualified_filename(file_to_process))
+	
 	if A_DEBUG_IS_ON: print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
 	Count_of_files = Count_of_files + 1
 	print_NORMAL(f'Processing {Count_of_files} {str(path)}')
@@ -2852,7 +2896,7 @@ for i in range(0,num_files):	# base 0; 0..(num_files - 1)
 																'start_frame_of_snippet_in_final_video':	0,
 																'end_frame_of_snippet_in_final_video':		0,
 																'snippet_num_frames':						snippet_num_frames,
-																'snippet_source_video_filename':			path
+																'snippet_source_video_filename':			str(path)
 																}
 															)
 	del this_clip
@@ -2880,17 +2924,17 @@ individual_chunk_dict['end_frame_num_in_chunk'] = clips_last_frame_num
 
 # now dump the updated individual_chunk_dict back to disk again so it can be re-read by the controller
 chunk_json_filename = fully_qualified_filename(individual_chunk_dict['chunk_fixed_json_filename'])					# always the same fixed filename
-if DEBUG:	print(f"DEBUG: ENCODER: attempting to create updated chunk_json_filename='{chunk_json_filename}' for controller to consume.",flush=True)
+if A_DEBUG_IS_ON:	print_DEBUG(f"DEBUG: ENCODER: attempting to create updated chunk_json_filename='{chunk_json_filename}' for controller to consume.")
 try:
 	with open(chunk_json_filename, 'w') as fp:
 		json.dump(individual_chunk_dict, fp, indent=4)
 except Exception as e:
 	raise ValueError(f"ERROR: ENCODER: error dumping current chunk JSON file: '{chunk_json_filename}' individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}\n{str(e)}")
-print_NORMAL(f"Created fixed-filename chunk file for controller to consume: '{chunk_json_filename}' listing {ALL_CHUNKS[str(individual_chunk_id)]['num_files']} files, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}",flush=True)
+print_NORMAL(f"Created fixed-filename chunk file for controller to consume: '{chunk_json_filename}' listing {individual_chunk_dict['num_files']} files, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}")
 
 
 #++++++++++++++++++++
-print_NORMAL(f'Finished processing {Count_of_files} image/video files in "{current_Directory}" num_frames={len(clips)} crossfade="{ct}/{cd}" RECURSIVE={objSettings.RECURSIVE} DEBUG_MODE={objSettings.DEBUG_MODE}" \n      with Extensions={objPrettyPrint.pformat(objSettings.EXTENSIONS)}')
+print_NORMAL(f'Finished processing {Count_of_files} image/video files, num_frames={len(clips)} crossfade="{ct}/{cd}" RECURSIVE={objSettings.RECURSIVE} DEBUG_MODE={objSettings.DEBUG_MODE}" \n      with Extensions={objPrettyPrint.pformat(objSettings.EXTENSIONS)}')
 #++++++++++++++++++++
 
 #++++++++++++++++++++
@@ -2901,7 +2945,7 @@ clips = clips.resize.Point(format=objSettings.TARGET_PIXEL_FORMAT)
 #++++++++++++++++++++
 # Cleanup any temporary .ffindex files created by ffms2
 # THE .FFINDEX ARE CREATED in the temporary folder
-print_NORMAL(f'Start removing temporary *.ffindex files from directory "{current_Directory}" with recursive="{objSettings.RECURSIVE}" ...')
+print_NORMAL(f'Start removing temporary *.ffindex files from directory "{objSettings.TEMP_DIRECTORY_LIST[0]}" with recursive="{objSettings.RECURSIVE}" ...')
 ff_glob_var="**/*.ffindex"		# for .ffindex file deletion recursive
 #ff_glob_var="*.ffindex"		# for .ffindex file deletion non-recursive
 pp = objSettings.TEMP_DIRECTORY_LIST[0] + "/" + ff_glob_var

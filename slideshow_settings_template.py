@@ -1,5 +1,9 @@
 settings = {
-	'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS':	[r'D:\ssTEST\TEST_VIDS_IMAGES\0TEST', r'D:\ssTEST\TEST_VIDS_IMAGES\2TEST_rotations', r'D:\ssTEST\TEST_VIDS_IMAGES\2022-11-Tasmania_renamed\ORIGINALS\01' ],		# a list, one or more folders to look in for slideshow pics/videos
+	'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS':	[
+													r'D:\ssTEST\TEST_VIDS_IMAGES\0TEST', 
+#													r'D:\ssTEST\TEST_VIDS_IMAGES\2TEST_rotations', 
+#													r'D:\ssTEST\TEST_VIDS_IMAGES\2022-11-Tasmania_renamed\ORIGINALS\01'
+												],		# a list, one or more folders to look in for slideshow pics/videos
 	'RECURSIVE':	True,		# case sensitive: whether to recurse the source folder(s) looking for slideshow pics/videos
 	'ROOT_FOLDER_FOR_OUTPUTS':	r'D:\ssTEST',		# folder in which outputs are to be placed
 	'TEMP_FOLDER':	r'D:\ssTEST\TEMP',		# folder where temporary files go ... use on a disk with LOTS of spare disk space !!
