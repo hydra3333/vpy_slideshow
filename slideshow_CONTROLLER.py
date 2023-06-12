@@ -1245,28 +1245,39 @@ if __name__ == "__main__":
 	snippet_audio_fade_in_duration_ms = SETTINGS_DICT['snippet_audio_fade_in_duration_ms']
 	snippet_audio_fade_out_duration_ms = SETTINGS_DICT['snippet_audio_fade_out_duration_ms']
 
-	# Load the main background audio
-	try:
-		if DEBUG: print(f"DEBUG: CONTROLLER: replace_audio_with_snippets_from_file: 'from_file' to background_audio '{background_audio_input_filename}'",flush=True)
-		background_audio = AudioSegment.from_file(background_audio_input_filename)
-	except FileNotFoundError:
-		print(f"CONTROLLER: replace_audio_with_snippets_from_file: background_audio File not found from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
-		sys.exit(1)
-	except TypeError:
-		print(f"CONTROLLER: replace_audio_with_snippets_from_file: background_audio Type mismatch or unsupported operation from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
-		sys.exit(1)
-	except ValueError:
-		print(f"CONTROLLER: replace_audio_with_snippets_from_file: background_audio Invalid or unsupported value from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
-		sys.exit(1)
-	except IOError:
-		print(f"CONTROLLER: replace_audio_with_snippets_from_file: background_audio I/O error occurred '{background_audio_input_filename}'",flush=True,file=sys.stderr)
-		sys.exit(1)
-	except OSError as e:
-		print(f"CONTROLLER: replace_audio_with_snippets_from_file: background_audio Unexpected OSError from AudioSegment.from_file('{background_audio_input_filename}')\n{str(e)}",flush=True,file=sys.stderr)
-		sys.exit(1)
-	except Exception as e:
-		print(f"CONTROLLER: replace_audio_with_snippets_from_file: background_audio Unexpected error from AudioSegment.from_file('{background_audio_input_filename}')\n{str(e)}",flush=True,file=sys.stderr)
-		sys.exit(1)
+	# https://pydub.com/
+	# https://github.com/jiaaro/pydub/blob/master/API.markdown
+	
+	# Generate a silence background, or Load the main background audio
+	if background_audio_input_filename is None:
+		try:
+			if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: 'from_file' to background_audio '{background_audio_input_filename}'",flush=True)
+			background_audio = AudioSegment.silent(duration=final_video_duration_ms)
+		except Exception as e:
+			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio Unexpected error from AudioSegment.silent(duration={final_video_duration_ms})\n{str(e)}",flush=True,file=sys.stderr)
+			sys.exit(1)
+	else:
+		try:
+			if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: 'from_file' from AudioSegment.from_file('{background_audio_input_filename}')",flush=True)
+			background_audio = AudioSegment.from_file(background_audio_input_filename)
+		except FileNotFoundError:
+			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio File not found from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
+			sys.exit(1)
+		except TypeError:
+			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio Type mismatch or unsupported operation from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
+			sys.exit(1)
+		except ValueError:
+			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio Invalid or unsupported value from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
+			sys.exit(1)
+		except IOError:
+			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio I/O error occurred from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
+			sys.exit(1)
+		except OSError as e:
+			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio Unexpected OSError from AudioSegment.from_file('{background_audio_input_filename}')\n{str(e)}",flush=True,file=sys.stderr)
+			sys.exit(1)
+		except Exception as e:
+			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio Unexpected error from AudioSegment.from_file('{background_audio_input_filename}')\n{str(e)}",flush=True,file=sys.stderr)
+			sys.exit(1)
 
 
 
