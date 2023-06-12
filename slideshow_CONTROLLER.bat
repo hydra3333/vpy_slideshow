@@ -50,6 +50,8 @@ echo "!python_exe!" "!script!" >>"!log!" 2>&1
 "!python_exe!" "!script!" >>"!log!" 2>&1
 REM "!python_exe!" "!script!"
 
+REM "D:\ssTEST\Vapoursynth_x64\vspipe.exe" --progress --filter-time --container y4m ".\slideshow_ENCODER_legacy.vpy" NUL  >>"!log!" 2>&1
+
 
 type "!log!"
 

@@ -534,7 +534,22 @@ if __name__ == "__main__":
 		#			'snippet_num_frames': YYY,							# filled in by encoder
 		#			'snippet_source_video_filename': '\a\b\c\ZZZ1.3GP'	# filled in by encoder
 		
-		encode_using_vsipe_ffmpeg(individual_chunk_id)
+		
+		
+		
+		# Define the commandlines for the subprocesses subprocesses
+		ffmpeg_command = SETTINGS_DICT['FFMPEG_PATH']
+		vspipe_command = SETTINGS_DICT['VSPIPE_PATH']
+		# Run vspipe command by itself
+		vspipe_commandline = [vspipe_command, '--progress', '--filter-time', '--container', 'y4m', '.\slideshow_ENCODER_legacy.vpy', 'NUL']
+		subprocess.run(vspipe_commandline, check=True)
+
+
+		#encode_using_vsipe_ffmpeg(individual_chunk_id)
+
+
+
+
 
 		if DEBUG:	print(f"DEBUG: encoder loop: returned from the encoder, VSPIPE piped to FFMPEG ... with controller using non-blocking reads of stdout and stderr (per chatgpt).",flush=True)
 		# ????????????????????????????????????

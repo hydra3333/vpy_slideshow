@@ -2854,6 +2854,7 @@ for i in range(0,num_files):	# base 0; 0..(num_files - 1)
 																'snippet_num_frames':						snippet_num_frames,
 																'snippet_source_video_filename':			path
 																}
+															)
 	del this_clip
 	#num_unreachable_objects = gc.collect()	# With no arguments, run a full garbage collection. # The number of unreachable objects found is returned
 	###if A_DEBUG_IS_ON: print_DEBUG(f'*** GARBAGE_COLLECTION: in-Directory-loop end of processing a single file, number of unreachable objects found={num_unreachable_objects}')
