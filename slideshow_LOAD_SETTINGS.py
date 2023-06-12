@@ -224,6 +224,10 @@ def load_settings():
 	DEBUG										= False if DEBUG==False else True
 	FFMPEG_PATH									= fully_qualified_filename(os.path.join(r'.\Vapoursynth_x64', r'ffmpeg.exe'))
 	VSPIPE_PATH									= fully_qualified_filename(os.path.join(r'.\Vapoursynth_x64', r'vspipe.exe'))
+	
+	slideshow_CONTROLLER_path					= fully_qualified_filename(os.path.join(r'.\slideshow_CONTROLLER.py'))
+	slideshow_LOAD_SETTINGS_path				= fully_qualified_filename(os.path.join(r'.\slideshow_LOAD_SETTINGS.py'))
+	slideshow_ENCODER_legacy_path				= fully_qualified_filename(os.path.join(r'.\slideshow_slideshow_ENCODER_legacy.vpy'))
 
 	SUBTITLE_DEPTH								= int(0)
 	SUBTITLE_FONTSIZE							= int(18)
@@ -319,6 +323,9 @@ def load_settings():
 		'DEBUG':									DEBUG,
 		'FFMPEG_PATH':								FFMPEG_PATH,
 		'VSPIPE_PATH':								VSPIPE_PATH,
+		'slideshow_CONTROLLER_path':				slideshow_CONTROLLER_path,
+		'slideshow_LOAD_SETTINGS_path':				slideshow_LOAD_SETTINGS_path,
+		'slideshow_ENCODER_legacy_path':			slideshow_ENCODER_legacy_path,
 		
 		'SUBTITLE_DEPTH':							SUBTITLE_DEPTH,
 		'SUBTITLE_FONTSIZE':						SUBTITLE_FONTSIZE,
@@ -398,6 +405,9 @@ def load_settings():
 										[ 'DEBUG',										DEBUG,										r'see and regret seeing, ginormous debug output' ],
 										[ 'FFMPEG_PATH',								FFMPEG_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'VSPIPE_PATH',								VSPIPE_PATH,								r'Please leave this alone unless really confident' ],
+										[ 'slideshow_CONTROLLER_path',					slideshow_CONTROLLER_path,				r'Please leave this alone unless really confident' ],
+										[ 'slideshow_LOAD_SETTINGS_path',				slideshow_LOAD_SETTINGS_path,				r'Please leave this alone unless really confident' ],
+										[ 'slideshow_ENCODER_legacy_path',				slideshow_ENCODER_legacy_path,				r'Please leave this alone unless really confident' ],
 									]	
 		if DEBUG:	print(f'DEBUG: specially_formatted_settings_list=\n{objPrettyPrint.pformat(specially_formatted_settings_list)}',flush=True)
 		create_py_file_from_specially_formatted_list(SLIDESHOW_SETTINGS_MODULE_FILENAME, specially_formatted_settings_list)
@@ -489,8 +499,16 @@ def load_settings():
 	final_settings_dict['FFMPEG_PATH'] = fully_qualified_filename(final_settings_dict['FFMPEG_PATH'])
 	final_settings_dict['VSPIPE_PATH'] = fully_qualified_filename(final_settings_dict['VSPIPE_PATH'])
 
+	final_settings_dict['slideshow_CONTROLLER_path'] = fully_qualified_filename(final_settings_dict['slideshow_CONTROLLER_path'])
+	final_settings_dict['slideshow_LOAD_SETTINGS_path'] = fully_qualified_filename(final_settings_dict['slideshow_LOAD_SETTINGS_path'])
+	final_settings_dict['slideshow_ENCODER_legacy_path'] = fully_qualified_filename(final_settings_dict['slideshow_ENCODER_legacy_path'])
+
 	check_file_exists_3333(final_settings_dict['FFMPEG_PATH'], r'FFMPEG_PATH')
 	check_file_exists_3333(final_settings_dict['VSPIPE_PATH'], r'VSPIPE_PATH')
+	check_file_exists_3333(final_settings_dict['slideshow_CONTROLLER_path'], r'slideshow_CONTROLLER_path')
+	check_file_exists_3333(final_settings_dict['slideshow_LOAD_SETTINGS_path'], r'slideshow_LOAD_SETTINGS_path')
+	check_file_exists_3333(final_settings_dict['slideshow_ENCODER_legacy_path'], r'slideshow_ENCODER_legacy_path')
+
 	check_file_exists_3333(final_settings_dict['BACKGROUND_AUDIO_INPUT_FILENAME'], r'BACKGROUND_AUDIO_INPUT_FILENAME')
 	# check the folders which should exist do exist
 	# 1. check the folders in this LIST

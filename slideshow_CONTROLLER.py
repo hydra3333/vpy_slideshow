@@ -333,7 +333,7 @@ def encode_using_vsipe_ffmpeg(individual_chunk_id):
 	ffmpeg_command = SETTINGS_DICT['FFMPEG_PATH']
 	vspipe_command = SETTINGS_DICT['VSPIPE_PATH']
 	
-	vspipe_commandline = [vspipe_command, '--progress', '--filter-time', '--container', 'y4m', 'script%', '-']
+	vspipe_commandline = [vspipe_command, '--progress', '--filter-time', '--container', 'y4m', '.\slideshow_ENCODER.vpy', '-']
 
 	ffmpeg_commandline = [	ffmpeg_command,
 							'-hide_banner', 
@@ -398,13 +398,8 @@ def encode_using_vsipe_ffmpeg(individual_chunk_id):
 				pass
 			except Empty:
 				pass
-			if 	(not stderr_thread1.is_alive()) and
-				(not stdout_thread2.is_alive()) and
-				(not stderr_thread2.is_alive()) and 
-				(stderr_queue1.empty()) and
-				(stdout_queue2.empty()) and 
-				(stderr_queue2.empty()):
-					break
+			if 	(not stderr_thread1.is_alive()) and (not stdout_thread2.is_alive()) and (not stderr_thread2.is_alive()) and (stderr_queue1.empty()) and (stdout_queue2.empty()) and (stderr_queue2.empty()):
+				break
 			# Introduce a 50ms delay to reduce CPU load
 			time.sleep(0.05)  # Sleep for 50 milliseconds so as to not thrash the cpu
 		#end while
@@ -539,7 +534,7 @@ if __name__ == "__main__":
 		#			'snippet_num_frames': YYY,							# filled in by encoder
 		#			'snippet_source_video_filename': '\a\b\c\ZZZ1.3GP'	# filled in by encoder
 		
-		encode_using_vsipe_ffmpeg(individual_chunk_id):
+		encode_using_vsipe_ffmpeg(individual_chunk_id)
 
 		if DEBUG:	print(f"DEBUG: encoder loop: returned from the encoder, VSPIPE piped to FFMPEG ... with controller using non-blocking reads of stdout and stderr (per chatgpt).",flush=True)
 		# ????????????????????????????????????
