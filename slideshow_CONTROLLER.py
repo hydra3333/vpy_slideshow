@@ -1121,17 +1121,13 @@ if __name__ == "__main__":
 		
 		
 		
-		# Define the commandlines for the subprocesses subprocesses
-		FFMPEG_EXE = SETTINGS_DICT['FFMPEG_PATH']
-		FFPROBE_EXE = SETTINGS_DICT['FFPROBE_PATH']
-		VSPIPE_EXE = SETTINGS_DICT['VSPIPE_PATH']
-		
+	
 		
 		# NOT YET ENCODE WITH FFMPEG, ONLY TEST WITH VSPIPE
 		#encode_using_vsipe_ffmpeg(individual_chunk_id)
 
 		# Run vspipe command by itself
-		vspipe_commandline = [vspipe_exe, '--progress', '--container', 'y4m', '.\slideshow_ENCODER_legacy.vpy', 'NUL']
+		vspipe_commandline = [VSPIPE_EXE, '--progress', '--container', 'y4m', '.\slideshow_ENCODER_legacy.vpy', 'NUL']
 		subprocess.run(vspipe_commandline, check=True)
 
 		time.sleep(1)
@@ -1175,7 +1171,7 @@ if __name__ == "__main__":
 
 	if DEBUG:
 		print(f'Finished INTERIM ENCODING OF CHUNKS INTO INTERIM FFV1 VIDEO FILES')
-		print(f'After updating encoder added snippets into each chunk and controller UPDATING chunk info into ALL_CHUNKS, the new ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
+		print(f"After updating encoder added snippets into each chunk and controller UPDATING chunk info into ALL_CHUNKS, the new ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
 
 	##########################################################################################################################################
 	##########################################################################################################################################
