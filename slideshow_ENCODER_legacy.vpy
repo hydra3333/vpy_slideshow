@@ -36,6 +36,11 @@ import ast
 import uuid
 import logging
 
+# for subprocess control eg using Popen
+import time
+from queue import Queue, Empty
+from threading import Thread
+
 import gc	# for inbuilt garbage collection
 # THE NEXT STATEMENT IS ONLY FOR DEBUGGING AND WILL CAUSE EXTRANEOUS OUTPUT TO STDERR
 #gc.set_debug(gc.DEBUG_LEAK | gc.DEBUG_STATS)	# for debugging, additional garbage collection settings, writes to stderr https://docs.python.org/3/library/gc.html to help detect leaky memory issues

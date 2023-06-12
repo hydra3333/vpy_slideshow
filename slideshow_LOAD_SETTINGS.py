@@ -36,6 +36,11 @@ import ast
 import uuid
 import logging
 
+# for subprocess control eg using Popen
+import time
+from queue import Queue, Empty
+from threading import Thread
+
 import gc	# for inbuilt garbage collection
 # THE NEXT STATEMENT IS ONLY FOR DEBUGGING AND WILL CAUSE EXTRANEOUS OUTPUT TO STDERR
 #gc.set_debug(gc.DEBUG_LEAK | gc.DEBUG_STATS)	# for debugging, additional garbage collection settings, writes to stderr https://docs.python.org/3/library/gc.html to help detect leaky memory issues
@@ -218,6 +223,7 @@ def load_settings():
 	RECURSIVE									= True
 	DEBUG										= False if DEBUG==False else True
 	FFMPEG_PATH									= fully_qualified_filename(os.path.join(r'.', r'ffmpeg.exe'))
+	VSPIPE_PATH									= fully_qualified_filename(os.path.join(r'.', r'vspipe.exe'))
 
 	SUBTITLE_DEPTH								= int(0)
 	SUBTITLE_FONTSIZE							= int(18)
@@ -312,6 +318,7 @@ def load_settings():
 		'RECURSIVE':								RECURSIVE,
 		'DEBUG':									DEBUG,
 		'FFMPEG_PATH':								FFMPEG_PATH,
+		'VSPIPE_PATH':								VSPIPE_PATH,
 		
 		'SUBTITLE_DEPTH':							SUBTITLE_DEPTH,
 		'SUBTITLE_FONTSIZE':						SUBTITLE_FONTSIZE,
@@ -389,7 +396,8 @@ def load_settings():
 										[ 'CROSSFADE_DIRECTION',						CROSSFADE_DIRECTION,						r'Please leave this alone unless really confident' ],
 										[ 'DURATION_MAX_VIDEO_SEC',						DURATION_MAX_VIDEO_SEC,						r'in seconds, maximum duration each video clip is shown in the slideshow' ],
 										[ 'DEBUG',										DEBUG,										r'see and regret seeing, ginormous debug output' ],
-										#[ 'FFMPEG_PATH',								FFMPEG_PATH,								r'Please leave this alone unless really confident' ],
+										[ 'FFMPEG_PATH',								FFMPEG_PATH,								r'Please leave this alone unless really confident' ],
+										[ 'VSPIPE_PATH',								VSPIPE_PATH,								r'Please leave this alone unless really confident' ],
 									]	
 		if DEBUG:	print(f'DEBUG: specially_formatted_settings_list=\n{objPrettyPrint.pformat(specially_formatted_settings_list)}',flush=True)
 		create_py_file_from_specially_formatted_list(SLIDESHOW_SETTINGS_MODULE_FILENAME, specially_formatted_settings_list)
@@ -479,8 +487,10 @@ def load_settings():
 	final_settings_dict['FINAL_MP4_WITH_AUDIO_FILENAME'] = fully_qualified_filename(final_settings_dict['FINAL_MP4_WITH_AUDIO_FILENAME'])
 
 	final_settings_dict['FFMPEG_PATH'] = fully_qualified_filename(final_settings_dict['FFMPEG_PATH'])
+	final_settings_dict['VSPIPE_PATH'] = fully_qualified_filename(final_settings_dict['VSPIPE_PATH'])
 
 	check_file_exists_3333(final_settings_dict['FFMPEG_PATH'], r'FFMPEG_PATH')
+	check_file_exists_3333(final_settings_dict['VSPIPE_PATH'], r'VSPIPE_PATH')
 	check_file_exists_3333(final_settings_dict['BACKGROUND_AUDIO_INPUT_FILENAME'], r'BACKGROUND_AUDIO_INPUT_FILENAME')
 	# check the folders which should exist do exist
 	# 1. check the folders in this LIST
