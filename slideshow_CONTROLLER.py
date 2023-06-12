@@ -351,10 +351,10 @@ def encode_using_vsipe_ffmpeg(individual_chunk_id):
 							'-sws_flags', 'lanczos+accurate_rnd+full_chroma_int+full_chroma_inp',
 							'-filter_complex', 'format=yuv420p,setdar=16/9',
 							'-c:v', 'ffv1', '-level', '3', '-coder', '1', '-context', '1', '-slicecrc', '1',
-							'-an'
+							'-an',
 							'-y', proposed_ffv1_mkv_filename
 							]
-		
+	try:	
 		# Run the commands in subprocesses
 		process1 = subprocess.Popen(vspipe_commandline, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		process2 = subprocess.Popen(ffmpeg_commandline, stdin=process1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -420,7 +420,7 @@ def encode_using_vsipe_ffmpeg(individual_chunk_id):
 		if error1:
 				print(f"vspipe: {error1.decode('utf-8').strip()}")
 		if error2:
-				print(f"ffmpeg:: {error2.decode('utf-8').strip()}")
+				print(f"ffmpeg: {error2.decode('utf-8').strip()}")
 	except KeyboardInterrupt:
 		# Retrieve the process IDs
 		pid1 = process1.pid
