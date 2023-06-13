@@ -1054,20 +1054,28 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 		def command_list_to_command_string(command_list):
 			command_parts = []
 			for part in command_list:
-				if part.startswith('-'):  # Check if the part starts with a dash (indicating a switch)
-					command_parts.append(part)  # Add the part as is (switch)
+				#if part.startswith('-') or part.lower() == r'pipe:'.lower():  # Check if the part starts with a dash (indicating a switch)
+				#	command_parts.append(part)  # Add the part as is (switch)
+				#else:
+				#	command_parts.append(f'"{part}"')  # Enclose the part in double quotes
+				if part.startswith('format='.lower()) or (len(part) >= 2 and part[1] == r':'):
+					command_parts.append(f'"{part}"')  # Enclose the part in double quotes
 				else:
-				command_parts.append(f'"{part}"')  # Enclose the part in double quotes
-			return command = ' '.join(command_parts)
-		print(f""),flush=True)
+					command_parts.append(part)  # Add the part as is
+			commandline = ' '.join(command_parts)
+			return commandline
 		vspipe_cmd = command_list_to_command_string(vspipe_commandline)
 		ffmpeg_cmd = command_list_to_command_string(ffmpeg_commandline)
-		vspipe_pipe_ffmpeg_commandline = vspipe_cmd + "|" + ffmpeg_cmd
-		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, os.system, with one commandline:\n{vspipe_pipe_ffmpeg_commandline}",flush=True)
-		exit_status = os.system(vspip_pipe_ffmpeg_commandline)
-		if exit_status != 0:
-			print(f"print(f'CONTROLLER: ERROR RUNNING ENCODER VSPIPE/FFMPEG via piping_method={piping_method} os.system, Command execution failed with exit status: {exit_status}",flush=True)
+		vspipe_pipe_ffmpeg_commandline = vspipe_cmd + " | " + ffmpeg_cmd
+		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{vspipe_pipe_ffmpeg_commandline}",flush=True)
+		#exit_status = os.system(vspipe_pipe_ffmpeg_commandline)	# os.system fails to run this even though the string works in a dos box
+		#if exit_status != 0: sys.exit(1)
+		result = subprocess.run(vspipe_pipe_ffmpeg_commandline, shell=True)
+		if result.returncode != 0:
+			print(f"CONTROLLER: ERROR RUNNING ENCODER VSPIPE/FFMPEG via piping_method={piping_method} os.system, Command execution failed with exit status: {exit_status}",flush=True)
 			sys.exit(1)
+		else:
+			print(f"CONTROLLER: Returned successfully from the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{vspipe_pipe_ffmpeg_commandline}",flush=True)
 	elif piping_method == 3:	# non-blocking reads, works fine as long as nothing goes wrong.
 		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, non=blocking reads, using commandlines:\n{vspipe_commandline}\n{ffmpeg_commandline}",flush=True)
 		try:	
