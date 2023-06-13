@@ -1393,8 +1393,8 @@ if __name__ == "__main__":
 	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']			# hopefully pcm_s16le ; for 16 bit
 	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder
 	
-	snippet_audio_fade_in_duration_ms = SETTINGS_DICT['snippet_audio_fade_in_duration_ms']
-	snippet_audio_fade_out_duration_ms = SETTINGS_DICT['snippet_audio_fade_out_duration_ms']
+	snippet_audio_fade_in_duration_ms = SETTINGS_DICT['SNIPPET_AUDIO_FADE_IN_DURATION_MS']
+	snippet_audio_fade_out_duration_ms = SETTINGS_DICT['SNIPPET_AUDIO_FADE_OUT_DURATION_MS']
 
 	# Generate a silence background, or Load the main background audio
 	if background_audio_input_filename is None:
