@@ -39,8 +39,7 @@ set "log=!script!.log"
 del /f "!log!"
 
 REM del /f .\slideshow_settings.py
-
-copy /y ".\slideshow_settings_template.py" ".\slideshow_settings.py"
+REM copy /y ".\slideshow_settings_template.py" ".\slideshow_settings.py"
 
 REM echo type ".\slideshow_settings.py" >>"!log!" 2>&1
 REM type ".\slideshow_settings.py" >>"!log!" 2>&1
