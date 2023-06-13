@@ -1041,7 +1041,7 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 
 	# run the vspipe -> ffmpeg with non-blocking reads of stderr and stdout
 
-	piping_method = 2
+	piping_method = 3	# 3 works
 	
 	if piping_method == 1:	# this loses stdout from ffmpeg
 		# stderr from process_ffmpeg works OK.  stdout from ffmpeg gets lost.
@@ -1049,7 +1049,41 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 		process_vspipe = subprocess.Popen( vspipe_commandline, stdout=subprocess.PIPE)
 		process_ffmpeg = subprocess.Popen( ffmpeg_commandline, stdin=process_vspipe.stdout)
 		process_ffmpeg.communicate()
-	elif piping_method == 2:	# less control but you see everything
+	elif piping_method == 2:	# this method DOES NOT WORK because subprocess.run hates the pipe symbol
+		# Execute the command using subprocess.run
+		vspipe_pipe_ffmpeg_commandline = vspipe_commandline + [r' | '] + ffmpeg_commandline
+		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{vspipe_pipe_ffmpeg_commandline}",flush=True)
+		result = subprocess.run(vspipe_pipe_ffmpeg_commandline, shell=True)
+		if result.returncode != 0:
+			print(f"CONTROLLER: ERROR RUNNING ENCODER VSPIPE/FFMPEG via piping_method={piping_method} subprocess.run, Command execution failed with exit status: {result.returncode}",flush=True)
+			sys.exit(1)
+		else:
+			print(f"CONTROLLER: Returned successfully from the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{vspipe_pipe_ffmpeg_commandline}",flush=True)
+	elif piping_method == 3:	# less control but you see everything
+		# Execute the command using subprocess.run but using a string not a list
+		def command_list_to_command_string(command_list):
+			command_parts = []
+			for part in command_list:
+				#if part.startswith('-') or part.lower() == r'pipe:'.lower():  # Check if the part starts with a dash (indicating a switch)
+				#	command_parts.append(part)  # Add the part as is (switch)
+				#else:
+				#	command_parts.append(f'"{part}"')  # Enclose the part in double quotes
+				if part.startswith('format='.lower()) or (len(part) >= 2 and part[1] == r':'):
+					command_parts.append(f'"{part}"')  # Enclose the part in double quotes
+				else:
+					command_parts.append(part)  # Add the part as is
+			commandline = ' '.join(command_parts)
+			return commandline
+		vspipe_cmd = command_list_to_command_string(vspipe_commandline)
+		ffmpeg_cmd = command_list_to_command_string(ffmpeg_commandline)
+		vspipe_pipe_ffmpeg_commandline = vspipe_cmd + r' | ' + ffmpeg_cmd
+		result = subprocess.run(vspipe_pipe_ffmpeg_commandline, shell=True)
+		if result.returncode != 0:
+			print(f"CONTROLLER: ERROR RUNNING ENCODER VSPIPE/FFMPEG via piping_method={piping_method} subprocess.run, Command execution failed with exit status: {result.returncode}",flush=True)
+			sys.exit(1)
+		else:
+			print(f"CONTROLLER: Returned successfully from the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{vspipe_pipe_ffmpeg_commandline}",flush=True)
+	elif piping_method == 4:
 		# Execute the command using os.system
 		def command_list_to_command_string(command_list):
 			command_parts = []
@@ -1066,17 +1100,15 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 			return commandline
 		vspipe_cmd = command_list_to_command_string(vspipe_commandline)
 		ffmpeg_cmd = command_list_to_command_string(ffmpeg_commandline)
-		vspipe_pipe_ffmpeg_commandline = vspipe_cmd + " | " + ffmpeg_cmd
+		vspipe_pipe_ffmpeg_commandline = vspipe_cmd + r' | ' + ffmpeg_cmd
 		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{vspipe_pipe_ffmpeg_commandline}",flush=True)
-		#exit_status = os.system(vspipe_pipe_ffmpeg_commandline)	# os.system fails to run this even though the string works in a dos box
-		#if exit_status != 0: sys.exit(1)
-		result = subprocess.run(vspipe_pipe_ffmpeg_commandline, shell=True)
-		if result.returncode != 0:
+		exit_status = os.system(vspipe_pipe_ffmpeg_commandline)	# os.system fails to run this even though the string works in a dos box
+		if exit_status != 0:
 			print(f"CONTROLLER: ERROR RUNNING ENCODER VSPIPE/FFMPEG via piping_method={piping_method} os.system, Command execution failed with exit status: {exit_status}",flush=True)
 			sys.exit(1)
 		else:
-			print(f"CONTROLLER: Returned successfully from the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{vspipe_pipe_ffmpeg_commandline}",flush=True)
-	elif piping_method == 3:	# non-blocking reads, works fine as long as nothing goes wrong.
+			print(f"CONTROLLER: Returned successfully from the ENCODER via piping_method={piping_method}, os.system, with one commandline:\n{vspipe_pipe_ffmpeg_commandline}",flush=True)
+	elif piping_method == 5:	# non-blocking reads, works fine as long as nothing goes wrong.
 		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, non=blocking reads, using commandlines:\n{vspipe_commandline}\n{ffmpeg_commandline}",flush=True)
 		try:	
 			# Run the commands in subprocesses for the ENCODER
@@ -1544,7 +1576,6 @@ if __name__ == "__main__":
 		print(f"DEBUG: CONTROLLER: FINISHED SNIPPET PROCESSING. SUMMARY:\n{objPrettyPrint.pformat(snippet_processing_summary)}",flush=True)
 		print(f"{100*'-'}",flush=True)
 
-	
 	# OK, by now we have a standardized background_audio in 'background_audio'
 	# Export it to background_audio_with_overlaid_snippets_filename (pydub hates .m4a so use .mp4 instead)
 	try:
@@ -1578,7 +1609,44 @@ if __name__ == "__main__":
 	# CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO MP4 AND AT SAME TIME MUX WITH BACKGROUND AUDIO.mp4
 	print(f"{100*'-'}",flush=True)
 	print(f'CONTROLLER: STARTING CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO MP4 AND AT SAME TIME MUX WITH BACKGROUND AUDIO')
+
+	# create the video-concat input file for ffmpeg, listing all of the FFV1 files to be concatenated/transcoded
+	temporary_ffmpeg_concat_list_filename = SETTINGS_DICT['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME']
+	with open(temporary_ffmpeg_concat_list_filename, 'w') as fp:
+		for individual_chunk_id in range(0,ALL_CHUNKS_COUNT):	# 0 to (ALL_CHUNKS_COUNT - 1)
+			ffv1_filename =  ALL_CHUNKS[str(individual_chunk_id)]['proposed_ffv1_mkv_filename']
+			fp.write("file '{ffv1_filename}'\n")
+			fp.flush()
+		#end for
+	#end with
 	
+	# We now have 
+	#	temporary_ffmpeg_concat_list_filename				the concat list of videos to be concatenated and transcoded
+	#	background_audio_with_overlaid_snippets_filename	the background audio with video snippets audio overlayed onto it the final format we need
+	# Lets transcode/mux them together.
+	final_mp4_with_audio_filename = SETTINGS_DICT['FINAL_MP4_WITH_AUDIO_FILENAME']
+	ffmpeg_commandline = [FFMPEG_EXE,
+							'-hide_banner', 
+							'-loglevel', 'info', 
+							'-nostats', 
+							'-i', background_audio_with_overlaid_snippets_filename,
+							'-f', 'concat', '-safe', '0', '-i', temporary_ffmpeg_concat_list_filename,
+							'-sws_flags', 'lanczos+accurate_rnd+full_chroma_int+full_chroma_inp',
+							'-filter_complex', 'format=yuv420p,setdar=16/9',
+							'-strict', 'experimental',
+							'-c:a', 'copy',
+							'-c:v', 'libx264',
+							'-preset', 'veryslow',
+							'-crf', '22',
+							'-profile:v', 'high',
+							'-level', '5.2',
+							'-movflags', '+faststart+write_colr',
+							'-y', final_mp4_with_audio_filename,
+							]
+	if DEBUG:	print(f"DEBUG: CONTROLLER: using ffmpeg to conatenate/transcode video and mux audio in one go. FFMPEG comamnd:\n{ffmpeg_commandline}",flush=True)
+	subprocess.run(ffmpeg_commandline, check=True)
+	print(f'CONTROLLER: FINISHED CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO MP4 AND AT SAME TIME MUX WITH BACKGROUND AUDIO\nFInals Slideshow={final_mp4_with_audio_filename}')
+	print(f"{100*'-'}",flush=True)
 	
 	##########################################################################################################################################
 	##########################################################################################################################################

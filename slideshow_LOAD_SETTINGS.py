@@ -256,6 +256,7 @@ def load_settings():
 
 	TEMPORARY_BACKGROUND_AUDIO_CODEC			= r'pcm_s16le'	# ; for 16 bit .wav
 	TEMPORARY_AUDIO_FILENAME					= os.path.join(TEMP_FOLDER, r'temporary_audio_file_for_standardization_then_input_to_pydub.wav')	# file is overwritten and deleted as needed
+	TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME		= os.path.join(TEMP_FOLDER, r'temporary_ffmpeg_concat_list.txt')	# file is overwritten and deleted as needed
 
 	TARGET_COLORSPACE							= r'BT.709'	# ; "target_colorspace" a string; set for hd; required to render subtitles, it is fixed at this value; this item must match target_colorspace_matrix_i etc = .
 	TARGET_COLORSPACE_MATRIX_I					= int(1)	# ; "target_colorspace_matrix_i" an integer; set for hd; this is the value that counts; it is fixed at this value; turn on debug_mode to see lists of these values = .
@@ -369,6 +370,7 @@ def load_settings():
 
 		'TEMPORARY_BACKGROUND_AUDIO_CODEC':			TEMPORARY_BACKGROUND_AUDIO_CODEC,
 		'TEMPORARY_AUDIO_FILENAME':					TEMPORARY_AUDIO_FILENAME,
+		'TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME':	TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME,
 
 		'TARGET_COLORSPACE':						TARGET_COLORSPACE,
 		'TARGET_COLORSPACE_MATRIX_I':				TARGET_COLORSPACE_MATRIX_I,
@@ -540,6 +542,7 @@ def load_settings():
 	final_settings_dict['slideshow_ENCODER_legacy_path'] = fully_qualified_filename(final_settings_dict['slideshow_ENCODER_legacy_path'])
 
 	final_settings_dict['TEMPORARY_AUDIO_FILENAME'] = fully_qualified_filename(final_settings_dict['TEMPORARY_AUDIO_FILENAME'])	# file is overwritten and deleted as needed
+	final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'] = fully_qualified_filename(final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'])	# file is overwritten and deleted as needed
 
 	check_file_exists_3333(final_settings_dict['FFMPEG_PATH'], r'FFMPEG_PATH')
 	check_file_exists_3333(final_settings_dict['FFPROBE_PATH'], r'FFPROBE_PATH')
