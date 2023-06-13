@@ -205,7 +205,7 @@ def load_settings():
 	# the CONTROLLER keeps track of a list of files created by the encoder with base filenames CHUNK_ENCODED_FFV1_FILENAME_BASE ... encoded_chunk_ffv1_00001.mkv
 	# the CONTROLLER re-encodes all these (to avoid timestmp issues) into one large final video without audio
 	### INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME			= os.path.join(TEMP_FOLDER, r'slideshow.INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME.mp4')
-	??? INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME not used ?
+	#??? INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME not used ?
 
 
 	# 4. the CONTROLLER does snippet processsing based on snippets written by the encoder per chunk and re-read and placed into a large dict on the fly by the CONTROLLER... 
@@ -214,7 +214,7 @@ def load_settings():
 	#	 then process snippets into the audio, re-encoding into .aac which can be muxed later.
 	#	this process touches the 
 	BACKGROUND_AUDIO_INPUT_FILENAME				= fully_qualified_filename(os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'background_audio_pre_snippet_editing.m4a'))
-	BACKGROUND_AUDIO_WITH_SNIPPETS_FILENAME		= os.path.join(TEMP_FOLDER, r'background_audio_post_snippet_editing.mp4')	# pydyub hates .m4a, so use .mp4
+	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME = os.path.join(TEMP_FOLDER, r'background_audio_with_overlaid_snippets.mp4')	# pydyub hates .m4a, so use .mp4
 
 	# 5. the CONTROLLER does Final muxing of the interim video .mp4 and the interim background_audio_post_snippet_editing
 	FINAL_MP4_WITH_AUDIO_FILENAME				= fully_qualified_filename(os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'slideshow.FINAL_MP4_WITH_AUDIO_FILENAME.mp4'))
@@ -241,17 +241,18 @@ def load_settings():
 	DURATION_MAX_VIDEO_SEC						= float(7200.0)
 	DENOISE_SMALL_SIZE_VIDEOS					= True
 
-	TARGET_WIDTH								= int(1920)	# ; "target_width" an integer; set for hd; do not change unless a dire emergency = .
-	TARGET_HEIGHT								= int(1080)	# ; "target_height" an integer; set for hd; do not change unless a dire emergency = .
-	TARGET_FPSNUM								= int(25)	# ; "target_fpsnum" an integer; set for pal = .
-	TARGET_FPSDEN								= int(1)	# ; "target_fpsden" an integer; set for pal = .
-	TARGET_BACKGROUND_AUDIO_CHANNELS			= int(2) 
+	TARGET_WIDTH								= int(1920)		# ; "target_width" an integer; set for hd; do not change unless a dire emergency = .
+	TARGET_HEIGHT								= int(1080)		# ; "target_height" an integer; set for hd; do not change unless a dire emergency = .
+	TARGET_FPSNUM								= int(25)		# ; "target_fpsnum" an integer; set for pal = .
+	TARGET_FPSDEN								= int(1)		# ; "target_fpsden" an integer; set for pal = .
 	TARGET_BACKGROUND_AUDIO_FREQUENCY			= int(48000) 
+	TARGET_BACKGROUND_AUDIO_CHANNELS			= int(2) 
+	TARGET_BACKGROUND_AUDIO_BYTEDEPTH			= int(2)		# 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
+	TARGET_BACKGROUND_AUDIO_CODEC				= r'libfdk_aac'
+	TARGET_BACKGROUND_AUDIO_BITRATE				= r'256k'
 
-	 channels, 					DONE
-	 frame rate (frequency) , 	DONE
-	 sample rate, 
-	 bit depth
+	TEMPORARY_BACKGROUND_AUDIO_CODEC			= r'pcm_s16le'	# ; for 16 bit .wav
+	TEMPORARY_AUDIO_FILENAME					= os.path.join(TEMP_FOLDER, r'temporary_audio_file_for_standardization_then_input_to_pydub.wav')	# file is overwritten and deleted as needed
 
 	TARGET_COLORSPACE							= r'BT.709'	# ; "target_colorspace" a string; set for hd; required to render subtitles, it is fixed at this value; this item must match target_colorspace_matrix_i etc = .
 	TARGET_COLORSPACE_MATRIX_I					= int(1)	# ; "target_colorspace_matrix_i" an integer; set for hd; this is the value that counts; it is fixed at this value; turn on debug_mode to see lists of these values = .
@@ -327,7 +328,7 @@ def load_settings():
 		'CURRENT_SNIPPETS_FILENAME': 				CURRENT_SNIPPETS_FILENAME,
 		'INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME':		INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME,
 		'BACKGROUND_AUDIO_INPUT_FILENAME':			BACKGROUND_AUDIO_INPUT_FILENAME,
-		'BACKGROUND_AUDIO_WITH_SNIPPETS_FILENAME':	BACKGROUND_AUDIO_WITH_SNIPPETS_FILENAME,
+		'BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME':	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME,
 		'FINAL_MP4_WITH_AUDIO_FILENAME':			FINAL_MP4_WITH_AUDIO_FILENAME,
 
 		'MAX_FILES_PER_CHUNK':						MAX_FILES_PER_CHUNK,
@@ -357,6 +358,12 @@ def load_settings():
 		'TARGET_FPSDEN':							TARGET_FPSDEN,
 		'TARGET_BACKGROUND_AUDIO_FREQUENCY':		TARGET_BACKGROUND_AUDIO_FREQUENCY,
 		'TARGET_BACKGROUND_AUDIO_CHANNELS':			TARGET_BACKGROUND_AUDIO_CHANNELS,
+		'TARGET_BACKGROUND_AUDIO_BYTEDEPTH':		TARGET_BACKGROUND_AUDIO_BYTEDEPTH,
+		'TARGET_BACKGROUND_AUDIO_CODEC':			TARGET_BACKGROUND_AUDIO_CODEC,
+		'TARGET_BACKGROUND_AUDIO_BITRATE':			TARGET_BACKGROUND_AUDIO_BITRATE,
+
+		'TEMPORARY_BACKGROUND_AUDIO_CODEC':			TEMPORARY_BACKGROUND_AUDIO_CODEC,
+		'TEMPORARY_AUDIO_FILENAME':					TEMPORARY_AUDIO_FILENAME,
 
 		'TARGET_COLORSPACE':						TARGET_COLORSPACE,
 		'TARGET_COLORSPACE_MATRIX_I':				TARGET_COLORSPACE_MATRIX_I,
@@ -513,7 +520,7 @@ def load_settings():
 	final_settings_dict['INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME'] = fully_qualified_filename(final_settings_dict['INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME'])
 
 	final_settings_dict['BACKGROUND_AUDIO_INPUT_FILENAME'] = fully_qualified_filename(final_settings_dict['BACKGROUND_AUDIO_INPUT_FILENAME'])
-	final_settings_dict['BACKGROUND_AUDIO_WITH_SNIPPETS_FILENAME'] = fully_qualified_filename(final_settings_dict['BACKGROUND_AUDIO_WITH_SNIPPETS_FILENAME'])
+	final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'] = fully_qualified_filename(final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'])
 	final_settings_dict['FINAL_MP4_WITH_AUDIO_FILENAME'] = fully_qualified_filename(final_settings_dict['FINAL_MP4_WITH_AUDIO_FILENAME'])
 
 	final_settings_dict['FFMPEG_PATH'] = fully_qualified_filename(final_settings_dict['FFMPEG_PATH'])
@@ -523,6 +530,8 @@ def load_settings():
 	final_settings_dict['slideshow_CONTROLLER_path'] = fully_qualified_filename(final_settings_dict['slideshow_CONTROLLER_path'])
 	final_settings_dict['slideshow_LOAD_SETTINGS_path'] = fully_qualified_filename(final_settings_dict['slideshow_LOAD_SETTINGS_path'])
 	final_settings_dict['slideshow_ENCODER_legacy_path'] = fully_qualified_filename(final_settings_dict['slideshow_ENCODER_legacy_path'])
+
+	final_settings_dict['TEMPORARY_AUDIO_FILENAME'] = fully_qualified_filename(final_settings_dict['TEMPORARY_AUDIO_FILENAME'])	# file is overwritten and deleted as needed
 
 	check_file_exists_3333(final_settings_dict['FFMPEG_PATH'], r'FFMPEG_PATH')
 	check_file_exists_3333(final_settings_dict['FFPROBE_PATH'], r'FFPROBE_PATH')
@@ -620,8 +629,6 @@ def load_settings():
 							'TARGET_HEIGHT' :					final_settings_dict['TARGET_HEIGHT'],
 							'TARGET_FPSNUM' :					final_settings_dict['TARGET_FPSNUM'],
 							'TARGET_FPSDEN' :					final_settings_dict['TARGET_FPSDEN'],
-							'TARGET_BACKGROUND_AUDIO_FREQUENCY':final_settings_dict['TARGET_BACKGROUND_AUDIO_FREQUENCY'],
-							'TARGET_BACKGROUND_AUDIO_CHANNELS':	final_settings_dict['TARGET_BACKGROUND_AUDIO_CHANNELS'],
 							'UPSIZE_KERNEL' :					final_settings_dict['UPSIZE_KERNEL'],
 							'DOWNSIZE_KERNEL' :					final_settings_dict['DOWNSIZE_KERNEL'],
 							'BOX' :								final_settings_dict['BOX'],
