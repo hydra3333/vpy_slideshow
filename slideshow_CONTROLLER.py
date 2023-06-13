@@ -895,6 +895,7 @@ def audio_standardize_and_import_file(audio_filename):
 	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']			# hopefully 'libfdk_aac'
 	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']		# hopefully '256k'
 	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']	# hopefully pcm_s16le ; for 16 bit
+	target_audio_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_NORMALIZE_HEADROOM_DB']		# hopefully -8 DB, normalize ausios to this maximum DB
 	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']					# in temp folder
 
 	if os.path.exists(temporary_audio_filename):
@@ -959,6 +960,7 @@ def audio_create_standardized_silence(duration_ms):
 	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']						# hopefully 'libfdk_aac'
 	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']					# hopefully '256k'
 	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']	# hopefully pcm_s16le ; for 16 bit
+	target_audio_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_NORMALIZE_HEADROOM_DB']		# hopefully -8 DB, normalize ausios to this maximum DB
 	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']					# in temp folder
 
 	audio = AudioSegment.silent(duration=padding_duration)
@@ -1398,6 +1400,7 @@ if __name__ == "__main__":
 	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']					# hopefully 'libfdk_aac'
 	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']				# hopefully '256k'
 	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']			# hopefully pcm_s16le ; for 16 bit
+	target_audio_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_NORMALIZE_HEADROOM_DB']		# hopefully -8 DB, normalize ausios to this maximum DB
 	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder
 	
 	snippet_audio_fade_in_duration_ms = SETTINGS_DICT['SNIPPET_AUDIO_FADE_IN_DURATION_MS']
@@ -1431,15 +1434,19 @@ if __name__ == "__main__":
 		if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio_len {background_audio_len}ms, trimming to {final_video_duration_ms}ms",flush=True)
 		background_audio = background_audio[:final_video_duration_ms]
 	background_audio_len = len(background_audio)
+	# now normalize the background_audio
+	background_audio = pydub.effects.normalize(background_audio,target_audio_normalize_headroom_db)	# -8db headroom
+
 
 
 
 	# ???????????????????????????????????
 	if DEBUG:
-		debug_background_audio_input_filename = temporary_audio_filename + r'_DEBUG.background_audio_trimmed' + '.mp4'
+		debug_background_audio_input_filename = temporary_audio_filename + r'_DEBUG.BACKGROUND_AUDIO_TRIMMED' + '.mp4'
 		debug_export_format = r'mp4'
 		debug_export_parameters = ["-ar", str(target_background_audio_frequency), "-ac", str(target_background_audio_channels)]
 		background_audio.export(debug_background_audio_input_filename, format=debug_export_format, codec=target_background_audio_codec, bitrate=str(target_background_audio_bitrate), parameters=debug_export_parameters)
+		print(f"DEBUG: CONTROLLER: exported {background_audio_input_filename} converted and trimmed audio to '{debug_background_audio_input_filename}'",flush=True)
 	# ???????????????????????????????????
 
 
@@ -1456,9 +1463,9 @@ if __name__ == "__main__":
 		num_files = individual_chunk_dict['num_files']
 		num_snippets = individual_chunk_dict['num_snippets']
 		if num_snippets > 0:
-			running_snippet_count = running_snippet_count + 1
 			print(f'CONTROLLER: Start processing chunk: {individual_chunk_id} list of {num_snippets} audio snippet files to be overlaid onto background audio.',flush=True)
 			for i in range(0,num_snippets):	# base 0; 0..(num_files - 1)
+				running_snippet_count = running_snippet_count + 1
 				# grab an individual_snippet_dict which specified details of snippet audio to be overlaid onto background audio; we have pre-calculated "good" frame numbers to calculate ms from
 				individual_snippet_dict = individual_chunk_dict['snippet_list'][i]
 				# which looks like this:	{	
@@ -1498,16 +1505,18 @@ if __name__ == "__main__":
 					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} snippet audio was {snippet_audio_len}ms, trimming to {snippet_duration_ms}ms",flush=True)
 					snippet_audio = snippet_audio[:snippet_duration_ms]
 				snippet_audio_len = len(snippet_audio)
-
+				# now normalize the snippet_audio
+				snippet_audio = pydub.effects.normalize(snippet_audio,target_audio_normalize_headroom_db)	# -8db headroom
 
 
 
 				# ???????????????????????????????????
 				if DEBUG:
-					debug_background_audio_with_overlaid_snippets_filename = temporary_audio_filename + r'_DEBUG.audio.from.snippet.' + str(running_snippet_count) + '.mp4'
+					debug_background_audio_with_overlaid_snippets_filename = temporary_audio_filename + r'_DEBUG.converted.audio.from.snippet.' + str(running_snippet_count) + '.mp4'
 					debug_export_format = r'mp4'
 					debug_export_parameters = ["-ar", str(target_background_audio_frequency), "-ac", str(target_background_audio_channels)]
 					snippet_audio.export(debug_background_audio_with_overlaid_snippets_filename, format=debug_export_format, codec=target_background_audio_codec, bitrate=str(target_background_audio_bitrate), parameters=debug_export_parameters)
+					print(f"DEBUG: CONTROLLER: exported snippet {running_snippet_count} converted audio to '{debug_background_audio_with_overlaid_snippets_filename}'",flush=True)
 				# ???????????????????????????????????
 
 
