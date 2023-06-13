@@ -204,7 +204,8 @@ def load_settings():
 	# 3. re-encode all encoded ffv1 chunks into a concatenated AVC .mp4
 	# the CONTROLLER keeps track of a list of files created by the encoder with base filenames CHUNK_ENCODED_FFV1_FILENAME_BASE ... encoded_chunk_ffv1_00001.mkv
 	# the CONTROLLER re-encodes all these (to avoid timestmp issues) into one large final video without audio
-	INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME			= os.path.join(TEMP_FOLDER, r'slideshow.INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME.mp4')
+	### INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME			= os.path.join(TEMP_FOLDER, r'slideshow.INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME.mp4')
+	??? INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME not used ?
 
 
 	# 4. the CONTROLLER does snippet processsing based on snippets written by the encoder per chunk and re-read and placed into a large dict on the fly by the CONTROLLER... 
@@ -244,7 +245,13 @@ def load_settings():
 	TARGET_HEIGHT								= int(1080)	# ; "target_height" an integer; set for hd; do not change unless a dire emergency = .
 	TARGET_FPSNUM								= int(25)	# ; "target_fpsnum" an integer; set for pal = .
 	TARGET_FPSDEN								= int(1)	# ; "target_fpsden" an integer; set for pal = .
+	TARGET_BACKGROUND_AUDIO_CHANNELS			= int(2) 
 	TARGET_BACKGROUND_AUDIO_FREQUENCY			= int(48000) 
+
+	 channels, 					DONE
+	 frame rate (frequency) , 	DONE
+	 sample rate, 
+	 bit depth
 
 	TARGET_COLORSPACE							= r'BT.709'	# ; "target_colorspace" a string; set for hd; required to render subtitles, it is fixed at this value; this item must match target_colorspace_matrix_i etc = .
 	TARGET_COLORSPACE_MATRIX_I					= int(1)	# ; "target_colorspace_matrix_i" an integer; set for hd; this is the value that counts; it is fixed at this value; turn on debug_mode to see lists of these values = .
@@ -349,6 +356,7 @@ def load_settings():
 		'TARGET_FPSNUM':							TARGET_FPSNUM,
 		'TARGET_FPSDEN':							TARGET_FPSDEN,
 		'TARGET_BACKGROUND_AUDIO_FREQUENCY':		TARGET_BACKGROUND_AUDIO_FREQUENCY,
+		'TARGET_BACKGROUND_AUDIO_CHANNELS':			TARGET_BACKGROUND_AUDIO_CHANNELS,
 
 		'TARGET_COLORSPACE':						TARGET_COLORSPACE,
 		'TARGET_COLORSPACE_MATRIX_I':				TARGET_COLORSPACE_MATRIX_I,
@@ -613,6 +621,7 @@ def load_settings():
 							'TARGET_FPSNUM' :					final_settings_dict['TARGET_FPSNUM'],
 							'TARGET_FPSDEN' :					final_settings_dict['TARGET_FPSDEN'],
 							'TARGET_BACKGROUND_AUDIO_FREQUENCY':final_settings_dict['TARGET_BACKGROUND_AUDIO_FREQUENCY'],
+							'TARGET_BACKGROUND_AUDIO_CHANNELS':	final_settings_dict['TARGET_BACKGROUND_AUDIO_CHANNELS'],
 							'UPSIZE_KERNEL' :					final_settings_dict['UPSIZE_KERNEL'],
 							'DOWNSIZE_KERNEL' :					final_settings_dict['DOWNSIZE_KERNEL'],
 							'BOX' :								final_settings_dict['BOX'],
