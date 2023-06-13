@@ -1239,6 +1239,7 @@ if __name__ == "__main__":
 	final_video_fps = SETTINGS_DICT['TARGET_FPS']
 	final_video_duration_ms = int((float(final_video_frame_count) / float(final_video_fps)) * 1000.0)
 	background_audio_input_filename = SETTINGS_DICT['BACKGROUND_AUDIO_INPUT_FILENAME']
+	target_background_audio_frequency = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_FREQUENCY']
 	background_audio_with_snippets_filename = SETTINGS_DICT['BACKGROUND_AUDIO_WITH_SNIPPETS_FILENAME']
 	final_mp4_with_audio_filename = SETTINGS_DICT['FINAL_MP4_WITH_AUDIO_FILENAME']
 	# not used	INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME = SETTINGS_DICT['INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME'] ????????????????????????????????????????
@@ -1252,13 +1253,14 @@ if __name__ == "__main__":
 	if background_audio_input_filename is None:
 		try:
 			if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: 'from_file' to background_audio '{background_audio_input_filename}'",flush=True)
-			background_audio = AudioSegment.silent(duration=final_video_duration_ms)
+			background_audio = AudioSegment.silent(duration=final_video_duration_ms, frame_rate=target_background_audio_frequency)
 		except Exception as e:
 			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio Unexpected error from AudioSegment.silent(duration={final_video_duration_ms})\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)
 	else:
 		try:
 			if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: 'from_file' from AudioSegment.from_file('{background_audio_input_filename}')",flush=True)
+			FUCK, we have to import or convert to 48000 ????? using parameter ??? frame_rate=48000 ???
 			background_audio = AudioSegment.from_file(background_audio_input_filename)
 		except FileNotFoundError:
 			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio File not found from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
@@ -1285,7 +1287,8 @@ if __name__ == "__main__":
 		padding_duration = final_video_duration_ms - background_audio_len
 		try:
 			if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio_len {background_audio_len}ms, padded with silence to {background_audio_len+padding_duration}ms",flush=True)
-			padding_audio = AudioSegment.silent(duration=padding_duration)
+			FUCK, we have create silent use the same frequency as the background audio  ????? using parameter frame_rate=44100
+			padding_audio = AudioSegment.silent(duration=padding_duration, frame_rate=target_background_audio_frequency)
 		except Exception as e:
 			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: padding_audio Unexpected error from AudioSegment.silent(duration={padding_duration})\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)
@@ -1319,10 +1322,13 @@ if __name__ == "__main__":
 				snippet_source_video_filename = individual_snippet_dict['snippet_source_video_filename'] 
 				snippet_num_frames = individual_snippet_dict['snippet_num_frames']
 				snippet_duration_ms = int((float(snippet_num_frames) / float(final_video_fps)) * 1000.0)	# this IS GOOD. The snippet may have been trimmed or padded for use in the final video, so do not use the audio duration from the original file
-				
+				start_frame_of_snippet_in_final_video = individual_snippet_dict['start_frame_of_snippet_in_final_video'] 
+				end_frame_of_snippet_in_final_video = individual_snippet_dict['end_frame_of_snippet_in_final_video'] 
+
 				# Load the snippet audio
 				if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: about to get audio from snippet {running_snippet_count} via AudioSegment.from_file('{snippet_source_video_filename}')",flush=True)
 				try:
+					FUCK, we have to import or convert to 48000 ????? using parameter ??? frame_rate=48000 ???
 					snippet_audio = AudioSegment.from_file(snippet_source_video_filename)
 				except FileNotFoundError:
 					print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet File not found from AudioSegment.from_file('{snippet_source_video_filename}')",flush=True,file=sys.stderr)
@@ -1351,34 +1357,51 @@ if __name__ == "__main__":
 					padding_duration = snippet_duration_ms - snippet_audio_len
 					try:
 					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} snippet_audio_len {snippet_audio_len}ms, padded with silence to {snippet_audio_len+padding_duration}ms",flush=True)
-						padding_audio = AudioSegment.silent(duration=padding_duration)
+						FUCK, we have create silent use the same frequency as the background audio  ????? using parameter frame_rate=44100
+						padding_audio = AudioSegment.silent(duration=padding_duration, frame_rate=target_background_audio_frequency)
 					except Exception as e:
 						print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: padding_audio Unexpected error from AudioSegment.silent(duration={padding_duration})\n{str(e)}",flush=True,file=sys.stderr)
 						sys.exit(1)
-					snippet_audio = snippet_audio + AudioSegment.silent(duration=padding_duration)
+					snippet_audio = snippet_audio + padding_audio
 					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} snippet_audio_len {snippet_audio_len}ms, padded with silence to {snippet_audio_len+padding_duration}ms",flush=True)
 				else:
 					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} snippet audio was {snippet_audio_len}ms, trimming to {snippet_duration_ms}ms",flush=True)
 					snippet_audio = snippet_audio[:snippet_duration_ms]
 				snippet_audio_len = len(snippet_audio)
 
-
-				# Calculate the pre and post fade times
+				# Calculate the pre and post fade times for the snippet
 				#	Fade out (to silent) the end of this AudioSegment
 				#	Fade in (from silent) the beginning of this AudioSegment
-				start_frame_of_snippet_in_final_video = individual_snippet_dict['start_frame_of_snippet_in_final_video'] 
-				end_frame_of_snippet_in_final_video = individual_snippet_dict['end_frame_of_snippet_in_final_video'] 
 				snippet_fade_out_start_time_ms = int((float(start_frame_of_snippet_in_final_video) / float(final_video_fps)) * 1000.0) - snippet_audio_fade_out_duration_ms
 				snippet_fade_out_end_time = snippet_fade_out_start_time_ms + snippet_audio_fade_out_duration_ms
 				snippet_fade_in_start_time_ms = int((float(end_frame_of_snippet_in_final_video) / float(final_video_fps)) * 1000.0)
 				snippet_fade_in_end_time_ms = snippet_fade_in_start_time_ms + snippet_audio_fade_in_duration_ms
-				if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: snippet {running_snippet_count} calculated fade_out_start_time_ms={snippet_fade_out_start_time_ms} fade_out_end_time={snippet_fade_out_end_time}",flush=True)
-				if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: snippet {running_snippet_count} calculated fade_in_start_time_ms={snippet_fade_in_start_time_ms} fade_in_end_time_ms={snippet_fade_in_end_time_ms}",flush=True)
-		
+				if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} calculated snippet_fade_out_start_time_ms={snippet_fade_out_start_time_ms} fade_out_end_time={snippet_fade_out_end_time}",flush=True)
+				if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} calculated snippet_fade_in_start_time_ms={snippet_fade_in_start_time_ms} snippet_fade_in_end_time_ms={snippet_fade_in_end_time_ms}",flush=True)
 
+				# Apply fade-in and fade-out effects to the background audio either side of the insertion point
+				# https://github.com/jiaaro/pydub/blob/master/API.markdown
+				if snippet_fade_out_start_time_ms >= 0:
+					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count}, applying 'fade-out', 'fade_in', to background_audio",flush=True)
+					# careful not to try: background_audio.fade_out().fade_in() because I am unsure of the order (real vs theeoretical)
+					background_audio = background_audio.fade(to_gain=-120.0,start=snippet_fade_out_start_time_ms,duration=fade_out_duration_ms)
+					background_audio = background_audio.fade(from_gain=-120.0,start=snippet_fade_in_start_time_ms,duration=snippet_audio_fade_in_duration_ms)
+				else:
+					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count}, NO fade-in, NO fade_out, applied to background_audio since snippet_fade_out_start_time_ms {snippet_fade_out_start_time_ms} < 0",flush=True)
 
+				# Overlay the snippet audio onto the background audio at the specified position
+				# Use gain_during_overlay even if fading is applied above
+				# 		Change the original audio by this many dB while overlaying audio. 
+				#		This can be used to make the original audio quieter while the overlaid audio plays.
+				#		example: -6.0 default: 0 (no change in volume during overlay) 
+				if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count}, applying snippet using 'overlay' to background_audio",flush=True)
+			
+				start_position_of_snippet_in_final_video_ms = int((float(start_frame_of_snippet_in_final_video) / float(video_fps)) * 1000.0)
+				background_audio = background_audio.overlay(snippet_audio, position=start_position_of_snippet_in_final_video_ms, gain_during_overlay=-120.0, loop=False)
+
+				del snippet_audio
+				del individual_snippet_dict
 		#end for
-
 	#end for
 
 

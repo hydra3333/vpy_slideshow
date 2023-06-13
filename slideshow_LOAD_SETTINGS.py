@@ -244,6 +244,8 @@ def load_settings():
 	TARGET_HEIGHT								= int(1080)	# ; "target_height" an integer; set for hd; do not change unless a dire emergency = .
 	TARGET_FPSNUM								= int(25)	# ; "target_fpsnum" an integer; set for pal = .
 	TARGET_FPSDEN								= int(1)	# ; "target_fpsden" an integer; set for pal = .
+	TARGET_BACKGROUND_AUDIO_FREQUENCY			= int(48000) 
+
 	TARGET_COLORSPACE							= r'BT.709'	# ; "target_colorspace" a string; set for hd; required to render subtitles, it is fixed at this value; this item must match target_colorspace_matrix_i etc = .
 	TARGET_COLORSPACE_MATRIX_I					= int(1)	# ; "target_colorspace_matrix_i" an integer; set for hd; this is the value that counts; it is fixed at this value; turn on debug_mode to see lists of these values = .
 	TARGET_COLOR_TRANSFER_I						= int(1)	# ; "target_color_transfer_i" an integer; set for hd; this is the value that counts; it is fixed at this value; used by vapoursynth; turn on debug_mode to see lists of these values = .
@@ -297,7 +299,7 @@ def load_settings():
 	TARGET_VFR_FPSDEN							= None		# CALCULATED LATER : 	# = self.calc_ini["TARGET_FPSDEN"]
 	TARGET_VFR_FPS								= None		# CALCULATED LATER : 	# = self.calc_ini["TARGET_VFR_FPSNUM"] / self.calc_ini["TARGET_VFR_FPSDEN"]	
 	TARGET_COLOR_RANGE_I_ZIMG					= None		# CALCULATED LATER : 	# = if something, calculate
-	
+
 	default_settings_dict = {
 		'SLIDESHOW_SETTINGS_MODULE_NAME':			SLIDESHOW_SETTINGS_MODULE_NAME,
 		'SLIDESHOW_SETTINGS_MODULE_FILENAME':		SLIDESHOW_SETTINGS_MODULE_FILENAME,
@@ -346,6 +348,7 @@ def load_settings():
 		'TARGET_HEIGHT':							TARGET_HEIGHT,
 		'TARGET_FPSNUM':							TARGET_FPSNUM,
 		'TARGET_FPSDEN':							TARGET_FPSDEN,
+		'TARGET_BACKGROUND_AUDIO_FREQUENCY':		TARGET_BACKGROUND_AUDIO_FREQUENCY,
 
 		'TARGET_COLORSPACE':						TARGET_COLORSPACE,
 		'TARGET_COLORSPACE_MATRIX_I':				TARGET_COLORSPACE_MATRIX_I,
@@ -609,6 +612,7 @@ def load_settings():
 							'TARGET_HEIGHT' :					final_settings_dict['TARGET_HEIGHT'],
 							'TARGET_FPSNUM' :					final_settings_dict['TARGET_FPSNUM'],
 							'TARGET_FPSDEN' :					final_settings_dict['TARGET_FPSDEN'],
+							'TARGET_BACKGROUND_AUDIO_FREQUENCY':final_settings_dict['TARGET_BACKGROUND_AUDIO_FREQUENCY'],
 							'UPSIZE_KERNEL' :					final_settings_dict['UPSIZE_KERNEL'],
 							'DOWNSIZE_KERNEL' :					final_settings_dict['DOWNSIZE_KERNEL'],
 							'BOX' :								final_settings_dict['BOX'],
