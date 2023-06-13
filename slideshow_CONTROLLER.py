@@ -990,9 +990,6 @@ def encode_using_vsipe_ffmpeg(individual_chunk_id):
 	individual_chunk_dict = ALL_CHUNKS[str(individual_chunk_id)]
 	proposed_ffv1_mkv_filename = fully_qualified_filename(individual_chunk_dict['proposed_ffv1_mkv_filename'])
 
-	#????????????? perhaps relocate the other logic to HERE here ...
-	# ... which logic ???
-
 	# Define the commandlines for the subprocesses subprocesses
 	
 	vspipe_commandline = [VSPIPE_EXE, '--progress', '--filter-time', '--container', 'y4m', '.\slideshow_ENCODER.vpy', '-']
