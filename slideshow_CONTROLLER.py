@@ -901,26 +901,27 @@ def audio_standardize_and_import_file(audio_filename):
 	if os.path.exists(temporary_audio_filename):
 		os.remove(temporary_audio_filename)
 
+	if DEBUG:
+		loglevel = 'verbose'
+	else:
+		loglevel = 'warning'
 	ffmpeg_commandline = [	FFMPEG_EXE,
 							'-hide_banner', 
-							'-loglevel', 'info', 
+							'-loglevel', loglevel, 
 							'-nostats', 
 							'-i', audio_filename,
 							'-vn',
-
-							'-this_is_a_bad_switch',
-
-							'-acodec', 'temporary_background_audio_codec',
-							'-ac', target_background_audio_channels,
-							'-ar', target_background_audio_frequency,
+							'-acodec', temporary_background_audio_codec,
+							'-ac', str(target_background_audio_channels),
+							'-ar', str(target_background_audio_frequency),
 							'-y', temporary_audio_filename
 							]
 
-	# use method 1 to see what happens when throwing an error (is stin, stderr lost from the console ?) ...
-	subprocess.run(ffmpeg_commandline, check=True)
+	print(f"CONTROLLER: audio_standardize_and_import_file attempting to audio using {ffmpeg_commandline}",flush=True)
 
-	# use other  methos 2,3,4 
-	#	sys.exit(1)
+	# Method 1	works fine, especially when we flush. Produces output and errors to the console. 
+	#			Tempted to use that everywhere. We'll see with long-running vspipes whether we see timely regular output from vspipe or not.
+	subprocess.run(ffmpeg_commandline, check=True)
 
 	try:
 		audio = AudioSegment.from_file(temporary_audio_filename)
@@ -1215,7 +1216,10 @@ if __name__ == "__main__":
 		# Run vspipe command by itself
 		vspipe_commandline = [VSPIPE_EXE, '--progress', '--container', 'y4m', '.\slideshow_ENCODER_legacy.vpy', 'NUL']
 
+		print(f"Methosd 1: vspipe_commandline={vspipe_commandline}",flush=True)
+
 		# method 1
+		print(f"Methosd 1: vspipe_commandline={vspipe_commandline}",flush=True)
 		subprocess.run(vspipe_commandline, check=True)
 
 		# method 2
@@ -1412,7 +1416,7 @@ if __name__ == "__main__":
 	if background_audio_len < final_video_duration_ms:
 		padding_duration = final_video_duration_ms - background_audio_len
 		try:
-			if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio_len {background_audio_len}ms, padded with silence to {background_audio_len+padding_duration}ms",flush=True)
+			if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio_len {background_audio_len}ms, padding background_audio with silence to length {background_audio_len+padding_duration}ms",flush=True)
 			padding_audio = audio_create_standardized_silence(padding_duration)
 		except Exception as e:
 			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: padding_audio Unexpected error from AudioSegment.silent(duration={padding_duration})\n{str(e)}",flush=True,file=sys.stderr)
@@ -1462,14 +1466,14 @@ if __name__ == "__main__":
 				if snippet_audio_len < snippet_duration_ms:
 					padding_duration = snippet_duration_ms - snippet_audio_len
 					try:
-						if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} snippet_audio_len {snippet_audio_len}ms, padded with silence to {snippet_audio_len+padding_duration}ms",flush=True)
+						if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} snippet_audio_len {snippet_audio_len}ms, padding with silence to duration {snippet_audio_len+padding_duration}ms",flush=True)
 						padding_audio = audio_create_standardized_silence(padding_duration)
 					except Exception as e:
 						print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: padding_audio Unexpected error from AudioSegment.silent(duration={padding_duration})\n{str(e)}",flush=True,file=sys.stderr)
 						sys.exit(1)
 					snippet_audio = snippet_audio + padding_audio
 					del padding_audio
-					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} snippet_audio_len {snippet_audio_len}ms, padded with silence to {snippet_audio_len+padding_duration}ms",flush=True)
+					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} snippet_audio_len {snippet_audio_len}ms, was padded with silence to duration {snippet_audio_len+padding_duration}ms",flush=True)
 				else:
 					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} snippet audio was {snippet_audio_len}ms, trimming to {snippet_duration_ms}ms",flush=True)
 					snippet_audio = snippet_audio[:snippet_duration_ms]
@@ -1490,7 +1494,7 @@ if __name__ == "__main__":
 				if snippet_fade_out_start_time_ms >= 0:
 					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count}, applying 'fade-out', 'fade_in', to background_audio",flush=True)
 					# careful not to try: background_audio.fade_out().fade_in() because I am unsure of the order (real vs theeoretical)
-					background_audio = background_audio.fade(to_gain=-120.0,start=snippet_fade_out_start_time_ms,duration=fade_out_duration_ms)
+					background_audio = background_audio.fade(to_gain=-120.0,start=snippet_fade_out_start_time_ms,duration=snippet_audio_fade_out_duration_ms)
 					background_audio = background_audio.fade(from_gain=-120.0,start=snippet_fade_in_start_time_ms,duration=snippet_audio_fade_in_duration_ms)
 				else:
 					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count}, NO fade-in, NO fade_out, applied to background_audio since snippet_fade_out_start_time_ms {snippet_fade_out_start_time_ms} < 0",flush=True)
@@ -1500,9 +1504,12 @@ if __name__ == "__main__":
 				# 		Change the original audio by this many dB while overlaying audio. 
 				#		This can be used to make the original audio quieter while the overlaid audio plays.
 				#		example: -6.0 default: 0 (no change in volume during overlay) 
-				if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count}, applying snippet using 'overlay' to background_audio",flush=True)
-			
-				start_position_of_snippet_in_final_video_ms = int((float(start_frame_of_snippet_in_final_video) / float(video_fps)) * 1000.0)
+
+				start_position_of_snippet_in_final_video_ms = int((float(start_frame_of_snippet_in_final_video) / float(final_video_fps)) * 1000.0)
+				end_position_of_snippet_in_final_video_ms = int((float(end_frame_of_snippet_in_final_video) / float(final_video_fps)) * 1000.0)
+				if DEBUG:
+					print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count}, applying snippet using 'overlay' to background_audio",flush=True)
+					print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: start_position_of_snippet_in_final_video_s={float(start_position_of_snippet_in_final_video_ms)/1000.0} end_position_of_snippet_in_final_video_s={float(end_position_of_snippet_in_final_video_ms)/1000.0} snippet_audio_len={float(snippet_audio_len)/1000.0}",flush=True)
 				background_audio = background_audio.overlay(snippet_audio, position=start_position_of_snippet_in_final_video_ms, gain_during_overlay=-120.0, loop=False)
 
 				del snippet_audio
