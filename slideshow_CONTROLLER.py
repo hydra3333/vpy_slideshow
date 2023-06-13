@@ -911,6 +911,7 @@ def audio_standardize_and_import_file(audio_filename):
 							'-nostats', 
 							'-i', audio_filename,
 							'-vn',
+							'-af', f'ebur128=peak=true:target={target_audio_normalize_headroom_db}:dualmono=true',	# this mornalizes the audio using industry standard ebur128
 							'-acodec', temporary_background_audio_codec,
 							'-ac', str(target_background_audio_channels),
 							'-ar', str(target_background_audio_frequency),
@@ -1435,7 +1436,6 @@ if __name__ == "__main__":
 		background_audio = background_audio[:final_video_duration_ms]
 	background_audio_len = len(background_audio)
 	# now normalize the background_audio
-	#background_audio = pydub.effects.normalize(background_audio,target_audio_normalize_headroom_db)
 	background_audio = background_audio.apply_gain(target_audio_normalize_headroom_db - background_audio.max_dBFS)
 
 
@@ -1507,8 +1507,6 @@ if __name__ == "__main__":
 					snippet_audio = snippet_audio[:snippet_duration_ms]
 				snippet_audio_len = len(snippet_audio)
 				# now normalize the snippet_audio
-				#snippet_audio = pydub.effects.normalize(snippet_audio,target_audio_normalize_headroom_db)
-				#snippet_audio = snippet_audio.apply_gain(-snippet_audio.max_dBFS + target_audio_normalize_headroom_db)
 				snippet_audio = snippet_audio.apply_gain(target_audio_normalize_headroom_db - snippet_audio.max_dBFS)
 
 
