@@ -250,7 +250,7 @@ def load_settings():
 	TARGET_BACKGROUND_AUDIO_BYTEDEPTH			= int(2)		# 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
 	TARGET_BACKGROUND_AUDIO_CODEC				= r'libfdk_aac'
 	TARGET_BACKGROUND_AUDIO_BITRATE				= r'256k'
-	TARGET_AUDIO_NORMALIZE_HEADROOM_DB			= int(-8)		# normalize audio to -8DB ; pydub calls it headroom
+	TARGET_AUDIO_NORMALIZE_HEADROOM_DB			= int(-4)		# normalize audio to -4DB ; pydub calls it headroom
 
 	TEMPORARY_BACKGROUND_AUDIO_CODEC			= r'pcm_s16le'	# ; for 16 bit .wav
 	TEMPORARY_AUDIO_FILENAME					= os.path.join(TEMP_FOLDER, r'temporary_audio_file_for_standardization_then_input_to_pydub.wav')	# file is overwritten and deleted as needed

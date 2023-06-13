@@ -889,14 +889,14 @@ def audio_standardize_and_import_file(audio_filename):
 	#		using .from_file a file may be an arbitrary number of channels, which pydub cannot handle
 	#			so we must first convert number of channels etc into a fixed file so we can use .from_file, eg
 	#			ffmpeg -i "background_audio_input_filename.mp4" -vn -ac 2 -ar 48000 -acodec pcm_s16le "some_audio_filename_in_temp_folder.wav"
-	target_background_audio_frequency = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_FREQUENCY']	# hopefully 48000
-	target_background_audio_channels = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CHANNELS']	# hopefully 2
-	target_background_audio_bytedepth = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BYTEDEPTH']	# hopefully 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
-	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']			# hopefully 'libfdk_aac'
-	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']		# hopefully '256k'
-	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']	# hopefully pcm_s16le ; for 16 bit
-	target_audio_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_NORMALIZE_HEADROOM_DB']		# hopefully -8 DB, normalize ausios to this maximum DB
-	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']					# in temp folder
+	target_background_audio_frequency = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_FREQUENCY']			# hopefully 48000
+	target_background_audio_channels = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CHANNELS']			# hopefully 2
+	target_background_audio_bytedepth = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BYTEDEPTH']			# hopefully 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
+	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']					# hopefully 'libfdk_aac'
+	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']				# hopefully '256k'
+	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']			# hopefully pcm_s16le ; for 16 bit
+	target_audio_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_NORMALIZE_HEADROOM_DB']		# normalize audios to this maximum DB
+	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder
 
 	if os.path.exists(temporary_audio_filename):
 		os.remove(temporary_audio_filename)
@@ -954,14 +954,14 @@ def audio_create_standardized_silence(duration_ms):
 	# https://pydub.com/
 	# https://github.com/jiaaro/pydub/blob/master/API.markdown
 	# NOTE	we MUST ensure the clips all have the SAME characteristics !!!!! or overlay etc will not work.
-	target_background_audio_frequency = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_FREQUENCY']	# hopefully 48000
-	target_background_audio_channels = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CHANNELS']	# hopefully 2
-	target_background_audio_bytedepth = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BYTEDEPTH']	# hopefully 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
-	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']						# hopefully 'libfdk_aac'
-	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']					# hopefully '256k'
-	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']	# hopefully pcm_s16le ; for 16 bit
-	target_audio_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_NORMALIZE_HEADROOM_DB']		# hopefully -8 DB, normalize ausios to this maximum DB
-	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']					# in temp folder
+	target_background_audio_frequency = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_FREQUENCY']			# hopefully 48000
+	target_background_audio_channels = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CHANNELS']			# hopefully 2
+	target_background_audio_bytedepth = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BYTEDEPTH']			# hopefully 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
+	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']					# hopefully 'libfdk_aac'
+	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']				# hopefully '256k'
+	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']			# hopefully pcm_s16le ; for 16 bit
+	target_audio_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_NORMALIZE_HEADROOM_DB']		# normalize audios to this maximum DB
+	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder
 
 	audio = AudioSegment.silent(duration=padding_duration)
 	audio = audio.set_channels(target_background_audio_channels).set_sample_width(target_background_audio_bytedepth).set_frame_rate(target_background_audio_frequency)
@@ -1400,7 +1400,7 @@ if __name__ == "__main__":
 	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']					# hopefully 'libfdk_aac'
 	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']				# hopefully '256k'
 	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']			# hopefully pcm_s16le ; for 16 bit
-	target_audio_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_NORMALIZE_HEADROOM_DB']		# hopefully -8 DB, normalize ausios to this maximum DB
+	target_audio_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_NORMALIZE_HEADROOM_DB']		# normalize audios to this maximum DB
 	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder
 	
 	snippet_audio_fade_in_duration_ms = SETTINGS_DICT['SNIPPET_AUDIO_FADE_IN_DURATION_MS']
@@ -1435,7 +1435,8 @@ if __name__ == "__main__":
 		background_audio = background_audio[:final_video_duration_ms]
 	background_audio_len = len(background_audio)
 	# now normalize the background_audio
-	background_audio = pydub.effects.normalize(background_audio,target_audio_normalize_headroom_db)	# -8db headroom
+	#background_audio = pydub.effects.normalize(background_audio,target_audio_normalize_headroom_db)
+	background_audio = background_audio.apply_gain(target_audio_normalize_headroom_db - background_audio.max_dBFS)
 
 
 
@@ -1506,7 +1507,9 @@ if __name__ == "__main__":
 					snippet_audio = snippet_audio[:snippet_duration_ms]
 				snippet_audio_len = len(snippet_audio)
 				# now normalize the snippet_audio
-				snippet_audio = pydub.effects.normalize(snippet_audio,target_audio_normalize_headroom_db)	# -8db headroom
+				#snippet_audio = pydub.effects.normalize(snippet_audio,target_audio_normalize_headroom_db)
+				#snippet_audio = snippet_audio.apply_gain(-snippet_audio.max_dBFS + target_audio_normalize_headroom_db)
+				snippet_audio = snippet_audio.apply_gain(target_audio_normalize_headroom_db - snippet_audio.max_dBFS)
 
 
 
