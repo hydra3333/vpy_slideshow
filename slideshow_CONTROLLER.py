@@ -881,7 +881,7 @@ def find_all_chunks():
 	return chunk_count, count_of_files, chunks
 
 ###
-def audio_standardize_and_import_file(audio_filename):
+def audio_standardize_and_import_file(audio_filename, headroom_db):
 	# use global SETTINGS_DICT for the convert and import audio
 	# https://pydub.com/
 	# https://github.com/jiaaro/pydub/blob/master/API.markdown
@@ -895,8 +895,9 @@ def audio_standardize_and_import_file(audio_filename):
 	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']					# hopefully 'libfdk_aac'
 	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']				# hopefully '256k'
 	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']			# hopefully pcm_s16le ; for 16 bit
-	target_audio_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_NORMALIZE_HEADROOM_DB']		# normalize audios to this maximum DB
-	target_audio_gain_during_overlay = SETTINGS_DICT['TARGET_AUDIO_GAIN_DURING_OVERLAY']			# how many DB to reduce backround audio during video clip audio overlay
+	target_audio_background_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB']		# normalize background audio to this maximum db
+	target_audio_background_gain_during_overlay = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY']			# how many DB to reduce backround audio during video clip audio overlay
+	target_audio_snippet_normalize_headroom_db =  SETTINGS_DICT['TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB']			# normalize video clip audio to this maximum db
 	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder
 
 	if os.path.exists(temporary_audio_filename):
@@ -911,7 +912,7 @@ def audio_standardize_and_import_file(audio_filename):
 							'-nostats', 
 							'-i', audio_filename,
 							'-vn',
-							'-af', f'ebur128=peak=true:target={target_audio_normalize_headroom_db}:dualmono=true',	# this normalizes audio using industry standard ebur128; it takes a while
+							'-af', f'ebur128=peak=true:target={headroom_db}:dualmono=true',	# this normalizes audio using industry standard ebur128; it takes a while
 							'-acodec', temporary_background_audio_codec,
 							'-ac', str(target_background_audio_channels),
 							'-ar', str(target_background_audio_frequency),
@@ -961,9 +962,10 @@ def audio_create_standardized_silence(duration_ms):
 	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']					# hopefully 'libfdk_aac'
 	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']				# hopefully '256k'
 	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']			# hopefully pcm_s16le ; for 16 bit
-	target_audio_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_NORMALIZE_HEADROOM_DB']		# normalize audios to this maximum DB
-	target_audio_gain_during_overlay = SETTINGS_DICT['TARGET_AUDIO_GAIN_DURING_OVERLAY']			# how many DB to reduce backround audio during video clip audio overlay
-	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder						# in temp folder
+	target_audio_background_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB']		# normalize background audio to this maximum db
+	target_audio_background_gain_during_overlay = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY']			# how many DB to reduce backround audio during video clip audio overlay
+	target_audio_snippet_normalize_headroom_db =  SETTINGS_DICT['TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB']			# normalize video clip audio to this maximum db
+	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder
 
 	audio = AudioSegment.silent(duration=padding_duration)
 	audio = audio.set_channels(target_background_audio_channels).set_sample_width(target_background_audio_bytedepth).set_frame_rate(target_background_audio_frequency)
@@ -1399,8 +1401,9 @@ if __name__ == "__main__":
 	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']					# hopefully 'libfdk_aac'
 	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']				# hopefully '256k'
 	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']			# hopefully pcm_s16le ; for 16 bit
-	target_audio_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_NORMALIZE_HEADROOM_DB']		# normalize audios to this maximum DB
-	target_audio_gain_during_overlay = SETTINGS_DICT['TARGET_AUDIO_GAIN_DURING_OVERLAY']			# how many DB to reduce backround audio during video clip audio overlay
+	target_audio_background_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB']		# normalize background audio to this maximum db
+	target_audio_background_gain_during_overlay = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY']			# how many DB to reduce backround audio during video clip audio overlay
+	target_audio_snippet_normalize_headroom_db =  SETTINGS_DICT['TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB']			# normalize video clip audio to this maximum db
 	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder
 	
 	snippet_audio_fade_in_duration_ms = SETTINGS_DICT['SNIPPET_AUDIO_FADE_IN_DURATION_MS']
@@ -1415,7 +1418,7 @@ if __name__ == "__main__":
 			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio Unexpected error from AudioSegment.silent(duration={final_video_duration_ms})\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)
 	else:
-		background_audio = audio_standardize_and_import_file(background_audio_input_filename)
+		background_audio = audio_standardize_and_import_file(background_audio_input_filename, target_audio_background_normalize_headroom_db)
 
 	# Trim or pad-with-silence the background audio to match the duration final_video_frame_count
 	background_audio_len = len(background_audio)
@@ -1435,7 +1438,7 @@ if __name__ == "__main__":
 		background_audio = background_audio[:final_video_duration_ms]
 	background_audio_len = len(background_audio)
 	# now normalize the background_audio
-	background_audio = background_audio.apply_gain(target_audio_normalize_headroom_db - background_audio.max_dBFS)
+	#background_audio = background_audio.apply_gain(target_audio_background_normalize_headroom_db - background_audio.max_dBFS)
 
 
 
@@ -1482,7 +1485,7 @@ if __name__ == "__main__":
 
 				# Load a snippet audio
 				if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: about to get audio from snippet {running_snippet_count} via AudioSegment.from_file('{snippet_source_video_filename}')",flush=True)
-				snippet_audio = audio_standardize_and_import_file(snippet_source_video_filename)
+				snippet_audio = audio_standardize_and_import_file(snippet_source_video_filename, target_audio_snippet_normalize_headroom_db)
 
 				# Extract the corresponding portion of the snippet file audio based on the calculated snippet duration
 				# There should be enough audio unless the a very small clip had to padded during slideshow creation
@@ -1504,7 +1507,7 @@ if __name__ == "__main__":
 					snippet_audio = snippet_audio[:snippet_duration_ms]
 				snippet_audio_len = len(snippet_audio)
 				# now normalize the snippet_audio
-				snippet_audio = snippet_audio.apply_gain(target_audio_normalize_headroom_db - snippet_audio.max_dBFS)
+				#snippet_audio = snippet_audio.apply_gain(target_audio_snippet_normalize_headroom_db - snippet_audio.max_dBFS)
 
 
 
@@ -1550,7 +1553,7 @@ if __name__ == "__main__":
 				if DEBUG:
 					print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count}, applying snippet using 'overlay' to background_audio",flush=True)
 					print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: start_position_of_snippet_in_final_video_s={float(start_position_of_snippet_in_final_video_ms)/1000.0} end_position_of_snippet_in_final_video_s={float(end_position_of_snippet_in_final_video_ms)/1000.0} snippet_audio_len={float(snippet_audio_len)/1000.0}",flush=True)
-				background_audio = background_audio.overlay(snippet_audio, loop=False, times=1, position=start_position_of_snippet_in_final_video_ms, gain_during_overlay=target_audio_gain_during_overlay)	# -120 is silent during overlay
+				background_audio = background_audio.overlay(snippet_audio, loop=False, times=1, position=start_position_of_snippet_in_final_video_ms, gain_during_overlay=target_audio_background_gain_during_overlay)	# -120 is silent during overlay
 				snippet_processing_summary.append(	[	{	'background_audio_len_ms':						background_audio_len,
 															'snippet_seq_no':								running_snippet_count,
 															'snippet_final_duration__ms':					snippet_audio_len,
