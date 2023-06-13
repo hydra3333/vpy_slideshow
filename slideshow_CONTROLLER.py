@@ -1237,7 +1237,7 @@ if __name__ == "__main__":
 
 	final_video_frame_count = end_frame_num_of_final_video + 1		# base 0
 	final_video_fps = SETTINGS_DICT['TARGET_FPS']
-	final_video_duration_ms = (float(final_video_frame_count) / video_fps) * 1000
+	final_video_duration_ms = int((float(final_video_frame_count) / float(final_video_fps)) * 1000.0)
 	background_audio_input_filename = SETTINGS_DICT['BACKGROUND_AUDIO_INPUT_FILENAME']
 	background_audio_with_snippets_filename = SETTINGS_DICT['BACKGROUND_AUDIO_WITH_SNIPPETS_FILENAME']
 	final_mp4_with_audio_filename = SETTINGS_DICT['FINAL_MP4_WITH_AUDIO_FILENAME']
@@ -1279,17 +1279,34 @@ if __name__ == "__main__":
 			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio Unexpected error from AudioSegment.from_file('{background_audio_input_filename}')\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)
 
+	# Trim or pad-with-silence the background audio to match the duration final_video_frame_count
+	background_audio_len = len(background_audio)
+	if background_audio_len < final_video_duration_ms:
+		padding_duration = final_video_duration_ms - background_audio_len
+		try:
+			if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio_len {background_audio_len}ms, padded with silence to {background_audio_len+padding_duration}ms",flush=True)
+			padding_audio = AudioSegment.silent(duration=padding_duration)
+		except Exception as e:
+			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: padding_audio Unexpected error from AudioSegment.silent(duration={padding_duration})\n{str(e)}",flush=True,file=sys.stderr)
+			sys.exit(1)
+		if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio_len {background_audio_len}ms, padding with silence to {background_audio_len+padding_duration}ms",flush=True)
+		background_audio = background_audio + padding_audio
+	else:
+		if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio_len {background_audio_len}ms, trimming to {final_video_duration_ms}ms",flush=True)
+		background_audio = background_audio[:final_video_duration_ms]
+	background_audio_len = len(background_audio)
 
-
-
-
+	# loop through chunks, and snippets within chunkls, overelaying audio as we go
+	running_snippet_count = 0
 	for individual_chunk_id in range(0,ALL_CHUNKS_COUNT):	# 0 to (ALL_CHUNKS_COUNT - 1)
 		individual_chunk_dict = ALL_CHUNKS[str(individual_chunk_id)]
 		num_files = individual_chunk_dict['num_files']
 		num_snippets = individual_chunk_dict['num_snippets']
 		if num_snippets > 0:
-			num_snippets(f'CONTROLLER: Start processing chunk: {individual_chunk_id} list of {num_snippets} audio snippet files to be overlaid onto backgroiund audio.',flush=True)
+			running_snippet_count = running_snippet_count + 1
+			print(f'CONTROLLER: Start processing chunk: {individual_chunk_id} list of {num_snippets} audio snippet files to be overlaid onto background audio.',flush=True)
 			for i in range(0,num_snippets):	# base 0; 0..(num_files - 1)
+				# grab an individual_snippet_dict which specified details of snippet audio to be overlaid onto background audio; we have pre-calculated "good" frame numbers to calculate ms from
 				individual_snippet_dict = individual_chunk_dict['snippet_list'][i]
 				# which looks like this:	{	
 				#								'start_frame_of_snippet_in_chunk':			integer,
@@ -1299,8 +1316,65 @@ if __name__ == "__main__":
 				#								'snippet_num_frames':						integer,	<- this is useful
 				#								'snippet_source_video_filename':			filename,	<- this is useful
 				#							}
+				snippet_source_video_filename = individual_snippet_dict['snippet_source_video_filename'] 
+				snippet_num_frames = individual_snippet_dict['snippet_num_frames']
+				snippet_duration_ms = int((float(snippet_num_frames) / float(final_video_fps)) * 1000.0)	# this IS GOOD. The snippet may have been trimmed or padded for use in the final video, so do not use the audio duration from the original file
+				
+				# Load the snippet audio
+				if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: about to get audio from snippet {running_snippet_count} via AudioSegment.from_file('{snippet_source_video_filename}')",flush=True)
+				try:
+					snippet_audio = AudioSegment.from_file(snippet_source_video_filename)
+				except FileNotFoundError:
+					print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet File not found from AudioSegment.from_file('{snippet_source_video_filename}')",flush=True,file=sys.stderr)
+					sys.exit(1)
+				except TypeError:
+					print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet Type mismatch or unsupported operation from AudioSegment.from_file('{snippet_source_video_filename}')",flush=True,file=sys.stderr)
+					sys.exit(1)
+				except ValueError:
+					print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet Invalid or unsupported value from AudioSegment.from_file('{snippet_source_video_filename}')",flush=True,file=sys.stderr)
+					sys.exit(1)
+				except IOError:
+					print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet I/O error occurred from AudioSegment.from_file('{snippet_source_video_filename}')",flush=True,file=sys.stderr)
+					sys.exit(1)
+				except OSError as e:
+					print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet Unexpected OSError from AudioSegment.from_file('{snippet_source_video_filename}')\n{str(e)}",flush=True,file=sys.stderr)
+					sys.exit(1)
+				except Exception as e:
+					print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet Unexpected error from AudioSegment.from_file('{snippet_source_video_filename})'\n{str(e)}",flush=True,file=sys.stderr)
+					sys.exit(1)
+
+				# Extract the corresponding portion of the snippet file audio based on the calculated snippet duration
+				# There should be enough audio unless the a very small clip had to padded during slideshow creation
+				# Trim or pad the snippet file audio to match the target snippet_duration_ms
+				snippet_audio_len = len(snippet_audio)
+				if snippet_audio_len < snippet_duration_ms:
+					padding_duration = snippet_duration_ms - snippet_audio_len
+					try:
+					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} snippet_audio_len {snippet_audio_len}ms, padded with silence to {snippet_audio_len+padding_duration}ms",flush=True)
+						padding_audio = AudioSegment.silent(duration=padding_duration)
+					except Exception as e:
+						print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: padding_audio Unexpected error from AudioSegment.silent(duration={padding_duration})\n{str(e)}",flush=True,file=sys.stderr)
+						sys.exit(1)
+					snippet_audio = snippet_audio + AudioSegment.silent(duration=padding_duration)
+					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} snippet_audio_len {snippet_audio_len}ms, padded with silence to {snippet_audio_len+padding_duration}ms",flush=True)
+				else:
+					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} snippet audio was {snippet_audio_len}ms, trimming to {snippet_duration_ms}ms",flush=True)
+					snippet_audio = snippet_audio[:snippet_duration_ms]
+				snippet_audio_len = len(snippet_audio)
 
 
+				# Calculate the pre and post fade times
+				#	Fade out (to silent) the end of this AudioSegment
+				#	Fade in (from silent) the beginning of this AudioSegment
+				start_frame_of_snippet_in_final_video = individual_snippet_dict['start_frame_of_snippet_in_final_video'] 
+				end_frame_of_snippet_in_final_video = individual_snippet_dict['end_frame_of_snippet_in_final_video'] 
+				snippet_fade_out_start_time_ms = int((float(start_frame_of_snippet_in_final_video) / float(final_video_fps)) * 1000.0) - snippet_audio_fade_out_duration_ms
+				snippet_fade_out_end_time = snippet_fade_out_start_time_ms + snippet_audio_fade_out_duration_ms
+				snippet_fade_in_start_time_ms = int((float(end_frame_of_snippet_in_final_video) / float(final_video_fps)) * 1000.0)
+				snippet_fade_in_end_time_ms = snippet_fade_in_start_time_ms + snippet_audio_fade_in_duration_ms
+				if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: snippet {running_snippet_count} calculated fade_out_start_time_ms={snippet_fade_out_start_time_ms} fade_out_end_time={snippet_fade_out_end_time}",flush=True)
+				if DEBUG: print(f"DEBUG: replace_audio_with_snippets_from_file: snippet {running_snippet_count} calculated fade_in_start_time_ms={snippet_fade_in_start_time_ms} fade_in_end_time_ms={snippet_fade_in_end_time_ms}",flush=True)
+		
 
 
 		#end for
@@ -1319,8 +1393,7 @@ if __name__ == "__main__":
 	##########################################################################################################################################
 	# CLEANUP
 	
-	
-	
+	??????????????????????????????????????????
 	
 	def replace_audio_with_snippets_from_file(input_video_path, video_fps, final_video_frame_count, video_duration_ms, seq_snippets_list, output_video_path, background_audio_input_filename, fade_out_duration_ms, fade_in_duration_ms):
 	# Load the background audio
