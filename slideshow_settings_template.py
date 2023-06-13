@@ -20,6 +20,7 @@ settings = {
 	'TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB':	-8,		# normalize background audio to this maximum db
 	'TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY':	-28,		# how many DB to reduce backround audio during video clip audio overlay
 	'TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB':	-6,		# normalize video clip audio to this maximum db
+	'MAX_FILES_PER_CHUNK':	150,	# how many images/videos to process in each chunk (more=slower)
 	'DEBUG':	False,		# see and regret seeing, ginormous debug output
 	'FFMPEG_PATH':	r'D:\ssTEST\Vapoursynth_x64\ffmpeg.exe',		# Please leave this alone unless really confident
 	'FFPROBE_PATH':	r'D:\ssTEST\Vapoursynth_x64\ffprobe.exe',		# Please leave this alone unless really confident

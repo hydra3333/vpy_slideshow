@@ -436,6 +436,7 @@ def load_settings():
 										[ 'TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB',	TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB,	r'normalize background audio to this maximum db' ],
 										[ 'TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY',	TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY,	r'how many DB to reduce backround audio during video clip audio overlay' ],
 										[ 'TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB',		TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB,		r'normalize video clip audio to this maximum db' ],
+										[ 'MAX_FILES_PER_CHUNK',						MAX_FILES_PER_CHUNK,						r'how many images/videos to process in each chunk (more=slower)' ],
 										[ 'DEBUG',										DEBUG,										r'see and regret seeing, ginormous debug output' ],
 										[ 'FFMPEG_PATH',								FFMPEG_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'FFPROBE_PATH',								FFPROBE_PATH,								r'Please leave this alone unless really confident' ],
