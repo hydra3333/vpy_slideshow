@@ -1,8 +1,8 @@
 settings = {
 	'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS':	[
 													r'D:\ssTEST\TEST_VIDS_IMAGES\0TEST', 
-													r'D:\ssTEST\TEST_VIDS_IMAGES\2022-11-Tasmania_renamed\ORIGINALS\01',
-													r'D:\ssTEST\TEST_VIDS_IMAGES\2TEST_rotations', 
+													#r'D:\ssTEST\TEST_VIDS_IMAGES\2022-11-Tasmania_renamed\ORIGINALS\01',
+													#r'D:\ssTEST\TEST_VIDS_IMAGES\2TEST_rotations', 
 												],	# a list, one or more folders to look in for slideshow pics/videos. the r in front of the string is CRITICAL
 	'RECURSIVE':	True,		# case sensitive: whether to recurse the source folder(s) looking for slideshow pics/videos
 	'ROOT_FOLDER_FOR_OUTPUTS':	r'D:\ssTEST',		# folder in which outputs are to be placed
@@ -21,7 +21,7 @@ settings = {
 	'TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY':	-28,		# how many DB to reduce backround audio during video clip audio overlay
 	'TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB':	-6,		# normalize video clip audio to this maximum db
 	'MAX_FILES_PER_CHUNK':	150,	# how many images/videos to process in each chunk (more=slower)
-	'DEBUG':	False,		# see and regret seeing, ginormous debug output
+	'DEBUG':	True,		# see and regret seeing, ginormous debug output
 	'FFMPEG_PATH':	r'D:\ssTEST\Vapoursynth_x64\ffmpeg.exe',		# Please leave this alone unless really confident
 	'FFPROBE_PATH':	r'D:\ssTEST\Vapoursynth_x64\ffprobe.exe',		# Please leave this alone unless really confident
 	'VSPIPE_PATH':	r'D:\ssTEST\Vapoursynth_x64\vspipe.exe',		# Please leave this alone unless really confident

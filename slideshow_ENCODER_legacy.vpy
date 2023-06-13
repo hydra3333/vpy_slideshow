@@ -69,7 +69,7 @@ global objPrettyPrint
 objPrettyPrint = pprint.PrettyPrinter(width=TERMINAL_WIDTH, compact=False, sort_dicts=False)	# facilitates formatting and printing of text and dicts etc
 
 def normalize_path(path):
-	#if DEBUG:	print(f"DEBUG: normalize_path:  incoming path='{path}'",flush=True)
+	#if DEBUG:	print(f"DEBUG: normalize_path:  incoming path='{path}'",flush=True,file=sys.stderr)
 	# Replace single backslashes with double backslashes
 	path = path.rstrip(os.linesep).strip('\r').strip('\n').strip()
 	r1 = r'\\'
@@ -79,7 +79,7 @@ def normalize_path(path):
 	# Add double backslashes before any single backslashes
 	for i in range(0,20):
 		path = path.replace(r2, r1)
-	#if DEBUG:	print(f"DEBUG: normalize_path: outgoing path='{path}'",flush=True)
+	#if DEBUG:	print(f"DEBUG: normalize_path: outgoing path='{path}'",flush=True,file=sys.stderr)
 	return path
 
 # A Special function needed at the top DEFAULT_INI_FILE_SPECIFYING_PARAMETERS and DEFAULT_DIRECTORY_LIST
@@ -97,7 +97,7 @@ def fully_qualified_filename(file_name):
 	# Make into a fully qualified filename string using double backslashes
 	# to later print/write with double backslashes use eg
 	#	converted_string = fully_qualified_filename('D:\\a\\b\\\\c\\\\\\d\\e\\f\\filename.txt')
-	#	print(repr(converted_string))
+	#	print(repr(converted_string),flush=True,file=sys.stderr)
 	# yields 'D:\\a\\b\\c\\d\\e\\f\\filename.txt'
 	new_file_name = os.path.abspath(file_name).rstrip(os.linesep).strip('\r').strip('\n').strip()
 	if new_file_name.endswith('\\'):

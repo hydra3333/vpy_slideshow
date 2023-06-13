@@ -98,7 +98,7 @@ def check_folder_exists_3333(folder, text):
 	return
 
 def normalize_path(path):
-	#if DEBUG:	print(f"DEBUG: normalize_path:  incoming path='{path}'",flush=True)
+	#if DEBUG:	print(f"DEBUG: normalize_path:  incoming path='{path}'",flush=True,file=sys.stderr)
 	# Replace single backslashes with double backslashes
 	path = path.rstrip(os.linesep).strip('\r').strip('\n').strip()
 	r1 = r'\\'
@@ -108,7 +108,7 @@ def normalize_path(path):
 	# Add double backslashes before any single backslashes
 	for i in range(0,20):
 		path = path.replace(r2, r1)
-	if DEBUG:	print(f"DEBUG: normalize_path: outgoing path='{path}'",flush=True)
+	if DEBUG:	print(f"DEBUG: normalize_path: outgoing path='{path}'",flush=True,file=sys.stderr)
 	return path
 
 def fully_qualified_directory_no_trailing_backslash(directory_name):
@@ -124,7 +124,7 @@ def fully_qualified_filename(file_name):
 	# Make into a fully qualified filename string using double backslashes
 	# to later print/write with double backslashes use eg
 	#	converted_string = fully_qualified_filename('D:\\a\\b\\\\c\\\\\\d\\e\\f\\filename.txt')
-	#	print(repr(converted_string),flush=True)
+	#	print(repr(converted_string),flush=True,file=sys.stderr)
 	# yields 'D:\\a\\b\\c\\d\\e\\f\\filename.txt'
 	new_file_name = os.path.abspath(file_name).rstrip(os.linesep).strip('\r').strip('\n').strip()
 	if new_file_name.endswith('\\'):
@@ -171,7 +171,7 @@ def load_settings():
 	# Missing values are defaulted here, yielding calculated ones as well.
 	global DEBUG
 	
-	if DEBUG:	print(f'DEBUG: at top of load_settings DEBUG={DEBUG}',flush=True)
+	if DEBUG:	print(f'DEBUG: at top of load_settings DEBUG={DEBUG}',flush=True,file=sys.stderr)
 
 	# This is ALWAYS a fixed filename in the current default folder !!!
 	SLIDESHOW_SETTINGS_MODULE_NAME				= 'SLIDESHOW_SETTINGS'.lower()	# SLIDESHOW_SETTINGS.py
@@ -250,7 +250,7 @@ def load_settings():
 	TARGET_BACKGROUND_AUDIO_BYTEDEPTH			= int(2)		# 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
 	TARGET_BACKGROUND_AUDIO_CODEC				= r'libfdk_aac'
 	TARGET_BACKGROUND_AUDIO_BITRATE				= r'256k'
-	TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB	= int(-8)		# normalize background audio to -xxDB ; pydub calls it headroom
+	TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB	= int(-12)		# normalize background audio to -xxDB ; pydub calls it headroom
 	TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY		= int(-28)		# reduce audio of background music during overlay of snippet audio by xxDB
 	TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB		= TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB + 2	# normalize snippet audio to -xxDB ; pydub calls it headroom
 
@@ -412,7 +412,7 @@ def load_settings():
 		'TARGET_COLOR_RANGE_I_ZIMG':				TARGET_COLOR_RANGE_I_ZIMG,	# CALCULATED LATER # = if something, calculated
 	}
 
-	if DEBUG:	print(f'DEBUG: created default_settings_dict=\n{objPrettyPrint.pformat(default_settings_dict)}',flush=True)
+	if DEBUG:	print(f'DEBUG: created default_settings_dict=\n{objPrettyPrint.pformat(default_settings_dict)}',flush=True,file=sys.stderr)
 
 	#######################################################################################################################################
 	#######################################################################################################################################
@@ -445,7 +445,7 @@ def load_settings():
 										[ 'slideshow_LOAD_SETTINGS_path',				slideshow_LOAD_SETTINGS_path,				r'Please leave this alone unless really confident' ],
 										[ 'slideshow_ENCODER_legacy_path',				slideshow_ENCODER_legacy_path,				r'Please leave this alone unless really confident' ],
 									]	
-		if DEBUG:	print(f'DEBUG: specially_formatted_settings_list=\n{objPrettyPrint.pformat(specially_formatted_settings_list)}',flush=True)
+		if DEBUG:	print(f'DEBUG: specially_formatted_settings_list=\n{objPrettyPrint.pformat(specially_formatted_settings_list)}',flush=True,file=sys.stderr)
 		print(f"load_settings: ERROR: File '{SLIDESHOW_SETTINGS_MODULE_FILENAME}' does not exist, creating it with template settings... you MUST edit it now ...",flush=True,file=sys.stderr)
 		create_py_file_from_specially_formatted_list(SLIDESHOW_SETTINGS_MODULE_FILENAME, specially_formatted_settings_list)
 		sys.exit(1)
@@ -455,10 +455,10 @@ def load_settings():
 
 	# read the user-edited settings from SLIDESHOW_SETTINGS_MODULE_NAME (SLIDESHOW_SETTINGS.py)
 	if SLIDESHOW_SETTINGS_MODULE_NAME not in sys.modules:
-		if DEBUG:	print(f'DEBUG: SLIDESHOW_SETTINGS_MODULE_NAME not in sys.modules',flush=True)
+		if DEBUG:	print(f'DEBUG: SLIDESHOW_SETTINGS_MODULE_NAME not in sys.modules',flush=True,file=sys.stderr)
 		# Import the module dynamically, if it is not done already
 		try:
-			if DEBUG:	print(f'DEBUG: importing SLIDESHOW_SETTINGS_MODULE_NAME={SLIDESHOW_SETTINGS_MODULE_NAME} dynamically',flush=True)
+			if DEBUG:	print(f'DEBUG: importing SLIDESHOW_SETTINGS_MODULE_NAME={SLIDESHOW_SETTINGS_MODULE_NAME} dynamically',flush=True,file=sys.stderr)
 			#importlib.invalidate_caches()
 			SETTINGS_MODULE = importlib.import_module(SLIDESHOW_SETTINGS_MODULE_NAME)
 		except ImportError as e:
@@ -469,29 +469,29 @@ def load_settings():
 			print(f"load_settings: ERROR: Exception, failed to dynamically import user specified Settings from import module: '{SLIDESHOW_SETTINGS_MODULE_NAME}'\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)	
 	else:
-		if DEBUG:	print(f'DEBUG: SLIDESHOW_SETTINGS_MODULE_NAME IS in sys.modules',flush=True)
+		if DEBUG:	print(f'DEBUG: SLIDESHOW_SETTINGS_MODULE_NAME IS in sys.modules',flush=True,file=sys.stderr)
 		# Reload the module since it had been dynamically loaded already ... remember, global variables in thee module are not scrubbed by reloading
 		try:
-			if DEBUG:	print(f'DEBUG: reloading SETTINGS_MODULE={SETTINGS_MODULE} ',flush=True)
+			if DEBUG:	print(f'DEBUG: reloading SETTINGS_MODULE={SETTINGS_MODULE} ',flush=True,file=sys.stderr)
 			#importlib.invalidate_caches()
 			importlib.reload(SETTINGS_MODULE)
 		except Exception as e:
 			print(f"load_settings: ERROR: Exception, failed to RELOAD user specified Settings from import module: '{SLIDESHOW_SETTINGS_MODULE_NAME}'\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)
 	
-	#print(f'DEBUG: before import slideshow_settings.py static',flush=True)
+	#print(f'DEBUG: before import slideshow_settings.py static',flush=True,file=sys.stderr)
 	#import slideshow_settings
 	#user_specified_settings_dict = slideshow_settings.settings
-	#print(f'DEBUG: after import slideshow_settings.py static',flush=True)
+	#print(f'DEBUG: after import slideshow_settings.py static',flush=True,file=sys.stderr)
 
 	# retrieve the settigns from SLIDESHOW_SETTINGS_MODULE_NAME (SLIDESHOW_SETTINGS.py)
-	if DEBUG:	print(f"DEBUG: Attempting to load user_specified_settings_dict = SETTINGS_MODULE.settings'",flush=True)
+	if DEBUG:	print(f"DEBUG: Attempting to load user_specified_settings_dict = SETTINGS_MODULE.settings'",flush=True,file=sys.stderr)
 	try:
 		user_specified_settings_dict = SETTINGS_MODULE.settings
 	except Exception as e:
 		print(f"load_settings: ERROR: Exception, failed to execute 'user_specified_settings_dict = SETTINGS_MODULE.settings'\n{str(e)}",flush=True,file=sys.stderr)
 		sys.exit(1)
-	print(f'Successfully loaded user_specified_settings_dict=\n{objPrettyPrint.pformat(user_specified_settings_dict)}',flush=True)
+	print(f'Successfully loaded user_specified_settings_dict=\n{objPrettyPrint.pformat(user_specified_settings_dict)}',flush=True,file=sys.stderr)
 
 	#######################################################################################################################################
 	#######################################################################################################################################
@@ -565,7 +565,7 @@ def load_settings():
 		except Exception as e:
 			print(f"load_settings: ERROR: creating TEMP_FOLDER '{final_settings_dict['TEMP_FOLDER']}'\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)	
-		print(f'load_settings: created TEMP_FOLDER "{final_settings_dict["TEMP_FOLDER"]}"',flush=True)
+		print(f'load_settings: created TEMP_FOLDER "{final_settings_dict["TEMP_FOLDER"]}"',flush=True,file=sys.stderr)
 
 	# Check for out-of-spec values
 	# for now, no validation checking of values ...

@@ -904,8 +904,8 @@ def audio_standardize_and_import_file(audio_filename, headroom_db):
 		os.remove(temporary_audio_filename)
 
 	loglevel = 'warning'
-	#if DEBUG:
-	#	loglevel = 'info'
+	if DEBUG:
+		loglevel = 'info'
 	ffmpeg_commandline = [	FFMPEG_EXE,
 							'-hide_banner', 
 							'-loglevel', loglevel, 
@@ -920,8 +920,8 @@ def audio_standardize_and_import_file(audio_filename, headroom_db):
 							]
 	print(f"CONTROLLER: audio_standardize_and_import_file attempting to standardize audio using {ffmpeg_commandline}",flush=True)
 
-	# Method 1	works fine, especially when we flush. Produces output and errors to the console. 
-	#			Tempted to use that everywhere. We'll see with long-running vspipes whether we see timely regular output from vspipe or not.
+	# Method 1	works fine, especially when we flush in print stamenets. it produces output and errors to the console. 
+	#			Tempted to use Method 1 everywhere.  We'll see with long-running vspipes whether we view timely regular output from vspipe or not.
 	subprocess.run(ffmpeg_commandline, check=True)
 
 	try:
@@ -973,7 +973,7 @@ def audio_create_standardized_silence(duration_ms):
 	return audio
 
 ###
-def encode_using_vsipe_ffmpeg(individual_chunk_id):
+def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 	# encode an individual chunk using vspipe and ffmpeg
 	# 
 	# using ChatGPT suggested method for non-blocking reads of subprocess stderr, stdout
@@ -984,29 +984,45 @@ def encode_using_vsipe_ffmpeg(individual_chunk_id):
 	
 	global FFMPEG_EXE
 	global VSPIPE_EXE
-	
+
+	slideshow_ENCODER_legacy_path = SETTINGS_DICT['slideshow_ENCODER_legacy_path']
+
 	def enqueue_output(out, queue):
 		# for subprocess thread output queueing
 		for line in iter(out.readline, b''):
 			queue.put(line)
 		out.close()
 
-	#
 	individual_chunk_dict = ALL_CHUNKS[str(individual_chunk_id)]
-	proposed_ffv1_mkv_filename = fully_qualified_filename(individual_chunk_dict['proposed_ffv1_mkv_filename'])
-
-	# Define the commandlines for the subprocesses subprocesses
 	
-	vspipe_commandline = [VSPIPE_EXE, '--progress', '--filter-time', '--container', 'y4m', '.\slideshow_ENCODER.vpy', '-']
+	chunk_json_filename = fully_qualified_filename(individual_chunk_dict['chunk_fixed_json_filename'])					# always the same fixed filename
+	proposed_ffv1_mkv_filename = fully_qualified_filename(individual_chunk_dict['proposed_ffv1_mkv_filename'])	# preset by find_all_chunks to: fixed filename plus a seqential 5-digit-zero-padded ending based on chunk_id + r'.mkv'
 
-	ffmpeg_commandline = [	FFMPEG_EXE,
+	# remove any pre-existing files to be consumed and produced by the ENCODER
+	if os.path.exists(chunk_json_filename):
+		os.remove(chunk_json_filename)
+	if os.path.exists(proposed_ffv1_mkv_filename):
+		os.remove(proposed_ffv1_mkv_filename)
+
+	# create the fixed-filename chunk file consumed by the encoder; it contains the fixed-filename of the snippet file to produce
+	if DEBUG:	print(f"DEBUG: CONTROLLER: in encoder loop: attempting to create chunk_json_filename='{chunk_json_filename}' for encoder to consume.",flush=True)
+	try:
+		with open(chunk_json_filename, 'w') as fp:
+			json.dump(individual_chunk_dict, fp, indent=4)
+	except Exception as e:
+		print(f"CONTROLLER: ERROR: dumping current chunk to JSON file: '{chunk_json_filename}' for encoder, chunk_id={individual_chunk_id}, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}\n{str(e)}",flush=True,file=sys.stderr)
+		sys.exit(1)	
+	print(f"CONTROLLER: Created fixed-filename chunk file for encoder to consume: '{chunk_json_filename}' listing {ALL_CHUNKS[str(individual_chunk_id)]['num_files']} files, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}",flush=True)
+
+	# Define the commandlines for the subprocesses forming the ENCODER
+	vspipe_commandline = [VSPIPE_EXE, '--progress', '--filter-time', '--container', 'y4m', slideshow_ENCODER_legacy_path, '-']
+	ffmpeg_commandline = [FFMPEG_EXE,
 							'-hide_banner', 
-							'-loglevel', 'info', 
+							'-loglevel', 'warning', 
 							'-nostats', 
 							'-colorspace', 'bt709', 
 							'-color_primaries', 'bt709', 
-							'-color_trc', 
-							'bt709', 
+							'-color_trc', 'bt709', 
 							'-color_range', 'pc',
 							'-f', 'yuv4mpegpipe', 
 							'-i', 'pipe:',
@@ -1018,16 +1034,32 @@ def encode_using_vsipe_ffmpeg(individual_chunk_id):
 							'-an',
 							'-y', proposed_ffv1_mkv_filename
 							]
+	# this vspipe commandline is for DEBUGGING only
+	# it produces the vspipe output but directs it to NUL and does not invoke ffmpeg
+	# but it is still handy becuase it prodices updated snippet into into ALL_CHUNKS
+	vspipe_commandline = [VSPIPE_EXE, '--progress', '--container', 'y4m', '.\slideshow_ENCODER_legacy.vpy', 'NUL']
+
+	# run the vspipe -> ffmpeg with non-blocking reads of stderr and stdout
+	print(f"CONTROLLER: Running the ENCODER using commandlines:\n{vspipe_commandline}\n{ffmpeg_commandline}",flush=True)
 	try:	
-		# Run the commands in subprocesses
+		# Run the commands in subprocesses for the ENCODER
 		process1 = subprocess.Popen(vspipe_commandline, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		process2 = subprocess.Popen(ffmpeg_commandline, stdin=process1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+		
+		pid1 = process1.pid
+		pid2 = process2.pid
+		time.sleep(3)  # Add a delay of a couple of seconds
+		# Terminate subprocesses forcefully using taskkill if they aren't already terminated
+		os.system(f'taskkill /F /PID {process1.pid}')
+		os.system(f'taskkill /F /PID {process2.pid}')
+		sys.exit()
+
+		
 		# Create queues to store the output and error streams
 		stderr_queue1 = Queue()
 		stdout_queue2 = Queue()
 		stderr_queue2 = Queue()
-
 		# Launch separate threads to read the output and error streams
 		stderr_thread1 = Thread(target=enqueue_output, args=(process1.stderr, stderr_queue1))
 		stdout_thread2 = Thread(target=enqueue_output, args=(process2.stdout, stdout_queue2))
@@ -1038,7 +1070,6 @@ def encode_using_vsipe_ffmpeg(individual_chunk_id):
 		stderr_thread1.start()
 		stdout_thread2.start()
 		stderr_thread2.start()
-
 		# Read output and error streams
 		while True:
 			try:
@@ -1067,14 +1098,11 @@ def encode_using_vsipe_ffmpeg(individual_chunk_id):
 			# Introduce a 50ms delay to reduce CPU load
 			time.sleep(0.05)  # Sleep for 50 milliseconds so as to not thrash the cpu
 		#end while
-
 		# Retrieve the remaining output and error streams
 		output, error2 = process2.communicate()
 		error1 = process1.stderr.read()
-
 		# Decode any ffmpeg final output from bytes to string and print it
 		print(f"ffmpeg: {output.decode('utf-8').strip()}")
-
 		# Print any final error messages
 		if error1:
 				print(f"vspipe: {error1.decode('utf-8').strip()}")
@@ -1092,11 +1120,41 @@ def encode_using_vsipe_ffmpeg(individual_chunk_id):
 		process2.wait()
 		# Delay before terminating forcefully with taskkill
 		time.sleep(2)  # Add a delay of a couple of seconds
-		# Terminate subprocesses forcefully using taskkill if they arem
+		# Terminate subprocesses forcefully using taskkill if they aren't already terminated
 		os.system(f'taskkill /F /PID {process1.pid}')
 		os.system(f'taskkill /F /PID {process2.pid}')
 		# Raise the exception again
 		raise
+	except Exception as e:
+		print(f'CONTROLLER: ERROR RUNNING SUBPROCESSES, :\n{e}\n{type(e)}\n{str(e)}',flush=True)
+		raise e
+
+	time.sleep(2.0)	# give it a chance (2 seconds) to settle down
+	print(f"CONTROLLER: Finished running the ENCODER.",flush=True)
+	if not os.path.exists(chunk_json_filename):
+		print(f"CONTROLLER: ERROR: CONTROLLER: encoder-updated current chunk to JSON file file not found '{chunk_json_filename}' not found !",flush=True)
+		sys.exit(1)
+	if not os.path.exists(proposed_ffv1_mkv_filename):
+		print(f"CONTROLLER: ERROR: CONTROLLER: encoder-produced .mkv video file not found '{proposed_ffv1_mkv_filename}' not found !",flush=True)
+		sys.exit(1)
+
+	# Now the encoder has encoded a chunk and produced an updated chunk file and an ffv1 encoded video .mkv 
+	# ... we must import updated chunk file (which will include a new snippet_list) check the chunk, and update the ALL_CHUNKS dict with updated chunk data
+	# The format of the snippet_list produced by the encoder into the updated chunk JSON file is defined above.
+	if DEBUG:	print(f"DEBUG: CONTROLLER: in encoder loop: attempting to load chunk_json_filename={chunk_json_filename} produced by the encoder.",flush=True)
+	try:
+		with open(chunk_json_filename, 'r') as fp:
+			updated_individual_chunk_dict = json.load(fp)
+	except Exception as e:
+		print(f"CONTROLLER: ERROR: CONTROLLER: loading updated current chunk from JSON file: '{chunk_json_filename}' from encoder, chunk_id={individual_chunk_id}, related to individual_chunk_dict=\nobjPrettyPrint.pformat(individual_chunk_dict)\n{str(e)}",flush=True,file=sys.stderr)
+		sys.exit(1)	
+	print(f"CONTROLLER: Loaded updated current chunk from ENCODER-updated JSON file: '{chunk_json_filename}'",flush=True)
+	if (updated_individual_chunk_dict['chunk_id'] !=  individual_chunk_dict['chunk_id']) or (updated_individual_chunk_dict['chunk_id'] != individual_chunk_id):
+		print(f"CONTROLLER: ERROR: the chunk_id returned from the encoder={updated_individual_chunk_dict['chunk_id']} in updated_individual_chunk_dict does not match both expected individual_chunk_dict chunk_id={individual_chunk_dict['chunk_id']} or loop's individual_chunk_id={individual_chunk_id}",flush=True)
+		sys.exit(1)
+	# poke the chunk updated by the encoder back into global ALL_CHUNKS ... it should contain snippet data now.
+	ALL_CHUNKS[str(individual_chunk_id)] = updated_individual_chunk_dict
+
 	return
 
 ##################################################
@@ -1138,14 +1196,11 @@ if __name__ == "__main__":
 	##########################################################################################################################################
 	##########################################################################################################################################
 	# FIND PIC/IMAGES
-
 	print(f"{100*'-'}",flush=True)
 	print(f'CONTROLLER: STARTING FIND/CHECK OF PIC AND IMAGES')
 	
 	# Locate all openable files and put them into chunks in a dict, including { proposed filename for the encoded chunk, first/last frames, number of frames in chunk } 
-
 	ALL_CHUNKS_COUNT, ALL_CHUNKS_COUNT_OF_FILES, ALL_CHUNKS = find_all_chunks()	# it uses settings in SETTINGS_DICT to do its thing
-	
 	if DEBUG:	print(f"DEBUG: retrieved ALL_CHUNKS tree: chunks: {ALL_CHUNKS_COUNT} files: {ALL_CHUNKS_COUNT_OF_FILES} dict:\n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
 
 	# create .JSON file containing the ALL_CHUNKS  dict. Note the start/stop frames etc are yet to be updated by the encoder
@@ -1162,10 +1217,8 @@ if __name__ == "__main__":
 	# INTERIM ENCODING OF CHUNKS INTO INTERIM FFV1 VIDEO FILES, 
 	# SAVING FRAME NUMBERS AND NUM VIDEO FRAMES INFO SNIPPET DICT, 
 	# CREATING SNIPPET JSON, IMPORTING JSON AND ADDING TO ALL_SNIPPETS DICT:
-
 	print(f"{100*'-'}",flush=True)
 	print(f'CONTROLLER: STARTING INTERIM ENCODING OF CHUNKS INTO INTERIM FFV1 VIDEO FILES')
-		
 	if DEBUG:	
 		print(f"DEBUG: CONTROLLER: Starting encoder loop for each of ALL_CHUNKS tree. chunks: {ALL_CHUNKS_COUNT} files: {ALL_CHUNKS_COUNT_OF_FILES}",flush=True)
 	
@@ -1177,25 +1230,8 @@ if __name__ == "__main__":
 		individual_chunk_dict = ALL_CHUNKS[str(individual_chunk_id)]
 
 		chunk_json_filename = fully_qualified_filename(individual_chunk_dict['chunk_fixed_json_filename'])					# always the same fixed filename
-		#### the CHUNK JASON FILE IS UPDATED AND RE-WRITTEN AND RE-READ, not a separate SNIPPETS FILE 
 		proposed_ffv1_mkv_filename = fully_qualified_filename(individual_chunk_dict['proposed_ffv1_mkv_filename'])	# preset by find_all_chunks to: fixed filename plus a seqential 5-digit-zero-padded ending based on chunk_id + r'.mkv'
 		
-		# remove any pre-existing files to be consumed and produced by the encoder
-		if os.path.exists(chunk_json_filename):
-			os.remove(chunk_json_filename)
-		if os.path.exists(proposed_ffv1_mkv_filename):
-			os.remove(proposed_ffv1_mkv_filename)
-		
-		# create the fixed-filename chunk file consumed by the encoder; it contains the fixed-filename of the snippet file to produce
-		if DEBUG:	print(f"DEBUG: CONTROLLER: in encoder loop: attempting to create chunk_json_filename='{chunk_json_filename}' for encoder to consume.",flush=True)
-		try:
-			with open(chunk_json_filename, 'w') as fp:
-				json.dump(individual_chunk_dict, fp, indent=4)
-		except Exception as e:
-			print(f"CONTROLLER: ERROR: dumping current chunk to JSON file: '{chunk_json_filename}' for encoder, chunk_id={individual_chunk_id}, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}\n{str(e)}",flush=True,file=sys.stderr)
-			sys.exit(1)	
-		print(f"CONTROLLER: Created fixed-filename chunk file for encoder to consume: '{chunk_json_filename}' listing {ALL_CHUNKS[str(individual_chunk_id)]['num_files']} files, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}",flush=True)
-
 		if DEBUG:	print(f"DEBUG: CONTROLLER: encoder loop: calling the encoder, VSPIPE piped to FFMPEG ... with controller using non-blocking reads of stdout and stderr (per chatgpt).",flush=True)
 		# These fields in a chunk dict need to be updated by the encoder:
 		#	'num_frames_in_chunk'
@@ -1209,105 +1245,12 @@ if __name__ == "__main__":
 		#			'end_frame_of_snippet_in_chunk': XXX, 				# filled in by encoder
 		#			'snippet_num_frames': YYY,							# filled in by encoder
 		#			'snippet_source_video_filename': '\a\b\c\ZZZ1.3GP'	# filled in by encoder
-		
-		
-		
-	
-		
-		# NOT YET ENCODE WITH FFMPEG, ONLY TEST WITH VSPIPE
-		#encode_using_vsipe_ffmpeg(individual_chunk_id)
 
-		# Run vspipe command by itself
-		vspipe_commandline = [VSPIPE_EXE, '--progress', '--container', 'y4m', '.\slideshow_ENCODER_legacy.vpy', 'NUL']
-
-		print(f"Methosd 1: vspipe_commandline={vspipe_commandline}",flush=True)
-
-		# method 1
-		print(f"Methosd 1: vspipe_commandline={vspipe_commandline}",flush=True)
-		subprocess.run(vspipe_commandline, check=True)
-
-		# method 2
-		#try:
-		#	subprocess.run(vspipe_commandline, check=True)
-		#except subprocess.CalledProcessError as e:
-		#	print(f"CONTROLLER: vspipe command {vspipe_commandline} error:\n{e}",flush=True,file=sys.stderr)
-		#	raise e
-		#	sys.exit(1)
-
-		# method 3
-		#vspipe_result = subprocess.run(vspipe_commandline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-		#vspipe_stdout_output = vspipe_result.stdout.decode('utf-8')
-		#vspipe_stderr_output = vspipe_result.stderr.decode('utf-8')
-		#print(vspipe_stdout_output,flush=True)
-		#print(vspipe_stderr_output,flush=True,file=sys.stderr)
-
-		# method 4
-		#try:
-		#	# Run vspipe command and capture outputs
-		#	vspipe_result = subprocess.run(vspipe_commandline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-		#except subprocess.CalledProcessError as e:
-		#	try:
-		#		vspipe_stdout_output = vspipe_result.stdout.decode('utf-8')
-		#		vspipe_stderr_output = vspipe_result.stderr.decode('utf-8')
-		#		print(vspipe_stdout_output,flush=True)
-		#		print(vspipe_stderr_output,flush=True,file=sys.stderr)
-		#	except Exception as ex:
-		#		print(f"CONTROLLER: Unable to retrieve and print stdout and stderr from subprocesss exception from the vspipe command.")
-		#		pass
-		#	print(f"CONTROLLER: vspipe command {vspipe_commandline} raised error:\n{e}", flush=True, file=sys.stderr)
-		#	raise e
-		#	sys.exit(1)
-		#vspipe_stdout_output = vspipe_result.stdout.decode('utf-8')
-		#print(vspipe_stdout_output, flush=True)
-		#vspipe_stderr_output = vspipe_result.stderr.decode('utf-8')
-		#print(vspipe_stderr_output,flush=True,file=sys.stderr)
-
-
-
-
-
-
-
-
-
-
-		time.sleep(1)
-
-
+		#+++
+		encode_chunk_using_vsipe_ffmpeg(individual_chunk_id)
+		#+++
 	
 		if DEBUG:	print(f"DEBUG: encoder loop: returned from the encoder, VSPIPE piped to FFMPEG ... with controller using non-blocking reads of stdout and stderr (per chatgpt).",flush=True)
-
-		# Now the encoder has encoded a chunk and produced an updated chunk file and an ffv1 encoded video .mkv 
-		# ... we must import updated chunk file (which will include a new snippet_list) check the chunk, and update the ALL_CHUNKS dict with updated chunk data
-		# The format of the snippet_list produced by the encoder into the updated chunk JSON file is defined above.
-		
-		if not os.path.exists(chunk_json_filename):
-			print(f"CONTROLLER: ERROR: controller: encoder-updated current chunk to JSON file file not found '{chunk_json_filename}' not found !",flush=True)
-			sys.exit(1)
-		
-		
-		# TEMPORARILY DISABLE THE CHECK FOR A VALID FFV1 FILE
-		
-		#if not os.path.exists(proposed_ffv1_mkv_filename):
-		#	print(f"CONTROLLER: ERROR: controller: encoder-produced .mkv video file not found '{proposed_ffv1_mkv_filename}' not found !",flush=True)
-		#	sys.exit(1)
-		
-		
-		
-		
-		if DEBUG:	print(f"DEBUG: controller: in encoder loop: attempting to load chunk_json_filename={chunk_json_filename} produced by the encoder.",flush=True)
-		try:
-			with open(chunk_json_filename, 'r') as fp:
-				updated_individual_chunk_dict = json.load(fp)
-		except Exception as e:
-			print(f"CONTROLLER: ERROR: controller: loading updated current chunk from JSON file: '{chunk_json_filename}' from encoder, chunk_id={individual_chunk_id}, related to individual_chunk_dict=\nobjPrettyPrint.pformat(individual_chunk_dict)\n{str(e)}",flush=True,file=sys.stderr)
-			sys.exit(1)	
-		print(f"CONTROLLER: Loaded updated current chunk from JSON file: '{chunk_json_filename}'",flush=True)
-		if (updated_individual_chunk_dict['chunk_id'] !=  individual_chunk_dict['chunk_id']) or (updated_individual_chunk_dict['chunk_id'] != individual_chunk_id):
-			print(f"CONTROLLER: ERROR: controller: the chunk_id returned from the encoder={updated_individual_chunk_dict['chunk_id']} in updated_individual_chunk_dict does not match both expected individual_chunk_dict chunk_id={individual_chunk_dict['chunk_id']} or loop's individual_chunk_id={individual_chunk_id}",flush=True)
-			sys.exit(1)
-		# poke the chunk updated by the encoder back into ALL_CHUNKS ... it should contain snippet data now.
-		ALL_CHUNKS[str(individual_chunk_id)] = updated_individual_chunk_dict
 	#end for
 
 	if DEBUG:
@@ -1375,12 +1318,6 @@ if __name__ == "__main__":
 	# USE SNIPPET INFO TO OVERLAY SNIPPET AUDIO INTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4 (so pydub accepts it):
 	print(f"{100*'-'}",flush=True)
 	print(f'CONTROLLER: STARTING OVERLAY SNIPPETS AUDIOS ONTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4')
-	
-	
-	# ????
-	DEBUG = True
-	# ????
-	
 
 	final_video_frame_count = end_frame_num_of_final_video + 1		# base 0
 	final_video_fps = SETTINGS_DICT['TARGET_FPS']
