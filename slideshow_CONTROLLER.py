@@ -896,22 +896,22 @@ def audio_standardize_and_import_file(audio_filename):
 	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']				# hopefully '256k'
 	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']			# hopefully pcm_s16le ; for 16 bit
 	target_audio_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_NORMALIZE_HEADROOM_DB']		# normalize audios to this maximum DB
+	target_audio_gain_during_overlay = SETTINGS_DICT['TARGET_AUDIO_GAIN_DURING_OVERLAY']			# how many DB to reduce backround audio during video clip audio overlay
 	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder
 
 	if os.path.exists(temporary_audio_filename):
 		os.remove(temporary_audio_filename)
 
-	if DEBUG:
-		loglevel = 'info'
-	else:
-		loglevel = 'warning'
+	loglevel = 'warning'
+	#if DEBUG:
+	#	loglevel = 'info'
 	ffmpeg_commandline = [	FFMPEG_EXE,
 							'-hide_banner', 
 							'-loglevel', loglevel, 
 							'-nostats', 
 							'-i', audio_filename,
 							'-vn',
-							'-af', f'ebur128=peak=true:target={target_audio_normalize_headroom_db}:dualmono=true',	# this mornalizes the audio using industry standard ebur128
+							'-af', f'ebur128=peak=true:target={target_audio_normalize_headroom_db}:dualmono=true',	# this normalizes audio using industry standard ebur128; it takes a while
 							'-acodec', temporary_background_audio_codec,
 							'-ac', str(target_background_audio_channels),
 							'-ar', str(target_background_audio_frequency),
@@ -962,7 +962,8 @@ def audio_create_standardized_silence(duration_ms):
 	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']				# hopefully '256k'
 	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']			# hopefully pcm_s16le ; for 16 bit
 	target_audio_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_NORMALIZE_HEADROOM_DB']		# normalize audios to this maximum DB
-	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder
+	target_audio_gain_during_overlay = SETTINGS_DICT['TARGET_AUDIO_GAIN_DURING_OVERLAY']			# how many DB to reduce backround audio during video clip audio overlay
+	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder						# in temp folder
 
 	audio = AudioSegment.silent(duration=padding_duration)
 	audio = audio.set_channels(target_background_audio_channels).set_sample_width(target_background_audio_bytedepth).set_frame_rate(target_background_audio_frequency)
@@ -1373,14 +1374,11 @@ if __name__ == "__main__":
 	print(f"{100*'-'}",flush=True)
 	print(f'CONTROLLER: STARTING OVERLAY SNIPPETS AUDIOS ONTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4')
 	
-
-
-
-
+	
+	# ????
 	DEBUG = True
-
-
-
+	# ????
+	
 
 	final_video_frame_count = end_frame_num_of_final_video + 1		# base 0
 	final_video_fps = SETTINGS_DICT['TARGET_FPS']
@@ -1402,6 +1400,7 @@ if __name__ == "__main__":
 	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']				# hopefully '256k'
 	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']			# hopefully pcm_s16le ; for 16 bit
 	target_audio_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_NORMALIZE_HEADROOM_DB']		# normalize audios to this maximum DB
+	target_audio_gain_during_overlay = SETTINGS_DICT['TARGET_AUDIO_GAIN_DURING_OVERLAY']			# how many DB to reduce backround audio during video clip audio overlay
 	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder
 	
 	snippet_audio_fade_in_duration_ms = SETTINGS_DICT['SNIPPET_AUDIO_FADE_IN_DURATION_MS']
@@ -1454,11 +1453,9 @@ if __name__ == "__main__":
 
 
 
-
-
-
 	# loop through chunks, and snippets within chunks, overlaying sandardized audio onto background_audio as we go
 	running_snippet_count = 0
+	snippet_processing_summary = []
 	for individual_chunk_id in range(0,ALL_CHUNKS_COUNT):	# 0 to (ALL_CHUNKS_COUNT - 1)
 		individual_chunk_dict = ALL_CHUNKS[str(individual_chunk_id)]
 		num_files = individual_chunk_dict['num_files']
@@ -1532,34 +1529,53 @@ if __name__ == "__main__":
 				if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} calculated snippet_fade_out_start_time_ms={snippet_fade_out_start_time_ms} fade_out_end_time={snippet_fade_out_end_time}",flush=True)
 				if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} calculated snippet_fade_in_start_time_ms={snippet_fade_in_start_time_ms} snippet_fade_in_end_time_ms={snippet_fade_in_end_time_ms}",flush=True)
 
+				# FADE does not seem to work properly, so ignore it ... 
 				# Apply fade-in and fade-out effects to the background audio either side of the insertion point
 				# https://github.com/jiaaro/pydub/blob/master/API.markdown
-				if snippet_fade_out_start_time_ms >= 0:
-					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count}, applying 'fade-out', 'fade_in', to background_audio",flush=True)
-					# careful not to try: background_audio.fade_out().fade_in() because I am unsure of the order (real vs theeoretical)
-					background_audio = background_audio.fade(to_gain=-120.0,start=snippet_fade_out_start_time_ms,duration=snippet_audio_fade_out_duration_ms)
-					background_audio = background_audio.fade(from_gain=-120.0,start=snippet_fade_in_start_time_ms,duration=snippet_audio_fade_in_duration_ms)
-				else:
-					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count}, NO fade-in, NO fade_out, applied to background_audio since snippet_fade_out_start_time_ms {snippet_fade_out_start_time_ms} < 0",flush=True)
+				#if snippet_fade_out_start_time_ms >= 0:
+				#	if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count}, applying 'fade-out', 'fade_in', to background_audio",flush=True)
+				#	# careful not to try: "background_audio.fade_out().fade_in()" because I am unsure of the order (real vs theeoretical)
+				#	background_audio = background_audio.fade(from_gain=0,to_gain=-18.0,start=snippet_fade_out_start_time_ms,duration=snippet_audio_fade_out_duration_ms)	#-120 is silent during fade
+				#	background_audio = background_audio.fade(from_gain=-18.0,to_gain=0,start=snippet_fade_in_start_time_ms,duration=snippet_audio_fade_in_duration_ms)	#-120 is silent during fade
+				#else:
+				#	if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count}, NO fade-in, NO fade_out, applied to background_audio since snippet_fade_out_start_time_ms {snippet_fade_out_start_time_ms} < 0",flush=True)
 
 				# Overlay the snippet audio onto the background audio at the specified position
 				# Use gain_during_overlay even if fading is applied above
 				# 		Change the original audio by this many dB while overlaying audio. 
 				#		This can be used to make the original audio quieter while the overlaid audio plays.
 				#		example: -6.0 default: 0 (no change in volume during overlay) 
-
 				start_position_of_snippet_in_final_video_ms = int((float(start_frame_of_snippet_in_final_video) / float(final_video_fps)) * 1000.0)
 				end_position_of_snippet_in_final_video_ms = int((float(end_frame_of_snippet_in_final_video) / float(final_video_fps)) * 1000.0)
 				if DEBUG:
 					print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count}, applying snippet using 'overlay' to background_audio",flush=True)
 					print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: start_position_of_snippet_in_final_video_s={float(start_position_of_snippet_in_final_video_ms)/1000.0} end_position_of_snippet_in_final_video_s={float(end_position_of_snippet_in_final_video_ms)/1000.0} snippet_audio_len={float(snippet_audio_len)/1000.0}",flush=True)
-				background_audio = background_audio.overlay(snippet_audio, position=start_position_of_snippet_in_final_video_ms, gain_during_overlay=-120.0, loop=False)
+				background_audio = background_audio.overlay(snippet_audio, loop=False, times=1, position=start_position_of_snippet_in_final_video_ms, gain_during_overlay=target_audio_gain_during_overlay)	# -120 is silent during overlay
+				snippet_processing_summary.append(	[	{	'background_audio_len_ms':						background_audio_len,
+															'snippet_seq_no':								running_snippet_count,
+															'snippet_final_duration__ms':					snippet_audio_len,
+															'snippet_fade_out_start_time_ms':				snippet_fade_out_start_time_ms,
+															'snippet_audio_fade_out_duration_ms':			snippet_audio_fade_out_duration_ms,
+															'snippet_fade_out_end_time_ms':					snippet_fade_out_end_time,
+															'start_position_of_snippet_in_final_video_ms':	start_position_of_snippet_in_final_video_ms,
+															'end_position_of_snippet_in_final_video_ms':	end_position_of_snippet_in_final_video_ms,
+															'snippet_fade_in_start_time_ms':				snippet_fade_in_start_time_ms,
+															'snippet_audio_fade_in_duration_ms':			snippet_audio_fade_in_duration_ms,
+															'end_fadein_ms_in_background_ms':				snippet_fade_in_end_time_ms, 
+															'snippet_filename':								snippet_source_video_filename
+														}
+													] )
 		#end for
 	#end for
+
+	if DEBUG:
+		print(f"{100*'-'}",flush=True)
+		print(f"DEBUG: CONTROLLER: FINISHED SNIPPET PROCESSING. SUMMARY:\n{objPrettyPrint.pformat(snippet_processing_summary)}",flush=True)
+		print(f"{100*'-'}",flush=True)
+
 	
 	# OK, by now we have a standardized background_audio in 'background_audio'
 	# Export it to background_audio_with_overlaid_snippets_filename (pydub hates .m4a so use .mp4 instead)
-	
 	try:
 		export_format = r'mp4'
 		export_parameters = ["-ar", str(target_background_audio_frequency), "-ac", str(target_background_audio_channels)]

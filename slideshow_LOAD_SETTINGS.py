@@ -250,7 +250,8 @@ def load_settings():
 	TARGET_BACKGROUND_AUDIO_BYTEDEPTH			= int(2)		# 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
 	TARGET_BACKGROUND_AUDIO_CODEC				= r'libfdk_aac'
 	TARGET_BACKGROUND_AUDIO_BITRATE				= r'256k'
-	TARGET_AUDIO_NORMALIZE_HEADROOM_DB			= int(-2)		# normalize audio to -xxDB ; pydub calls it headroom
+	TARGET_AUDIO_NORMALIZE_HEADROOM_DB			= int(-6)		# normalize audio to -xxDB ; pydub calls it headroom
+	TARGET_AUDIO_GAIN_DURING_OVERLAY			= int(-28)		# reduce audio of background music during overlay of snippet audio by xxDB
 
 	TEMPORARY_BACKGROUND_AUDIO_CODEC			= r'pcm_s16le'	# ; for 16 bit .wav
 	TEMPORARY_AUDIO_FILENAME					= os.path.join(TEMP_FOLDER, r'temporary_audio_file_for_standardization_then_input_to_pydub.wav')	# file is overwritten and deleted as needed
@@ -362,6 +363,7 @@ def load_settings():
 		'TARGET_BACKGROUND_AUDIO_CODEC':			TARGET_BACKGROUND_AUDIO_CODEC,
 		'TARGET_BACKGROUND_AUDIO_BITRATE':			TARGET_BACKGROUND_AUDIO_BITRATE,
 		'TARGET_AUDIO_NORMALIZE_HEADROOM_DB':		TARGET_AUDIO_NORMALIZE_HEADROOM_DB,
+		'TARGET_AUDIO_GAIN_DURING_OVERLAY':			TARGET_AUDIO_GAIN_DURING_OVERLAY,
 
 		'TEMPORARY_BACKGROUND_AUDIO_CODEC':			TEMPORARY_BACKGROUND_AUDIO_CODEC,
 		'TEMPORARY_AUDIO_FILENAME':					TEMPORARY_AUDIO_FILENAME,
@@ -429,7 +431,8 @@ def load_settings():
 										[ 'CROSSFADE_TYPE',								CROSSFADE_TYPE,								r'random is a good choice, leave this alone unless confident' ],
 										[ 'CROSSFADE_DIRECTION',						CROSSFADE_DIRECTION,						r'Please leave this alone unless really confident' ],
 										[ 'DURATION_MAX_VIDEO_SEC',						DURATION_MAX_VIDEO_SEC,						r'in seconds, maximum duration each video clip is shown in the slideshow' ],
-										[ 'TARGET_AUDIO_NORMALIZE_HEADROOM_DB',			TARGET_AUDIO_NORMALIZE_HEADROOM_DB,			r'normalize audios to this maximum db' ],
+										[ 'TARGET_AUDIO_NORMALIZE_HEADROOM_DB',			TARGET_AUDIO_NORMALIZE_HEADROOM_DB,			r'normalize all audios to this maximum db' ],
+										[ 'TARGET_AUDIO_GAIN_DURING_OVERLAY',			TARGET_AUDIO_GAIN_DURING_OVERLAY,			r'how many DB to reduce backround audio during video clip audio overlay' ],
 										[ 'DEBUG',										DEBUG,										r'see and regret seeing, ginormous debug output' ],
 										[ 'FFMPEG_PATH',								FFMPEG_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'FFPROBE_PATH',								FFPROBE_PATH,								r'Please leave this alone unless really confident' ],
