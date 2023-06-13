@@ -1311,7 +1311,7 @@ if __name__ == "__main__":
 	# so we can refer to absolute final-video frame numbers rather than chunk-internal frame numbers
 
 	print(f"{100*'-'}",flush=True)
-	print(f"CONTROLLER: STARTING RE-PARSE OF ALL_CHUNKS TREE DICT TO RE-CALCULATE AND SAVE GLOBAL FRAME NUMBERS. NUMVER OF CHUNKS TO PROCESS: {ALL_CHUNKS_COUNT}.",flush=True)
+	print(f"CONTROLLER: STARTING RE-PARSE OF ALL_CHUNKS TREE DICT TO RE-CALCULATE AND SAVE GLOBAL FRAME NUMBERS. NUMBER OF CHUNKS TO PROCESS: {ALL_CHUNKS_COUNT}.",flush=True)
 
 	# To be calculated and updated in each chunk at the chunk level:
 	#		ALL_CHUNKS[str(individual_chunk_id)]['start_frame_num_of_chunk_in_final_video']
@@ -1423,21 +1423,12 @@ if __name__ == "__main__":
 	# now normalize the background_audio
 	#background_audio = background_audio.apply_gain(target_audio_background_normalize_headroom_db - background_audio.max_dBFS)
 
-
-
-
-	# ???????????????????????????????????
 	if DEBUG:
 		debug_background_audio_input_filename = temporary_audio_filename + r'_DEBUG.BACKGROUND_AUDIO_TRIMMED' + '.mp4'
 		debug_export_format = r'mp4'
 		debug_export_parameters = ["-ar", str(target_background_audio_frequency), "-ac", str(target_background_audio_channels)]
 		background_audio.export(debug_background_audio_input_filename, format=debug_export_format, codec=target_background_audio_codec, bitrate=str(target_background_audio_bitrate), parameters=debug_export_parameters)
 		print(f"DEBUG: CONTROLLER: exported {background_audio_input_filename} converted and trimmed audio to '{debug_background_audio_input_filename}'",flush=True)
-	# ???????????????????????????????????
-
-
-
-
 
 	# loop through chunks, and snippets within chunks, overlaying sandardized audio onto background_audio as we go
 	running_snippet_count = 0
@@ -1492,18 +1483,12 @@ if __name__ == "__main__":
 				# now normalize the snippet_audio
 				#snippet_audio = snippet_audio.apply_gain(target_audio_snippet_normalize_headroom_db - snippet_audio.max_dBFS)
 
-
-
-				# ???????????????????????????????????
 				if DEBUG:
 					debug_background_audio_with_overlaid_snippets_filename = temporary_audio_filename + r'_DEBUG.converted.audio.from.snippet.' + str(running_snippet_count) + '.mp4'
 					debug_export_format = r'mp4'
 					debug_export_parameters = ["-ar", str(target_background_audio_frequency), "-ac", str(target_background_audio_channels)]
 					snippet_audio.export(debug_background_audio_with_overlaid_snippets_filename, format=debug_export_format, codec=target_background_audio_codec, bitrate=str(target_background_audio_bitrate), parameters=debug_export_parameters)
 					print(f"DEBUG: CONTROLLER: exported snippet {running_snippet_count} converted audio to '{debug_background_audio_with_overlaid_snippets_filename}'",flush=True)
-				# ???????????????????????????????????
-
-
 
 				# Calculate the pre and post fade times for the snippet
 				#	Fade out (to silent) the end of this AudioSegment

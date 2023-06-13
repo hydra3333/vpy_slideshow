@@ -293,7 +293,9 @@ IF EXIST "%vs_temp%ffmpeg.zip" (del /f "%vs_temp%ffmpeg.zip")
 "%vs_CD%wget.exe" -v -t 1 --server-response --no-check-certificate --timeout=360 -nd -np -nH --no-cookies --output-document="%vs_temp%ffmpeg.zip" https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip
 "%vs_path%7za.exe" e -y -aoa "%vs_temp%ffmpeg.zip" -o"%vs_path%" ffmpeg-master-latest-win64-gpl\bin
 copy /Y /V "%vs_path%ffmpeg.exe" "%vs_CD%"
+copy /Y /V "%vs_path%ffmpeg.exe" "%vs_path%"
 copy /Y /V "%vs_path%ffprobe.exe" "%vs_CD%"
+copy /Y /V "%vs_path%ffprobe.exe" "%vs_path%"
 
 REM THIS WORKS TO RETRIEVE THE LATEST RELEASE FROM GITHUB
 CD "%py_path%"
