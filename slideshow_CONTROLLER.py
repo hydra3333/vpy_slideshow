@@ -878,7 +878,6 @@ def find_all_chunks():
 			file2 = chunks[str(i)]["file_list"][j]
 
 	print(f"CONTROLLER: Finished assigning files into chunks for processing: {count_of_files} files into {chunk_count} chunks.",flush=True)
-
 	return chunk_count, count_of_files, chunks
 
 ###
@@ -902,7 +901,7 @@ def audio_standardize_and_import_file(audio_filename):
 		os.remove(temporary_audio_filename)
 
 	if DEBUG:
-		loglevel = 'verbose'
+		loglevel = 'info'
 	else:
 		loglevel = 'warning'
 	ffmpeg_commandline = [	FFMPEG_EXE,
@@ -916,8 +915,7 @@ def audio_standardize_and_import_file(audio_filename):
 							'-ar', str(target_background_audio_frequency),
 							'-y', temporary_audio_filename
 							]
-
-	print(f"CONTROLLER: audio_standardize_and_import_file attempting to audio using {ffmpeg_commandline}",flush=True)
+	print(f"CONTROLLER: audio_standardize_and_import_file attempting to standardize audio using {ffmpeg_commandline}",flush=True)
 
 	# Method 1	works fine, especially when we flush. Produces output and errors to the console. 
 	#			Tempted to use that everywhere. We'll see with long-running vspipes whether we see timely regular output from vspipe or not.
@@ -926,21 +924,21 @@ def audio_standardize_and_import_file(audio_filename):
 	try:
 		audio = AudioSegment.from_file(temporary_audio_filename)
 		audio = audio.set_channels(target_background_audio_channels).set_sample_width(target_background_audio_bytedepth).set_frame_rate(target_background_audio_frequency)
-	except FileNotFoundError:
-		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio File not found from AudioSegment.from_file('{temporary_audio_filename}')",flush=True,file=sys.stderr)
-		sys.exit(1)
-	except TypeError:
-		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio Type mismatch or unsupported operation from AudioSegment.from_file('{temporary_audio_filename}')",flush=True,file=sys.stderr)
-		sys.exit(1)
-	except ValueError:
-		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio Invalid or unsupported value from AudioSegment.from_file('{temporary_audio_filename}')",flush=True,file=sys.stderr)
-		sys.exit(1)
-	except IOError:
-		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio I/O error occurred from AudioSegment.from_file('{temporary_audio_filename}')",flush=True,file=sys.stderr)
-		sys.exit(1)
-	except OSError as e:
-		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio Unexpected OSError from AudioSegment.from_file('{temporary_audio_filename}')\n{str(e)}",flush=True,file=sys.stderr)
-		sys.exit(1)
+	#except FileNotFoundError:
+	#	print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio File not found from AudioSegment.from_file('{temporary_audio_filename}')",flush=True,file=sys.stderr)
+	#	sys.exit(1)
+	#except TypeError:
+	#	print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio Type mismatch or unsupported operation from AudioSegment.from_file('{temporary_audio_filename}')",flush=True,file=sys.stderr)
+	#	sys.exit(1)
+	#except ValueError:
+	#	print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio Invalid or unsupported value from AudioSegment.from_file('{temporary_audio_filename}')",flush=True,file=sys.stderr)
+	#	sys.exit(1)
+	#except IOError:
+	#	print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio I/O error occurred from AudioSegment.from_file('{temporary_audio_filename}')",flush=True,file=sys.stderr)
+	#	sys.exit(1)
+	#except OSError as e:
+	#	print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio Unexpected OSError from AudioSegment.from_file('{temporary_audio_filename}')\n{str(e)}",flush=True,file=sys.stderr)
+	#	sys.exit(1)
 	except Exception as e:
 		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio Unexpected error from AudioSegment.from_file('{temporary_audio_filename}')\n{str(e)}",flush=True,file=sys.stderr)
 		sys.exit(1)
@@ -1372,9 +1370,14 @@ if __name__ == "__main__":
 	print(f"{100*'-'}",flush=True)
 	print(f'CONTROLLER: STARTING OVERLAY SNIPPETS AUDIOS ONTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4')
 	
-	
+
+
+
+
 	DEBUG = True
-	
+
+
+
 
 	final_video_frame_count = end_frame_num_of_final_video + 1		# base 0
 	final_video_fps = SETTINGS_DICT['TARGET_FPS']
@@ -1429,6 +1432,23 @@ if __name__ == "__main__":
 		background_audio = background_audio[:final_video_duration_ms]
 	background_audio_len = len(background_audio)
 
+
+
+	# ???????????????????????????????????
+	if DEBUG:
+		debug_background_audio_input_filename = temporary_audio_filename + r'_DEBUG.background_audio_trimmed' + '.mp4'
+		debug_export_format = r'mp4'
+		debug_export_parameters = ["-ar", str(target_background_audio_frequency), "-ac", str(target_background_audio_channels)]
+		background_audio.export(debug_background_audio_input_filename, format=debug_export_format, codec=target_background_audio_codec, bitrate=str(target_background_audio_bitrate), parameters=debug_export_parameters)
+	# ???????????????????????????????????
+
+
+
+
+
+
+
+
 	# loop through chunks, and snippets within chunks, overlaying sandardized audio onto background_audio as we go
 	running_snippet_count = 0
 	for individual_chunk_id in range(0,ALL_CHUNKS_COUNT):	# 0 to (ALL_CHUNKS_COUNT - 1)
@@ -1455,7 +1475,7 @@ if __name__ == "__main__":
 				start_frame_of_snippet_in_final_video = individual_snippet_dict['start_frame_of_snippet_in_final_video'] 
 				end_frame_of_snippet_in_final_video = individual_snippet_dict['end_frame_of_snippet_in_final_video'] 
 
-				# Load the snippet audio
+				# Load a snippet audio
 				if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: about to get audio from snippet {running_snippet_count} via AudioSegment.from_file('{snippet_source_video_filename}')",flush=True)
 				snippet_audio = audio_standardize_and_import_file(snippet_source_video_filename)
 
@@ -1478,6 +1498,19 @@ if __name__ == "__main__":
 					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} snippet audio was {snippet_audio_len}ms, trimming to {snippet_duration_ms}ms",flush=True)
 					snippet_audio = snippet_audio[:snippet_duration_ms]
 				snippet_audio_len = len(snippet_audio)
+
+
+
+
+				# ???????????????????????????????????
+				if DEBUG:
+					debug_background_audio_with_overlaid_snippets_filename = temporary_audio_filename + r'_DEBUG.audio.from.snippet.' + str(running_snippet_count) + '.mp4'
+					debug_export_format = r'mp4'
+					debug_export_parameters = ["-ar", str(target_background_audio_frequency), "-ac", str(target_background_audio_channels)]
+					snippet_audio.export(debug_background_audio_with_overlaid_snippets_filename, format=debug_export_format, codec=target_background_audio_codec, bitrate=str(target_background_audio_bitrate), parameters=debug_export_parameters)
+				# ???????????????????????????????????
+
+
 
 				# Calculate the pre and post fade times for the snippet
 				#	Fade out (to silent) the end of this AudioSegment
@@ -1511,9 +1544,6 @@ if __name__ == "__main__":
 					print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count}, applying snippet using 'overlay' to background_audio",flush=True)
 					print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: start_position_of_snippet_in_final_video_s={float(start_position_of_snippet_in_final_video_ms)/1000.0} end_position_of_snippet_in_final_video_s={float(end_position_of_snippet_in_final_video_ms)/1000.0} snippet_audio_len={float(snippet_audio_len)/1000.0}",flush=True)
 				background_audio = background_audio.overlay(snippet_audio, position=start_position_of_snippet_in_final_video_ms, gain_during_overlay=-120.0, loop=False)
-
-				del snippet_audio
-				del individual_snippet_dict
 		#end for
 	#end for
 	
@@ -1521,23 +1551,25 @@ if __name__ == "__main__":
 	# Export it to background_audio_with_overlaid_snippets_filename (pydub hates .m4a so use .mp4 instead)
 	
 	try:
-		if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: 'export' background_audio to file '{background_audio_with_overlaid_snippets_filename}' with format='mp4', codec='libfdk_aac', bitrate='256k', parameters=['-ar', '48000', '-ac', '2']",flush=True)
-		background_audio.export(background_audio_with_overlaid_snippets_filename, codec=target_background_audio_codec, bitrate=target_background_audio_bitrate, parameters=["-ar", target_background_audio_frequency, "-ac", target_background_audio_channels])
-	except FileNotFoundError:
-		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: File not found from background_audio.export('{background_audio_with_overlaid_snippets_filename}',...)",flush=True,file=sys.stderr)
-		sys.exit(1)
-	except TypeError:
-		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: Type mismatch or unsupported operation from background_audio.export('{background_audio_with_overlaid_snippets_filename}',...)",flush=True,file=sys.stderr)
-		sys.exit(1)
-	except ValueError:
-		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: Invalid or unsupported value from background_audio.export('{background_audio_with_overlaid_snippets_filename}',...)",flush=True,file=sys.stderr)
-		sys.exit(1)
-	except IOError:
-		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: I/O error occurred from background_audio.export('{background_audio_with_overlaid_snippets_filename}',...)",flush=True,file=sys.stderr)
-		sys.exit(1)
-	except OSError as e:
-		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: Unexpected OSError from background_audio.export('{background_audio_with_overlaid_snippets_filename}',...)\n{str(e)}",flush=True,file=sys.stderr)
-		sys.exit(1)
+		export_format = r'mp4'
+		export_parameters = ["-ar", str(target_background_audio_frequency), "-ac", str(target_background_audio_channels)]
+		if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: 'export' background_audio to file '{background_audio_with_overlaid_snippets_filename}' with format='{export_format}', codec='(target_background_audio_codec)', bitrate='{target_background_audio_bitrate}', parameters={export_parameters}",flush=True)
+		background_audio.export(background_audio_with_overlaid_snippets_filename, format=export_format, codec=target_background_audio_codec, bitrate=str(target_background_audio_bitrate), parameters=export_parameters)
+	#except FileNotFoundError:
+	#	print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: File not found from background_audio.export('{background_audio_with_overlaid_snippets_filename}',...)",flush=True,file=sys.stderr)
+	#	sys.exit(1)
+	#except TypeError:
+	#	print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: Type mismatch or unsupported operation from background_audio.export('{background_audio_with_overlaid_snippets_filename}',...)",flush=True,file=sys.stderr)
+	#	sys.exit(1)
+	#except ValueError:
+	#	print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: Invalid or unsupported value from background_audio.export('{background_audio_with_overlaid_snippets_filename}',...)",flush=True,file=sys.stderr)
+	#	sys.exit(1)
+	#except IOError:
+	#	print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: I/O error occurred from background_audio.export('{background_audio_with_overlaid_snippets_filename}',...)",flush=True,file=sys.stderr)
+	#	sys.exit(1)
+	#except OSError as e:
+	#	print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: Unexpected OSError from background_audio.export('{background_audio_with_overlaid_snippets_filename}',...)\n{str(e)}",flush=True,file=sys.stderr)
+	#	sys.exit(1)
 	except Exception as e:
 		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: Unexpected error from background_audio.export('{background_audio_with_overlaid_snippets_filename}',...)\n{str(e)}",flush=True,file=sys.stderr)
 		sys.exit(1)
