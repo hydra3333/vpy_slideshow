@@ -893,21 +893,34 @@ def audio_standardize_and_import_file(audio_filename):
 	target_background_audio_frequency = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_FREQUENCY']	# hopefully 48000
 	target_background_audio_channels = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CHANNELS']	# hopefully 2
 	target_background_audio_bytedepth = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BYTEDEPTH']	# hopefully 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
-	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']						# hopefully 'libfdk_aac'
-	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']					# hopefully '256k'
+	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']			# hopefully 'libfdk_aac'
+	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']		# hopefully '256k'
 	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']	# hopefully pcm_s16le ; for 16 bit
 	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']					# in temp folder
 
 	if os.path.exists(temporary_audio_filename):
 		os.remove(temporary_audio_filename)
 
-	??? ffmpeg_command = [ something ]
-	try:
-		if DEBUG: print(f"DEBUG: CONTROLLER: audio_standardize_and_import_file: pre-converting before import: '{ffmpeg_command}'",flush=True)
-		??? ffmpeg -i input_video.mp4 -vn -ac 2 -ar 48000 -acodec pcm_s16le temporary_audio_filename
-	except Exception as e:
-		print(f"CONTROLLER: audio_standardize_and_import_file: Unexpected error pre-converting before import: from '{ffmpeg_command}')\n{str(e)}",flush=True,file=sys.stderr)
-		sys.exit(1)
+	ffmpeg_commandline = [	FFMPEG_EXE,
+							'-hide_banner', 
+							'-loglevel', 'info', 
+							'-nostats', 
+							'-i', audio_filename,
+							'-vn',
+
+							'-this_is_a_bad_switch',
+
+							'-acodec', 'temporary_background_audio_codec',
+							'-ac', target_background_audio_channels,
+							'-ar', target_background_audio_frequency,
+							'-y', temporary_audio_filename
+							]
+
+	# use method 1 to see what happens when throwing an error (is stin, stderr lost from the console ?) ...
+	subprocess.run(ffmpeg_commandline, check=True)
+
+	# use other  methos 2,3,4 
+	#	sys.exit(1)
 
 	try:
 		audio = AudioSegment.from_file(temporary_audio_filename)
@@ -984,7 +997,7 @@ def encode_using_vsipe_ffmpeg(individual_chunk_id):
 	
 	vspipe_commandline = [VSPIPE_EXE, '--progress', '--filter-time', '--container', 'y4m', '.\slideshow_ENCODER.vpy', '-']
 
-	ffmpeg_commandline = [	ffmpeg_exe,
+	ffmpeg_commandline = [	FFMPEG_EXE,
 							'-hide_banner', 
 							'-loglevel', 'info', 
 							'-nostats', 
@@ -1152,7 +1165,7 @@ if __name__ == "__main__":
 	print(f'CONTROLLER: STARTING INTERIM ENCODING OF CHUNKS INTO INTERIM FFV1 VIDEO FILES')
 		
 	if DEBUG:	
-		print(f"DEBUG: Starting encoder loop for each of ALL_CHUNKS tree. chunks: {ALL_CHUNKS_COUNT} files: {ALL_CHUNKS_COUNT_OF_FILES}",flush=True)
+		print(f"DEBUG: CONTROLLER: Starting encoder loop for each of ALL_CHUNKS tree. chunks: {ALL_CHUNKS_COUNT} files: {ALL_CHUNKS_COUNT_OF_FILES}",flush=True)
 	
 	for individual_chunk_id in range(0,ALL_CHUNKS_COUNT):	# 0 to (ALL_CHUNKS_COUNT - 1)
 		# we cannot just import the legacy encoder and call it with parameters, it is a vpy consumed by ffmpeg and that does not accept parameters
@@ -1172,7 +1185,7 @@ if __name__ == "__main__":
 			os.remove(proposed_ffv1_mkv_filename)
 		
 		# create the fixed-filename chunk file consumed by the encoder; it contains the fixed-filename of the snippet file to produce
-		if DEBUG:	print(f"DEBUG: in encoder loop: attempting to create chunk_json_filename='{chunk_json_filename}' for encoder to consume.",flush=True)
+		if DEBUG:	print(f"DEBUG: CONTROLLER: in encoder loop: attempting to create chunk_json_filename='{chunk_json_filename}' for encoder to consume.",flush=True)
 		try:
 			with open(chunk_json_filename, 'w') as fp:
 				json.dump(individual_chunk_dict, fp, indent=4)
@@ -1181,7 +1194,7 @@ if __name__ == "__main__":
 			sys.exit(1)	
 		print(f"CONTROLLER: Created fixed-filename chunk file for encoder to consume: '{chunk_json_filename}' listing {ALL_CHUNKS[str(individual_chunk_id)]['num_files']} files, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}",flush=True)
 
-		if DEBUG:	print(f"DEBUG: encoder loop: calling the encoder, VSPIPE piped to FFMPEG ... with controller using non-blocking reads of stdout and stderr (per chatgpt).",flush=True)
+		if DEBUG:	print(f"DEBUG: CONTROLLER: encoder loop: calling the encoder, VSPIPE piped to FFMPEG ... with controller using non-blocking reads of stdout and stderr (per chatgpt).",flush=True)
 		# These fields in a chunk dict need to be updated by the encoder:
 		#	'num_frames_in_chunk'
  		#	'start_frame_num_in_chunk'
@@ -1204,7 +1217,54 @@ if __name__ == "__main__":
 
 		# Run vspipe command by itself
 		vspipe_commandline = [VSPIPE_EXE, '--progress', '--container', 'y4m', '.\slideshow_ENCODER_legacy.vpy', 'NUL']
+
+		# method 1
 		subprocess.run(vspipe_commandline, check=True)
+
+		# method 2
+		#try:
+		#	subprocess.run(vspipe_commandline, check=True)
+		#except subprocess.CalledProcessError as e:
+		#	print(f"CONTROLLER: vspipe command {vspipe_commandline} error:\n{e}",flush=True,file=sys.stderr)
+		#	raise e
+		#	sys.exit(1)
+
+		# method 3
+		#vspipe_result = subprocess.run(vspipe_commandline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+		#vspipe_stdout_output = vspipe_result.stdout.decode('utf-8')
+		#vspipe_stderr_output = vspipe_result.stderr.decode('utf-8')
+		#print(vspipe_stdout_output,flush=True)
+		#print(vspipe_stderr_output,flush=True,file=sys.stderr)
+
+		# method 4
+		#try:
+		#	# Run vspipe command and capture outputs
+		#	vspipe_result = subprocess.run(vspipe_commandline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+		#except subprocess.CalledProcessError as e:
+		#	try:
+		#		vspipe_stdout_output = vspipe_result.stdout.decode('utf-8')
+		#		vspipe_stderr_output = vspipe_result.stderr.decode('utf-8')
+		#		print(vspipe_stdout_output,flush=True)
+		#		print(vspipe_stderr_output,flush=True,file=sys.stderr)
+		#	except Exception as ex:
+		#		print(f"CONTROLLER: Unable to retrieve and print stdout and stderr from subprocesss exception from the vspipe command.")
+		#		pass
+		#	print(f"CONTROLLER: vspipe command {vspipe_commandline} raised error:\n{e}", flush=True, file=sys.stderr)
+		#	raise e
+		3	sys.exit(1)
+		#vspipe_stdout_output = vspipe_result.stdout.decode('utf-8')
+		#print(vspipe_stdout_output, flush=True)
+		#vspipe_stderr_output = vspipe_result.stderr.decode('utf-8')
+		#print(vspipe_stderr_output,flush=True,file=sys.stderr)
+
+
+
+
+
+
+
+
+
 
 		time.sleep(1)
 
