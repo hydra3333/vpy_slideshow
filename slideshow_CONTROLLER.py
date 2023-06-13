@@ -1251,7 +1251,7 @@ if __name__ == "__main__":
 		#		pass
 		#	print(f"CONTROLLER: vspipe command {vspipe_commandline} raised error:\n{e}", flush=True, file=sys.stderr)
 		#	raise e
-		3	sys.exit(1)
+		#	sys.exit(1)
 		#vspipe_stdout_output = vspipe_result.stdout.decode('utf-8')
 		#print(vspipe_stdout_output, flush=True)
 		#vspipe_stderr_output = vspipe_result.stderr.decode('utf-8')
@@ -1465,7 +1465,7 @@ if __name__ == "__main__":
 				if snippet_audio_len < snippet_duration_ms:
 					padding_duration = snippet_duration_ms - snippet_audio_len
 					try:
-					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} snippet_audio_len {snippet_audio_len}ms, padded with silence to {snippet_audio_len+padding_duration}ms",flush=True)
+						if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} snippet_audio_len {snippet_audio_len}ms, padded with silence to {snippet_audio_len+padding_duration}ms",flush=True)
 						padding_audio = audio_create_standardized_silence(padding_duration)
 					except Exception as e:
 						print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: padding_audio Unexpected error from AudioSegment.silent(duration={padding_duration})\n{str(e)}",flush=True,file=sys.stderr)
