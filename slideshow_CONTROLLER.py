@@ -727,7 +727,8 @@ def find_all_chunks():
 				ffcachefile = get_random_ffindex_path(path)
 				clip = core.ffms2.Source(str(path), cachefile=ffcachefile)
 				del clip
-				os.remove(ffcachefile)
+				if os.path.exists(ffcachefile):
+					os.remove(ffcachefile)
 				return True
 			except Exception as e:
 				print(f'CONTROLLER: WARNING: fac_check_clip_from__path: error opening file via "ffms2": "{str(path)}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}',flush=True)
@@ -750,7 +751,8 @@ def find_all_chunks():
 				ffcachefile = get_random_ffindex_path(path)
 				clip = core.ffms2.Source(str(path), cachefile=ffcachefile)
 				del clip
-				os.remove(ffcachefile)
+				if os.path.exists(ffcachefile):
+					os.remove(ffcachefile)
 				return True
 			except Exception as e:
 				print(f'CONTROLLER: WARNING: fac_check_clip_from_pic: error opening file via "ffms2": "{path.name}" ; ignoring this picture. The error was:\n{e}\n{type(e)}\n{str(e)}',flush=True)
@@ -878,6 +880,74 @@ def find_all_chunks():
 	print(f"CONTROLLER: Finished assigning files into chunks for processing: {count_of_files} files into {chunk_count} chunks.",flush=True)
 
 	return chunk_count, count_of_files, chunks
+
+###
+def audio_standardize_and_import_file(audio_filename):
+	# use global SETTINGS_DICT for the convert and import audio
+	# https://pydub.com/
+	# https://github.com/jiaaro/pydub/blob/master/API.markdown
+	# NOTE	we MUST ensure the clips all have the SAME characteristics !!!!! or overlay etc will not work.
+	#		using .from_file a file may be an arbitrary number of channels, which pydub cannot handle
+	#			so we must first convert number of channels etc into a fixed file so we can use .from_file, eg
+	#			ffmpeg -i "background_audio_input_filename.mp4" -vn -ac 2 -ar 48000 -acodec pcm_s16le "some_audio_filename_in_temp_folder.wav"
+	target_background_audio_frequency = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_FREQUENCY']	# hopefully 48000
+	target_background_audio_channels = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CHANNELS']	# hopefully 2
+	target_background_audio_bytedepth = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BYTEDEPTH']	# hopefully 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
+	target_background_audio_codec = SETTINGS_DICT['target_background_audio_codec']			# hopefully pcm_s16le ; for 16 bit
+	temp_audio_file = SETTINGS_DICT['temp_audio_file']										# in temp folder
+
+	if os.path.exists(temp_audio_file):
+		os.remove(temp_audio_file)
+
+	??? ffmpeg_command = [ something ]
+	try:
+		if DEBUG: print(f"DEBUG: CONTROLLER: audio_standardize_and_import_file: pre-converting before import: '{ffmpeg_command}'",flush=True)
+		??? ffmpeg -i input_video.mp4 -vn -ac 2 -ar 48000 -acodec pcm_s16le temp_audio_file
+	except Exception as e:
+		print(f"CONTROLLER: audio_standardize_and_import_file: Unexpected error pre-converting before import: from '{ffmpeg_command}')\n{str(e)}",flush=True,file=sys.stderr)
+		sys.exit(1)
+
+	try:
+		audio = AudioSegment.from_file(temp_audio_file)
+		audio = audio.set_channels(target_background_audio_channels).set_sample_width(target_background_audio_bytedepth).set_frame_rate(target_background_audio_frequency)
+	except FileNotFoundError:
+		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio File not found from AudioSegment.from_file('{temp_audio_file}')",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except TypeError:
+		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio Type mismatch or unsupported operation from AudioSegment.from_file('{temp_audio_file}')",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except ValueError:
+		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio Invalid or unsupported value from AudioSegment.from_file('{temp_audio_file}')",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except IOError:
+		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio I/O error occurred from AudioSegment.from_file('{temp_audio_file}')",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except OSError as e:
+		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio Unexpected OSError from AudioSegment.from_file('{temp_audio_file}')\n{str(e)}",flush=True,file=sys.stderr)
+		sys.exit(1)
+	except Exception as e:
+		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio Unexpected error from AudioSegment.from_file('{temp_audio_file}')\n{str(e)}",flush=True,file=sys.stderr)
+		sys.exit(1)
+
+	if os.path.exists(temp_audio_file):
+		os.remove(temp_audio_file)
+
+	return audio
+
+def audio_create_standardized_silence(duration_ms):
+	# use global SETTINGS_DICT for the convert and import audio
+	# https://pydub.com/
+	# https://github.com/jiaaro/pydub/blob/master/API.markdown
+	# NOTE	we MUST ensure the clips all have the SAME characteristics !!!!! or overlay etc will not work.
+	target_background_audio_frequency = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_FREQUENCY']	# hopefully 48000
+	target_background_audio_channels = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CHANNELS']	# hopefully 2
+	target_background_audio_bytedepth = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BYTEDEPTH']	# hopefully 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
+	target_background_audio_codec = SETTINGS_DICT['target_background_audio_codec']			# hopefully pcm_s16le ; for 16 bit
+	
+	audio = AudioSegment.silent(duration=padding_duration)
+	audio = audio.set_channels(target_background_audio_channels).set_sample_width(target_background_audio_bytedepth).set_frame_rate(target_background_audio_frequency)
+	
+	return audio
 
 ###
 def encode_using_vsipe_ffmpeg(individual_chunk_id):
@@ -1266,32 +1336,7 @@ if __name__ == "__main__":
 			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio Unexpected error from AudioSegment.silent(duration={final_video_duration_ms})\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)
 	else:
-		try:
-			if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: 'from_file' from AudioSegment.from_file('{background_audio_input_filename}')",flush=True)
-
-			??? before from_file, do 
-			ffmpeg -i input_video.mp4 -vn -ac 2 -ar 48000 -acodec pcm_s16le output_audio.wav
-
-			background_audio = AudioSegment.from_file(background_audio_input_filename)
-			background_audio = background_audio.set_channels(target_background_audio_channels).set_sample_width(target_background_audio_bytedepth).set_frame_rate(target_background_audio_frequency)
-		except FileNotFoundError:
-			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio File not found from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
-			sys.exit(1)
-		except TypeError:
-			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio Type mismatch or unsupported operation from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
-			sys.exit(1)
-		except ValueError:
-			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio Invalid or unsupported value from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
-			sys.exit(1)
-		except IOError:
-			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio I/O error occurred from AudioSegment.from_file('{background_audio_input_filename}')",flush=True,file=sys.stderr)
-			sys.exit(1)
-		except OSError as e:
-			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio Unexpected OSError from AudioSegment.from_file('{background_audio_input_filename}')\n{str(e)}",flush=True,file=sys.stderr)
-			sys.exit(1)
-		except Exception as e:
-			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio Unexpected error from AudioSegment.from_file('{background_audio_input_filename}')\n{str(e)}",flush=True,file=sys.stderr)
-			sys.exit(1)
+		background_audio = audio_standardize_and_import_file(background_audio_input_filename)
 
 	# Trim or pad-with-silence the background audio to match the duration final_video_frame_count
 	background_audio_len = len(background_audio)
@@ -1339,31 +1384,7 @@ if __name__ == "__main__":
 
 				# Load the snippet audio
 				if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: about to get audio from snippet {running_snippet_count} via AudioSegment.from_file('{snippet_source_video_filename}')",flush=True)
-				try:
-
-					??? before from_file, do 
-					ffmpeg -i input_video.mp4 -vn -ac 2 -ar 48000 -acodec pcm_s16le output_audio.wav
-
-					snippet_audio = AudioSegment.from_file(snippet_source_video_filename)
-					snippet_audio = snippet_audio.set_channels(target_background_audio_channels).set_sample_width(target_background_audio_bytedepth).set_frame_rate(target_background_audio_frequency)
-				except FileNotFoundError:
-					print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet File not found from AudioSegment.from_file('{snippet_source_video_filename}')",flush=True,file=sys.stderr)
-					sys.exit(1)
-				except TypeError:
-					print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet Type mismatch or unsupported operation from AudioSegment.from_file('{snippet_source_video_filename}')",flush=True,file=sys.stderr)
-					sys.exit(1)
-				except ValueError:
-					print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet Invalid or unsupported value from AudioSegment.from_file('{snippet_source_video_filename}')",flush=True,file=sys.stderr)
-					sys.exit(1)
-				except IOError:
-					print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet I/O error occurred from AudioSegment.from_file('{snippet_source_video_filename}')",flush=True,file=sys.stderr)
-					sys.exit(1)
-				except OSError as e:
-					print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet Unexpected OSError from AudioSegment.from_file('{snippet_source_video_filename}')\n{str(e)}",flush=True,file=sys.stderr)
-					sys.exit(1)
-				except Exception as e:
-					print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet Unexpected error from AudioSegment.from_file('{snippet_source_video_filename})'\n{str(e)}",flush=True,file=sys.stderr)
-					sys.exit(1)
+				snippet_audio = audio_standardize_and_import_file(snippet_source_video_filename)
 
 				# Extract the corresponding portion of the snippet file audio based on the calculated snippet duration
 				# There should be enough audio unless the a very small clip had to padded during slideshow creation
