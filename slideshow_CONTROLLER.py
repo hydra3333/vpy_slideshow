@@ -1015,10 +1015,10 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 	print(f"CONTROLLER: Created fixed-filename chunk file for encoder to consume: '{chunk_json_filename}' listing {ALL_CHUNKS[str(individual_chunk_id)]['num_files']} files, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}",flush=True)
 
 	# Define the commandlines for the subprocesses forming the ENCODER
-	vspipe_commandline = [VSPIPE_EXE, '--progress', '--filter-time', '--container', 'y4m', slideshow_ENCODER_legacy_path, '-']
+	vspipe_commandline = [VSPIPE_EXE, '--progress', '--container', 'y4m', slideshow_ENCODER_legacy_path, '-']
 	ffmpeg_commandline = [FFMPEG_EXE,
 							'-hide_banner', 
-							'-loglevel', 'warning', 
+							'-loglevel', 'info', 
 							'-nostats', 
 							'-colorspace', 'bt709', 
 							'-color_primaries', 'bt709', 
@@ -1037,99 +1037,137 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 	# this vspipe commandline is for DEBUGGING only
 	# it produces the vspipe output but directs it to NUL and does not invoke ffmpeg
 	# but it is still handy becuase it prodices updated snippet into into ALL_CHUNKS
-	vspipe_commandline = [VSPIPE_EXE, '--progress', '--container', 'y4m', '.\slideshow_ENCODER_legacy.vpy', 'NUL']
+	vspipe_commandline_NUL = [VSPIPE_EXE, '--progress', '--container', 'y4m',  slideshow_ENCODER_legacy_path, 'NUL']
 
 	# run the vspipe -> ffmpeg with non-blocking reads of stderr and stdout
-	print(f"CONTROLLER: Running the ENCODER using commandlines:\n{vspipe_commandline}\n{ffmpeg_commandline}",flush=True)
-	try:	
-		# Run the commands in subprocesses for the ENCODER
-		process1 = subprocess.Popen(vspipe_commandline, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		process2 = subprocess.Popen(ffmpeg_commandline, stdin=process1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-		
-		pid1 = process1.pid
-		pid2 = process2.pid
-		time.sleep(3)  # Add a delay of a couple of seconds
-		# Terminate subprocesses forcefully using taskkill if they aren't already terminated
-		os.system(f'taskkill /F /PID {process1.pid}')
-		os.system(f'taskkill /F /PID {process2.pid}')
-		sys.exit()
+	piping_method = 2
+	
+	if piping_method == 1:	# this loses stdout from ffmpeg
+		# stderr from process_ffmpeg works OK.  stdout from ffmpeg gets lost.
+		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, simple Popens, losing ffmpeg stdout?, using commandlines:\n{vspipe_commandline}\n{ffmpeg_commandline}",flush=True)
+		process_vspipe = subprocess.Popen( vspipe_commandline, stdout=subprocess.PIPE)
+		process_ffmpeg = subprocess.Popen( ffmpeg_commandline, stdin=process_vspipe.stdout)
+		process_ffmpeg.communicate()
+	elif piping_method == 2:	# less control but you see everything
+		# Execute the command using os.system
+		def command_list_to_command_string(command_list):
+			command_parts = []
+			for part in command_list:
+				if part.startswith('-'):  # Check if the part starts with a dash (indicating a switch)
+					command_parts.append(part)  # Add the part as is (switch)
+				else:
+				command_parts.append(f'"{part}"')  # Enclose the part in double quotes
+			return command = ' '.join(command_parts)
+		print(f""),flush=True)
+		vspipe_cmd = command_list_to_command_string(vspipe_commandline)
+		ffmpeg_cmd = command_list_to_command_string(ffmpeg_commandline)
+		vspipe_pipe_ffmpeg_commandline = vspipe_cmd + "|" + ffmpeg_cmd
+		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, os.system, with one commandline:\n{vspipe_pipe_ffmpeg_commandline}",flush=True)
+		exit_status = os.system(vspip_pipe_ffmpeg_commandline)
+		if exit_status != 0:
+			print(f"print(f'CONTROLLER: ERROR RUNNING ENCODER VSPIPE/FFMPEG via piping_method={piping_method} os.system, Command execution failed with exit status: {exit_status}",flush=True)
+			sys.exit(1)
+	elif piping_method == 3:	# non-blocking reads, works fine as long as nothing goes wrong.
+		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, non=blocking reads, using commandlines:\n{vspipe_commandline}\n{ffmpeg_commandline}",flush=True)
+		try:	
+			# Run the commands in subprocesses for the ENCODER
+			process1 = subprocess.Popen(vspipe_commandline, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			process2 = subprocess.Popen(ffmpeg_commandline, stdin=process1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+			# FOR TESTING:
+			#pid1 = process1.pid
+			#pid2 = process2.pid
+			#time.sleep(3)  # Add a delay of a couple of seconds
+			## Terminate subprocesses forcefully using taskkill if they aren't already terminated
+			#os.system(f'taskkill /F /PID {process1.pid}')
+			#os.system(f'taskkill /F /PID {process2.pid}')
+			#sys.exit()
+			# Create queues to store the output and error streams
+			stderr_queue1 = Queue()
+			stdout_queue2 = Queue()
+			stderr_queue2 = Queue()
+			# Launch separate threads to read the output and error streams
+			stderr_thread1 = Thread(target=enqueue_output, args=(process1.stderr, stderr_queue1))
+			stdout_thread2 = Thread(target=enqueue_output, args=(process2.stdout, stdout_queue2))
+			stderr_thread2 = Thread(target=enqueue_output, args=(process2.stderr, stderr_queue2))
+			stderr_thread1.daemon = True
+			stdout_thread2.daemon = True
+			stderr_thread2.daemon = True
+			stderr_thread1.start()
+			stdout_thread2.start()
+			stderr_thread2.start()
+			# Read output and error streams
+			while True:
+				try:
+					stderr_line1 = stderr_queue1.get_nowait().decode('utf-8').strip()
+					if stderr_line1:
+						print(f"vspipe: {stderr_line1}")
+					pass
+				except Empty:
+					pass
+				try:
+					stdout_line2 = stdout_queue2.get_nowait().decode('utf-8').strip()
+					if stdout_line2:
+						print(f"ffmpeg: {stdout_line2}")
+					pass
+				except Empty:
+					pass
+				try:
+					stderr_line2 = stderr_queue2.get_nowait().decode('utf-8').strip()
+					if stderr_line2:
+						print(f"ffmpeg: {stderr_line2}")
+					pass
+				except Empty:
+					pass
+				if 	(not stderr_thread1.is_alive()) and (not stdout_thread2.is_alive()) and (not stderr_thread2.is_alive()) and (stderr_queue1.empty()) and (stdout_queue2.empty()) and (stderr_queue2.empty()):
+					break
+				# Introduce a 50ms delay to reduce CPU load
+				time.sleep(0.05)  # Sleep for 50 milliseconds so as to not thrash the cpu
+			#end while
+			# Retrieve the remaining output and error streams
+			output, error2 = process2.communicate()
+			error1 = process1.stderr.read()
+			# Decode any ffmpeg final output from bytes to string and print it
+			print(f"ffmpeg: {output.decode('utf-8').strip()}")
+			# Print any final error messages
+			if error1:
+					print(f"vspipe: {error1.decode('utf-8').strip()}")
+			if error2:
+					print(f"ffmpeg: {error2.decode('utf-8').strip()}")
+			# Close the queues
+			stderr_queue1.close()
+			stdout_queue2.close()
+			stderr_queue2.close()
+			# Close the subprocesses
+			process1.stdout.close()
+			process1.stderr.close()
+			process2.stdout.close()
+			process2.stderr.close()
+		except KeyboardInterrupt:
+			# Retrieve the process IDs
+			pid1 = process1.pid
+			pid2 = process2.pid
+			# Perform cleanup or other actions
+			# before terminating the program
+			process1.terminate()
+			process2.terminate()
+			process1.wait()
+			process2.wait()
+			# Delay before terminating forcefully with taskkill
+			time.sleep(2)  # Add a delay of a couple of seconds
+			# Terminate subprocesses forcefully using taskkill if they aren't already terminated
+			os.system(f'taskkill /F /PID {process1.pid}')
+			os.system(f'taskkill /F /PID {process2.pid}')
+			# Raise the exception again
+			raise
+		except Exception as e:
+			print(f'CONTROLLER: ERROR RUNNING SUBPROCESSES, :\n{e}\n{type(e)}\n{str(e)}',flush=True)
+			raise e
+	else:
+		print(f"print(f'CONTROLLER: ERROR RUNNING VSPIPE/FFMPEG, invalid piping_method={piping_method}",flush=True)
+		sys.exit(1)
 
-		
-		# Create queues to store the output and error streams
-		stderr_queue1 = Queue()
-		stdout_queue2 = Queue()
-		stderr_queue2 = Queue()
-		# Launch separate threads to read the output and error streams
-		stderr_thread1 = Thread(target=enqueue_output, args=(process1.stderr, stderr_queue1))
-		stdout_thread2 = Thread(target=enqueue_output, args=(process2.stdout, stdout_queue2))
-		stderr_thread2 = Thread(target=enqueue_output, args=(process2.stderr, stderr_queue2))
-		stderr_thread1.daemon = True
-		stdout_thread2.daemon = True
-		stderr_thread2.daemon = True
-		stderr_thread1.start()
-		stdout_thread2.start()
-		stderr_thread2.start()
-		# Read output and error streams
-		while True:
-			try:
-				stderr_line1 = stderr_queue1.get_nowait().decode('utf-8').strip()
-				if stderr_line1:
-					print(f"vspipe: {stderr_line1}")
-				pass
-			except Empty:
-				pass
-			try:
-				stdout_line2 = stdout_queue2.get_nowait().decode('utf-8').strip()
-				if stdout_line2:
-					print(f"ffmpeg: {stdout_line2}")
-				pass
-			except Empty:
-				pass
-			try:
-				stderr_line2 = stderr_queue2.get_nowait().decode('utf-8').strip()
-				if stderr_line2:
-					print(f"ffmpeg: {stderr_line2}")
-				pass
-			except Empty:
-				pass
-			if 	(not stderr_thread1.is_alive()) and (not stdout_thread2.is_alive()) and (not stderr_thread2.is_alive()) and (stderr_queue1.empty()) and (stdout_queue2.empty()) and (stderr_queue2.empty()):
-				break
-			# Introduce a 50ms delay to reduce CPU load
-			time.sleep(0.05)  # Sleep for 50 milliseconds so as to not thrash the cpu
-		#end while
-		# Retrieve the remaining output and error streams
-		output, error2 = process2.communicate()
-		error1 = process1.stderr.read()
-		# Decode any ffmpeg final output from bytes to string and print it
-		print(f"ffmpeg: {output.decode('utf-8').strip()}")
-		# Print any final error messages
-		if error1:
-				print(f"vspipe: {error1.decode('utf-8').strip()}")
-		if error2:
-				print(f"ffmpeg: {error2.decode('utf-8').strip()}")
-	except KeyboardInterrupt:
-		# Retrieve the process IDs
-		pid1 = process1.pid
-		pid2 = process2.pid
-		# Perform cleanup or other actions
-		# before terminating the program
-		process1.terminate()
-		process2.terminate()
-		process1.wait()
-		process2.wait()
-		# Delay before terminating forcefully with taskkill
-		time.sleep(2)  # Add a delay of a couple of seconds
-		# Terminate subprocesses forcefully using taskkill if they aren't already terminated
-		os.system(f'taskkill /F /PID {process1.pid}')
-		os.system(f'taskkill /F /PID {process2.pid}')
-		# Raise the exception again
-		raise
-	except Exception as e:
-		print(f'CONTROLLER: ERROR RUNNING SUBPROCESSES, :\n{e}\n{type(e)}\n{str(e)}',flush=True)
-		raise e
-
-	time.sleep(2.0)	# give it a chance (2 seconds) to settle down
+	time.sleep(2.0)	# give it a chance (2 seconds, or 2000ms) to settle down
 	print(f"CONTROLLER: Finished running the ENCODER.",flush=True)
 	if not os.path.exists(chunk_json_filename):
 		print(f"CONTROLLER: ERROR: CONTROLLER: encoder-updated current chunk to JSON file file not found '{chunk_json_filename}' not found !",flush=True)
