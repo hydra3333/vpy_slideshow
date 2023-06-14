@@ -918,7 +918,7 @@ def audio_standardize_and_import_file(audio_filename, headroom_db):
 							'-ar', str(target_background_audio_frequency),
 							'-y', temporary_audio_filename
 							]
-	print(f"CONTROLLER: audio_standardize_and_import_file attempting to standardize audio using {ffmpeg_commandline}",flush=True)
+	print(f"CONTROLLER: audio_standardize_and_import_file attempting to standardize audio using {objPrettyPrint.pformat(ffmpeg_commandline)}",flush=True)
 
 	# Method 1	works fine, especially when we flush in print stamenets. it produces output and errors to the console. 
 	#			Tempted to use Method 1 everywhere.  We'll see with long-running vspipes whether we view timely regular output from vspipe or not.
@@ -1045,20 +1045,20 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 	
 	if piping_method == 1:	# this loses stdout from ffmpeg
 		# stderr from process_ffmpeg works OK.  stdout from ffmpeg gets lost.
-		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, simple Popens, losing ffmpeg stdout?, using commandlines:\n{vspipe_commandline}\n{ffmpeg_commandline}",flush=True)
+		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, simple Popens, losing ffmpeg stdout?, using commandlines:\n{vspipe_commandline}\n{objPrettyPrint.pformat(ffmpeg_commandline)}",flush=True)
 		process_vspipe = subprocess.Popen( vspipe_commandline, stdout=subprocess.PIPE)
 		process_ffmpeg = subprocess.Popen( ffmpeg_commandline, stdin=process_vspipe.stdout)
 		process_ffmpeg.communicate()
 	elif piping_method == 2:	# this method DOES NOT WORK because subprocess.run hates the pipe symbol
 		# Execute the command using subprocess.run
 		vspipe_pipe_ffmpeg_commandline = vspipe_commandline + [r' | '] + ffmpeg_commandline
-		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{vspipe_pipe_ffmpeg_commandline}",flush=True)
+		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}",flush=True)
 		result = subprocess.run(vspipe_pipe_ffmpeg_commandline, shell=True)
 		if result.returncode != 0:
 			print(f"CONTROLLER: ERROR RUNNING ENCODER VSPIPE/FFMPEG via piping_method={piping_method} subprocess.run, Command execution failed with exit status: {result.returncode}",flush=True)
 			sys.exit(1)
 		else:
-			print(f"CONTROLLER: Returned successfully from the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{vspipe_pipe_ffmpeg_commandline}",flush=True)
+			print(f"CONTROLLER: Returned successfully from the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}",flush=True)
 	elif piping_method == 3:	# less control but you see everything
 		# Execute the command using subprocess.run but using a string not a list
 		def command_list_to_command_string(command_list):
@@ -1077,12 +1077,13 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 		vspipe_cmd = command_list_to_command_string(vspipe_commandline)
 		ffmpeg_cmd = command_list_to_command_string(ffmpeg_commandline)
 		vspipe_pipe_ffmpeg_commandline = vspipe_cmd + r' | ' + ffmpeg_cmd
+		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}",flush=True)
 		result = subprocess.run(vspipe_pipe_ffmpeg_commandline, shell=True)
 		if result.returncode != 0:
 			print(f"CONTROLLER: ERROR RUNNING ENCODER VSPIPE/FFMPEG via piping_method={piping_method} subprocess.run, Command execution failed with exit status: {result.returncode}",flush=True)
 			sys.exit(1)
 		else:
-			print(f"CONTROLLER: Returned successfully from the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{vspipe_pipe_ffmpeg_commandline}",flush=True)
+			print(f"CONTROLLER: Returned successfully from the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}",flush=True)
 	elif piping_method == 4:
 		# Execute the command using os.system
 		def command_list_to_command_string(command_list):
@@ -1101,15 +1102,15 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 		vspipe_cmd = command_list_to_command_string(vspipe_commandline)
 		ffmpeg_cmd = command_list_to_command_string(ffmpeg_commandline)
 		vspipe_pipe_ffmpeg_commandline = vspipe_cmd + r' | ' + ffmpeg_cmd
-		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{vspipe_pipe_ffmpeg_commandline}",flush=True)
+		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}",flush=True)
 		exit_status = os.system(vspipe_pipe_ffmpeg_commandline)	# os.system fails to run this even though the string works in a dos box
 		if exit_status != 0:
 			print(f"CONTROLLER: ERROR RUNNING ENCODER VSPIPE/FFMPEG via piping_method={piping_method} os.system, Command execution failed with exit status: {exit_status}",flush=True)
 			sys.exit(1)
 		else:
-			print(f"CONTROLLER: Returned successfully from the ENCODER via piping_method={piping_method}, os.system, with one commandline:\n{vspipe_pipe_ffmpeg_commandline}",flush=True)
+			print(f"CONTROLLER: Returned successfully from the ENCODER via piping_method={piping_method}, os.system, with one commandline:\n{objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}",flush=True)
 	elif piping_method == 5:	# non-blocking reads, works fine as long as nothing goes wrong.
-		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, non=blocking reads, using commandlines:\n{vspipe_commandline}\n{ffmpeg_commandline}",flush=True)
+		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, non=blocking reads, using commandlines:\n{objPrettyPrint.pformat(vspipe_commandline)}\n{objPrettyPrint.pformat(ffmpeg_commandline)}",flush=True)
 		try:	
 			# Run the commands in subprocesses for the ENCODER
 			process1 = subprocess.Popen(vspipe_commandline, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -1615,7 +1616,7 @@ if __name__ == "__main__":
 	with open(temporary_ffmpeg_concat_list_filename, 'w') as fp:
 		for individual_chunk_id in range(0,ALL_CHUNKS_COUNT):	# 0 to (ALL_CHUNKS_COUNT - 1)
 			ffv1_filename =  ALL_CHUNKS[str(individual_chunk_id)]['proposed_ffv1_mkv_filename']
-			fp.write("file '{ffv1_filename}'\n")
+			fp.write(f"file '{ffv1_filename}'\n")
 			fp.flush()
 		#end for
 	#end with
@@ -1625,10 +1626,11 @@ if __name__ == "__main__":
 	#	background_audio_with_overlaid_snippets_filename	the background audio with video snippets audio overlayed onto it the final format we need
 	# Lets transcode/mux them together.
 	final_mp4_with_audio_filename = SETTINGS_DICT['FINAL_MP4_WITH_AUDIO_FILENAME']
-	ffmpeg_commandline = [FFMPEG_EXE,
+	ffmpeg_commandline_libx264 = [
+							FFMPEG_EXE,
 							'-hide_banner', 
 							'-loglevel', 'info', 
-							'-nostats', 
+							'-stats', 
 							'-i', background_audio_with_overlaid_snippets_filename,
 							'-f', 'concat', '-safe', '0', '-i', temporary_ffmpeg_concat_list_filename,
 							'-sws_flags', 'lanczos+accurate_rnd+full_chroma_int+full_chroma_inp',
@@ -1637,17 +1639,64 @@ if __name__ == "__main__":
 							'-c:a', 'copy',
 							'-c:v', 'libx264',
 							'-preset', 'veryslow',
-							'-crf', '22',
+							#'-crf', '22', 
+							'-refs', '3',  			# Set the number of reference frames to 3 (it used be 16 by default)
+							'-b:v', '5M', 			# 5M target bitrate instead of crf 22
+							'-minrate:v', '1M', 
+							'-maxrate:v', '12M', 
+							'-bufsize', '12M',
 							'-profile:v', 'high',
-							'-level', '5.2',
+							'-level', '5.1',		# H.264 Maximum supported bitrate: Level 5.1: 50 Mbps, Level 5.2: 62.5 Mbps
 							'-movflags', '+faststart+write_colr',
 							'-y', final_mp4_with_audio_filename,
 							]
-	if DEBUG:	print(f"DEBUG: CONTROLLER: using ffmpeg to conatenate/transcode video and mux audio in one go. FFMPEG comamnd:\n{ffmpeg_commandline}",flush=True)
+	ffmpeg_commandline_h264_nvenc = [		# h264_nvenc ... has parameters ONLY for use with an nvidia 2060plus or higher video encoding card
+							FFMPEG_EXE,
+							'-hide_banner', 
+							'-loglevel', 'info', 
+							'-stats', 
+							'-i', background_audio_with_overlaid_snippets_filename,
+							'-f', 'concat', '-safe', '0', '-i', temporary_ffmpeg_concat_list_filename,
+							'-sws_flags', 'lanczos+accurate_rnd+full_chroma_int+full_chroma_inp',
+							'-filter_complex', 'format=yuv420p,setdar=16/9',
+							'-strict', 'experimental',
+							'-c:a', 'copy',
+							'-c:v', 'h264_nvenc', 
+							'-pix_fmt', 'nv12', 
+							'-preset', 'p7', 
+							'-multipass', 
+							'fullres', 
+							'-forced-idr', '1', 
+							'-g', '25', 
+							'-coder:v', 'cabac', 
+							'-spatial-aq', '1', 
+							'-temporal-aq', '1', 
+							'-dpb_size', '0', 
+							'-bf:v', '3', 
+							'-b_ref_mode:v', '0', 
+							'-rc:v', 'vbr', 
+							'-cq:v', '0', 
+							'-b:v', '5M', 			# 5M target bitrate
+							'-minrate:v', '1M', 
+							'-maxrate:v', '12M', 
+							'-bufsize', '12M',
+							'-profile:v', 'high',
+							'-level', '5.1',		# H.264 Maximum supported bitrate: Level 5.1: 50 Mbps, Level 5.2: 62.5 Mbps
+							'-movflags', '+faststart+write_colr',
+							'-y', final_mp4_with_audio_filename,
+							]
+
+	ffmpeg_commandline = ffmpeg_commandline_libx264
+	print(f"CONTROLLER: START FFMPEG CONATENATE/TRANSCODE INTERIM VIDEOS AND MUX AUDIO IN ONE GO. FFMPEG command:\n{objPrettyPrint.pformat(ffmpeg_commandline)}",flush=True)
 	subprocess.run(ffmpeg_commandline, check=True)
-	print(f'CONTROLLER: FINISHED CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO MP4 AND AT SAME TIME MUX WITH BACKGROUND AUDIO\nFInals Slideshow={final_mp4_with_audio_filename}')
+	print(f'CONTROLLER: FINISHED CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO MP4 AND AT SAME TIME MUX WITH BACKGROUND AUDIO\nFinal Slideshow={objPrettyPrint.pformat(final_mp4_with_audio_filename)}')
 	print(f"{100*'-'}",flush=True)
 	
 	##########################################################################################################################################
 	##########################################################################################################################################
 	# CLEANUP
+
+
+
+
+

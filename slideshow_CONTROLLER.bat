@@ -50,6 +50,8 @@ rem echo "!python_exe!" "!script!" >>"!log!" 2>&1
 
 REM "D:\ssTEST\Vapoursynth_x64\vspipe.exe" --progress --filter-time --container y4m ".\slideshow_ENCODER_legacy.vpy" NUL  >>"!log!" 2>&1
 
+echo "%py_path%MediaInfo.exe" --full slideshow.TEST.LEVEL.BITRATE.mp4   >>"!log!" 2>&1
+"%py_path%MediaInfo.exe" --full slideshow.TEST.LEVEL.BITRATE.mp4   >>"!log!" 2>&1
 
 type "!log!"
 

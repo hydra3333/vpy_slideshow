@@ -132,6 +132,31 @@ def fully_qualified_filename(file_name):
 	new_file_name = normalize_path(new_file_name)
 	return new_file_name
 
+def make_full_path(incoming_path, default_dir, default_filename=None, default_extension=None):
+	# make a fully qualified path from an incoming string and defaults
+	default_filled_path = incoming_path
+	if not os.path.isabs(default_filled_path):
+		default_dir = fully_qualified_directory_no_trailing_backslash(default_dir)
+		default_filled_path = os.path.join(default_dir, default_filled_path)
+	if default_filename is not None:
+		filename = os.path.basename(default_filled_path)
+		if filename == '':
+			default_filled_path = os.path.join(default_filled_path, default_filename)
+	if default_extension is not None:
+		_, ext = os.path.splitext(default_filled_path)
+		if ext == '':
+			default_filled_path += default_extension
+	# check if have defaulted a file or a folder:
+	filename = os.path.basename(default_filled_path)
+	_, ext = os.path.splitext(default_filled_path)
+	if (default_filename is None) and (default_extension is None) and (filename is None) and (ext is None):
+		# must be a folder being defaulted
+		default_filled_path = fully_qualified_filename(default_filled_path)
+	else:
+		# must be a file being defaulted
+		default_filled_path = fully_qualified_directory_no_trailing_backslash(default_filled_path)
+	return default_filled_path
+
 def create_py_file_from_specially_formatted_list(dot_py_filename, specially_formatted_list):
 	# a dict may contain strings defined like r''
 	# parse a specially formatted LIST [key, value, annotation_text]
@@ -199,16 +224,7 @@ def load_settings():
 	CURRENT_CHUNK_FILENAME						= os.path.join(TEMP_FOLDER, r'current_chunk_file.json') 	# used by the ENCODER to load a file whose .json content gives the ENCODER (a dict of the current chunk, and a filename to be encoded into)
 	CURRENT_SNIPPETS_FILENAME					= os.path.join(TEMP_FOLDER, r'current_snippets_file.json') 	# used by the ENCODER to write file whose .json content will be a dict of snippets for this chunk, and a filename/[start/end]-frames of the encoded file)
 																											# the file will contain the start/end frame numbers and the fully qualified SOURCE filename for each snippet, and a filename/[start/end-frames] for the encoded file (used in calcs later)
-																											# after encoding this chunk is completed, the CONTROLLER loads a dict from this json file, being snippet data for this chunk, and loads into a global dict for tracking
-	
-	# 3. re-encode all encoded ffv1 chunks into a concatenated AVC .mp4
-	# the CONTROLLER keeps track of a list of files created by the encoder with base filenames CHUNK_ENCODED_FFV1_FILENAME_BASE ... encoded_chunk_ffv1_00001.mkv
-	# the CONTROLLER re-encodes all these (to avoid timestmp issues) into one large final video without audio
-	### INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME			= os.path.join(TEMP_FOLDER, r'slideshow.INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME.mp4')
-	#??? INTERIM_VIDEO_MP4_NO_AUDIO_FILENAME not used ?
-
-
-	# 4. the CONTROLLER does snippet processsing based on snippets written by the encoder per chunk and re-read and placed into a large dict on the fly by the CONTROLLER... 
+	# 3. the CONTROLLER does snippet processsing based on snippets written by the encoder per chunk and re-read and placed into a large dict on the fly by the CONTROLLER... 
 	#	 use the global snippets dict updated by the fly by the encoding CONTROLLER process
 	#	 global frame numbers are now re-calculated after encoding all chunks by processing snippet dicts in sequence and recalculating the global [frame-start/frame-end] pairs for each snippet
 	#	 then process snippets into the audio, re-encoding into .aac which can be muxed later.
@@ -219,7 +235,7 @@ def load_settings():
 	# 5. the CONTROLLER does Final muxing of the interim video .mp4 and the interim background_audio_post_snippet_editing
 	FINAL_MP4_WITH_AUDIO_FILENAME				= fully_qualified_filename(os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'slideshow.FINAL_MP4_WITH_AUDIO_FILENAME.mp4'))
 
-	MAX_FILES_PER_CHUNK							= int(150)
+	MAX_FILES_PER_CHUNK							= int(100)
 	TOLERANCE_PERCENT_FINAL_CHUNK				= int(20)
 	RECURSIVE									= True
 	DEBUG										= False if DEBUG==False else True
@@ -252,7 +268,7 @@ def load_settings():
 	TARGET_BACKGROUND_AUDIO_BITRATE				= r'256k'
 	TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB	= int(-12)		# normalize background audio to -xxDB ; pydub calls it headroom
 	TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY		= int(-28)		# reduce audio of background music during overlay of snippet audio by xxDB
-	TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB		= TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB + 2	# normalize snippet audio to -xxDB ; pydub calls it headroom
+	TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB		= int(-6)		# normalize snippet audio to -xxDB ; pydub calls it headroom; camera vids are usually much quieter than background music
 
 	TEMPORARY_BACKGROUND_AUDIO_CODEC			= r'pcm_s16le'	# ; for 16 bit .wav
 	TEMPORARY_AUDIO_FILENAME					= os.path.join(TEMP_FOLDER, r'temporary_audio_file_for_standardization_then_input_to_pydub.wav')	# file is overwritten and deleted as needed
@@ -421,6 +437,10 @@ def load_settings():
 	
 	if not os.path.exists(SLIDESHOW_SETTINGS_MODULE_FILENAME):
 		specially_formatted_settings_list =	[
+		
+		#-->>		add os.path.join(TEMP_FOLDER, 
+		#-->>		and os.path.join(TEMP_FOLDER, 
+		
 										[ 'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS',	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS,	r'a list, one or more folders to look in for slideshow pics/videos. the r in front of the string is CRITICAL' ],
 										[ 'RECURSIVE',									RECURSIVE,									r'case sensitive: whether to recurse the source folder(s) looking for slideshow pics/videos' ],
 										[ 'ROOT_FOLDER_FOR_OUTPUTS', 					ROOT_FOLDER_FOR_OUTPUTS,					r'folder in which outputs are to be placed' ],
@@ -437,7 +457,7 @@ def load_settings():
 										[ 'DURATION_MAX_VIDEO_SEC',						DURATION_MAX_VIDEO_SEC,						r'in seconds, maximum duration each video clip is shown in the slideshow' ],
 										[ 'TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB',	TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB,	r'normalize background audio to this maximum db' ],
 										[ 'TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY',	TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY,	r'how many DB to reduce backround audio during video clip audio overlay' ],
-										[ 'TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB',		TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB,		r'normalize video clip audio to this maximum db' ],
+										[ 'TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB',		TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB,		r'normalize video clip audio to this maximum db; camera vids are quieter so gain them' ],
 										[ 'MAX_FILES_PER_CHUNK',						MAX_FILES_PER_CHUNK,						r'how many images/videos to process in each chunk (more=slower)' ],
 										[ 'DEBUG',										DEBUG,										r'see and regret seeing, ginormous debug output' ],
 										[ 'FFMPEG_PATH',								FFMPEG_PATH,								r'Please leave this alone unless really confident' ],
@@ -498,10 +518,12 @@ def load_settings():
 	#######################################################################################################################################
 	#######################################################################################################################################
 
-	# x = {**y, **z} creates a new dictionary. Similar to the dict.update method,
-	# if both dictionaries has the same key with different values,
+	# x = {**y, **z} = CREATE A NEW MERGED DICTIONARY where items in **z overwrite items in **y
+	# Similar to the dict.update method, if both dictionaries has the same key with different values,
 	# then the final output will contain the value of the second dictionary. 
+	
 	final_settings_dict = {**default_settings_dict, **user_specified_settings_dict}	
+	
 	# FOR NOW, NOT USING THIS METHOD:
 	#		create a new dict in which user settings dict items overwrite the defaults dict
 	#		final_settings_dict = default_settings_dict
