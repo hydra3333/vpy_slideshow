@@ -914,16 +914,7 @@ def audio_standardize_and_import_file(audio_filename, headroom_db, ignore_error_
 	#		using .from_file a file may be an arbitrary number of channels, which pydub cannot handle
 	#			so we must first convert number of channels etc into a fixed file so we can use .from_file, eg
 	#			ffmpeg -i "background_audio_input_filename.mp4" -vn -ac 2 -ar 48000 -acodec pcm_s16le "some_audio_filename_in_temp_folder.wav"
-	target_background_audio_frequency = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_FREQUENCY']			# hopefully 48000
-	target_background_audio_channels = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CHANNELS']			# hopefully 2
-	target_background_audio_bytedepth = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BYTEDEPTH']			# hopefully 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
-	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']					# hopefully 'libfdk_aac'
-	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']				# hopefully '256k'
-	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']			# hopefully pcm_s16le ; for 16 bit
-	target_audio_background_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB']		# normalize background audio to this maximum db
-	target_audio_background_gain_during_overlay = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY']			# how many DB to reduce backround audio during video clip audio overlay
-	target_audio_snippet_normalize_headroom_db =  SETTINGS_DICT['TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB']			# normalize video clip audio to this maximum db
-	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder
+	# rely on multi-used settings variables defined in main
 
 	if os.path.exists(temporary_audio_filename):
 		os.remove(temporary_audio_filename)
@@ -981,20 +972,11 @@ def audio_standardize_and_import_file(audio_filename, headroom_db, ignore_error_
 
 	return audio
 
-def import_background_audio_files_from_folder(background_audio_folder, concat_file, extensions=['.mp2', '.mp3', '.mp4', '.m4a', '.wav', '.flac', '.aac', '.ogg', '.wma']):
-	# loop through files in a specified folder background_audio_folder, 
-	# standardize and import and append them to form a large background audio clip
-	# thanks, chatgpt
-	target_background_audio_frequency = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_FREQUENCY']			# hopefully 48000
-	target_background_audio_channels = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CHANNELS']			# hopefully 2
-	target_background_audio_bytedepth = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BYTEDEPTH']			# hopefully 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
-	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']					# hopefully 'libfdk_aac'
-	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']				# hopefully '256k'
-	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']			# hopefully pcm_s16le ; for 16 bit
-	target_audio_background_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB']		# normalize background audio to this maximum db
-	target_audio_background_gain_during_overlay = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY']			# how many DB to reduce backround audio during video clip audio overlay
-	target_audio_snippet_normalize_headroom_db =  SETTINGS_DICT['TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB']			# normalize video clip audio to this maximum db
-	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder
+def import_background_audio_files_from_folder(background_audio_folder, extensions=['.mp2', '.mp3', '.mp4', '.m4a', '.wav', '.flac', '.aac', '.ogg', '.wma']):
+	# loop through files in a specified  background_audio_folder in alphabetical order, 
+	# standardize them (ffmpeg reads anything useful and converts it)
+	# and import and append them to form a large background audio clip
+	# rely on multi-used settings variables defined in main
 
 	background_audio = AudioSegment.empty()
 	background_audio = background_audio.set_channels(target_background_audio_channels)
@@ -1018,16 +1000,7 @@ def audio_create_standardized_silence(duration_ms):
 	# https://pydub.com/
 	# https://github.com/jiaaro/pydub/blob/master/API.markdown
 	# NOTE	we MUST ensure the clips all have the SAME characteristics !!!!! or overlay etc will not work.
-	target_background_audio_frequency = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_FREQUENCY']			# hopefully 48000
-	target_background_audio_channels = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CHANNELS']			# hopefully 2
-	target_background_audio_bytedepth = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BYTEDEPTH']			# hopefully 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
-	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']					# hopefully 'libfdk_aac'
-	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']				# hopefully '256k'
-	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']			# hopefully pcm_s16le ; for 16 bit
-	target_audio_background_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB']		# normalize background audio to this maximum db
-	target_audio_background_gain_during_overlay = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY']			# how many DB to reduce backround audio during video clip audio overlay
-	target_audio_snippet_normalize_headroom_db =  SETTINGS_DICT['TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB']			# normalize video clip audio to this maximum db
-	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder
+	# rely on multi-used settings variables defined in main
 
 	audio = AudioSegment.silent(duration=padding_duration)
 	audio = audio.set_channels(target_background_audio_channels).set_sample_width(target_background_audio_bytedepth).set_frame_rate(target_background_audio_frequency)
@@ -1302,7 +1275,7 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 
 if __name__ == "__main__":
 	DEBUG = False
-	
+
 	##########################################################################################################################################
 	##########################################################################################################################################
 	# GATHER SETTINGS
@@ -1333,6 +1306,22 @@ if __name__ == "__main__":
 		print(f"DEBUG: slideshow_CONTROLLER: SETTINGS_DICT=\n{objPrettyPrint.pformat(SETTINGS_DICT)}",flush=True)
 		print(f"DEBUG: slideshow_CONTROLLER: OLD_INI_DICT=\n{objPrettyPrint.pformat(OLD_INI_DICT)}",flush=True)
 		print(f"DEBUG: slideshow_CONTROLLER: OLD_CALC_INI_DICT=\n{objPrettyPrint.pformat(OLD_CALC_INI_DICT)}",flush=True)
+
+	##########################################################################################################################################
+	##########################################################################################################################################
+	# DEFINE MILTI-USED SETTINGS VARIABLES
+	# rather than go to SETTINGS_DICT all the time ... since these are defined in main, functions should see them but cannot change them
+
+	target_background_audio_frequency = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_FREQUENCY']			# hopefully 48000
+	target_background_audio_channels = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CHANNELS']			# hopefully 2
+	target_background_audio_bytedepth = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BYTEDEPTH']			# hopefully 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
+	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']					# hopefully 'libfdk_aac'
+	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']				# hopefully '256k'
+	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']			# hopefully pcm_s16le ; for 16 bit
+	target_audio_background_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB']		# normalize background audio to this maximum db
+	target_audio_background_gain_during_overlay = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY']			# how many DB to reduce backround audio during video clip audio overlay
+	target_audio_snippet_normalize_headroom_db =  SETTINGS_DICT['TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB']			# normalize video clip audio to this maximum db
+	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder
 
 	##########################################################################################################################################
 	##########################################################################################################################################
@@ -1473,16 +1462,7 @@ if __name__ == "__main__":
 	#		using .from_file a file may be an arbitrary number of channels, which pydub cannot handle
 	#			so we must first convert number of channels etc into a fixed file so we can use .from_file, eg
 	#			ffmpeg -i "background_audio_input_filename.mp4" -vn -ac 2 -ar 48000 -acodec pcm_s16le "some_audio_filename_in_temp_folder.wav"
-	target_background_audio_frequency = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_FREQUENCY']			# hopefully 48000
-	target_background_audio_channels = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CHANNELS']			# hopefully 2
-	target_background_audio_bytedepth = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BYTEDEPTH']			# hopefully 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
-	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']					# hopefully 'libfdk_aac'
-	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']				# hopefully '256k'
-	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']			# hopefully pcm_s16le ; for 16 bit
-	target_audio_background_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB']		# normalize background audio to this maximum db
-	target_audio_background_gain_during_overlay = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY']			# how many DB to reduce backround audio during video clip audio overlay
-	target_audio_snippet_normalize_headroom_db =  SETTINGS_DICT['TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB']			# normalize video clip audio to this maximum db
-	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder
+	# rely on multi-used settings variables defined in main
 	
 	snippet_audio_fade_in_duration_ms = SETTINGS_DICT['SNIPPET_AUDIO_FADE_IN_DURATION_MS']
 	snippet_audio_fade_out_duration_ms = SETTINGS_DICT['SNIPPET_AUDIO_FADE_OUT_DURATION_MS']
