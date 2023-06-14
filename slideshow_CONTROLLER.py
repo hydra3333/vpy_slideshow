@@ -124,6 +124,31 @@ def fully_qualified_filename(file_name):
 	new_file_name = normalize_path(new_file_name)
 	return new_file_name
 
+def make_full_path(incoming_path, default_dir, default_filename=None, default_extension=None):
+	# make a fully qualified path from an incoming string and defaults
+	default_filled_path = incoming_path
+	if not os.path.isabs(default_filled_path):
+		default_dir = fully_qualified_directory_no_trailing_backslash(default_dir)
+		default_filled_path = os.path.join(default_dir, default_filled_path)
+	if default_filename is not None:
+		filename = os.path.basename(default_filled_path)
+		if filename == '':
+			default_filled_path = os.path.join(default_filled_path, default_filename)
+	if default_extension is not None:
+		_, ext = os.path.splitext(default_filled_path)
+		if ext == '':
+			default_filled_path += default_extension
+	# check if have defaulted a file or a folder:
+	filename = os.path.basename(default_filled_path)
+	_, ext = os.path.splitext(default_filled_path)
+	if (default_filename is None) and (default_extension is None) and (filename is None) and (ext is None):
+		# must be a folder being defaulted
+		default_filled_path = fully_qualified_filename(default_filled_path)
+	else:
+		# must be a file being defaulted
+		default_filled_path = fully_qualified_directory_no_trailing_backslash(default_filled_path)
+	return default_filled_path
+
 #********************************************************************************************************
 #********************************************************************************************************
 #--------------------------------------------------------------------------------------------------------
@@ -881,7 +906,7 @@ def find_all_chunks():
 	return chunk_count, count_of_files, chunks
 
 ###
-def audio_standardize_and_import_file(audio_filename, headroom_db):
+def audio_standardize_and_import_file(audio_filename, headroom_db, ignore_error_converting=False):
 	# use global SETTINGS_DICT for the convert and import audio
 	# https://pydub.com/
 	# https://github.com/jiaaro/pydub/blob/master/API.markdown
@@ -920,36 +945,73 @@ def audio_standardize_and_import_file(audio_filename, headroom_db):
 							]
 	print(f"CONTROLLER: audio_standardize_and_import_file attempting to standardize audio using {objPrettyPrint.pformat(ffmpeg_commandline)}",flush=True)
 
-	# Method 1	works fine, especially when we flush in print stamenets. it produces output and errors to the console. 
-	#			Tempted to use Method 1 everywhere.  We'll see with long-running vspipes whether we view timely regular output from vspipe or not.
-	subprocess.run(ffmpeg_commandline, check=True)
+	if ignore_error_converting:
+		result = subprocess.run(ffmpeg_commandline, check=False)
+		if result.returncode != 0:
+			print(f"CONTROLLER: WARNING: audio_standardize_and_import_file: ignoring an audio file due to Unexpected error from subprocess.run\n{objPrettyPrint.pformat(ffmpeg_commandline)}",flush=True,file=sys.stderr)
+			return None
+	else:
+		# this will crash if there's an error
+		subprocess.run(ffmpeg_commandline, check=True)
 
 	try:
 		audio = AudioSegment.from_file(temporary_audio_filename)
 		audio = audio.set_channels(target_background_audio_channels).set_sample_width(target_background_audio_bytedepth).set_frame_rate(target_background_audio_frequency)
 	#except FileNotFoundError:
-	#	print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio File not found from AudioSegment.from_file('{temporary_audio_filename}')",flush=True,file=sys.stderr)
+	#	print(f"CONTROLLER: audio_standardize_and_import_file: audio File not found from AudioSegment.from_file('{temporary_audio_filename}')",flush=True,file=sys.stderr)
 	#	sys.exit(1)
 	#except TypeError:
-	#	print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio Type mismatch or unsupported operation from AudioSegment.from_file('{temporary_audio_filename}')",flush=True,file=sys.stderr)
+	#	print(f"CONTROLLER: audio_standardize_and_import_file: audio Type mismatch or unsupported operation from AudioSegment.from_file('{temporary_audio_filename}')",flush=True,file=sys.stderr)
 	#	sys.exit(1)
 	#except ValueError:
-	#	print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio Invalid or unsupported value from AudioSegment.from_file('{temporary_audio_filename}')",flush=True,file=sys.stderr)
+	#	print(f"CONTROLLER: audio_standardize_and_import_file: audio Invalid or unsupported value from AudioSegment.from_file('{temporary_audio_filename}')",flush=True,file=sys.stderr)
 	#	sys.exit(1)
 	#except IOError:
-	#	print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio I/O error occurred from AudioSegment.from_file('{temporary_audio_filename}')",flush=True,file=sys.stderr)
+	#	print(f"CONTROLLER: audio_standardize_and_import_file: audio I/O error occurred from AudioSegment.from_file('{temporary_audio_filename}')",flush=True,file=sys.stderr)
 	#	sys.exit(1)
 	#except OSError as e:
-	#	print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio Unexpected OSError from AudioSegment.from_file('{temporary_audio_filename}')\n{str(e)}",flush=True,file=sys.stderr)
+	#	print(f"CONTROLLER: audio_standardize_and_import_file: audio Unexpected OSError from AudioSegment.from_file('{temporary_audio_filename}')\n{str(e)}",flush=True,file=sys.stderr)
 	#	sys.exit(1)
 	except Exception as e:
-		print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: audio Unexpected error from AudioSegment.from_file('{temporary_audio_filename}')\n{str(e)}",flush=True,file=sys.stderr)
+		print(f"CONTROLLER: audio_standardize_and_import_file: audio Unexpected error from AudioSegment.from_file('{temporary_audio_filename}')\n{str(e)}",flush=True,file=sys.stderr)
 		sys.exit(1)
 
 	if os.path.exists(temporary_audio_filename):
 		os.remove(temporary_audio_filename)
 
 	return audio
+
+def import_background_audio_files_from_folder(background_audio_folder, concat_file, extensions=['.mp2', '.mp3', '.mp4', '.m4a', '.wav', '.flac', '.aac', '.ogg', '.wma']):
+	# loop through files in a specified folder background_audio_folder, 
+	# standardize and import and append them to form a large background audio clip
+	# thanks, chatgpt
+	target_background_audio_frequency = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_FREQUENCY']			# hopefully 48000
+	target_background_audio_channels = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CHANNELS']			# hopefully 2
+	target_background_audio_bytedepth = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BYTEDEPTH']			# hopefully 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
+	target_background_audio_codec = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_CODEC']					# hopefully 'libfdk_aac'
+	target_background_audio_bitrate = SETTINGS_DICT['TARGET_BACKGROUND_AUDIO_BITRATE']				# hopefully '256k'
+	temporary_background_audio_codec = SETTINGS_DICT['TEMPORARY_BACKGROUND_AUDIO_CODEC']			# hopefully pcm_s16le ; for 16 bit
+	target_audio_background_normalize_headroom_db = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB']		# normalize background audio to this maximum db
+	target_audio_background_gain_during_overlay = SETTINGS_DICT['TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY']			# how many DB to reduce backround audio during video clip audio overlay
+	target_audio_snippet_normalize_headroom_db =  SETTINGS_DICT['TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB']			# normalize video clip audio to this maximum db
+	temporary_audio_filename = SETTINGS_DICT['TEMPORARY_AUDIO_FILENAME']							# in temp folder
+
+	background_audio = AudioSegment.empty()
+	background_audio = background_audio.set_channels(target_background_audio_channels)
+	background_audio = background_audio.set_sample_width(target_background_audio_bytedepth)
+	background_audio = background_audio.set_frame_rate(target_background_audio_frequency)
+
+	background_audio_folder = os.path.abspath(background_audio_folder).rstrip(os.linesep).strip('\r').strip('\n').strip()
+	files = sorted(os.listdir(background_audio_folder))
+	for filename in files:
+		if any(filename.lower().endswith(ext) for ext in extensions):
+			filename = fully_qualified_filename(filename)
+			# having found a suitable audio file in the background_audio_folder, standardize and import and append it
+			audio_imported_from_file = audio_standardize_and_import_file(filename, target_audio_background_normalize_headroom_db, ignore_error_converting=True)
+			if audio_imported_from_file is not None:
+				background_audio = background_audio + audio_imported_from_file
+	#end for
+	return background_audio
 
 def audio_create_standardized_silence(duration_ms):
 	# use global SETTINGS_DICT for the convert and import audio
@@ -1639,14 +1701,14 @@ if __name__ == "__main__":
 							'-c:a', 'copy',
 							'-c:v', 'libx264',
 							'-preset', 'veryslow',
-							#'-crf', '22', 
+							'-crf', '21', 
 							'-refs', '3',  			# Set the number of reference frames to 3 (it used be 16 by default)
-							'-b:v', '5M', 			# 5M target bitrate instead of crf 22
+							#'-b:v', '5M', 			# 5M target bitrate instead of crf 22
 							'-minrate:v', '1M', 
 							'-maxrate:v', '12M', 
 							'-bufsize', '12M',
 							'-profile:v', 'high',
-							'-level', '5.1',		# H.264 Maximum supported bitrate: Level 5.1: 50 Mbps, Level 5.2: 62.5 Mbps
+							'-level', '5.1',		# we are only 1080p so 5.1 is enough # H.264 Maximum supported bitrate: Level 5.1: 50 Mbps, Level 5.2: 62.5 Mbps
 							'-movflags', '+faststart+write_colr',
 							'-y', final_mp4_with_audio_filename,
 							]
@@ -1681,7 +1743,7 @@ if __name__ == "__main__":
 							'-maxrate:v', '12M', 
 							'-bufsize', '12M',
 							'-profile:v', 'high',
-							'-level', '5.1',		# H.264 Maximum supported bitrate: Level 5.1: 50 Mbps, Level 5.2: 62.5 Mbps
+							'-level', '5.1',		# we are only 1080p so 5.1 is enough# H.264 Maximum supported bitrate: Level 5.1: 50 Mbps, Level 5.2: 62.5 Mbps
 							'-movflags', '+faststart+write_colr',
 							'-y', final_mp4_with_audio_filename,
 							]
