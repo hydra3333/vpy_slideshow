@@ -972,7 +972,7 @@ def audio_standardize_and_import_file(audio_filename, headroom_db, ignore_error_
 
 	return audio
 
-def import_background_audio_files_from_folder(background_audio_folder, extensions=['.mp2', '.mp3', '.mp4', '.m4a', '.wav', '.flac', '.aac', '.ogg', '.wma']):
+def audio_standardize_and_import_background_audios_from_folder(background_audio_folder, extensions=['.mp2', '.mp3', '.mp4', '.m4a', '.wav', '.flac', '.aac', '.ogg', '.wma']):
 	# loop through files in a specified  background_audio_folder in alphabetical order, 
 	# standardize them (ffmpeg reads anything useful and converts it)
 	# and import and append them to form a large background audio clip
@@ -1738,7 +1738,50 @@ if __name__ == "__main__":
 	##########################################################################################################################################
 	# CLEANUP
 
+why is ffmpeg libx264 header bitrate 300 Mbps in .mp4 ?
+FIXED
+
+
+get backgroud audio from files in a folder ...
+PART DONE  - RELISE ON ALL CHANES TO SETTINGS, then a new ENTRY SPECIFYING THE FOLDER INSTEAD OF THE BACKGROUND AUDIO FILENAME ??? 
+??? is there anoither setting, or does it use a temp file for the resulting background with overlay ? 
+what if there is no overlay ? does it still find/keep the background audio ???
+
+... function defined but not called ... audio_standardize_and_import_background_audios_from_folder
+... folder not specified yet in SETTINGS 
+... if the folder does not exist or the resulting background_audio is empty (0 length) then generate silence instead
+
+
+get rid of root folder ???
+... make it invisible to user perhaps, check
+
+
+TEMP folder not on G even though G specified ? ... does it still need/use root_for_output ?
+... CRAETED FUNCTION   make_full_path(incoming_path, default_dir, default_filename=None, default_extension=None):
+... but how to setup and use TEMP folder ???
+change to remove folder spec from TEMP filenames (add a comment)  abd fill them in later with the updated TEMP_FOLDER in the "new" dict
+... THEN, MOVE code to define user template so it is AFTER trying to import user_settings and then fleshing them out with defaults ????
+
+
+check settings.py  and the settings loader, to see if they're the same for headroom etc
+do audio headrooom updates ... 2 less for background music normal headroom, 2 more for snippet headroom
+FIXED
 
 
 
+add print of the final concat ffmpeg command.
+FIXED
+
+
+
+find uplifting royalty free background music 
+edit current one for first  and second first song
+
+
+cleanup step is not yet done in controller
+... either as we go ... or at the end or both
+
+
+
+tassie -- individual people's not combined
 
