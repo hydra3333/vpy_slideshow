@@ -199,12 +199,12 @@ def load_settings():
 	if DEBUG:	print(f'DEBUG: at top of load_settings DEBUG={DEBUG}',flush=True,file=sys.stderr)
 
 	# This is ALWAYS a fixed filename in the current default folder !!!
+
 	SLIDESHOW_SETTINGS_MODULE_NAME				= 'SLIDESHOW_SETTINGS'.lower()	# SLIDESHOW_SETTINGS.py
 	SLIDESHOW_SETTINGS_MODULE_FILENAME			= fully_qualified_filename(os.path.join(r'.', SLIDESHOW_SETTINGS_MODULE_NAME + '.py'))
 
 	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS	= [ fully_qualified_directory_no_trailing_backslash(r'.') ]
-	ROOT_FOLDER_FOR_OUTPUTS						= fully_qualified_directory_no_trailing_backslash(r'.')
-	TEMP_FOLDER									= fully_qualified_directory_no_trailing_backslash(r'.\\TEMP')
+	TEMP_FOLDER									= fully_qualified_directory_no_trailing_backslash(r'.\\TEMP')				# TEMP_FOLDER
 	PIC_EXTENSIONS								= [ r'.png', r'.jpg', r'.jpeg', r'.gif' ]
 	VID_EXTENSIONS								= [ r'.mp4', r'.mpeg4', r'.mpg', r'.mpeg', r'.avi', r'.mjpeg', r'.3gp', r'.mov' ]
 	EEK_EXTENSIONS								= [ r'.m2ts' ]
@@ -212,28 +212,32 @@ def load_settings():
 	EXTENSIONS									= PIC_EXTENSIONS + VID_EXTENSIONS + EEK_EXTENSIONS
 
 	# we need a json file to contain a dict of all chunks
-	CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT			= os.path.join(TEMP_FOLDER, r'chunks_file_for_all_chunks_dict.json')		# only for debug
-	SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT		= os.path.join(TEMP_FOLDER, r'snippets_file_for_all_snippets_dict.json')	# only for debug
-	CHUNK_ENCODED_FFV1_FILENAME_BASE			= os.path.join(TEMP_FOLDER, r'encoded_chunk_ffv1_')	# the interim encoded video created by the encoding process, to be associated with a snippet dict, full names dynamically created eg "interim_ffv1_0001.mkv"
+
+	CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT			= r'chunks_file_for_all_chunks_dict.json'		# TEMP_FOLDER
+	SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT		= r'snippets_file_for_all_snippets_dict.json'	# TEMP_FOLDER
+	CHUNK_ENCODED_FFV1_FILENAME_BASE			= r'encoded_chunk_ffv1_'						# TEMP_FOLDER interim encoded video from encoding process, associated with a snippet dict, full names dynamically created eg "interim_ffv1_0001.mkv"
 	
 	# Now we need a set of inter-step comms files
 	# 1. PREPARATION: 
 	# the CONTROLLER calls load_settings.load_settings() and can call a function to do the chunking into a dict and keep it in memory and write a debug copy to CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT
 
 	# 2. ENCODER : process_video also creating a snippets file ... change the format of the snippets file to exclude the last line with a filename and change the code
-	CURRENT_CHUNK_FILENAME						= os.path.join(TEMP_FOLDER, r'current_chunk_file.json') 	# used by the ENCODER to load a file whose .json content gives the ENCODER (a dict of the current chunk, and a filename to be encoded into)
-	CURRENT_SNIPPETS_FILENAME					= os.path.join(TEMP_FOLDER, r'current_snippets_file.json') 	# used by the ENCODER to write file whose .json content will be a dict of snippets for this chunk, and a filename/[start/end]-frames of the encoded file)
-																											# the file will contain the start/end frame numbers and the fully qualified SOURCE filename for each snippet, and a filename/[start/end-frames] for the encoded file (used in calcs later)
+
+	CURRENT_CHUNK_FILENAME						= r'current_chunk_file.json' 		# TEMP_FOLDER	# used by the ENCODER to load a file whose .json content gives the ENCODER (a dict of the current chunk, and a filename to be encoded into)
+	CURRENT_SNIPPETS_FILENAME					= r'current_snippets_file.json'		# TEMP_FOLDER	# used by the ENCODER to write file whose .json content will be a dict of snippets for this chunk, and a filename/[start/end]-frames of the encoded file)
+																									# the file will contain the start/end frame numbers and the fully qualified SOURCE filename for each snippet, and a filename/[start/end-frames] for the encoded file (used in calcs later)
 	# 3. the CONTROLLER does snippet processsing based on snippets written by the encoder per chunk and re-read and placed into a large dict on the fly by the CONTROLLER... 
 	#	 use the global snippets dict updated by the fly by the encoding CONTROLLER process
 	#	 global frame numbers are now re-calculated after encoding all chunks by processing snippet dicts in sequence and recalculating the global [frame-start/frame-end] pairs for each snippet
 	#	 then process snippets into the audio, re-encoding into .aac which can be muxed later.
 	#	this process touches the 
-	BACKGROUND_AUDIO_INPUT_FILENAME				= fully_qualified_filename(os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'background_audio_pre_snippet_editing.m4a'))
-	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME = os.path.join(TEMP_FOLDER, r'background_audio_with_overlaid_snippets.mp4')	# pydyub hates .m4a, so use .mp4
+
+	BACKGROUND_AUDIO_INPUT_FOLDER						= fully_qualified_directory_no_trailing_backslash(r'.')
+	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME	= r'background_audio_with_overlaid_snippets.mp4')			# TEMP_FOLDER
 
 	# 5. the CONTROLLER does Final muxing of the interim video .mp4 and the interim background_audio_post_snippet_editing
-	FINAL_MP4_WITH_AUDIO_FILENAME				= fully_qualified_filename(os.path.join(ROOT_FOLDER_FOR_OUTPUTS, r'slideshow.FINAL_MP4_WITH_AUDIO_FILENAME.mp4'))
+
+	FINAL_MP4_WITH_AUDIO_FILENAME				= fully_qualified_filename(r'.\slideshow.FINAL_MP4_WITH_AUDIO_FILENAME.mp4')
 
 	MAX_FILES_PER_CHUNK							= int(100)
 	TOLERANCE_PERCENT_FINAL_CHUNK				= int(20)
@@ -271,8 +275,8 @@ def load_settings():
 	TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB		= int(-6)		# normalize snippet audio to -xxDB ; pydub calls it headroom; camera vids are usually much quieter than background music
 
 	TEMPORARY_BACKGROUND_AUDIO_CODEC			= r'pcm_s16le'	# ; for 16 bit .wav
-	TEMPORARY_AUDIO_FILENAME					= os.path.join(TEMP_FOLDER, r'temporary_audio_file_for_standardization_then_input_to_pydub.wav')	# file is overwritten and deleted as needed
-	TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME		= os.path.join(TEMP_FOLDER, r'temporary_ffmpeg_concat_list.txt')	# file is overwritten and deleted as needed
+	TEMPORARY_AUDIO_FILENAME					= r'temporary_audio_file_for_standardization_then_input_to_pydub.wav'	# TEMP_FOLDER	# file is overwritten and deleted as needed
+	TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME		= r'temporary_ffmpeg_concat_list.txt'									# TEMP_FOLDER	# file is overwritten and deleted as needed
 
 	TARGET_COLORSPACE							= r'BT.709'	# ; "target_colorspace" a string; set for hd; required to render subtitles, it is fixed at this value; this item must match target_colorspace_matrix_i etc = .
 	TARGET_COLORSPACE_MATRIX_I					= int(1)	# ; "target_colorspace_matrix_i" an integer; set for hd; this is the value that counts; it is fixed at this value; turn on debug_mode to see lists of these values = .
@@ -329,153 +333,113 @@ def load_settings():
 	TARGET_COLOR_RANGE_I_ZIMG					= None		# CALCULATED LATER : 	# = if something, calculate
 
 	default_settings_dict = {
-		'SLIDESHOW_SETTINGS_MODULE_NAME':			SLIDESHOW_SETTINGS_MODULE_NAME,
-		'SLIDESHOW_SETTINGS_MODULE_FILENAME':		SLIDESHOW_SETTINGS_MODULE_FILENAME,
+		'SLIDESHOW_SETTINGS_MODULE_NAME':					SLIDESHOW_SETTINGS_MODULE_NAME,
+		'SLIDESHOW_SETTINGS_MODULE_FILENAME':				SLIDESHOW_SETTINGS_MODULE_FILENAME,
 		
-		'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS': ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS,	# this is the ONLY file/folder thing in the NEW version that is actually already a LIST
-		'ROOT_FOLDER_FOR_OUTPUTS': 					ROOT_FOLDER_FOR_OUTPUTS,
-		'TEMP_FOLDER':								TEMP_FOLDER,
-		'PIC_EXTENSIONS' :							PIC_EXTENSIONS,
-		'VID_EXTENSIONS' :							VID_EXTENSIONS,
-		'EEK_EXTENSIONS' :							EEK_EXTENSIONS,
-		'VID_EEK_EXTENSIONS':						VID_EEK_EXTENSIONS,
-		'EXTENSIONS' :								EXTENSIONS,
+		'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS': 		ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS,	# this is the ONLY file/folder thing in the NEW version that is actually already a LIST
+		'TEMP_FOLDER':										TEMP_FOLDER,
+		'PIC_EXTENSIONS' :									PIC_EXTENSIONS,
+		'VID_EXTENSIONS' :									VID_EXTENSIONS,
+		'EEK_EXTENSIONS' :									EEK_EXTENSIONS,
+		'VID_EEK_EXTENSIONS':								VID_EEK_EXTENSIONS,
+		'EXTENSIONS' :										EXTENSIONS,
 
-		'CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT': 		CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT,		# only for debug
-		'SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT':	SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT,	# only for debug
-		'CHUNK_ENCODED_FFV1_FILENAME_BASE': 		CHUNK_ENCODED_FFV1_FILENAME_BASE,
-		'CURRENT_CHUNK_FILENAME':					CURRENT_CHUNK_FILENAME,
-		'CURRENT_SNIPPETS_FILENAME': 				CURRENT_SNIPPETS_FILENAME,
-		'BACKGROUND_AUDIO_INPUT_FILENAME':			BACKGROUND_AUDIO_INPUT_FILENAME,
-		'BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME':	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME,
-		'FINAL_MP4_WITH_AUDIO_FILENAME':			FINAL_MP4_WITH_AUDIO_FILENAME,
+		'CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT': 				CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT,				# TEMP_FOLDER
+		'SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT':			SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT,			# TEMP_FOLDER
+		'CHUNK_ENCODED_FFV1_FILENAME_BASE': 				CHUNK_ENCODED_FFV1_FILENAME_BASE,					# TEMP_FOLDER
+		'CURRENT_CHUNK_FILENAME':							CURRENT_CHUNK_FILENAME,								# TEMP_FOLDER
+		'CURRENT_SNIPPETS_FILENAME': 						CURRENT_SNIPPETS_FILENAME,							# TEMP_FOLDER
+		'BACKGROUND_AUDIO_INPUT_FOLDER':					BACKGROUND_AUDIO_INPUT_FOLDER,
+		'BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME':	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME,	# TEMP_FOLDER
+		'FINAL_MP4_WITH_AUDIO_FILENAME':					FINAL_MP4_WITH_AUDIO_FILENAME,
 
-		'MAX_FILES_PER_CHUNK':						MAX_FILES_PER_CHUNK,
-		'TOLERANCE_PERCENT_FINAL_CHUNK':			TOLERANCE_PERCENT_FINAL_CHUNK,
-		'RECURSIVE':								RECURSIVE,
-		'DEBUG':									DEBUG,
-		'FFMPEG_PATH':								FFMPEG_PATH,
-		'FFPROBE_PATH':								FFPROBE_PATH,
-		'VSPIPE_PATH':								VSPIPE_PATH,
-		'slideshow_CONTROLLER_path':				slideshow_CONTROLLER_path,
-		'slideshow_LOAD_SETTINGS_path':				slideshow_LOAD_SETTINGS_path,
-		'slideshow_ENCODER_legacy_path':			slideshow_ENCODER_legacy_path,
+		'MAX_FILES_PER_CHUNK':								MAX_FILES_PER_CHUNK,
+		'TOLERANCE_PERCENT_FINAL_CHUNK':					TOLERANCE_PERCENT_FINAL_CHUNK,
+		'RECURSIVE':										RECURSIVE,
+		'DEBUG':											DEBUG,
+		'FFMPEG_PATH':										FFMPEG_PATH,
+		'FFPROBE_PATH':										FFPROBE_PATH,
+		'VSPIPE_PATH':										VSPIPE_PATH,
+		'slideshow_CONTROLLER_path':						slideshow_CONTROLLER_path,
+		'slideshow_LOAD_SETTINGS_path':						slideshow_LOAD_SETTINGS_path,
+		'slideshow_ENCODER_legacy_path':					slideshow_ENCODER_legacy_path,
 		
-		'SUBTITLE_DEPTH':							SUBTITLE_DEPTH,
-		'SUBTITLE_FONTSIZE':						SUBTITLE_FONTSIZE,
-		'SUBTITLE_FONTSCALE':						SUBTITLE_FONTSCALE,
-		'DURATION_PIC_SEC':							DURATION_PIC_SEC,
-		'DURATION_CROSSFADE_SECS':					DURATION_CROSSFADE_SECS,
-		'CROSSFADE_TYPE':							CROSSFADE_TYPE,
-		'CROSSFADE_DIRECTION':						CROSSFADE_DIRECTION,
-		'DURATION_MAX_VIDEO_SEC':					DURATION_MAX_VIDEO_SEC,
-		'DENOISE_SMALL_SIZE_VIDEOS':				DENOISE_SMALL_SIZE_VIDEOS,
+		'SUBTITLE_DEPTH':									SUBTITLE_DEPTH,
+		'SUBTITLE_FONTSIZE':								SUBTITLE_FONTSIZE,
+		'SUBTITLE_FONTSCALE':								SUBTITLE_FONTSCALE,
+		'DURATION_PIC_SEC':									DURATION_PIC_SEC,
+		'DURATION_CROSSFADE_SECS':							DURATION_CROSSFADE_SECS,
+		'CROSSFADE_TYPE':									CROSSFADE_TYPE,
+		'CROSSFADE_DIRECTION':								CROSSFADE_DIRECTION,
+		'DURATION_MAX_VIDEO_SEC':							DURATION_MAX_VIDEO_SEC,
+		'DENOISE_SMALL_SIZE_VIDEOS':						DENOISE_SMALL_SIZE_VIDEOS,
 
-		'TARGET_WIDTH':								TARGET_WIDTH,
-		'TARGET_HEIGHT':							TARGET_HEIGHT,
-		'TARGET_FPSNUM':							TARGET_FPSNUM,
-		'TARGET_FPSDEN':							TARGET_FPSDEN,
-		'TARGET_BACKGROUND_AUDIO_FREQUENCY':		TARGET_BACKGROUND_AUDIO_FREQUENCY,
-		'TARGET_BACKGROUND_AUDIO_CHANNELS':			TARGET_BACKGROUND_AUDIO_CHANNELS,
-		'TARGET_BACKGROUND_AUDIO_BYTEDEPTH':		TARGET_BACKGROUND_AUDIO_BYTEDEPTH,
-		'TARGET_BACKGROUND_AUDIO_CODEC':			TARGET_BACKGROUND_AUDIO_CODEC,
-		'TARGET_BACKGROUND_AUDIO_BITRATE':			TARGET_BACKGROUND_AUDIO_BITRATE,
+		'TARGET_WIDTH':										TARGET_WIDTH,
+		'TARGET_HEIGHT':									TARGET_HEIGHT,
+		'TARGET_FPSNUM':									TARGET_FPSNUM,
+		'TARGET_FPSDEN':									TARGET_FPSDEN,
+		'TARGET_BACKGROUND_AUDIO_FREQUENCY':				TARGET_BACKGROUND_AUDIO_FREQUENCY,
+		'TARGET_BACKGROUND_AUDIO_CHANNELS':					TARGET_BACKGROUND_AUDIO_CHANNELS,
+		'TARGET_BACKGROUND_AUDIO_BYTEDEPTH':				TARGET_BACKGROUND_AUDIO_BYTEDEPTH,
+		'TARGET_BACKGROUND_AUDIO_CODEC':					TARGET_BACKGROUND_AUDIO_CODEC,
+		'TARGET_BACKGROUND_AUDIO_BITRATE':					TARGET_BACKGROUND_AUDIO_BITRATE,
 		'TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB':	TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB,
 		'TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY':		TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY,
 		'TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB':		TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB,
 
-		'TEMPORARY_BACKGROUND_AUDIO_CODEC':			TEMPORARY_BACKGROUND_AUDIO_CODEC,
-		'TEMPORARY_AUDIO_FILENAME':					TEMPORARY_AUDIO_FILENAME,
-		'TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME':	TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME,
+		'TEMPORARY_BACKGROUND_AUDIO_CODEC':					TEMPORARY_BACKGROUND_AUDIO_CODEC,
+		'TEMPORARY_AUDIO_FILENAME':							TEMPORARY_AUDIO_FILENAME,							# TEMP_FOLDER
+		'TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME':			TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME,				# TEMP_FOLDER
 
-		'TARGET_COLORSPACE':						TARGET_COLORSPACE,
-		'TARGET_COLORSPACE_MATRIX_I':				TARGET_COLORSPACE_MATRIX_I,
-		'TARGET_COLOR_TRANSFER_I':					TARGET_COLOR_TRANSFER_I,
-		'TARGET_COLOR_PRIMARIES_I':					TARGET_COLOR_PRIMARIES_I,
-		'TARGET_COLOR_RANGE_I':						TARGET_COLOR_RANGE_I,
-		'UPSIZE_KERNEL':							UPSIZE_KERNEL,
-		'DOWNSIZE_KERNEL':							DOWNSIZE_KERNEL,
-		'BOX':										BOX,
+		'TARGET_COLORSPACE':								TARGET_COLORSPACE,
+		'TARGET_COLORSPACE_MATRIX_I':						TARGET_COLORSPACE_MATRIX_I,
+		'TARGET_COLOR_TRANSFER_I':							TARGET_COLOR_TRANSFER_I,
+		'TARGET_COLOR_PRIMARIES_I':							TARGET_COLOR_PRIMARIES_I,
+		'TARGET_COLOR_RANGE_I':								TARGET_COLOR_RANGE_I,
+		'UPSIZE_KERNEL':									UPSIZE_KERNEL,
+		'DOWNSIZE_KERNEL':									DOWNSIZE_KERNEL,
+		'BOX':												BOX,
 
-		'_INI_SECTION_NAME':						_INI_SECTION_NAME,
+		'_INI_SECTION_NAME':								_INI_SECTION_NAME,
 
-		'WORKING_PIXEL_FORMAT':						WORKING_PIXEL_FORMAT,
-		'TARGET_PIXEL_FORMAT':						TARGET_PIXEL_FORMAT,
-		'DG_PIXEL_FORMAT':							DG_PIXEL_FORMAT,
-		'DOT_FFINDEX':								DOT_FFINDEX,
-		'MODX':										MODX,
-		'MODY':										MODY,
-		'SUBTITLE_MAX_DEPTH':						SUBTITLE_MAX_DEPTH,	
-		'ROTATION_ANTI_CLOCKWISE':					ROTATION_ANTI_CLOCKWISE,
-		'ROTATION_CLOCKWISE':						ROTATION_CLOCKWISE,
-		'PRECISION_TOLERANCE':						PRECISION_TOLERANCE,
-		'MIN_ACTUAL_DISPLAY_TIME':					MIN_ACTUAL_DISPLAY_TIME,
+		'WORKING_PIXEL_FORMAT':								WORKING_PIXEL_FORMAT,
+		'TARGET_PIXEL_FORMAT':								TARGET_PIXEL_FORMAT,
+		'DG_PIXEL_FORMAT':									DG_PIXEL_FORMAT,
+		'DOT_FFINDEX':										DOT_FFINDEX,
+		'MODX':												MODX,
+		'MODY':												MODY,
+		'SUBTITLE_MAX_DEPTH':								SUBTITLE_MAX_DEPTH,	
+		'ROTATION_ANTI_CLOCKWISE':							ROTATION_ANTI_CLOCKWISE,
+		'ROTATION_CLOCKWISE':								ROTATION_CLOCKWISE,
+		'PRECISION_TOLERANCE':								PRECISION_TOLERANCE,
+		'MIN_ACTUAL_DISPLAY_TIME':							MIN_ACTUAL_DISPLAY_TIME,
 
-		'SNIPPET_AUDIO_FADE_IN_DURATION_MS':		SNIPPET_AUDIO_FADE_IN_DURATION_MS,
-		'SNIPPET_AUDIO_FADE_OUT_DURATION_MS':		SNIPPET_AUDIO_FADE_OUT_DURATION_MS,
+		'SNIPPET_AUDIO_FADE_IN_DURATION_MS':				SNIPPET_AUDIO_FADE_IN_DURATION_MS,
+		'SNIPPET_AUDIO_FADE_OUT_DURATION_MS':				SNIPPET_AUDIO_FADE_OUT_DURATION_MS,
 
-		'ZIMG_RANGE_LIMITED':						ZIMG_RANGE_LIMITED,	# = 0		# /**< Studio (TV) legal range, 16-235 in 8 bits. */
-		'ZIMG_RANGE_FULL':							ZIMG_RANGE_FULL,	# = 1		# /**< Full (PC) dynamic range, 0-255 in 8 bits. */
-		'VS_INTERLACED':							VS_INTERLACED,		# = { 'Progressive' : 0, 'BFF' : 1, 'TFF' : 2 }		# vs documnetation says frame property _FieldBased is one of 0=frame based (progressive), 1=bottom field first, 2=top field first.
+		'ZIMG_RANGE_LIMITED':								ZIMG_RANGE_LIMITED,	# = 0		# /**< Studio (TV) legal range, 16-235 in 8 bits. */
+		'ZIMG_RANGE_FULL':									ZIMG_RANGE_FULL,	# = 1		# /**< Full (PC) dynamic range, 0-255 in 8 bits. */
+		'VS_INTERLACED':									VS_INTERLACED,		# = { 'Progressive' : 0, 'BFF' : 1, 'TFF' : 2 }		# vs documnetation says frame property _FieldBased is one of 0=frame based (progressive), 1=bottom field first, 2=top field first.
 
 		# placeholders for calculated values - calculated after reading in the user-specified JSON
-		'TARGET_FPS':								TARGET_FPS,					# CALCULATED LATER # = round(self.calc_ini["TARGET_FPSNUM"] / self.calc_ini["TARGET_FPSDEN"], 3)
-		'DURATION_PIC_FRAMES':						DURATION_PIC_FRAMES,		# CALCULATED LATER # = int(math.ceil(self.calc_ini["DURATION_PIC_SEC"] * self.calc_ini["TARGET_FPS"]))
-		'DURATION_CROSSFADE_FRAMES':				DURATION_CROSSFADE_FRAMES,	# CALCULATED LATER # = int(math.ceil(self.calc_ini["DURATION_CROSSFADE_SECS"] * self.calc_ini["TARGET_FPS"]))
-		'DURATION_BLANK_CLIP_FRAMES':				DURATION_BLANK_CLIP_FRAMES,	# CALCULATED LATER # = self.calc_ini["DURATION_CROSSFADE_FRAMES"] + 1	# make equal to the display time for an image; DURATION_CROSSFADE_FRAMES will be less than this
-		'DURATION_MAX_VIDEO_FRAMES':				DURATION_MAX_VIDEO_FRAMES,	# CALCULATED LATER # = int(math.ceil(self.calc_ini["DURATION_MAX_VIDEO_SEC"] * self.calc_ini["TARGET_FPS"]))
-		'TARGET_VFR_FPSNUM':						TARGET_VFR_FPSNUM,			# CALCULATED LATER # = self.calc_ini["TARGET_FPSNUM"] * 2
-		'TARGET_VFR_FPSDEN':						TARGET_VFR_FPSDEN,			# CALCULATED LATER # = self.calc_ini["TARGET_FPSDEN"]
-		'TARGET_VFR_FPS':							TARGET_VFR_FPS,				# CALCULATED LATER # = self.calc_ini["TARGET_VFR_FPSNUM"] / self.calc_ini["TARGET_VFR_FPSDEN"]	
-		'TARGET_COLOR_RANGE_I_ZIMG':				TARGET_COLOR_RANGE_I_ZIMG,	# CALCULATED LATER # = if something, calculated
+		'TARGET_FPS':										TARGET_FPS,					# CALCULATED LATER # = round(self.calc_ini["TARGET_FPSNUM"] / self.calc_ini["TARGET_FPSDEN"], 3)
+		'DURATION_PIC_FRAMES':								DURATION_PIC_FRAMES,		# CALCULATED LATER # = int(math.ceil(self.calc_ini["DURATION_PIC_SEC"] * self.calc_ini["TARGET_FPS"]))
+		'DURATION_CROSSFADE_FRAMES':						DURATION_CROSSFADE_FRAMES,	# CALCULATED LATER # = int(math.ceil(self.calc_ini["DURATION_CROSSFADE_SECS"] * self.calc_ini["TARGET_FPS"]))
+		'DURATION_BLANK_CLIP_FRAMES':						DURATION_BLANK_CLIP_FRAMES,	# CALCULATED LATER # = self.calc_ini["DURATION_CROSSFADE_FRAMES"] + 1	# make equal to the display time for an image; DURATION_CROSSFADE_FRAMES will be less than this
+		'DURATION_MAX_VIDEO_FRAMES':						DURATION_MAX_VIDEO_FRAMES,	# CALCULATED LATER # = int(math.ceil(self.calc_ini["DURATION_MAX_VIDEO_SEC"] * self.calc_ini["TARGET_FPS"]))
+		'TARGET_VFR_FPSNUM':								TARGET_VFR_FPSNUM,			# CALCULATED LATER # = self.calc_ini["TARGET_FPSNUM"] * 2
+		'TARGET_VFR_FPSDEN':								TARGET_VFR_FPSDEN,			# CALCULATED LATER # = self.calc_ini["TARGET_FPSDEN"]
+		'TARGET_VFR_FPS':									TARGET_VFR_FPS,				# CALCULATED LATER # = self.calc_ini["TARGET_VFR_FPSNUM"] / self.calc_ini["TARGET_VFR_FPSDEN"]	
+		'TARGET_COLOR_RANGE_I_ZIMG':						TARGET_COLOR_RANGE_I_ZIMG,	# CALCULATED LATER # = if something, calculated
 	}
 
 	if DEBUG:	print(f'DEBUG: created default_settings_dict=\n{objPrettyPrint.pformat(default_settings_dict)}',flush=True,file=sys.stderr)
 
 	#######################################################################################################################################
 	#######################################################################################################################################
-	
-	if not os.path.exists(SLIDESHOW_SETTINGS_MODULE_FILENAME):
-		specially_formatted_settings_list =	[
-		
-		#-->>		add os.path.join(TEMP_FOLDER, 
-		#-->>		and os.path.join(TEMP_FOLDER, 
-		
-										[ 'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS',	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS,	r'a list, one or more folders to look in for slideshow pics/videos. the r in front of the string is CRITICAL' ],
-										[ 'RECURSIVE',									RECURSIVE,									r'case sensitive: whether to recurse the source folder(s) looking for slideshow pics/videos' ],
-										[ 'ROOT_FOLDER_FOR_OUTPUTS', 					ROOT_FOLDER_FOR_OUTPUTS,					r'folder in which outputs are to be placed' ],
-										[ 'TEMP_FOLDER',								TEMP_FOLDER,								r'folder where temporary files go; USE A DISK WITH LOTS OF SPARE DISK SPACE - CIRCA 6 GB PER 100 PICS/VIDEOS' ],
-										[ 'BACKGROUND_AUDIO_INPUT_FILENAME',			BACKGROUND_AUDIO_INPUT_FILENAME,			r'Use the word None to generate a silence background, or specify a .m4a audio file if you want a background track (it is not looped if too short)' ],
-										[ 'FINAL_MP4_WITH_AUDIO_FILENAME',				FINAL_MP4_WITH_AUDIO_FILENAME,				r'the filename of the FINAL slideshow .mp4' ],
-										[ 'SUBTITLE_DEPTH',								SUBTITLE_DEPTH,								r'how many folders deep to display in subtitles; use 0 for no subtitling' ],
-										[ 'SUBTITLE_FONTSIZE',							SUBTITLE_FONTSIZE,							r'fontsize for subtitles, leave this alone unless confident' ],
-										[ 'SUBTITLE_FONTSCALE',							SUBTITLE_FONTSCALE,							r'fontscale for subtitles, leave this alone unless confident' ],
-										[ 'DURATION_PIC_SEC',							DURATION_PIC_SEC,							r'in seconds, duration each pic is shown in the slideshow' ],
-										[ 'DURATION_CROSSFADE_SECS',					DURATION_CROSSFADE_SECS,					r'in seconds duration crossfade between pic, leave this alone unless confident' ],
-										[ 'CROSSFADE_TYPE',								CROSSFADE_TYPE,								r'random is a good choice, leave this alone unless confident' ],
-										[ 'CROSSFADE_DIRECTION',						CROSSFADE_DIRECTION,						r'Please leave this alone unless really confident' ],
-										[ 'DURATION_MAX_VIDEO_SEC',						DURATION_MAX_VIDEO_SEC,						r'in seconds, maximum duration each video clip is shown in the slideshow' ],
-										[ 'TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB',	TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB,	r'normalize background audio to this maximum db' ],
-										[ 'TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY',	TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY,	r'how many DB to reduce backround audio during video clip audio overlay' ],
-										[ 'TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB',		TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB,		r'normalize video clip audio to this maximum db; camera vids are quieter so gain them' ],
-										[ 'MAX_FILES_PER_CHUNK',						MAX_FILES_PER_CHUNK,						r'how many images/videos to process in each chunk (more=slower)' ],
-										[ 'DEBUG',										DEBUG,										r'see and regret seeing, ginormous debug output' ],
-										[ 'FFMPEG_PATH',								FFMPEG_PATH,								r'Please leave this alone unless really confident' ],
-										[ 'FFPROBE_PATH',								FFPROBE_PATH,								r'Please leave this alone unless really confident' ],
-										[ 'VSPIPE_PATH',								VSPIPE_PATH,								r'Please leave this alone unless really confident' ],
-										[ 'slideshow_CONTROLLER_path',					slideshow_CONTROLLER_path,					r'Please leave this alone unless really confident' ],
-										[ 'slideshow_LOAD_SETTINGS_path',				slideshow_LOAD_SETTINGS_path,				r'Please leave this alone unless really confident' ],
-										[ 'slideshow_ENCODER_legacy_path',				slideshow_ENCODER_legacy_path,				r'Please leave this alone unless really confident' ],
-									]	
-		if DEBUG:	print(f'DEBUG: specially_formatted_settings_list=\n{objPrettyPrint.pformat(specially_formatted_settings_list)}',flush=True,file=sys.stderr)
-		print(f"load_settings: ERROR: File '{SLIDESHOW_SETTINGS_MODULE_FILENAME}' does not exist, creating it with template settings... you MUST edit it now ...",flush=True,file=sys.stderr)
-		create_py_file_from_specially_formatted_list(SLIDESHOW_SETTINGS_MODULE_FILENAME, specially_formatted_settings_list)
-		sys.exit(1)
-
-	#######################################################################################################################################
-	#######################################################################################################################################
 
 	# read the user-edited settings from SLIDESHOW_SETTINGS_MODULE_NAME (SLIDESHOW_SETTINGS.py)
+	
 	if SLIDESHOW_SETTINGS_MODULE_NAME not in sys.modules:
 		if DEBUG:	print(f'DEBUG: SLIDESHOW_SETTINGS_MODULE_NAME not in sys.modules',flush=True,file=sys.stderr)
 		# Import the module dynamically, if it is not done already
@@ -510,10 +474,10 @@ def load_settings():
 	if DEBUG:	print(f"DEBUG: Attempting to load user_specified_settings_dict = SETTINGS_MODULE.settings'",flush=True,file=sys.stderr)
 	try:
 		user_specified_settings_dict = SETTINGS_MODULE.settings
+		print(f'Successfully loaded user_specified_settings_dict=\n{objPrettyPrint.pformat(user_specified_settings_dict)}',flush=True,file=sys.stderr)
 	except Exception as e:
-		print(f"load_settings: ERROR: Exception, failed to execute 'user_specified_settings_dict = SETTINGS_MODULE.settings'\n{str(e)}",flush=True,file=sys.stderr)
-		sys.exit(1)
-	print(f'Successfully loaded user_specified_settings_dict=\n{objPrettyPrint.pformat(user_specified_settings_dict)}',flush=True,file=sys.stderr)
+		print(f"load_settings: WARNING: Exception, could not import 'user_specified_settings' '{SLIDESHOW_SETTINGS_MODULE_FILENAME}'",flush=True,file=sys.stderr)
+		user_specified_settings_dict = None
 
 	#######################################################################################################################################
 	#######################################################################################################################################
@@ -531,9 +495,15 @@ def load_settings():
 
 	if final_settings_dict['DEBUG']: DEBUG = True
 
-	# format  proper paths for folders and files ...
+	#######################################################################################################################################
+	#######################################################################################################################################
+
+	# Once we get to here, the user dict (if any) has been merged with the default settings above.
+	# The TEMP_FOLDER has not yet been inserted as defaults into thee tight places
+	# And we need to format proper paths for folders and files ...
 	#
 	# process a LIST ... make ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS list entries all fully qualified and escaped where required
+	
 	ddl_fully_qualified = []									
 	for ddl in final_settings_dict['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS']:
 		ddl_fully_qualified.append(fully_qualified_directory_no_trailing_backslash(ddl))
@@ -542,36 +512,36 @@ def load_settings():
 	final_settings_dict['SLIDESHOW_SETTINGS_MODULE_NAME'] = final_settings_dict['SLIDESHOW_SETTINGS_MODULE_NAME']
 	final_settings_dict['SLIDESHOW_SETTINGS_MODULE_FILENAME'] = fully_qualified_filename(final_settings_dict['SLIDESHOW_SETTINGS_MODULE_FILENAME'])
 	
-	final_settings_dict['ROOT_FOLDER_FOR_OUTPUTS'] = fully_qualified_directory_no_trailing_backslash(final_settings_dict['ROOT_FOLDER_FOR_OUTPUTS'])
 	final_settings_dict['TEMP_FOLDER'] = fully_qualified_directory_no_trailing_backslash(final_settings_dict['TEMP_FOLDER'])
-
-	final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'] = fully_qualified_filename(final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'])
-	final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'] = fully_qualified_filename(final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'])
-	final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'] = fully_qualified_filename(final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'])
-	final_settings_dict['CURRENT_CHUNK_FILENAME'] = fully_qualified_filename(final_settings_dict['CURRENT_CHUNK_FILENAME'])
-	final_settings_dict['CURRENT_SNIPPETS_FILENAME'] = fully_qualified_filename(final_settings_dict['CURRENT_SNIPPETS_FILENAME'])
-
-	final_settings_dict['BACKGROUND_AUDIO_INPUT_FILENAME'] = fully_qualified_filename(final_settings_dict['BACKGROUND_AUDIO_INPUT_FILENAME'])
-	final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'] = fully_qualified_filename(final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'])
+	
+	final_settings_dict['BACKGROUND_AUDIO_INPUT_FOLDER'] = fully_qualified_filename(final_settings_dict['BACKGROUND_AUDIO_INPUT_FOLDER'])
 	final_settings_dict['FINAL_MP4_WITH_AUDIO_FILENAME'] = fully_qualified_filename(final_settings_dict['FINAL_MP4_WITH_AUDIO_FILENAME'])
 
 	final_settings_dict['FFMPEG_PATH'] = fully_qualified_filename(final_settings_dict['FFMPEG_PATH'])
 	final_settings_dict['FFPROBE_PATH'] = fully_qualified_filename(final_settings_dict['FFPROBE_PATH'])
 	final_settings_dict['VSPIPE_PATH'] = fully_qualified_filename(final_settings_dict['VSPIPE_PATH'])
-
 	final_settings_dict['slideshow_CONTROLLER_path'] = fully_qualified_filename(final_settings_dict['slideshow_CONTROLLER_path'])
 	final_settings_dict['slideshow_LOAD_SETTINGS_path'] = fully_qualified_filename(final_settings_dict['slideshow_LOAD_SETTINGS_path'])
 	final_settings_dict['slideshow_ENCODER_legacy_path'] = fully_qualified_filename(final_settings_dict['slideshow_ENCODER_legacy_path'])
 
-	final_settings_dict['TEMPORARY_AUDIO_FILENAME'] = fully_qualified_filename(final_settings_dict['TEMPORARY_AUDIO_FILENAME'])	# file is overwritten and deleted as needed
-	final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'] = fully_qualified_filename(final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'])	# file is overwritten and deleted as needed
 
-	check_file_exists_3333(final_settings_dict['FFMPEG_PATH'], r'FFMPEG_PATH')
-	check_file_exists_3333(final_settings_dict['FFPROBE_PATH'], r'FFPROBE_PATH')
-	check_file_exists_3333(final_settings_dict['VSPIPE_PATH'], r'VSPIPE_PATH')
-	check_file_exists_3333(final_settings_dict['slideshow_CONTROLLER_path'], r'slideshow_CONTROLLER_path')
-	check_file_exists_3333(final_settings_dict['slideshow_LOAD_SETTINGS_path'], r'slideshow_LOAD_SETTINGS_path')
-	check_file_exists_3333(final_settings_dict['slideshow_ENCODER_legacy_path'], r'slideshow_ENCODER_legacy_path')
+	# NOW WE NEED TO RE-DEFAULT THINGS WHICH BELONG IN THE TEMPORARY FOLDER
+	
+	TEMP_FOLDER = final_settings_dict['TEMP_FOLDER']
+
+RE-DEFAULT THESE
+?	final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'] = fully_qualified_filename(final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'])
+?	final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'] = fully_qualified_filename(final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'])
+?	final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'] = fully_qualified_filename(final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'])
+?	final_settings_dict['CURRENT_CHUNK_FILENAME'] = fully_qualified_filename(final_settings_dict['CURRENT_CHUNK_FILENAME'])
+?	final_settings_dict['CURRENT_SNIPPETS_FILENAME'] = fully_qualified_filename(final_settings_dict['CURRENT_SNIPPETS_FILENAME'])
+?	final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'] = fully_qualified_filename(final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'])
+?	final_settings_dict['TEMPORARY_AUDIO_FILENAME'] = fully_qualified_filename(final_settings_dict['TEMPORARY_AUDIO_FILENAME'])	# file is overwritten and deleted as needed
+?	final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'] = fully_qualified_filename(final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'])	# file is overwritten and deleted as needed
+
+
+-------------
+
 
 	if final_settings_dict['BACKGROUND_AUDIO_INPUT_FILENAME'] is not None:	# allow None for a silence background to be generated
 		check_file_exists_3333(final_settings_dict['BACKGROUND_AUDIO_INPUT_FILENAME'], r'BACKGROUND_AUDIO_INPUT_FILENAME')
@@ -624,16 +594,8 @@ def load_settings():
 	else:
 		raise ValueError(f'load_settings: ERROR: "TARGET_COLOR_RANGE_I"={TARGET_COLOR_RANGE_I} is an invalid value')
 
-	# insert calcuated values into default_settings_dict
-	#default_settings_dict['TARGET_FPS']						= final_settings_dict['TARGET_FPS']
-	#default_settings_dict['DURATION_PIC_FRAMES']			= final_settings_dict['DURATION_PIC_FRAMES']
-	#default_settings_dict['DURATION_CROSSFADE_FRAMES']		= final_settings_dict['DURATION_CROSSFADE_FRAMES']
-	#default_settings_dict['DURATION_BLANK_CLIP_FRAMES']		= final_settings_dict['DURATION_BLANK_CLIP_FRAMES']
-	#default_settings_dict['DURATION_MAX_VIDEO_FRAMES']		= final_settings_dict['DURATION_MAX_VIDEO_FRAMES']
-	#default_settings_dict['TARGET_VFR_FPSNUM']				= final_settings_dict['TARGET_VFR_FPSNUM']
-	#default_settings_dict['TARGET_VFR_FPSDEN']				= final_settings_dict['TARGET_VFR_FPSDEN']
-	#default_settings_dict['TARGET_VFR_FPS']					= final_settings_dict['TARGET_VFR_FPS']
-	#default_settings_dict['TARGET_COLOR_RANGE_I_ZIMG']		= final_settings_dict['TARGET_COLOR_RANGE_I_ZIMG']
+	#######################################################################################################################################
+	#######################################################################################################################################
 
 	# now  MAP these back into format/names compatible with the OLD calc_ini["SETTING_NAME"]
 	# "case" of keys is important
@@ -696,6 +658,9 @@ def load_settings():
 	# MAP that back into something compatible with OLD '_ini_values[self._ini_section_name]["SETTING_NAME"]'
 	old_ini_dict = { final_settings_dict['_INI_SECTION_NAME']: old_calc_ini_dict }
 
+	#######################################################################################################################################
+	#######################################################################################################################################
+
 	# now save debug versions of those dicts
 	if DEBUG:
 		try:
@@ -737,6 +702,49 @@ def load_settings():
 		except Exception as e:
 			print(f"DEBUG: load_settings: ERROR: error dumping JSON file: '{f_debug}'\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)	
+
+	#######################################################################################################################################
+	#######################################################################################################################################
+	
+	if not os.path.exists(SLIDESHOW_SETTINGS_MODULE_FILENAME):
+		specially_formatted_settings_list =	[
+		
+		-->>		add os.path.join(TEMP_FOLDER, 
+		-->>		and os.path.join(TEMP_FOLDER, 
+		
+										[ 'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS',	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS,	r'a list, one or more folders to look in for slideshow pics/videos. the r in front of the string is CRITICAL' ],
+										[ 'RECURSIVE',									RECURSIVE,									r'case sensitive: whether to recurse the source folder(s) looking for slideshow pics/videos' ],
+										[ 'ROOT_FOLDER_FOR_OUTPUTS', 					ROOT_FOLDER_FOR_OUTPUTS,					r'folder in which outputs are to be placed' ],
+										[ 'TEMP_FOLDER',								TEMP_FOLDER,								r'folder where temporary files go; USE A DISK WITH LOTS OF SPARE DISK SPACE - CIRCA 6 GB PER 100 PICS/VIDEOS' ],
+										[ 'BACKGROUND_AUDIO_INPUT_FILENAME',			BACKGROUND_AUDIO_INPUT_FILENAME,			r'Use the word None to generate a silence background, or specify a .m4a audio file if you want a background track (it is not looped if too short)' ],
+										[ 'FINAL_MP4_WITH_AUDIO_FILENAME',				FINAL_MP4_WITH_AUDIO_FILENAME,				r'the filename of the FINAL slideshow .mp4' ],
+										[ 'SUBTITLE_DEPTH',								SUBTITLE_DEPTH,								r'how many folders deep to display in subtitles; use 0 for no subtitling' ],
+										[ 'SUBTITLE_FONTSIZE',							SUBTITLE_FONTSIZE,							r'fontsize for subtitles, leave this alone unless confident' ],
+										[ 'SUBTITLE_FONTSCALE',							SUBTITLE_FONTSCALE,							r'fontscale for subtitles, leave this alone unless confident' ],
+										[ 'DURATION_PIC_SEC',							DURATION_PIC_SEC,							r'in seconds, duration each pic is shown in the slideshow' ],
+										[ 'DURATION_CROSSFADE_SECS',					DURATION_CROSSFADE_SECS,					r'in seconds duration crossfade between pic, leave this alone unless confident' ],
+										[ 'CROSSFADE_TYPE',								CROSSFADE_TYPE,								r'random is a good choice, leave this alone unless confident' ],
+										[ 'CROSSFADE_DIRECTION',						CROSSFADE_DIRECTION,						r'Please leave this alone unless really confident' ],
+										[ 'DURATION_MAX_VIDEO_SEC',						DURATION_MAX_VIDEO_SEC,						r'in seconds, maximum duration each video clip is shown in the slideshow' ],
+										[ 'TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB',	TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB,	r'normalize background audio to this maximum db' ],
+										[ 'TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY',	TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY,	r'how many DB to reduce backround audio during video clip audio overlay' ],
+										[ 'TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB',		TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB,		r'normalize video clip audio to this maximum db; camera vids are quieter so gain them' ],
+										[ 'MAX_FILES_PER_CHUNK',						MAX_FILES_PER_CHUNK,						r'how many images/videos to process in each chunk (more=slower)' ],
+										[ 'DEBUG',										DEBUG,										r'see and regret seeing, ginormous debug output' ],
+										[ 'FFMPEG_PATH',								FFMPEG_PATH,								r'Please leave this alone unless really confident' ],
+										[ 'FFPROBE_PATH',								FFPROBE_PATH,								r'Please leave this alone unless really confident' ],
+										[ 'VSPIPE_PATH',								VSPIPE_PATH,								r'Please leave this alone unless really confident' ],
+										[ 'slideshow_CONTROLLER_path',					slideshow_CONTROLLER_path,					r'Please leave this alone unless really confident' ],
+										[ 'slideshow_LOAD_SETTINGS_path',				slideshow_LOAD_SETTINGS_path,				r'Please leave this alone unless really confident' ],
+										[ 'slideshow_ENCODER_legacy_path',				slideshow_ENCODER_legacy_path,				r'Please leave this alone unless really confident' ],
+									]	
+		if DEBUG:	print(f'DEBUG: specially_formatted_settings_list=\n{objPrettyPrint.pformat(specially_formatted_settings_list)}',flush=True,file=sys.stderr)
+		print(f"load_settings: ERROR: File '{SLIDESHOW_SETTINGS_MODULE_FILENAME}' does not exist, creating it with template settings... you MUST edit it now ...",flush=True,file=sys.stderr)
+		create_py_file_from_specially_formatted_list(SLIDESHOW_SETTINGS_MODULE_FILENAME, specially_formatted_settings_list)
+		sys.exit(1)
+
+	#######################################################################################################################################
+	#######################################################################################################################################
 
 	return final_settings_dict, old_ini_dict, old_calc_ini_dict, user_specified_settings_dict
 
