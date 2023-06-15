@@ -827,7 +827,6 @@ def find_all_chunks():
 	else:
 		glob_var="*.*"				# non-recursive
 		ff_glob_var="*.ffindex"		# for .ffindex file deletion non-recursive
-
 	count_of_files = 0
 	chunk_id = -1	# base 0 chunk id, remember
 	chunks = {}
@@ -836,12 +835,9 @@ def find_all_chunks():
 	for Directory in SETTINGS_DICT['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS']:				# Use the order of folders as specified by the user in the LIST, unsorted
 		current_Directory = Directory
 		#files = sorted(Path(current_Directory).glob(glob_var)) 									# generator of all files in a directory, files starting with . won't be matched by default
-		files = sorted( (entry for entry in Path(background_audio_folder).glob(glob_var) if entry.is_file()), key=lambda p: (p.parent, p.name) )  # consider files but exclude directories in the generator, sorting them
-		filename = fac_get_filename(files)	#pre-fetch first filename ( a fully qualified filename)
-		if filename is None:
-			raise ValueError(f"ERROR: find_all_chunks: File Extensions:\n{SETTINGS_DICT['EXTENSIONS']}\nnot found in '{current_Directory}'")
-		while not (filename is None):	# first clip already pre-retrieved ready for this while loop
-			if DEBUG:	print(f"DEBUG: find_all_chunks: found file '{filename}', checking if file is in '{SETTINGS_DICT['EXTENSIONS']}'",flush=True)
+		files = sorted( (entry for entry in Path(current_Directory).glob(glob_var) if (entry.is_file() and entry.suffix.lower() in SETTINGS_DICT['EXTENSIONS'])), key=lambda p: (p.parent, p.name) )  # consider files but exclude directories in the generator, sorting them
+		for filename in files:
+			if DEBUG:	print(f"DEBUG: find_all_chunks: found file '{filename}', re-checking if file is in '{SETTINGS_DICT['EXTENSIONS']}'",flush=True)
 			if filename.suffix.lower() in SETTINGS_DICT['EXTENSIONS']:
 				print(f"CONTROLLER: Checking file {count_of_files}. '{filename}' for validity ...",flush=True)
 				is_valid = fac_check_file_validity_by_opening(filename)
@@ -880,9 +876,11 @@ def find_all_chunks():
 					chunks[str(chunk_id)]['file_list'].append(fully_qualified_path_string)
 					chunks[str(chunk_id)]['num_files'] = chunks[str(chunk_id)]['num_files'] + 1
 					count_of_files = count_of_files + 1
-			filename = fac_get_filename(files)
-		#end while
+		#end for
 	#end for
+	if count_of_files <=0:
+		raise ValueError(f"ERROR: find_all_chunks: File Extensions:\n{SETTINGS_DICT['EXTENSIONS']}\nnot found in '{SETTINGS_DICT['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS']}'")
+
 	# If the final chunk is < 20% of SETTINGS_DICT['MAX_FILES_PER_CHUNK'] then merge it into the previous chunk
 	chunk_count = len(chunks)
 	if chunk_count > 1:
