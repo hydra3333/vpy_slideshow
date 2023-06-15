@@ -16,11 +16,11 @@ settings = {
 	'CROSSFADE_TYPE':	'random',		# random is a good choice, leave this alone unless confident
 	'CROSSFADE_DIRECTION':	'left',		# Please leave this alone unless really confident
 	'DURATION_MAX_VIDEO_SEC':	7200.0,		# in seconds, maximum duration each video clip is shown in the slideshow
-	'TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB':	-12,		# normalize background audio to this maximum db
-	'TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY':	-28,		# how many DB to reduce backround audio during video clip audio overlay
-	'TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB':	-6,		# normalize video clip audio to this maximum db; camera vids are quieter so gain them
+	'TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB':	-18,		# normalize background audio to this maximum db
+	'TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY':	-30,		# how many DB to reduce backround audio during video clip audio overlay
+	'TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB':	-12,		# normalize video clip audio to this maximum db; camera vids are quieter so gain them
 	'MAX_FILES_PER_CHUNK':	100,		# how many images/videos to process in each chunk (more=slower)
-	'DEBUG':	True,		# see and regret seeing, ginormous debug output
+	'DEBUG':	False,		# see and regret seeing, ginormous debug output
 	'FFMPEG_PATH':	r'D:\ssTEST\Vapoursynth_x64\ffmpeg.exe',		# Please leave this alone unless really confident
 	'FFPROBE_PATH':	r'D:\ssTEST\Vapoursynth_x64\ffprobe.exe',		# Please leave this alone unless really confident
 	'VSPIPE_PATH':	r'D:\ssTEST\Vapoursynth_x64\vspipe.exe',		# Please leave this alone unless really confident
