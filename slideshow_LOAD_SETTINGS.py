@@ -542,11 +542,6 @@ def load_settings():
 
 
 	# NOW WE NEED TO RECONSTRUCT THINGS WHICH BELONG IN THE TEMPORARY FOLDER
-	
-	
-	DEBUG = True
-	
-	
 	TEMP_FOLDER = final_settings_dict['TEMP_FOLDER']
 
 	# put the new RECONSTRUCTED items (from the merged dict) back into the variables for use when later creating dict specially_formatted_settings_list 
