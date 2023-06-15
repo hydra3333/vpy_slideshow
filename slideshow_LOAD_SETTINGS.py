@@ -219,7 +219,7 @@ def load_settings():
 	SLIDESHOW_SETTINGS_MODULE_FILENAME			= fully_qualified_filename(os.path.join(r'.', SLIDESHOW_SETTINGS_MODULE_NAME + '.py'))
 
 	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS	= [ fully_qualified_directory_no_trailing_backslash(r'.') ]
-	TEMP_FOLDER									= fully_qualified_directory_no_trailing_backslash(r'.\\TEMP')				# TEMP_FOLDER
+	TEMP_FOLDER									= fully_qualified_directory_no_trailing_backslash(r'.\TEMP')				# TEMP_FOLDER
 	PIC_EXTENSIONS								= [ r'.png', r'.jpg', r'.jpeg', r'.gif' ]
 	VID_EXTENSIONS								= [ r'.mp4', r'.mpeg4', r'.mpg', r'.mpeg', r'.avi', r'.mjpeg', r'.3gp', r'.mov' ]
 	EEK_EXTENSIONS								= [ r'.m2ts' ]
@@ -247,7 +247,7 @@ def load_settings():
 	#	 then process snippets into the audio, re-encoding into .aac which can be muxed later.
 	#	this process touches the 
 
-	BACKGROUND_AUDIO_INPUT_FOLDER						= fully_qualified_directory_no_trailing_backslash(r'.')
+	BACKGROUND_AUDIO_INPUT_FOLDER						= fully_qualified_directory_no_trailing_backslash(".\\BACKGROUND_AUDIO_INPUT_FOLDER")
 	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME	= r'background_audio_with_overlaid_snippets.mp4')			# add TEMP_FOLDER later.
 
 	# 5. the CONTROLLER does Final muxing of the interim video .mp4 and the interim background_audio_post_snippet_editing
@@ -527,9 +527,6 @@ def load_settings():
 	final_settings_dict['SLIDESHOW_SETTINGS_MODULE_NAME'] = final_settings_dict['SLIDESHOW_SETTINGS_MODULE_NAME']
 	final_settings_dict['SLIDESHOW_SETTINGS_MODULE_FILENAME'] = fully_qualified_filename(final_settings_dict['SLIDESHOW_SETTINGS_MODULE_FILENAME'])
 	
-	final_settings_dict['TEMP_FOLDER'] = fully_qualified_directory_no_trailing_backslash(final_settings_dict['TEMP_FOLDER'])
-	
-	final_settings_dict['BACKGROUND_AUDIO_INPUT_FOLDER'] = fully_qualified_filename(final_settings_dict['BACKGROUND_AUDIO_INPUT_FOLDER'])
 	final_settings_dict['FINAL_MP4_WITH_AUDIO_FILENAME'] = fully_qualified_filename(final_settings_dict['FINAL_MP4_WITH_AUDIO_FILENAME'])
 
 	final_settings_dict['FFMPEG_PATH'] = fully_qualified_filename(final_settings_dict['FFMPEG_PATH'])
@@ -544,40 +541,45 @@ def load_settings():
 	
 	TEMP_FOLDER = final_settings_dict['TEMP_FOLDER']
 
-RE-DEFAULT THESE
+	# put the new RECONSTRUCTED items (from the merged dict) back into the variables for use when later creating dict specially_formatted_settings_list 
+	CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT = reconstruct_full_directory_and_filename( final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'], default=TEMP_FOLDER)	# cater for any missing folder
+	SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT = reconstruct_full_directory_and_filename( final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'], default=TEMP_FOLDER)	# cater for any missing folder
+	CHUNK_ENCODED_FFV1_FILENAME_BASE = reconstruct_full_directory_and_filename( final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'], default=TEMP_FOLDER)	# cater for any missing folder
+	CURRENT_CHUNK_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['CURRENT_CHUNK_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
+	CURRENT_SNIPPETS_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['CURRENT_SNIPPETS_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
+	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
+	TEMPORARY_AUDIO_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['TEMPORARY_AUDIO_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
+	TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
 
-	final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'] =  reconstruct_full_directory_and_filename( final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'], default=TEMP_FOLDER)	# cater for any missing folder
-	final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'] =  reconstruct_full_directory_and_filename( final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'], default=TEMP_FOLDER)	# cater for any missing folder
-	final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'] =  reconstruct_full_directory_and_filename( final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'], default=TEMP_FOLDER)	# cater for any missing folder
-	final_settings_dict['CURRENT_CHUNK_FILENAME'] =  reconstruct_full_directory_and_filename( final_settings_dict['CURRENT_CHUNK_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
-	final_settings_dict['CURRENT_SNIPPETS_FILENAME'] =  reconstruct_full_directory_and_filename( final_settings_dict['CURRENT_SNIPPETS_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
-	final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'] =  reconstruct_full_directory_and_filename( final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
-	final_settings_dict['TEMPORARY_AUDIO_FILENAME'] =  reconstruct_full_directory_and_filename( final_settings_dict['TEMPORARY_AUDIO_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
-	final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'] =  reconstruct_full_directory_and_filename( final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
-	
-	
-	
+	BACKGROUND_AUDIO_INPUT_FOLDER = reconstruct_full_directory_only(final_settings_dict['BACKGROUND_AUDIO_INPUT_FOLDER'], BACKGROUND_AUDIO_INPUT_FOLDER)	# re-default it if user mucked it up
 
-?	final_settings_dict['CURRENT_SNIPPETS_FILENAME'] = fully_qualified_filename(final_settings_dict['CURRENT_SNIPPETS_FILENAME'])
-?	final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'] = fully_qualified_filename(final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'])
-?	final_settings_dict['TEMPORARY_AUDIO_FILENAME'] = fully_qualified_filename(final_settings_dict['TEMPORARY_AUDIO_FILENAME'])	# file is overwritten and deleted as needed
-?	final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'] = fully_qualified_filename(final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'])	# file is overwritten and deleted as needed
+	# put the new RECONSTRUCTED back into the merged dict as well
+	final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'] = CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT
+	final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'] = SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT
+	final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'] = CHUNK_ENCODED_FFV1_FILENAME_BASE
+	final_settings_dict['CURRENT_CHUNK_FILENAME'] = CURRENT_CHUNK_FILENAME
+	final_settings_dict['CURRENT_SNIPPETS_FILENAME'] = CURRENT_SNIPPETS_FILENAME
+	final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'] = BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME
+	final_settings_dict['TEMPORARY_AUDIO_FILENAME'] = TEMPORARY_AUDIO_FILENAME
+	final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'] = TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME
 
+	final_settings_dict['BACKGROUND_AUDIO_INPUT_FOLDER'] = BACKGROUND_AUDIO_INPUT_FOLDER
 
--------------
-
-
-	if final_settings_dict['BACKGROUND_AUDIO_INPUT_FILENAME'] is not None:	# allow None for a silence background to be generated
-		check_file_exists_3333(final_settings_dict['BACKGROUND_AUDIO_INPUT_FILENAME'], r'BACKGROUND_AUDIO_INPUT_FILENAME')
-	
 	# check the folders which should exist do exist
 	# 1. check the folders in this LIST
 	for ddl in final_settings_dict['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS']:
 		check_folder_exists_3333(ddl, r'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS')
-	# 2. now check the other folders
-	check_folder_exists_3333(final_settings_dict['ROOT_FOLDER_FOR_OUTPUTS'], r'ROOT_FOLDER_FOR_OUTPUTS')
 
-	# if the TEMP_FOLDER folder does not exist, try to create it
+	# if the BACKGROUND_AUDIO_INPUT_FOLDER folder does not exist, try to create it with a try/except
+	if not os.path.isdir(final_settings_dict['BACKGROUND_AUDIO_INPUT_FOLDER']):
+		try:
+			os.makedirs(final_settings_dict['BACKGROUND_AUDIO_INPUT_FOLDER'])
+		except Exception as e:
+			print(f"load_settings: ERROR: creating BACKGROUND_AUDIO_INPUT_FOLDER '{final_settings_dict['BACKGROUND_AUDIO_INPUT_FOLDER']}'\n{str(e)}",flush=True,file=sys.stderr)
+			sys.exit(1)	
+		print(f'load_settings: created BACKGROUND_AUDIO_INPUT_FOLDER "{final_settings_dict["BACKGROUND_AUDIO_INPUT_FOLDER"]}"',flush=True,file=sys.stderr)
+
+	# if the TEMP_FOLDER folder does not exist, try to create it with a try/except
 	if not os.path.isdir(final_settings_dict['TEMP_FOLDER']):
 		try:
 			os.makedirs(final_settings_dict['TEMP_FOLDER'])
@@ -738,7 +740,6 @@ RE-DEFAULT THESE
 		
 										[ 'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS',	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS,	r'a list, one or more folders to look in for slideshow pics/videos. the r in front of the string is CRITICAL' ],
 										[ 'RECURSIVE',									RECURSIVE,									r'case sensitive: whether to recurse the source folder(s) looking for slideshow pics/videos' ],
-										[ 'ROOT_FOLDER_FOR_OUTPUTS', 					ROOT_FOLDER_FOR_OUTPUTS,					r'folder in which outputs are to be placed' ],
 										[ 'TEMP_FOLDER',								TEMP_FOLDER,								r'folder where temporary files go; USE A DISK WITH LOTS OF SPARE DISK SPACE - CIRCA 6 GB PER 100 PICS/VIDEOS' ],
 										[ 'BACKGROUND_AUDIO_INPUT_FILENAME',			BACKGROUND_AUDIO_INPUT_FILENAME,			r'Use the word None to generate a silence background, or specify a .m4a audio file if you want a background track (it is not looped if too short)' ],
 										[ 'FINAL_MP4_WITH_AUDIO_FILENAME',				FINAL_MP4_WITH_AUDIO_FILENAME,				r'the filename of the FINAL slideshow .mp4' ],

@@ -1005,6 +1005,8 @@ def audio_standardize_and_import_background_audios_from_folder(background_audio_
 			if audio_imported_from_file is not None:
 				background_audio = background_audio + audio_imported_from_file
 	#end for
+
+	# return an empty audio of zero length if no background files were found
 	return background_audio
 
 def audio_create_standardized_silence(duration_ms):
@@ -1464,10 +1466,11 @@ if __name__ == "__main__":
 	final_video_frame_count = end_frame_num_of_final_video + 1		# base 0
 	final_video_fps = SETTINGS_DICT['TARGET_FPS']
 	final_video_duration_ms = int((float(final_video_frame_count) / float(final_video_fps)) * 1000.0)
-	background_audio_input_filename = SETTINGS_DICT['BACKGROUND_AUDIO_INPUT_FILENAME']
-	background_audio_with_overlaid_snippets_filename = SETTINGS_DICT['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME']
 	final_mp4_with_audio_filename = SETTINGS_DICT['FINAL_MP4_WITH_AUDIO_FILENAME']
-	
+
+	background_audio_with_overlaid_snippets_filename = SETTINGS_DICT['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME']
+	background_audio_input_folder = SETTINGS_DICT['BACKGROUND_AUDIO_INPUT_FOLDER']
+
 	# https://pydub.com/
 	# https://github.com/jiaaro/pydub/blob/master/API.markdown
 	# NOTE	we MUST ensure the clips all have the SAME characteristics !!!!! or overlay etc will not work.
@@ -1476,21 +1479,20 @@ if __name__ == "__main__":
 	#			ffmpeg -i "background_audio_input_filename.mp4" -vn -ac 2 -ar 48000 -acodec pcm_s16le "some_audio_filename_in_temp_folder.wav"
 	# rely on multi-used settings variables defined in main
 	
-	snippet_audio_fade_in_duration_ms = SETTINGS_DICT['SNIPPET_AUDIO_FADE_IN_DURATION_MS']
-	snippet_audio_fade_out_duration_ms = SETTINGS_DICT['SNIPPET_AUDIO_FADE_OUT_DURATION_MS']
-
-	# Generate a silence background, or Load the main background audio
-	if background_audio_input_filename is None:
+	# Import background audio files.
+	background_audio = audio_standardize_and_import_background_audios_from_folder(background_audio_input_folder, extensions=['.mp2', '.mp3', '.mp4', '.m4a', '.wav', '.flac', '.aac', '.ogg', '.wma'])
+	# Generate a silence background if no valid background audio files found
+	if len(background_audio) <=0:
 		try:
-			if DEBUG: print(f"DEBUG: CONTROLLER: generate silent to background_audio since 'background_audio_input_filename' in None",flush=True)
+			print(f"WARNING: CONTROLLER: generate silence as background_audio since len(background_audio) ({len(background_audio)}) <=0 ... probably no background audio files found",flush=True)
 			background_audio = audio_create_standardized_silence(final_video_duration_ms)
 		except Exception as e:
-			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio Unexpected error from AudioSegment.silent(duration={final_video_duration_ms})\n{str(e)}",flush=True,file=sys.stderr)
+			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: Unexpected error for background_audio from audio_create_standardized_silence({final_video_duration_ms})\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)
-	else:
-		background_audio = audio_standardize_and_import_file(background_audio_input_filename, target_audio_background_normalize_headroom_db)
+	# now normalize the background_audio
+	#background_audio = background_audio.apply_gain(target_audio_background_normalize_headroom_db - background_audio.max_dBFS)
 
-	# Trim or pad-with-silence the background audio to match the duration final_video_frame_count
+	# Trim or pad-with-silence the background audio to match the duration final_video_frame_count .. in case concatenated background audio files is too short
 	background_audio_len = len(background_audio)
 	if background_audio_len < final_video_duration_ms:
 		padding_duration = final_video_duration_ms - background_audio_len
@@ -1507,8 +1509,6 @@ if __name__ == "__main__":
 		if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: background_audio_len {background_audio_len}ms, trimming to {final_video_duration_ms}ms",flush=True)
 		background_audio = background_audio[:final_video_duration_ms]
 	background_audio_len = len(background_audio)
-	# now normalize the background_audio
-	#background_audio = background_audio.apply_gain(target_audio_background_normalize_headroom_db - background_audio.max_dBFS)
 
 	if DEBUG:
 		debug_background_audio_input_filename = temporary_audio_filename + r'_DEBUG.BACKGROUND_AUDIO_TRIMMED' + '.mp4'
@@ -1518,6 +1518,8 @@ if __name__ == "__main__":
 		print(f"DEBUG: CONTROLLER: exported {background_audio_input_filename} converted and trimmed audio to '{debug_background_audio_input_filename}'",flush=True)
 
 	# loop through chunks, and snippets within chunks, overlaying sandardized audio onto background_audio as we go
+	snippet_audio_fade_in_duration_ms = SETTINGS_DICT['SNIPPET_AUDIO_FADE_IN_DURATION_MS']
+	snippet_audio_fade_out_duration_ms = SETTINGS_DICT['SNIPPET_AUDIO_FADE_OUT_DURATION_MS']
 	running_snippet_count = 0
 	snippet_processing_summary = []
 	for individual_chunk_id in range(0,ALL_CHUNKS_COUNT):	# 0 to (ALL_CHUNKS_COUNT - 1)
@@ -1750,50 +1752,12 @@ if __name__ == "__main__":
 	##########################################################################################################################################
 	# CLEANUP
 
-why is ffmpeg libx264 header bitrate 300 Mbps in .mp4 ?
-FIXED
 
+	#find uplifting royalty free background music 
+	#edit current one for first  and second first song
 
-get backgroud audio from files in a folder ...
-PART DONE  - RELISE ON ALL CHANES TO SETTINGS, then a new ENTRY SPECIFYING THE FOLDER INSTEAD OF THE BACKGROUND AUDIO FILENAME ??? 
-??? is there anoither setting, or does it use a temp file for the resulting background with overlay ? 
-what if there is no overlay ? does it still find/keep the background audio ???
+	#cleanup step is not yet done in controller
+	#... either as we go ... or at the end or both
 
-... function defined but not called ... audio_standardize_and_import_background_audios_from_folder
-... folder not specified yet in SETTINGS 
-... if the folder does not exist or the resulting background_audio is empty (0 length) then generate silence instead
-
-
-get rid of root folder ???
-... make it invisible to user perhaps, check
-
-
-TEMP folder not on G even though G specified ? ... does it still need/use root_for_output ?
-... CRAETED FUNCTION   make_full_path(incoming_path, default_dir, default_filename=None, default_extension=None):
-... but how to setup and use TEMP folder ???
-change to remove folder spec from TEMP filenames (add a comment)  abd fill them in later with the updated TEMP_FOLDER in the "new" dict
-... THEN, MOVE code to define user template so it is AFTER trying to import user_settings and then fleshing them out with defaults ????
-
-
-check settings.py  and the settings loader, to see if they're the same for headroom etc
-do audio headrooom updates ... 2 less for background music normal headroom, 2 more for snippet headroom
-FIXED
-
-
-
-add print of the final concat ffmpeg command.
-FIXED
-
-
-
-find uplifting royalty free background music 
-edit current one for first  and second first song
-
-
-cleanup step is not yet done in controller
-... either as we go ... or at the end or both
-
-
-
-tassie -- individual people's not combined
+	#tassie -- individual people's not combined
 
