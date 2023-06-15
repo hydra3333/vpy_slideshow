@@ -132,30 +132,40 @@ def fully_qualified_filename(file_name):
 	new_file_name = normalize_path(new_file_name)
 	return new_file_name
 
-def make_full_path(incoming_path, default_dir, default_filename=None, default_extension=None):
-	# make a fully qualified path from an incoming string and defaults
-	default_filled_path = incoming_path
-	if not os.path.isabs(default_filled_path):
-		default_dir = fully_qualified_directory_no_trailing_backslash(default_dir)
-		default_filled_path = os.path.join(default_dir, default_filled_path)
-	if default_filename is not None:
-		filename = os.path.basename(default_filled_path)
-		if filename == '':
-			default_filled_path = os.path.join(default_filled_path, default_filename)
-	if default_extension is not None:
-		_, ext = os.path.splitext(default_filled_path)
-		if ext == '':
-			default_filled_path += default_extension
-	# check if have defaulted a file or a folder:
-	filename = os.path.basename(default_filled_path)
-	_, ext = os.path.splitext(default_filled_path)
-	if (default_filename is None) and (default_extension is None) and (filename is None) and (ext is None):
-		# must be a folder being defaulted
-		default_filled_path = fully_qualified_filename(default_filled_path)
-	else:
-		# must be a file being defaulted
-		default_filled_path = fully_qualified_directory_no_trailing_backslash(default_filled_path)
-	return default_filled_path
+def fully_qualified_filename(file_name):
+	# Make into a fully qualified filename string using double backslashes
+	# to later print/write with double backslashes use eg
+	#	converted_string = fully_qualified_filename('D:\\a\\b\\\\c\\\\\\d\\e\\f\\filename.txt')
+	#	print(repr(converted_string))
+	# yields 'D:\\a\\b\\c\\d\\e\\f\\filename.txt'
+	new_file_name = os.path.abspath(file_name).rstrip(os.linesep).strip('\r').strip('\n').strip()
+	if new_file_name.endswith('\\'):
+		new_file_name = new_file_name[:-1]  # Remove trailing backslash
+	new_file_name = normalize_path(new_file_name)
+	return new_file_name
+
+def reconstruct_full_directory_and_filename(incoming, default):
+	# default is assumed to be a filename, any text in it treated as that and not a directory unless ending in \ (repr='\\')
+    default_abs_path = os.path.abspath(default)
+    default_directory, default_filename = os.path.split(default_abs_path)
+    default_filename, default_extension = os.path.splitext(default_filename)
+    if incoming:
+        incoming_directory, incoming_filename = os.path.split(incoming)
+        incoming_filename, incoming_extension = os.path.splitext(incoming_filename)
+        directory = incoming_directory or default_directory
+        filename = incoming_filename or default_filename
+        extension = incoming_extension or default_extension
+        return os.path.normpath(os.path.join(directory, filename + extension))
+    else:
+        return os.path.normpath(default_abs_path)
+
+def reconstruct_full_directory_only(incoming, default):
+	# default is assumed to be a directory, any text in it treated as that and not a filename
+    if incoming:
+        return os.path.normpath(incoming)
+    else:
+        default_abs_path = os.path.abspath(default)
+        return os.path.normpath(default_abs_path)
 
 def create_py_file_from_specially_formatted_list(dot_py_filename, specially_formatted_list):
 	# a dict may contain strings defined like r''

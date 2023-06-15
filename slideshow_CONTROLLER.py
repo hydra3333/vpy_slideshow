@@ -124,30 +124,28 @@ def fully_qualified_filename(file_name):
 	new_file_name = normalize_path(new_file_name)
 	return new_file_name
 
-def make_full_path(incoming_path, default_dir, default_filename=None, default_extension=None):
-	# make a fully qualified path from an incoming string and defaults
-	default_filled_path = incoming_path
-	if not os.path.isabs(default_filled_path):
-		default_dir = fully_qualified_directory_no_trailing_backslash(default_dir)
-		default_filled_path = os.path.join(default_dir, default_filled_path)
-	if default_filename is not None:
-		filename = os.path.basename(default_filled_path)
-		if filename == '':
-			default_filled_path = os.path.join(default_filled_path, default_filename)
-	if default_extension is not None:
-		_, ext = os.path.splitext(default_filled_path)
-		if ext == '':
-			default_filled_path += default_extension
-	# check if have defaulted a file or a folder:
-	filename = os.path.basename(default_filled_path)
-	_, ext = os.path.splitext(default_filled_path)
-	if (default_filename is None) and (default_extension is None) and (filename is None) and (ext is None):
-		# must be a folder being defaulted
-		default_filled_path = fully_qualified_filename(default_filled_path)
-	else:
-		# must be a file being defaulted
-		default_filled_path = fully_qualified_directory_no_trailing_backslash(default_filled_path)
-	return default_filled_path
+def reconstruct_full_directory_and_filename(incoming, default):
+	# default is assumed to be a filename, any text in it treated as that and not a directory unless ending in \ (repr='\\')
+    default_abs_path = os.path.abspath(default)
+    default_directory, default_filename = os.path.split(default_abs_path)
+    default_filename, default_extension = os.path.splitext(default_filename)
+    if incoming:
+        incoming_directory, incoming_filename = os.path.split(incoming)
+        incoming_filename, incoming_extension = os.path.splitext(incoming_filename)
+        directory = incoming_directory or default_directory
+        filename = incoming_filename or default_filename
+        extension = incoming_extension or default_extension
+        return os.path.normpath(os.path.join(directory, filename + extension))
+    else:
+        return os.path.normpath(default_abs_path)
+
+def reconstruct_full_directory_only(incoming, default):
+	# default is assumed to be a directory, any text in it treated as that and not a filename
+    if incoming:
+        return os.path.normpath(incoming)
+    else:
+        default_abs_path = os.path.abspath(default)
+        return os.path.normpath(default_abs_path)
 
 #********************************************************************************************************
 #********************************************************************************************************
@@ -720,7 +718,7 @@ def image_calculate_rotation_flipping(exif_data):
 #********************************************************************************************************
 
 ###
-def get_random_ffindex_path(path):
+def get_random_ffindex_filename(path):
 	# use the filename component of the incoming path and create a random fully qualified path into the temp folder
 	# there is a significant to 100% chance of home picture/video filenames in directory trees being non-unique
 	# apparently uuid4 has a good chance of returning a unique string
@@ -731,74 +729,74 @@ def get_random_ffindex_path(path):
 def find_all_chunks():
 	# only use globals: SETTINGS_DICT, DEBUG
 
-	def fac_get_path(path_generator):
-		# get next path of desired extensions from generator, ignoring extensions we have not specified
-		# loop around only returning a path with a known extension
+	def fac_get_filename(files_generator):
+		# get next filename of desired extensions from generator, ignoring extensions we have not specified
+		# loop around only returning a filename with a known extension
 		while 1:	# loop until we do a "return", hitting past the end of the iterator returns None
 			try:
-				path = next(path_generator)
-				#if DEBUG:	print(f'fac_get_path: get success, path.name=' + path.name,flush=True)
+				filename = next(files_generator)
+				#if DEBUG:	print(f'fac_get_filename: get success, filename.name=' + filename.name,flush=True)
 			except StopIteration:
 				return None
-			if path.suffix.lower() in SETTINGS_DICT['EXTENSIONS']:	# only return files which are in known extensions
-				#if DEBUG:	print(f'DEBUG: find_all_chunks: fac_get_path: in EXTENSIONS success, path.name=' + path.name,flush=True)
-				return path
+			if filename.suffix.lower() in SETTINGS_DICT['EXTENSIONS']:	# only return files which are in known extensions
+				#if DEBUG:	print(f'DEBUG: find_all_chunks: fac_get_filename: in EXTENSIONS success, filename.name=' + filename.name,flush=True)
+				return filename
 
-	def fac_check_clip_from__path(path, ext):		# opens VID_EEK_EXTENSIONS only ... Source filter depends on extension
+	def fac_check_clip_from_filename(filename, ext):		# opens VID_EEK_EXTENSIONS only ... Source filter depends on extension
 		if not ext in SETTINGS_DICT['VID_EEK_EXTENSIONS']:
-			raise ValueError(f'get_clip_from_path: expected {path} to have extension in {SETTINGS_DICT["VID_EEK_EXTENSIONS"]} ... aborting')
+			raise ValueError(f'get_clip_from_path: expected {filename} to have extension in {SETTINGS_DICT["VID_EEK_EXTENSIONS"]} ... aborting')
 		if ext in SETTINGS_DICT['VID_EXTENSIONS']:
 			try:
-				ffcachefile = get_random_ffindex_path(path)
-				clip = core.ffms2.Source(str(path), cachefile=ffcachefile)
+				ffcachefile = get_random_ffindex_filename(filename)
+				clip = core.ffms2.Source(str(filename), cachefile=ffcachefile)
 				del clip
-				if os.path.exists(ffcachefile):
+				if os.filename.exists(ffcachefile):
 					os.remove(ffcachefile)
 				return True
 			except Exception as e:
-				print(f'CONTROLLER: WARNING: fac_check_clip_from__path: error opening file via "ffms2": "{str(path)}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}',flush=True)
+				print(f'CONTROLLER: WARNING: fac_check_clip_from_filename: error opening file via "ffms2": "{str(filename)}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}',flush=True)
 				return False
 		elif  ext in SETTINGS_DICT['EEK_EXTENSIONS']:
 			try:
-				clip = core.lsmas.LWLibavSource(str(path))
+				clip = core.lsmas.LWLibavSource(str(filename))
 				del clip
 				return True
 			except Exception as e:
-				print(f'CONTROLLER: WARNING: fac_check_clip_from__path: error opening file via "lsmas": "{path.name}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}',flush=True)
+				print(f'CONTROLLER: WARNING: fac_check_clip_from_filename: error opening file via "lsmas": "{filename.name}" ; ignoring this video clip. The error was:\n{e}\n{type(e)}\n{str(e)}',flush=True)
 				return False
 		else:
-			raise ValueError(f'ERROR: fac_check_clip_from__path: get_clip_from_path: expected {path} to have extension in {SETTINGS_DICT["VID_EEK_EXTENSIONS"]} ... aborting')
+			raise ValueError(f'ERROR: fac_check_clip_from_filename: get_clip_from_path: expected {filename} to have extension in {SETTINGS_DICT["VID_EEK_EXTENSIONS"]} ... aborting')
 		return False
 
-	def fac_check_clip_from_pic(path, ext):
+	def fac_check_clip_from_pic(filename, ext):
 		if ext in SETTINGS_DICT['PIC_EXTENSIONS']:
 			try:
-				ffcachefile = get_random_ffindex_path(path)
-				clip = core.ffms2.Source(str(path), cachefile=ffcachefile)
+				ffcachefile = get_random_ffindex_filename(filename)
+				clip = core.ffms2.Source(str(filename), cachefile=ffcachefile)
 				del clip
-				if os.path.exists(ffcachefile):
+				if os.filename.exists(ffcachefile):
 					os.remove(ffcachefile)
 				return True
 			except Exception as e:
-				print(f'CONTROLLER: WARNING: fac_check_clip_from_pic: error opening file via "ffms2": "{path.name}" ; ignoring this picture. The error was:\n{e}\n{type(e)}\n{str(e)}',flush=True)
+				print(f'CONTROLLER: WARNING: fac_check_clip_from_pic: error opening file via "ffms2": "{filename.name}" ; ignoring this picture. The error was:\n{e}\n{type(e)}\n{str(e)}',flush=True)
 				return False
 		else:
-			raise ValueError(f'ERROR: fac_check_clip_from_pic: : expected {path} to have extension in {SETTINGS_DICT["PIC_EXTENSIONS"]} ... aborting')
+			raise ValueError(f'ERROR: fac_check_clip_from_pic: : expected {filename} to have extension in {SETTINGS_DICT["PIC_EXTENSIONS"]} ... aborting')
 		return False
 
-	def fac_check_file_validity_by_opening(path):
-		if path is None:
-			raise ValueError(f'ERROR: fac_check_file_validity_by_opening: "path" not passed as an argument to fac_check_file_validity_by_opening')
+	def fac_check_file_validity_by_opening(filename):
+		if filename is None:
+			raise ValueError(f'ERROR: fac_check_file_validity_by_opening: "filename" not passed as an argument to fac_check_file_validity_by_opening')
 			sys.exit(1)
-		ext = path.suffix.lower()
+		ext = filename.suffix.lower()
 		if ext in SETTINGS_DICT['VID_EXTENSIONS']:
-			is_valid = fac_check_clip_from__path(path, ext)									# open depends on ext, the rest is the same
+			is_valid = fac_check_clip_from_filename(filename, ext)									# open depends on ext, the rest is the same
 		elif ext in SETTINGS_DICT['EEK_EXTENSIONS']:
-			is_valid = fac_check_clip_from__path(path, ext)									# open depends on ext, the rest is the same
+			is_valid = fac_check_clip_from_filename(filename, ext)									# open depends on ext, the rest is the same
 		elif ext in SETTINGS_DICT['PIC_EXTENSIONS']:
-			is_valid = fac_check_clip_from_pic(path, ext)
+			is_valid = fac_check_clip_from_pic(filename, ext)
 		else:
-			raise ValueError(f'ERROR: fac_check_file_validity_by_opening: "{path}" - UNRECOGNISED file extension "{ext}", aborting ...')
+			raise ValueError(f'ERROR: fac_check_file_validity_by_opening: "{filename}" - UNRECOGNISED file extension "{ext}", aborting ...')
 			sys.exit()
 		return is_valid
 
@@ -826,18 +824,21 @@ def find_all_chunks():
 	chunk_id = -1	# base 0 chunk id, remember
 	chunks = {}
 	file_list_in_chunk = []
-	for Directory in SETTINGS_DICT['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS']:
+	#for Directory in sorted(SETTINGS_DICT['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS']):	# Sort the list provided by the user prior to using it
+ 	for Directory in SETTINGS_DICT['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS']:				# Use the order of folders as specified by the user in the LIST, unsorted
 		current_Directory = Directory
-		paths = Path(current_Directory).glob(glob_var) # generator of all paths in a directory, files starting with . won't be matched by default
-		path = fac_get_path(paths)	#pre-fetch first path
-		if path is None:
+		#files = sorted(Path(current_Directory).glob(glob_var)) 									# generator of all files in a directory, files starting with . won't be matched by default
+		files = sorted( (entry for entry in Path(background_audio_folder).glob(glob_var) if entry.is_file()), key=lambda p: (p.parent, p.name) )  # consider files but exclude directories in the generator, sorting them
+		filename = fac_get_filename(files)	#pre-fetch first filename ( a fully qualified filename)
+		if filename is None:
 			raise ValueError(f"ERROR: find_all_chunks: File Extensions:\n{SETTINGS_DICT['EXTENSIONS']}\nnot found in '{current_Directory}'")
-		while not (path is None):	# first clip already pre-retrieved ready for this while loop
-			if path.suffix.lower() in SETTINGS_DICT['EXTENSIONS']:
-				print(f"CONTROLLER: Checking file {count_of_files}. '{path}' for validity ...",flush=True)
-				is_valid = fac_check_file_validity_by_opening(path)
+		while not (filename is None):	# first clip already pre-retrieved ready for this while loop
+			if DEBUG:	print(f"DEBUG: find_all_chunks: found file '{filename}', checking if file is in '{SETTINGS_DICT['EXTENSIONS'}'",flush=True)
+			if filename.suffix.lower() in SETTINGS_DICT['EXTENSIONS']:
+				print(f"CONTROLLER: Checking file {count_of_files}. '{filename}' for validity ...",flush=True)
+				is_valid = fac_check_file_validity_by_opening(filename)
 				if not is_valid:	# ignore clips which had an issue with being opened and return None
-					print(f'CONTROLLER: Unable to process {count_of_files} {str(path)} ... ignoring it',flush=True)
+					print(f'CONTROLLER: Unable to process {count_of_files} {str(filename)} ... ignoring it',flush=True)
 				else:
 					# if required, start a new chunk
 					if (count_of_files % SETTINGS_DICT['MAX_FILES_PER_CHUNK']) == 0:
@@ -867,11 +868,11 @@ def find_all_chunks():
 													#				]
 												}
 					# add currently examined file to chunk
-					fully_qualified_path_string = fully_qualified_filename(path)
+					fully_qualified_path_string = fully_qualified_filename(filename)
 					chunks[str(chunk_id)]['file_list'].append(fully_qualified_path_string)
 					chunks[str(chunk_id)]['num_files'] = chunks[str(chunk_id)]['num_files'] + 1
 					count_of_files = count_of_files + 1
-			path = fac_get_path(paths)
+			filename = fac_get_filename(files)
 		#end while
 	#end for
 	# If the final chunk is < 20% of SETTINGS_DICT['MAX_FILES_PER_CHUNK'] then merge it into the previous chunk
@@ -892,9 +893,10 @@ def find_all_chunks():
 	# CHECK the chunks tree
 	if DEBUG:	print(f"DEBUG: find_all_chunks: Chunks tree contains {count_of_files} files:\n{objPrettyPrint.pformat(chunks)}",flush=True)
 	for i in range(0,chunk_count):	# i.e. 0 to (chunk_count-1)
-		print(f'DEBUG: find_all_chunks: About to check-print data for chunks[{i}] : chunks[{i}]["num_files"] and chunks[{i}]["file_list"]:',flush=True)
-		print(f'DEBUG:find_all_chunks: chunks[{i}]["num_files"] = {chunks[str(i)]["num_files"]}',flush=True)
-		print(f'DEBUG:find_all_chunks:  chunks[{i}]["file_list"] = \n{objPrettyPrint.pformat(chunks[str(i)]["file_list"])}',flush=True)
+		if DEBUG:
+			print(f'DEBUG: find_all_chunks: About to check-print data for chunks[{i}] : chunks[{i}]["num_files"] and chunks[{i}]["file_list"]:',flush=True)
+			print(f'DEBUG:find_all_chunks: chunks[{i}]["num_files"] = {chunks[str(i)]["num_files"]}',flush=True)
+			print(f'DEBUG:find_all_chunks:  chunks[{i}]["file_list"] = \n{objPrettyPrint.pformat(chunks[str(i)]["file_list"])}',flush=True)
 		num_files = chunks[str(i)]["num_files"]
 		file_list = chunks[str(i)]["file_list"]
 		for j in range(0,num_files):
@@ -984,8 +986,13 @@ def audio_standardize_and_import_background_audios_from_folder(background_audio_
 	background_audio = background_audio.set_frame_rate(target_background_audio_frequency)
 
 	background_audio_folder = os.path.abspath(background_audio_folder).rstrip(os.linesep).strip('\r').strip('\n').strip()
-	files = sorted(os.listdir(background_audio_folder))
+	#glob_var="**/*.*"			# recursive
+	glob_var="*.*"				# non-recursive
+	
+	#files = sorted(os.listdir(background_audio_folder))
+	files = sorted( (entry for entry in Path(background_audio_folder).glob(glob_var) if entry.is_file()), key=lambda p: (p.parent, p.name) )  # consider files but exclude directories in the generator, sorting them
 	for filename in files:
+		if DEBUG:	print(f"DEBUG: audio_standardize_and_import_background_audios_from_folder: found file '{filename}', checking if file is in '{extensions}'",flush=True)
 		if any(filename.lower().endswith(ext) for ext in extensions):
 			filename = fully_qualified_filename(filename)
 			# having found a suitable audio file in the background_audio_folder, standardize and import and append it
