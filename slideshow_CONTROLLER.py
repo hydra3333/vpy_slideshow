@@ -1017,7 +1017,7 @@ def audio_create_standardized_silence(duration_ms):
 	# NOTE	we MUST ensure the clips all have the SAME characteristics !!!!! or overlay etc will not work.
 	# rely on multi-used settings variables defined in main
 
-	audio = AudioSegment.silent(duration=padding_duration)
+	audio = AudioSegment.silent(duration=duration_ms)
 	audio = audio.set_channels(target_background_audio_channels).set_sample_width(target_background_audio_bytedepth).set_frame_rate(target_background_audio_frequency)
 	
 	return audio
@@ -1482,6 +1482,7 @@ if __name__ == "__main__":
 	
 	# Import background audio files.
 	background_audio = audio_standardize_and_import_background_audios_from_folder(background_audio_input_folder, extensions=['.mp2', '.mp3', '.mp4', '.m4a', '.wav', '.flac', '.aac', '.ogg', '.wma'])
+	
 	# Generate a silence background if no valid background audio files found
 	if len(background_audio) <=0:
 		try:
@@ -1490,6 +1491,7 @@ if __name__ == "__main__":
 		except Exception as e:
 			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: Unexpected error for background_audio from audio_create_standardized_silence({final_video_duration_ms})\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)
+
 	# now normalize the background_audio
 	#background_audio = background_audio.apply_gain(target_audio_background_normalize_headroom_db - background_audio.max_dBFS)
 
