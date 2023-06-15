@@ -274,7 +274,7 @@ def load_settings():
 	#	this process touches the 
 
 	BACKGROUND_AUDIO_INPUT_FOLDER						= ".\\BACKGROUND_AUDIO_INPUT_FOLDER"
-	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME	= r'background_audio_with_overlaid_snippets.mp4'			# add TEMP_FOLDER later.
+	BACKGROUND_AUDIO_WITH_OVERLAYED_SNIPPETS_FILENAME	= r'background_audio_with_overlayed_snippets.mp4'			# add TEMP_FOLDER later.
 
 	# 5. the CONTROLLER does Final muxing of the interim video .mp4 and the interim background_audio_post_snippet_editing
 
@@ -391,7 +391,7 @@ def load_settings():
 		'CURRENT_CHUNK_FILENAME':							CURRENT_CHUNK_FILENAME,								# add TEMP_FOLDER later.
 		'CURRENT_SNIPPETS_FILENAME': 						CURRENT_SNIPPETS_FILENAME,							# add TEMP_FOLDER later.
 		'BACKGROUND_AUDIO_INPUT_FOLDER':					BACKGROUND_AUDIO_INPUT_FOLDER,
-		'BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME':	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME,	# add TEMP_FOLDER later.
+		'BACKGROUND_AUDIO_WITH_OVERLAYED_SNIPPETS_FILENAME':	BACKGROUND_AUDIO_WITH_OVERLAYED_SNIPPETS_FILENAME,	# add TEMP_FOLDER later.
 		'FINAL_MP4_WITH_AUDIO_FILENAME':					FINAL_MP4_WITH_AUDIO_FILENAME,
 
 		'MAX_FILES_PER_CHUNK':								MAX_FILES_PER_CHUNK,
@@ -573,7 +573,7 @@ def load_settings():
 	CHUNK_ENCODED_FFV1_FILENAME_BASE = reconstruct_full_directory_and_filename( final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'])	# cater for any missing folder
 	CURRENT_CHUNK_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['CURRENT_CHUNK_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['CURRENT_CHUNK_FILENAME'])	# cater for any missing folder
 	CURRENT_SNIPPETS_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['CURRENT_SNIPPETS_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['CURRENT_SNIPPETS_FILENAME'])	# cater for any missing folder
-	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'])	# cater for any missing folder
+	BACKGROUND_AUDIO_WITH_OVERLAYED_SNIPPETS_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAYED_SNIPPETS_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAYED_SNIPPETS_FILENAME'])	# cater for any missing folder
 	TEMPORARY_AUDIO_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['TEMPORARY_AUDIO_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['TEMPORARY_AUDIO_FILENAME'])	# cater for any missing folder
 	TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'])	# cater for any missing folder
 
@@ -585,7 +585,7 @@ def load_settings():
 	final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'] = CHUNK_ENCODED_FFV1_FILENAME_BASE
 	final_settings_dict['CURRENT_CHUNK_FILENAME'] = CURRENT_CHUNK_FILENAME
 	final_settings_dict['CURRENT_SNIPPETS_FILENAME'] = CURRENT_SNIPPETS_FILENAME
-	final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'] = BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME
+	final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAYED_SNIPPETS_FILENAME'] = BACKGROUND_AUDIO_WITH_OVERLAYED_SNIPPETS_FILENAME
 	final_settings_dict['TEMPORARY_AUDIO_FILENAME'] = TEMPORARY_AUDIO_FILENAME
 	final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'] = TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME
 
