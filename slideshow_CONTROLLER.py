@@ -124,24 +124,6 @@ def fully_qualified_filename(file_name):
 	new_file_name = normalize_path(new_file_name)
 	return new_file_name
 
-def reconstruct_full_directory_and_filename(incoming, default):
-	# default is assumed to be a filename, any text in it treated as that and not a directory unless ending in \ (repr='\\')
-	default_abs_path = os.path.abspath(default)
-	default_directory, default_filename = os.path.split(default_abs_path)
-	default_filename, default_extension = os.path.splitext(default_filename)
-	if incoming:
-		incoming_directory, incoming_filename = os.path.split(incoming)
-		incoming_filename, incoming_extension = os.path.splitext(incoming_filename)
-		directory = incoming_directory or default_directory
-		filename = incoming_filename or default_filename
-		extension = incoming_extension or default_extension
-		outgoing = os.path.normpath(os.path.join(directory, filename + extension))
-	else:
-		outgoing = os.path.normpath(default_abs_path)
-	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
-	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_and_filename: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True)	# ,file=sys.stderr)
-	return outgoing
-
 def reconstruct_full_directory_only(incoming, default):
 	# default is assumed to be a directory, any text in it treated as that and not a filename
 	if incoming:
@@ -152,7 +134,48 @@ def reconstruct_full_directory_only(incoming, default):
 		default_abs_path = os.path.abspath(default) + '\\' if not default.endswith('\\') else ''
 		outgoing = os.path.normpath(default_abs_path)
 	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
-	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_only: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True)	# ,file=sys.stderr)
+	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_only: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
+	return outgoing
+
+def reconstruct_full_directory_and_filename(incoming, default_path, default_filename):
+	# default is assumed to be a filename, any text in it treated as that and not a directory unless ending in \ (repr='\\')
+	default_directory = reconstruct_full_directory_only(default_path, default_path)
+	#print(f"{20*'%'}  reconstruct_full_directory_and_filename: incoming='{incoming}' default_path='{default_path}' default_filename='{default_filename}' default_directory='{default_directory}' default_filename='{default_filename}'",flush=True,file=sys.stderr)
+	default_filename, default_extension = os.path.splitext(default_filename)
+	if incoming:
+		incoming_directory, incoming_filename = os.path.split(incoming)
+		if incoming_directory:
+			incoming_directory = reconstruct_full_directory_only(incoming_directory, incoming_directory)
+		incoming_filename, incoming_extension = os.path.splitext(incoming_filename)
+		directory = incoming_directory or default_directory
+		filename = incoming_filename or default_filename
+		extension = incoming_extension or default_extension
+		outgoing = os.path.normpath(os.path.join(directory, filename + extension))
+	else:
+		outgoing = os.path.normpath(default_abs_path)
+	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
+	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_and_filename: incoming='{incoming}' default_path='{default_path}' default_filename='{default_filename}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
+	return outgoing
+
+def old__bad_reconstruct_full_directory_and_filename(incoming, default):
+	# default is assumed to be a filename, any text in it treated as that and not a directory unless ending in \ (repr='\\')
+	default_abs_path = os.path.abspath(default)
+	default_directory, default_filename = os.path.split(default_abs_path)
+	print(f"{20*'%'}  econstruct_full_directory_and_filename: incoming='{incoming}' default='{default}' default_abs_path='{default_abs_path}' default_directory='{default_directory}' default_filename='{default_filename}'",flush=True,file=sys.stderr)
+	default_directory = os.path.abspath(default_directory) + '\\' if not default_directory.endswith('\\') else ''
+	default_filename, default_extension = os.path.splitext(default_filename)
+	if incoming:
+		incoming_directory, incoming_filename = os.path.split(incoming)
+		incoming_directory = os.path.abspath(incoming_directory) + '\\' if not incoming_directory.endswith('\\') else ''
+		incoming_filename, incoming_extension = os.path.splitext(incoming_filename)
+		directory = incoming_directory or default_directory
+		filename = incoming_filename or default_filename
+		extension = incoming_extension or default_extension
+		outgoing = os.path.normpath(os.path.join(directory, filename + extension))
+	else:
+		outgoing = os.path.normpath(default_abs_path)
+	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
+	if DEBUG:	print(f"DEBUG: old__bad_reconstruct_full_directory_and_filename: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
 	return outgoing
 
 def format_duration_ms_to_hh_mm_ss_hhh(milliseconds):
@@ -964,6 +987,7 @@ def audio_standardize_and_import_file(audio_filename, headroom_db, ignore_error_
 	try:
 		audio = AudioSegment.from_file(temporary_audio_filename)
 		audio = audio.set_channels(target_background_audio_channels).set_sample_width(target_background_audio_bytedepth).set_frame_rate(target_background_audio_frequency)
+		audio = audio.apply_gain(headroom_db - audio.max_dBFS)	# RE-normalize imported audio, not sure ffmpeg ebur128 does anything
 	#except FileNotFoundError:
 	#	print(f"CONTROLLER: audio_standardize_and_import_file: audio File not found from AudioSegment.from_file('{temporary_audio_filename}')",flush=True,file=sys.stderr)
 	#	sys.exit(1)
@@ -1503,7 +1527,7 @@ if __name__ == "__main__":
 			print(f"CONTROLLER: overlay_snippet_audio_onto_background_audio: Unexpected error for background_audio from audio_create_standardized_silence({final_video_duration_ms})\n{str(e)}",flush=True,file=sys.stderr)
 			sys.exit(1)
 
-	# now normalize the background_audio
+	# now RE-normalize the background_audio
 	#background_audio = background_audio.apply_gain(target_audio_background_normalize_headroom_db - background_audio.max_dBFS)
 
 	# Trim or pad-with-silence the background audio to match the duration final_video_frame_count .. in case concatenated background audio files is too short
@@ -1583,7 +1607,7 @@ if __name__ == "__main__":
 					if DEBUG: print(f"DEBUG: CONTROLLER: overlay_snippet_audio_onto_background_audio: snippet {running_snippet_count} snippet audio was {snippet_audio_len}ms, trimming to {snippet_duration_ms}ms",flush=True)
 					snippet_audio = snippet_audio[:snippet_duration_ms]
 				snippet_audio_len = len(snippet_audio)
-				# now normalize the snippet_audio
+				# now RE-normalize the snippet_audio
 				#snippet_audio = snippet_audio.apply_gain(target_audio_snippet_normalize_headroom_db - snippet_audio.max_dBFS)
 
 				if DEBUG:

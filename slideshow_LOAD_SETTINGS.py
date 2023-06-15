@@ -144,24 +144,6 @@ def fully_qualified_filename(file_name):
 	new_file_name = normalize_path(new_file_name)
 	return new_file_name
 
-def reconstruct_full_directory_and_filename(incoming, default):
-	# default is assumed to be a filename, any text in it treated as that and not a directory unless ending in \ (repr='\\')
-	default_abs_path = os.path.abspath(default)
-	default_directory, default_filename = os.path.split(default_abs_path)
-	default_filename, default_extension = os.path.splitext(default_filename)
-	if incoming:
-		incoming_directory, incoming_filename = os.path.split(incoming)
-		incoming_filename, incoming_extension = os.path.splitext(incoming_filename)
-		directory = incoming_directory or default_directory
-		filename = incoming_filename or default_filename
-		extension = incoming_extension or default_extension
-		outgoing = os.path.normpath(os.path.join(directory, filename + extension))
-	else:
-		outgoing = os.path.normpath(default_abs_path)
-	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
-	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_and_filename: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
-	return outgoing
-
 def reconstruct_full_directory_only(incoming, default):
 	# default is assumed to be a directory, any text in it treated as that and not a filename
 	if incoming:
@@ -173,6 +155,47 @@ def reconstruct_full_directory_only(incoming, default):
 		outgoing = os.path.normpath(default_abs_path)
 	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
 	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_only: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
+	return outgoing
+
+def reconstruct_full_directory_and_filename(incoming, default_path, default_filename):
+	# default is assumed to be a filename, any text in it treated as that and not a directory unless ending in \ (repr='\\')
+	default_directory = reconstruct_full_directory_only(default_path, default_path)
+	#print(f"{20*'%'}  reconstruct_full_directory_and_filename: incoming='{incoming}' default_path='{default_path}' default_filename='{default_filename}' default_directory='{default_directory}' default_filename='{default_filename}'",flush=True,file=sys.stderr)
+	default_filename, default_extension = os.path.splitext(default_filename)
+	if incoming:
+		incoming_directory, incoming_filename = os.path.split(incoming)
+		if incoming_directory:
+			incoming_directory = reconstruct_full_directory_only(incoming_directory, incoming_directory)
+		incoming_filename, incoming_extension = os.path.splitext(incoming_filename)
+		directory = incoming_directory or default_directory
+		filename = incoming_filename or default_filename
+		extension = incoming_extension or default_extension
+		outgoing = os.path.normpath(os.path.join(directory, filename + extension))
+	else:
+		outgoing = os.path.normpath(default_abs_path)
+	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
+	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_and_filename: incoming='{incoming}' default_path='{default_path}' default_filename='{default_filename}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
+	return outgoing
+
+def old__bad_reconstruct_full_directory_and_filename(incoming, default):
+	# default is assumed to be a filename, any text in it treated as that and not a directory unless ending in \ (repr='\\')
+	default_abs_path = os.path.abspath(default)
+	default_directory, default_filename = os.path.split(default_abs_path)
+	print(f"{20*'%'}  econstruct_full_directory_and_filename: incoming='{incoming}' default='{default}' default_abs_path='{default_abs_path}' default_directory='{default_directory}' default_filename='{default_filename}'",flush=True,file=sys.stderr)
+	default_directory = os.path.abspath(default_directory) + '\\' if not default_directory.endswith('\\') else ''
+	default_filename, default_extension = os.path.splitext(default_filename)
+	if incoming:
+		incoming_directory, incoming_filename = os.path.split(incoming)
+		incoming_directory = os.path.abspath(incoming_directory) + '\\' if not incoming_directory.endswith('\\') else ''
+		incoming_filename, incoming_extension = os.path.splitext(incoming_filename)
+		directory = incoming_directory or default_directory
+		filename = incoming_filename or default_filename
+		extension = incoming_extension or default_extension
+		outgoing = os.path.normpath(os.path.join(directory, filename + extension))
+	else:
+		outgoing = os.path.normpath(default_abs_path)
+	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
+	if DEBUG:	print(f"DEBUG: old__bad_reconstruct_full_directory_and_filename: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
 	return outgoing
 
 def create_py_file_from_specially_formatted_list(dot_py_filename, specially_formatted_list):
@@ -288,9 +311,9 @@ def load_settings():
 	TARGET_BACKGROUND_AUDIO_BYTEDEPTH			= int(2)		# 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
 	TARGET_BACKGROUND_AUDIO_CODEC				= r'libfdk_aac'
 	TARGET_BACKGROUND_AUDIO_BITRATE				= r'256k'
-	TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB	= int(-12)		# normalize background audio to -xxDB ; pydub calls it headroom
-	TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY		= int(-28)		# reduce audio of background music during overlay of snippet audio by xxDB
-	TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB		= int(-6)		# normalize snippet audio to -xxDB ; pydub calls it headroom; camera vids are usually much quieter than background music
+	TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB	= int(-18)		# normalize background audio to -xxDB ; pydub calls it headroom
+	TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY		= int(-30)		# reduce audio of background music during overlay of snippet audio by xxDB
+	TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB		= int(-12)		# normalize snippet audio to -xxDB ; pydub calls it headroom; camera vids are usually much quieter than background music
 
 	TEMPORARY_BACKGROUND_AUDIO_CODEC			= r'pcm_s16le'	# ; for 16 bit .wav
 	TEMPORARY_AUDIO_FILENAME					= r'temporary_audio_file_for_standardization_then_input_to_pydub.wav'	# add TEMP_FOLDER later.	# file is overwritten and deleted as needed
@@ -542,17 +565,17 @@ def load_settings():
 
 
 	# NOW WE NEED TO RECONSTRUCT THINGS WHICH BELONG IN THE TEMPORARY FOLDER
-	TEMP_FOLDER = final_settings_dict['TEMP_FOLDER']
+	TEMP_FOLDER = reconstruct_full_directory_only(final_settings_dict['TEMP_FOLDER'], final_settings_dict['TEMP_FOLDER'])
 
 	# put the new RECONSTRUCTED items (from the merged dict) back into the variables for use when later creating dict specially_formatted_settings_list 
-	CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT = reconstruct_full_directory_and_filename( final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'], default=TEMP_FOLDER)	# cater for any missing folder
-	SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT = reconstruct_full_directory_and_filename( final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'], default=TEMP_FOLDER)	# cater for any missing folder
-	CHUNK_ENCODED_FFV1_FILENAME_BASE = reconstruct_full_directory_and_filename( final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'], default=TEMP_FOLDER)	# cater for any missing folder
-	CURRENT_CHUNK_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['CURRENT_CHUNK_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
-	CURRENT_SNIPPETS_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['CURRENT_SNIPPETS_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
-	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
-	TEMPORARY_AUDIO_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['TEMPORARY_AUDIO_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
-	TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
+	CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT = reconstruct_full_directory_and_filename( final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'])	# cater for any missing folder
+	SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT = reconstruct_full_directory_and_filename( final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'])	# cater for any missing folder
+	CHUNK_ENCODED_FFV1_FILENAME_BASE = reconstruct_full_directory_and_filename( final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'])	# cater for any missing folder
+	CURRENT_CHUNK_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['CURRENT_CHUNK_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['CURRENT_CHUNK_FILENAME'])	# cater for any missing folder
+	CURRENT_SNIPPETS_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['CURRENT_SNIPPETS_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['CURRENT_SNIPPETS_FILENAME'])	# cater for any missing folder
+	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'])	# cater for any missing folder
+	TEMPORARY_AUDIO_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['TEMPORARY_AUDIO_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['TEMPORARY_AUDIO_FILENAME'])	# cater for any missing folder
+	TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'])	# cater for any missing folder
 
 	BACKGROUND_AUDIO_INPUT_FOLDER = reconstruct_full_directory_only(final_settings_dict['BACKGROUND_AUDIO_INPUT_FOLDER'], BACKGROUND_AUDIO_INPUT_FOLDER)	# re-default it if user mucked it up
 
