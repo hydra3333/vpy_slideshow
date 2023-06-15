@@ -165,11 +165,10 @@ def reconstruct_full_directory_and_filename(incoming, default):
 def reconstruct_full_directory_only(incoming, default):
 	# default is assumed to be a directory, any text in it treated as that and not a filename
     if incoming:
-        outgoing = os.path.normpath(incoming)
+        outgoing = os.path.normpath(incoming + '\\' if not incoming.endswith('\\') else '')
     else:
-        default_abs_path = os.path.abspath(default)
+        default_abs_path = os.path.abspath(default + '\\' if not default.endswith('\\') else '')
         outgoing = os.path.normpath(default_abs_path)
-	outgoing = 
 	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
 	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_only: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
 
@@ -229,9 +228,9 @@ def load_settings():
 
 	# we need a json file to contain a dict of all chunks
 
-	CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT			= r'chunks_file_for_all_chunks_dict.json'		# TEMP_FOLDER
-	SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT		= r'snippets_file_for_all_snippets_dict.json'	# TEMP_FOLDER
-	CHUNK_ENCODED_FFV1_FILENAME_BASE			= r'encoded_chunk_ffv1_'						# TEMP_FOLDER interim encoded video from encoding process, associated with a snippet dict, full names dynamically created eg "interim_ffv1_0001.mkv"
+	CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT			= r'chunks_file_for_all_chunks_dict.json'		# add TEMP_FOLDER later.
+	SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT		= r'snippets_file_for_all_snippets_dict.json'	# add TEMP_FOLDER later.
+	CHUNK_ENCODED_FFV1_FILENAME_BASE			= r'encoded_chunk_ffv1_'						# add TEMP_FOLDER later. interim encoded video from encoding process, associated with a snippet dict, full names dynamically created eg "interim_ffv1_0001.mkv"
 	
 	# Now we need a set of inter-step comms files
 	# 1. PREPARATION: 
@@ -239,8 +238,8 @@ def load_settings():
 
 	# 2. ENCODER : process_video also creating a snippets file ... change the format of the snippets file to exclude the last line with a filename and change the code
 
-	CURRENT_CHUNK_FILENAME						= r'current_chunk_file.json' 		# TEMP_FOLDER	# used by the ENCODER to load a file whose .json content gives the ENCODER (a dict of the current chunk, and a filename to be encoded into)
-	CURRENT_SNIPPETS_FILENAME					= r'current_snippets_file.json'		# TEMP_FOLDER	# used by the ENCODER to write file whose .json content will be a dict of snippets for this chunk, and a filename/[start/end]-frames of the encoded file)
+	CURRENT_CHUNK_FILENAME						= r'current_chunk_file.json' 		# add TEMP_FOLDER later.	# used by the ENCODER to load a file whose .json content gives the ENCODER (a dict of the current chunk, and a filename to be encoded into)
+	CURRENT_SNIPPETS_FILENAME					= r'current_snippets_file.json'		# add TEMP_FOLDER later.	# used by the ENCODER to write file whose .json content will be a dict of snippets for this chunk, and a filename/[start/end]-frames of the encoded file)
 																									# the file will contain the start/end frame numbers and the fully qualified SOURCE filename for each snippet, and a filename/[start/end-frames] for the encoded file (used in calcs later)
 	# 3. the CONTROLLER does snippet processsing based on snippets written by the encoder per chunk and re-read and placed into a large dict on the fly by the CONTROLLER... 
 	#	 use the global snippets dict updated by the fly by the encoding CONTROLLER process
@@ -249,7 +248,7 @@ def load_settings():
 	#	this process touches the 
 
 	BACKGROUND_AUDIO_INPUT_FOLDER						= fully_qualified_directory_no_trailing_backslash(r'.')
-	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME	= r'background_audio_with_overlaid_snippets.mp4')			# TEMP_FOLDER
+	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME	= r'background_audio_with_overlaid_snippets.mp4')			# add TEMP_FOLDER later.
 
 	# 5. the CONTROLLER does Final muxing of the interim video .mp4 and the interim background_audio_post_snippet_editing
 
@@ -291,8 +290,8 @@ def load_settings():
 	TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB		= int(-6)		# normalize snippet audio to -xxDB ; pydub calls it headroom; camera vids are usually much quieter than background music
 
 	TEMPORARY_BACKGROUND_AUDIO_CODEC			= r'pcm_s16le'	# ; for 16 bit .wav
-	TEMPORARY_AUDIO_FILENAME					= r'temporary_audio_file_for_standardization_then_input_to_pydub.wav'	# TEMP_FOLDER	# file is overwritten and deleted as needed
-	TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME		= r'temporary_ffmpeg_concat_list.txt'									# TEMP_FOLDER	# file is overwritten and deleted as needed
+	TEMPORARY_AUDIO_FILENAME					= r'temporary_audio_file_for_standardization_then_input_to_pydub.wav'	# add TEMP_FOLDER later.	# file is overwritten and deleted as needed
+	TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME		= r'temporary_ffmpeg_concat_list.txt'									# add TEMP_FOLDER later.	# file is overwritten and deleted as needed
 
 	TARGET_COLORSPACE							= r'BT.709'	# ; "target_colorspace" a string; set for hd; required to render subtitles, it is fixed at this value; this item must match target_colorspace_matrix_i etc = .
 	TARGET_COLORSPACE_MATRIX_I					= int(1)	# ; "target_colorspace_matrix_i" an integer; set for hd; this is the value that counts; it is fixed at this value; turn on debug_mode to see lists of these values = .
@@ -360,13 +359,13 @@ def load_settings():
 		'VID_EEK_EXTENSIONS':								VID_EEK_EXTENSIONS,
 		'EXTENSIONS' :										EXTENSIONS,
 
-		'CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT': 				CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT,				# TEMP_FOLDER
-		'SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT':			SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT,			# TEMP_FOLDER
-		'CHUNK_ENCODED_FFV1_FILENAME_BASE': 				CHUNK_ENCODED_FFV1_FILENAME_BASE,					# TEMP_FOLDER
-		'CURRENT_CHUNK_FILENAME':							CURRENT_CHUNK_FILENAME,								# TEMP_FOLDER
-		'CURRENT_SNIPPETS_FILENAME': 						CURRENT_SNIPPETS_FILENAME,							# TEMP_FOLDER
+		'CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT': 				CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT,				# add TEMP_FOLDER later.
+		'SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT':			SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT,			# add TEMP_FOLDER later.
+		'CHUNK_ENCODED_FFV1_FILENAME_BASE': 				CHUNK_ENCODED_FFV1_FILENAME_BASE,					# add TEMP_FOLDER later.
+		'CURRENT_CHUNK_FILENAME':							CURRENT_CHUNK_FILENAME,								# add TEMP_FOLDER later.
+		'CURRENT_SNIPPETS_FILENAME': 						CURRENT_SNIPPETS_FILENAME,							# add TEMP_FOLDER later.
 		'BACKGROUND_AUDIO_INPUT_FOLDER':					BACKGROUND_AUDIO_INPUT_FOLDER,
-		'BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME':	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME,	# TEMP_FOLDER
+		'BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME':	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME,	# add TEMP_FOLDER later.
 		'FINAL_MP4_WITH_AUDIO_FILENAME':					FINAL_MP4_WITH_AUDIO_FILENAME,
 
 		'MAX_FILES_PER_CHUNK':								MAX_FILES_PER_CHUNK,
@@ -404,8 +403,8 @@ def load_settings():
 		'TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB':		TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB,
 
 		'TEMPORARY_BACKGROUND_AUDIO_CODEC':					TEMPORARY_BACKGROUND_AUDIO_CODEC,
-		'TEMPORARY_AUDIO_FILENAME':							TEMPORARY_AUDIO_FILENAME,							# TEMP_FOLDER
-		'TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME':			TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME,				# TEMP_FOLDER
+		'TEMPORARY_AUDIO_FILENAME':							TEMPORARY_AUDIO_FILENAME,							# add TEMP_FOLDER later.
+		'TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME':			TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME,				# add TEMP_FOLDER later.
 
 		'TARGET_COLORSPACE':								TARGET_COLORSPACE,
 		'TARGET_COLORSPACE_MATRIX_I':						TARGET_COLORSPACE_MATRIX_I,
@@ -546,10 +545,19 @@ def load_settings():
 	TEMP_FOLDER = final_settings_dict['TEMP_FOLDER']
 
 RE-DEFAULT THESE
-?	final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'] = fully_qualified_filename(final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'])
-?	final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'] = fully_qualified_filename(final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'])
-?	final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'] = fully_qualified_filename(final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'])
-?	final_settings_dict['CURRENT_CHUNK_FILENAME'] = fully_qualified_filename(final_settings_dict['CURRENT_CHUNK_FILENAME'])
+
+	final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'] =  reconstruct_full_directory_and_filename( final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'], default=TEMP_FOLDER)	# cater for any missing folder
+	final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'] =  reconstruct_full_directory_and_filename( final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'], default=TEMP_FOLDER)	# cater for any missing folder
+	final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'] =  reconstruct_full_directory_and_filename( final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'], default=TEMP_FOLDER)	# cater for any missing folder
+	final_settings_dict['CURRENT_CHUNK_FILENAME'] =  reconstruct_full_directory_and_filename( final_settings_dict['CURRENT_CHUNK_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
+	final_settings_dict['CURRENT_SNIPPETS_FILENAME'] =  reconstruct_full_directory_and_filename( final_settings_dict['CURRENT_SNIPPETS_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
+	final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'] =  reconstruct_full_directory_and_filename( final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
+	final_settings_dict['TEMPORARY_AUDIO_FILENAME'] =  reconstruct_full_directory_and_filename( final_settings_dict['TEMPORARY_AUDIO_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
+	final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'] =  reconstruct_full_directory_and_filename( final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'], default=TEMP_FOLDER)	# cater for any missing folder
+	
+	
+	
+
 ?	final_settings_dict['CURRENT_SNIPPETS_FILENAME'] = fully_qualified_filename(final_settings_dict['CURRENT_SNIPPETS_FILENAME'])
 ?	final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'] = fully_qualified_filename(final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME'])
 ?	final_settings_dict['TEMPORARY_AUDIO_FILENAME'] = fully_qualified_filename(final_settings_dict['TEMPORARY_AUDIO_FILENAME'])	# file is overwritten and deleted as needed

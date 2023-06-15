@@ -145,11 +145,10 @@ def reconstruct_full_directory_and_filename(incoming, default):
 def reconstruct_full_directory_only(incoming, default):
 	# default is assumed to be a directory, any text in it treated as that and not a filename
     if incoming:
-        outgoing = os.path.normpath(incoming)
+        outgoing = os.path.normpath(incoming + '\\' if not incoming.endswith('\\') else '')
     else:
-        default_abs_path = os.path.abspath(default)
+        default_abs_path = os.path.abspath(default + '\\' if not default.endswith('\\') else '')
         outgoing = os.path.normpath(default_abs_path)
-	outgoing = 
 	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
 	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_only: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True)	# ,file=sys.stderr)
 
