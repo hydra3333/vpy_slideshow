@@ -102,6 +102,7 @@ REM install latest certificates for python requests.get
 "%py_exe%" pip.pyz install datetime --target=%vs_path% --no-cache-dir --upgrade --check-build-dependencies --force-reinstall --upgrade-strategy eager --verbose
 "%py_exe%" pip.pyz install packaging --target=%vs_path% --no-cache-dir --upgrade --check-build-dependencies --force-reinstall --upgrade-strategy eager --verbose
 "%py_exe%" pip.pyz install python-utils --target=%vs_path% --no-cache-dir --upgrade --check-build-dependencies --force-reinstall --upgrade-strategy eager --verbose
+"%py_exe%" pip.pyz install python-dotenv --target=%vs_path% --no-cache-dir --upgrade --check-build-dependencies --force-reinstall --upgrade-strategy eager --verbose
 "%py_exe%" pip.pyz install progressbar2 --target=%vs_path% --no-cache-dir --upgrade --check-build-dependencies --force-reinstall --upgrade-strategy eager --verbose
 "%py_exe%" pip.pyz install pyyaml --target=%vs_path% --no-cache-dir --upgrade --check-build-dependencies --force-reinstall --upgrade-strategy eager --verbose
 "%py_exe%" pip.pyz install html5lib --target=%vs_path% --no-cache-dir --upgrade --check-build-dependencies --force-reinstall --upgrade-strategy eager --verbose

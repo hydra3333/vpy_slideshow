@@ -155,6 +155,14 @@ def reconstruct_full_directory_only(incoming, default):
 	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_only: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True)	# ,file=sys.stderr)
 	return outgoing
 
+def format_duration_ms_to_hh_mm_ss_hhh(milliseconds):
+	duration = datetime.timedelta(milliseconds=milliseconds)
+	hours = duration.seconds // 3600
+	minutes = (duration.seconds // 60) % 60
+	seconds = duration.seconds % 60
+	milliseconds = duration.microseconds // 1000
+	return f"{hours:02d}:{minutes:02d}:{seconds:02d}.{milliseconds:03d}"
+
 #********************************************************************************************************
 #********************************************************************************************************
 #--------------------------------------------------------------------------------------------------------
@@ -942,7 +950,7 @@ def audio_standardize_and_import_file(audio_filename, headroom_db, ignore_error_
 							'-ar', str(target_background_audio_frequency),
 							'-y', temporary_audio_filename
 							]
-	print(f"CONTROLLER: audio_standardize_and_import_file attempting to standardize audio using {objPrettyPrint.pformat(ffmpeg_commandline)}",flush=True)
+	print(f"CONTROLLER: audio_standardize_and_import_file attempting to standardize audio using {ffmpeg_commandline}",flush=True)
 
 	if ignore_error_converting:
 		result = subprocess.run(ffmpeg_commandline, check=False)
@@ -994,18 +1002,21 @@ def audio_standardize_and_import_background_audios_from_folder(background_audio_
 	background_audio_folder = os.path.abspath(background_audio_folder).rstrip(os.linesep).strip('\r').strip('\n').strip()
 	#glob_var="**/*.*"			# recursive
 	glob_var="*.*"				# non-recursive
-	
+	c = 0
+	v = 0
 	#files = sorted(os.listdir(background_audio_folder))
-	files = sorted( (entry for entry in Path(background_audio_folder).glob(glob_var) if entry.is_file()), key=lambda p: (p.parent, p.name) )  # consider files but exclude directories in the generator, sorting them
+	files = sorted( (entry for entry in Path(background_audio_folder).glob(glob_var) if (entry.is_file() and entry.suffix.lower() in extensions)), key=lambda p: (p.parent, p.name) )  # consider files but exclude directories in the generator, sorting them
 	for filename in files:
+		c = c + 1
 		if DEBUG:	print(f"DEBUG: audio_standardize_and_import_background_audios_from_folder: found file '{filename}', checking if file is in '{extensions}'",flush=True)
-		if any(filename.lower().endswith(ext) for ext in extensions):
-			filename = fully_qualified_filename(filename)
-			# having found a suitable audio file in the background_audio_folder, standardize and import and append it
-			audio_imported_from_file = audio_standardize_and_import_file(filename, target_audio_background_normalize_headroom_db, ignore_error_converting=True)
-			if audio_imported_from_file is not None:
-				background_audio = background_audio + audio_imported_from_file
+		filename = fully_qualified_filename(filename)
+		# having found a suitable audio file in the background_audio_folder, standardize and import and append it
+		audio_imported_from_file = audio_standardize_and_import_file(filename, target_audio_background_normalize_headroom_db, ignore_error_converting=True)
+		if audio_imported_from_file is not None:
+			v = v + 1
+			background_audio = background_audio + audio_imported_from_file
 	#end for
+	print(f"CONTROLLER: audio_standardize_and_import_background_audios_from_folder: found {v} valid background audio files out of {c}, duration={format_duration_ms_to_hh_mm_ss_hhh(len(background_audio))}, in '{extensions}' in '{background_audio_folder}', ",flush=True)
 
 	# return an empty audio of zero length if no background files were found
 	return background_audio
