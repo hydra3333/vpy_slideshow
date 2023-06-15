@@ -126,31 +126,34 @@ def fully_qualified_filename(file_name):
 
 def reconstruct_full_directory_and_filename(incoming, default):
 	# default is assumed to be a filename, any text in it treated as that and not a directory unless ending in \ (repr='\\')
-    default_abs_path = os.path.abspath(default)
-    default_directory, default_filename = os.path.split(default_abs_path)
-    default_filename, default_extension = os.path.splitext(default_filename)
-    if incoming:
-        incoming_directory, incoming_filename = os.path.split(incoming)
-        incoming_filename, incoming_extension = os.path.splitext(incoming_filename)
-        directory = incoming_directory or default_directory
-        filename = incoming_filename or default_filename
-        extension = incoming_extension or default_extension
-        outgoing = os.path.normpath(os.path.join(directory, filename + extension))
-    else:
-        outgoing = os.path.normpath(default_abs_path)
+	default_abs_path = os.path.abspath(default)
+	default_directory, default_filename = os.path.split(default_abs_path)
+	default_filename, default_extension = os.path.splitext(default_filename)
+	if incoming:
+		incoming_directory, incoming_filename = os.path.split(incoming)
+		incoming_filename, incoming_extension = os.path.splitext(incoming_filename)
+		directory = incoming_directory or default_directory
+		filename = incoming_filename or default_filename
+		extension = incoming_extension or default_extension
+		outgoing = os.path.normpath(os.path.join(directory, filename + extension))
+	else:
+		outgoing = os.path.normpath(default_abs_path)
 	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
 	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_and_filename: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True)	# ,file=sys.stderr)
 	return outgoing
 
 def reconstruct_full_directory_only(incoming, default):
 	# default is assumed to be a directory, any text in it treated as that and not a filename
-    if incoming:
-        outgoing = os.path.normpath(incoming + '\\' if not incoming.endswith('\\') else '')
-    else:
-        default_abs_path = os.path.abspath(default + '\\' if not default.endswith('\\') else '')
-        outgoing = os.path.normpath(default_abs_path)
+	if incoming:
+		#outgoing = os.path.normpath(incoming + '\\' if not incoming.endswith('\\') else '')
+		incoming_abspath = os.path.abspath(incoming) + '\\' if not incoming.endswith('\\') else ''
+		outgoing = os.path.normpath(incoming_abspath)
+	else:
+		default_abs_path = os.path.abspath(default) + '\\' if not default.endswith('\\') else ''
+		outgoing = os.path.normpath(default_abs_path)
 	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
 	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_only: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True)	# ,file=sys.stderr)
+	return outgoing
 
 #********************************************************************************************************
 #********************************************************************************************************
@@ -830,7 +833,7 @@ def find_all_chunks():
 	chunks = {}
 	file_list_in_chunk = []
 	#for Directory in sorted(SETTINGS_DICT['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS']):	# Sort the list provided by the user prior to using it
- 	for Directory in SETTINGS_DICT['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS']:				# Use the order of folders as specified by the user in the LIST, unsorted
+	for Directory in SETTINGS_DICT['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS']:				# Use the order of folders as specified by the user in the LIST, unsorted
 		current_Directory = Directory
 		#files = sorted(Path(current_Directory).glob(glob_var)) 									# generator of all files in a directory, files starting with . won't be matched by default
 		files = sorted( (entry for entry in Path(background_audio_folder).glob(glob_var) if entry.is_file()), key=lambda p: (p.parent, p.name) )  # consider files but exclude directories in the generator, sorting them
@@ -838,7 +841,7 @@ def find_all_chunks():
 		if filename is None:
 			raise ValueError(f"ERROR: find_all_chunks: File Extensions:\n{SETTINGS_DICT['EXTENSIONS']}\nnot found in '{current_Directory}'")
 		while not (filename is None):	# first clip already pre-retrieved ready for this while loop
-			if DEBUG:	print(f"DEBUG: find_all_chunks: found file '{filename}', checking if file is in '{SETTINGS_DICT['EXTENSIONS'}'",flush=True)
+			if DEBUG:	print(f"DEBUG: find_all_chunks: found file '{filename}', checking if file is in '{SETTINGS_DICT['EXTENSIONS']}'",flush=True)
 			if filename.suffix.lower() in SETTINGS_DICT['EXTENSIONS']:
 				print(f"CONTROLLER: Checking file {count_of_files}. '{filename}' for validity ...",flush=True)
 				is_valid = fac_check_file_validity_by_opening(filename)
@@ -920,7 +923,7 @@ def audio_standardize_and_import_file(audio_filename, headroom_db, ignore_error_
 	# NOTE	we MUST ensure the clips all have the SAME characteristics !!!!! or overlay etc will not work.
 	#		using .from_file a file may be an arbitrary number of channels, which pydub cannot handle
 	#			so we must first convert number of channels etc into a fixed file so we can use .from_file, eg
-	#			ffmpeg -i "background_audio_input_filename.mp4" -vn -ac 2 -ar 48000 -acodec pcm_s16le "some_audio_filename_in_temp_folder.wav"
+	#			ffmpeg -i "filename.mp4" -vn -ac 2 -ar 48000 -acodec pcm_s16le "some_audio_filename_in_temp_folder.wav"
 	# rely on multi-used settings variables defined in main
 
 	if os.path.exists(temporary_audio_filename):
@@ -1476,7 +1479,7 @@ if __name__ == "__main__":
 	# NOTE	we MUST ensure the clips all have the SAME characteristics !!!!! or overlay etc will not work.
 	#		using .from_file a file may be an arbitrary number of channels, which pydub cannot handle
 	#			so we must first convert number of channels etc into a fixed file so we can use .from_file, eg
-	#			ffmpeg -i "background_audio_input_filename.mp4" -vn -ac 2 -ar 48000 -acodec pcm_s16le "some_audio_filename_in_temp_folder.wav"
+	#			ffmpeg -i "filename.mp4" -vn -ac 2 -ar 48000 -acodec pcm_s16le "some_audio_filename_in_temp_folder.wav"
 	# rely on multi-used settings variables defined in main
 	
 	# Import background audio files.
@@ -1515,7 +1518,7 @@ if __name__ == "__main__":
 		debug_export_format = r'mp4'
 		debug_export_parameters = ["-ar", str(target_background_audio_frequency), "-ac", str(target_background_audio_channels)]
 		background_audio.export(debug_background_audio_input_filename, format=debug_export_format, codec=target_background_audio_codec, bitrate=str(target_background_audio_bitrate), parameters=debug_export_parameters)
-		print(f"DEBUG: CONTROLLER: exported {background_audio_input_filename} converted and trimmed audio to '{debug_background_audio_input_filename}'",flush=True)
+		print(f"DEBUG: CONTROLLER: exported background_audio converted and trimmed audio to '{debug_background_audio_input_filename}'",flush=True)
 
 	# loop through chunks, and snippets within chunks, overlaying sandardized audio onto background_audio as we go
 	snippet_audio_fade_in_duration_ms = SETTINGS_DICT['SNIPPET_AUDIO_FADE_IN_DURATION_MS']

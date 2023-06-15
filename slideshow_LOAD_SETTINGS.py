@@ -146,31 +146,34 @@ def fully_qualified_filename(file_name):
 
 def reconstruct_full_directory_and_filename(incoming, default):
 	# default is assumed to be a filename, any text in it treated as that and not a directory unless ending in \ (repr='\\')
-    default_abs_path = os.path.abspath(default)
-    default_directory, default_filename = os.path.split(default_abs_path)
-    default_filename, default_extension = os.path.splitext(default_filename)
-    if incoming:
-        incoming_directory, incoming_filename = os.path.split(incoming)
-        incoming_filename, incoming_extension = os.path.splitext(incoming_filename)
-        directory = incoming_directory or default_directory
-        filename = incoming_filename or default_filename
-        extension = incoming_extension or default_extension
-        outgoing = os.path.normpath(os.path.join(directory, filename + extension))
-    else:
-        outgoing = os.path.normpath(default_abs_path)
+	default_abs_path = os.path.abspath(default)
+	default_directory, default_filename = os.path.split(default_abs_path)
+	default_filename, default_extension = os.path.splitext(default_filename)
+	if incoming:
+		incoming_directory, incoming_filename = os.path.split(incoming)
+		incoming_filename, incoming_extension = os.path.splitext(incoming_filename)
+		directory = incoming_directory or default_directory
+		filename = incoming_filename or default_filename
+		extension = incoming_extension or default_extension
+		outgoing = os.path.normpath(os.path.join(directory, filename + extension))
+	else:
+		outgoing = os.path.normpath(default_abs_path)
 	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
 	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_and_filename: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
 	return outgoing
 
 def reconstruct_full_directory_only(incoming, default):
 	# default is assumed to be a directory, any text in it treated as that and not a filename
-    if incoming:
-        outgoing = os.path.normpath(incoming + '\\' if not incoming.endswith('\\') else '')
-    else:
-        default_abs_path = os.path.abspath(default + '\\' if not default.endswith('\\') else '')
-        outgoing = os.path.normpath(default_abs_path)
+	if incoming:
+		#outgoing = os.path.normpath(incoming + '\\' if not incoming.endswith('\\') else '')
+		incoming_abspath = os.path.abspath(incoming) + '\\' if not incoming.endswith('\\') else ''
+		outgoing = os.path.normpath(incoming_abspath)
+	else:
+		default_abs_path = os.path.abspath(default) + '\\' if not default.endswith('\\') else ''
+		outgoing = os.path.normpath(default_abs_path)
 	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
 	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_only: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
+	return outgoing
 
 def create_py_file_from_specially_formatted_list(dot_py_filename, specially_formatted_list):
 	# a dict may contain strings defined like r''
@@ -247,8 +250,8 @@ def load_settings():
 	#	 then process snippets into the audio, re-encoding into .aac which can be muxed later.
 	#	this process touches the 
 
-	BACKGROUND_AUDIO_INPUT_FOLDER						= fully_qualified_directory_no_trailing_backslash(".\\BACKGROUND_AUDIO_INPUT_FOLDER")
-	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME	= r'background_audio_with_overlaid_snippets.mp4')			# add TEMP_FOLDER later.
+	BACKGROUND_AUDIO_INPUT_FOLDER						= ".\\BACKGROUND_AUDIO_INPUT_FOLDER"
+	BACKGROUND_AUDIO_WITH_OVERLAID_SNIPPETS_FILENAME	= r'background_audio_with_overlaid_snippets.mp4'			# add TEMP_FOLDER later.
 
 	# 5. the CONTROLLER does Final muxing of the interim video .mp4 and the interim background_audio_post_snippet_editing
 
@@ -455,30 +458,31 @@ def load_settings():
 
 	# read the user-edited settings from SLIDESHOW_SETTINGS_MODULE_NAME (SLIDESHOW_SETTINGS.py)
 	
-	if SLIDESHOW_SETTINGS_MODULE_NAME not in sys.modules:
-		if DEBUG:	print(f'DEBUG: SLIDESHOW_SETTINGS_MODULE_NAME not in sys.modules',flush=True,file=sys.stderr)
-		# Import the module dynamically, if it is not done already
-		try:
-			if DEBUG:	print(f'DEBUG: importing SLIDESHOW_SETTINGS_MODULE_NAME={SLIDESHOW_SETTINGS_MODULE_NAME} dynamically',flush=True,file=sys.stderr)
-			#importlib.invalidate_caches()
-			SETTINGS_MODULE = importlib.import_module(SLIDESHOW_SETTINGS_MODULE_NAME)
-		except ImportError as e:
-			# Handle the ImportError if the module cannot be imported
-			print(f"load_settings: ERROR: ImportError, failed to dynamically import user specified Settings from import module: '{SLIDESHOW_SETTINGS_MODULE_NAME}'\n{str(e)}",flush=True,file=sys.stderr)
-			sys.exit(1)	
-		except Exception as e:
-			print(f"load_settings: ERROR: Exception, failed to dynamically import user specified Settings from import module: '{SLIDESHOW_SETTINGS_MODULE_NAME}'\n{str(e)}",flush=True,file=sys.stderr)
-			sys.exit(1)	
-	else:
-		if DEBUG:	print(f'DEBUG: SLIDESHOW_SETTINGS_MODULE_NAME IS in sys.modules',flush=True,file=sys.stderr)
-		# Reload the module since it had been dynamically loaded already ... remember, global variables in thee module are not scrubbed by reloading
-		try:
-			if DEBUG:	print(f'DEBUG: reloading SETTINGS_MODULE={SETTINGS_MODULE} ',flush=True,file=sys.stderr)
-			#importlib.invalidate_caches()
-			importlib.reload(SETTINGS_MODULE)
-		except Exception as e:
-			print(f"load_settings: ERROR: Exception, failed to RELOAD user specified Settings from import module: '{SLIDESHOW_SETTINGS_MODULE_NAME}'\n{str(e)}",flush=True,file=sys.stderr)
-			sys.exit(1)
+	if os.path.exists(SLIDESHOW_SETTINGS_MODULE_FILENAME):
+		if SLIDESHOW_SETTINGS_MODULE_NAME not in sys.modules:
+			if DEBUG:	print(f'DEBUG: SLIDESHOW_SETTINGS_MODULE_NAME not in sys.modules',flush=True,file=sys.stderr)
+			# Import the module dynamically, if it is not done already
+			try:
+				if DEBUG:	print(f'DEBUG: importing SLIDESHOW_SETTINGS_MODULE_NAME={SLIDESHOW_SETTINGS_MODULE_NAME} dynamically',flush=True,file=sys.stderr)
+				#importlib.invalidate_caches()
+				SETTINGS_MODULE = importlib.import_module(SLIDESHOW_SETTINGS_MODULE_NAME)
+			except ImportError as e:
+				# Handle the ImportError if the module cannot be imported
+				print(f"load_settings: ERROR: ImportError, failed to dynamically import user specified Settings from import module: '{SLIDESHOW_SETTINGS_MODULE_NAME}'\n{str(e)}",flush=True,file=sys.stderr)
+				sys.exit(1)	
+			except Exception as e:
+				print(f"load_settings: ERROR: Exception, failed to dynamically import user specified Settings from import module: '{SLIDESHOW_SETTINGS_MODULE_NAME}'\n{str(e)}",flush=True,file=sys.stderr)
+				sys.exit(1)	
+		else:
+			if DEBUG:	print(f'DEBUG: SLIDESHOW_SETTINGS_MODULE_NAME IS in sys.modules',flush=True,file=sys.stderr)
+			# Reload the module since it had been dynamically loaded already ... remember, global variables in thee module are not scrubbed by reloading
+			try:
+				if DEBUG:	print(f'DEBUG: reloading SETTINGS_MODULE={SETTINGS_MODULE} ',flush=True,file=sys.stderr)
+				#importlib.invalidate_caches()
+				importlib.reload(SETTINGS_MODULE)
+			except Exception as e:
+				print(f"load_settings: ERROR: Exception, failed to RELOAD user specified Settings from import module: '{SLIDESHOW_SETTINGS_MODULE_NAME}'\n{str(e)}",flush=True,file=sys.stderr)
+				sys.exit(1)
 	
 	#print(f'DEBUG: before import slideshow_settings.py static',flush=True,file=sys.stderr)
 	#import slideshow_settings
@@ -491,8 +495,8 @@ def load_settings():
 		user_specified_settings_dict = SETTINGS_MODULE.settings
 		print(f'Successfully loaded user_specified_settings_dict=\n{objPrettyPrint.pformat(user_specified_settings_dict)}',flush=True,file=sys.stderr)
 	except Exception as e:
+		user_specified_settings_dict = {}
 		print(f"load_settings: WARNING: Exception, could not import 'user_specified_settings' '{SLIDESHOW_SETTINGS_MODULE_FILENAME}'",flush=True,file=sys.stderr)
-		user_specified_settings_dict = None
 
 	#######################################################################################################################################
 	#######################################################################################################################################
@@ -537,7 +541,11 @@ def load_settings():
 	final_settings_dict['slideshow_ENCODER_legacy_path'] = fully_qualified_filename(final_settings_dict['slideshow_ENCODER_legacy_path'])
 
 
-	# NOW WE NEED TO RE-DEFAULT THINGS WHICH BELONG IN THE TEMPORARY FOLDER
+	# NOW WE NEED TO RECONSTRUCT THINGS WHICH BELONG IN THE TEMPORARY FOLDER
+	
+	
+	DEBUG = True
+	
 	
 	TEMP_FOLDER = final_settings_dict['TEMP_FOLDER']
 
@@ -564,6 +572,8 @@ def load_settings():
 	final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'] = TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME
 
 	final_settings_dict['BACKGROUND_AUDIO_INPUT_FOLDER'] = BACKGROUND_AUDIO_INPUT_FOLDER
+
+	if DEBUG:	print(f'load_settings: After folders RECONSTRUCTION final_settings_dict=\n"{objPrettyPrint.pformat(final_settings_dict)}"',flush=True,file=sys.stderr)
 
 	# check the folders which should exist do exist
 	# 1. check the folders in this LIST
@@ -734,14 +744,10 @@ def load_settings():
 	
 	if not os.path.exists(SLIDESHOW_SETTINGS_MODULE_FILENAME):
 		specially_formatted_settings_list =	[
-		
-		-->>		add os.path.join(TEMP_FOLDER, 
-		-->>		and os.path.join(TEMP_FOLDER, 
-		
 										[ 'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS',	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS,	r'a list, one or more folders to look in for slideshow pics/videos. the r in front of the string is CRITICAL' ],
 										[ 'RECURSIVE',									RECURSIVE,									r'case sensitive: whether to recurse the source folder(s) looking for slideshow pics/videos' ],
 										[ 'TEMP_FOLDER',								TEMP_FOLDER,								r'folder where temporary files go; USE A DISK WITH LOTS OF SPARE DISK SPACE - CIRCA 6 GB PER 100 PICS/VIDEOS' ],
-										[ 'BACKGROUND_AUDIO_INPUT_FILENAME',			BACKGROUND_AUDIO_INPUT_FILENAME,			r'Use the word None to generate a silence background, or specify a .m4a audio file if you want a background track (it is not looped if too short)' ],
+										[ 'BACKGROUND_AUDIO_INPUT_FOLDER',				BACKGROUND_AUDIO_INPUT_FOLDER,				r'Folder containing audio files (in sequence) to make an audio background track (it is not looped if too short). No files = silent background.' ],
 										[ 'FINAL_MP4_WITH_AUDIO_FILENAME',				FINAL_MP4_WITH_AUDIO_FILENAME,				r'the filename of the FINAL slideshow .mp4' ],
 										[ 'SUBTITLE_DEPTH',								SUBTITLE_DEPTH,								r'how many folders deep to display in subtitles; use 0 for no subtitling' ],
 										[ 'SUBTITLE_FONTSIZE',							SUBTITLE_FONTSIZE,							r'fontsize for subtitles, leave this alone unless confident' ],
