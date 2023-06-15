@@ -116,7 +116,7 @@ def fully_qualified_filename(file_name):
 	# Make into a fully qualified filename string using double backslashes
 	# to later print/write with double backslashes use eg
 	#	converted_string = fully_qualified_filename('D:\\a\\b\\\\c\\\\\\d\\e\\f\\filename.txt')
-	#	print(repr(converted_string))
+	#	print(repr(converted_string),flush=True)
 	# yields 'D:\\a\\b\\c\\d\\e\\f\\filename.txt'
 	new_file_name = os.path.abspath(file_name).rstrip(os.linesep).strip('\r').strip('\n').strip()
 	if new_file_name.endswith('\\'):
@@ -181,7 +181,7 @@ def reconstruct_full_directory_only(incoming, default):
 #		video_mediainfo_value_worker
 #		mi_dict[param] = value	# any of str, bool, int, float, etc
 #	MI.Close()
-#	print(f'\n====================mi_dict=\n{objPrettyPrint.pformat(mi_dict)}')
+#	print(f'\n====================mi_dict=\n{objPrettyPrint.pformat(mi_dict)}',flush=True)
 
 def video_mediainfo_value_worker(stream:int, track:int, param:str, path: Union[Path,str]) -> Union[int,float,str]:
 	# Assume MI.Open(str(path)) has already occurred
@@ -367,7 +367,7 @@ def video_calculate_rotation_flipping(rotation_degrees):
 # use ffprobe class like this:
 #
 #	obj_ffprobe = ffprobe(file_path)
-#	print(f'{objPrettyPrint.pformat(obj_ffprobe.dict)}')	# to print everything. take care to notice stream indexing to correctly find your video stream metadata
+#	print(f'{objPrettyPrint.pformat(obj_ffprobe.dict)}',flush=True)	# to print everything. take care to notice stream indexing to correctly find your video stream metadata
 #	encoded_date = obj_ffprobe.format_dict.get("Encoded_Date")	# 'Encoded_Date': '2013-09-01 03:46:29 UTC'
 #	duration = obj_ffprobe.format_dict.get("duration")
 #	rotation = obj_ffprobe.first_video.get("rotation")
@@ -381,7 +381,7 @@ class ffprobe:
 	# The native ffprobe tag names go straight into the dict so they always align with ffprobe querying
 	# Usage:
 	#	obj_ffprobe = ffprobe(file_path)
-	#	print(f'{objPrettyPrint.pformat(obj_ffprobe.dict)}')	# to print everything. take care to notice stream indexing to correctly find your video stream metadata
+	#	print(f'{objPrettyPrint.pformat(obj_ffprobe.dict)}',flush=True)	# to print everything. take care to notice stream indexing to correctly find your video stream metadata
 	#	duration = obj_ffprobe.format_dict.get("duration")
 	#	rotation = obj_ffprobe.first_video.get("rotation")
 	#	r_frame_rate = obj_ffprobe.first_video.get("r_frame_rate")
@@ -499,7 +499,7 @@ def image_get_metadata_via_PIL(image_path):
 		exif_data = image._getexif()
 		if exif_data is None:
 			date_recorded = datetime.strptime(datetime.fromtimestamp(pathlib.Path(image_path).stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S")	# chatgpt and https://pynative.com/python-file-creation-modification-datetime/
-			#print(f"DEBUG image_get_metadata_via_PIL: no exif_data, FILE DATEMODIFIED WILL BE USED FOR date_recorded='{date_recorded}'")
+			#print(f"DEBUG image_get_metadata_via_PIL: no exif_data, FILE DATEMODIFIED WILL BE USED FOR date_recorded='{date_recorded}'",flush=True)
 			return {
 				"Date_Recorded": date_recorded,
 				"Rotation_Flipping": {	'exif_orientation_value': 1,
@@ -550,8 +550,8 @@ def image_get_date_recorded_from_exif(image_path, exif_data):
 	if date_recorded == None:	# attempt to get the file date-modified
 		# chatgpt and https://pynative.com/python-file-creation-modification-datetime/
 		date_recorded = datetime.strptime(datetime.fromtimestamp(pathlib.Path(image_path).stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S") # chatgpt and https://pynative.com/python-file-creation-modification-datetime/
-		#print(f"DEBUG image_get_date_recorded_from_exif: FILE DATEMODIFIED USED FOR date_recorded='{date_recorded}'")
-	#print(f"DEBUG image_get_date_recorded_from_exif: date_recorded='{date_recorded}'")
+		#print(f"DEBUG image_get_date_recorded_from_exif: FILE DATEMODIFIED USED FOR date_recorded='{date_recorded}'",flush=True)
+	#print(f"DEBUG image_get_date_recorded_from_exif: date_recorded='{date_recorded}'",flush=True)
 	return date_recorded
 
 def image_calculate_rotation_flipping(exif_data):
@@ -758,7 +758,7 @@ def find_all_chunks():
 				ffcachefile = get_random_ffindex_filename(filename)
 				clip = core.ffms2.Source(str(filename), cachefile=ffcachefile)
 				del clip
-				if os.filename.exists(ffcachefile):
+				if os.path.exists(ffcachefile):
 					os.remove(ffcachefile)
 				return True
 			except Exception as e:
@@ -778,11 +778,11 @@ def find_all_chunks():
 
 	def fac_check_clip_from_pic(filename, ext):
 		if ext in SETTINGS_DICT['PIC_EXTENSIONS']:
+			ffcachefile = get_random_ffindex_filename(filename)
 			try:
-				ffcachefile = get_random_ffindex_filename(filename)
 				clip = core.ffms2.Source(str(filename), cachefile=ffcachefile)
 				del clip
-				if os.filename.exists(ffcachefile):
+				if os.path.exists(ffcachefile):
 					os.remove(ffcachefile)
 				return True
 			except Exception as e:
@@ -836,10 +836,10 @@ def find_all_chunks():
 		current_Directory = Directory
 		#files = sorted(Path(current_Directory).glob(glob_var)) 									# generator of all files in a directory, files starting with . won't be matched by default
 		files = sorted( (entry for entry in Path(current_Directory).glob(glob_var) if (entry.is_file() and entry.suffix.lower() in SETTINGS_DICT['EXTENSIONS'])), key=lambda p: (p.parent, p.name) )  # consider files but exclude directories in the generator, sorting them
-		for filename in files:
+		for filename in files:		# filename type='<class 'pathlib.WindowsPath'>'
 			if DEBUG:	print(f"DEBUG: find_all_chunks: found file '{filename}', re-checking if file is in '{SETTINGS_DICT['EXTENSIONS']}'",flush=True)
 			if filename.suffix.lower() in SETTINGS_DICT['EXTENSIONS']:
-				print(f"CONTROLLER: Checking file {count_of_files}. '{filename}' for validity ...",flush=True)
+				print(f"CONTROLLER: Checking file {count_of_files}. '{filename}' for validity with fac_check_file_validity_by_opening ...",flush=True)
 				is_valid = fac_check_file_validity_by_opening(filename)
 				if not is_valid:	# ignore clips which had an issue with being opened and return None
 					print(f'CONTROLLER: Unable to process {count_of_files} {str(filename)} ... ignoring it',flush=True)
@@ -1192,21 +1192,21 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 				try:
 					stderr_line1 = stderr_queue1.get_nowait().decode('utf-8').strip()
 					if stderr_line1:
-						print(f"vspipe: {stderr_line1}")
+						print(f"vspipe: {stderr_line1}",flush=True,file=sys.stderr)
 					pass
 				except Empty:
 					pass
 				try:
 					stdout_line2 = stdout_queue2.get_nowait().decode('utf-8').strip()
 					if stdout_line2:
-						print(f"ffmpeg: {stdout_line2}")
+						print(f"ffmpeg: {stdout_line2}",flush=True)
 					pass
 				except Empty:
 					pass
 				try:
 					stderr_line2 = stderr_queue2.get_nowait().decode('utf-8').strip()
 					if stderr_line2:
-						print(f"ffmpeg: {stderr_line2}")
+						print(f"ffmpeg: {stderr_line2}",flush=True,file=sys.stderr)
 					pass
 				except Empty:
 					pass
@@ -1219,12 +1219,12 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 			output, error2 = process2.communicate()
 			error1 = process1.stderr.read()
 			# Decode any ffmpeg final output from bytes to string and print it
-			print(f"ffmpeg: {output.decode('utf-8').strip()}")
+			print(f"ffmpeg: {output.decode('utf-8').strip()}",flush=True)
 			# Print any final error messages
 			if error1:
-					print(f"vspipe: {error1.decode('utf-8').strip()}")
+					print(f"vspipe: {error1.decode('utf-8').strip()}",flush=True,file=sys.stderr)
 			if error2:
-					print(f"ffmpeg: {error2.decode('utf-8').strip()}")
+					print(f"ffmpeg: {error2.decode('utf-8').strip()}",flush=True,file=sys.stderr)
 			# Close the queues
 			stderr_queue1.close()
 			stdout_queue2.close()
@@ -1295,7 +1295,7 @@ if __name__ == "__main__":
 	##########################################################################################################################################
 	# GATHER SETTINGS
 	print(f"{100*'-'}",flush=True)
-	print(f'CONTROLLER: STARTING GATHER SETTINGS')
+	print(f'CONTROLLER: STARTING GATHER SETTINGS',flush=True)
 
 	import slideshow_LOAD_SETTINGS	# from same folder .\
 	SETTINGS_DICT, OLD_INI_DICT, OLD_CALC_INI_DICT, USER_SPECIFIED_SETTINGS_DICT = slideshow_LOAD_SETTINGS.load_settings()
@@ -1342,7 +1342,7 @@ if __name__ == "__main__":
 	##########################################################################################################################################
 	# FIND PIC/IMAGES
 	print(f"{100*'-'}",flush=True)
-	print(f'CONTROLLER: STARTING FIND/CHECK OF PIC AND IMAGES')
+	print(f'CONTROLLER: STARTING FIND/CHECK OF PIC AND IMAGES',flush=True)
 	
 	# Locate all openable files and put them into chunks in a dict, including { proposed filename for the encoded chunk, first/last frames, number of frames in chunk } 
 	ALL_CHUNKS_COUNT, ALL_CHUNKS_COUNT_OF_FILES, ALL_CHUNKS = find_all_chunks()	# it uses settings in SETTINGS_DICT to do its thing
@@ -1363,7 +1363,7 @@ if __name__ == "__main__":
 	# SAVING FRAME NUMBERS AND NUM VIDEO FRAMES INFO SNIPPET DICT, 
 	# CREATING SNIPPET JSON, IMPORTING JSON AND ADDING TO ALL_SNIPPETS DICT:
 	print(f"{100*'-'}",flush=True)
-	print(f'CONTROLLER: STARTING INTERIM ENCODING OF CHUNKS INTO INTERIM FFV1 VIDEO FILES')
+	print(f'CONTROLLER: STARTING INTERIM ENCODING OF CHUNKS INTO INTERIM FFV1 VIDEO FILES',flush=True)
 	if DEBUG:	
 		print(f"DEBUG: CONTROLLER: Starting encoder loop for each of ALL_CHUNKS tree. chunks: {ALL_CHUNKS_COUNT} files: {ALL_CHUNKS_COUNT_OF_FILES}",flush=True)
 	
@@ -1399,7 +1399,7 @@ if __name__ == "__main__":
 	#end for
 
 	if DEBUG:
-		print(f'CONTROLLER: Finished INTERIM ENCODING OF CHUNKS INTO INTERIM FFV1 VIDEO FILES')
+		print(f'CONTROLLER: Finished INTERIM ENCODING OF CHUNKS INTO INTERIM FFV1 VIDEO FILES',flush=True)
 		print(f"CONTROLLER: After updating encoder added snippets into each chunk and controller UPDATING chunk info into ALL_CHUNKS, the new ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
 
 	##########################################################################################################################################
@@ -1462,7 +1462,7 @@ if __name__ == "__main__":
 	##########################################################################################################################################
 	# USE SNIPPET INFO TO OVERLAY SNIPPET AUDIO INTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4 (so pydub accepts it):
 	print(f"{100*'-'}",flush=True)
-	print(f'CONTROLLER: STARTING OVERLAY SNIPPETS AUDIOS ONTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4')
+	print(f'CONTROLLER: STARTING OVERLAY SNIPPETS AUDIOS ONTO BACKGROUND AUDIO, AND TRANSCODE AUDIO to AAC in an MP4',flush=True)
 
 	final_video_frame_count = end_frame_num_of_final_video + 1		# base 0
 	final_video_fps = SETTINGS_DICT['TARGET_FPS']
@@ -1666,7 +1666,7 @@ if __name__ == "__main__":
 	##########################################################################################################################################
 	# CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO MP4 AND AT SAME TIME MUX WITH BACKGROUND AUDIO.mp4
 	print(f"{100*'-'}",flush=True)
-	print(f'CONTROLLER: STARTING CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO MP4 AND AT SAME TIME MUX WITH BACKGROUND AUDIO')
+	print(f'CONTROLLER: STARTING CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO MP4 AND AT SAME TIME MUX WITH BACKGROUND AUDIO',flush=True)
 
 	# create the video-concat input file for ffmpeg, listing all of the FFV1 files to be concatenated/transcoded
 	temporary_ffmpeg_concat_list_filename = SETTINGS_DICT['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME']
@@ -1746,7 +1746,7 @@ if __name__ == "__main__":
 	ffmpeg_commandline = ffmpeg_commandline_libx264
 	print(f"CONTROLLER: START FFMPEG CONATENATE/TRANSCODE INTERIM VIDEOS AND MUX AUDIO IN ONE GO. FFMPEG command:\n{objPrettyPrint.pformat(ffmpeg_commandline)}",flush=True)
 	subprocess.run(ffmpeg_commandline, check=True)
-	print(f'CONTROLLER: FINISHED CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO MP4 AND AT SAME TIME MUX WITH BACKGROUND AUDIO\nFinal Slideshow={objPrettyPrint.pformat(final_mp4_with_audio_filename)}')
+	print(f'CONTROLLER: FINISHED CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO MP4 AND AT SAME TIME MUX WITH BACKGROUND AUDIO\nFinal Slideshow={objPrettyPrint.pformat(final_mp4_with_audio_filename)}',flush=True)
 	print(f"{100*'-'}",flush=True)
 	
 	##########################################################################################################################################
