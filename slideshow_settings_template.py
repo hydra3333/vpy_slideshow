@@ -3,7 +3,8 @@ settings = {
 													r'D:\ssTEST\TEST_VIDS_IMAGES\0TEST', 
 													#r'D:\ssTEST\TEST_VIDS_IMAGES\2022-11-Tasmania_renamed\ORIGINALS',
 													#r'D:\ssTEST\TEST_VIDS_IMAGES\2TEST_rotations', 
-												],	# a list, one or more folders to look in for slideshow pics/videos. the r in front of the string is CRITICAL	'RECURSIVE':	True,		# case sensitive: whether to recurse the source folder(s) looking for slideshow pics/videos
+												],	# a list, one or more folders to look in for slideshow pics/videos. the r in front of the string is CRITICAL
+	'RECURSIVE':	True,		# case sensitive: whether to recurse the source folder(s) looking for slideshow pics/videos
 	'TEMP_FOLDER':	r'G:\ssTEST\TEMP',		# folder where temporary files go; USE A DISK WITH LOTS OF SPARE DISK SPACE - CIRCA 6 GB PER 100 PICS/VIDEOS
 	'BACKGROUND_AUDIO_INPUT_FOLDER':	r'D:\ssTEST\BACKGROUND_AUDIO_INPUT_FOLDER',		# Folder containing audio files (in sequence) to make an audio background track (it is not looped if too short). No files = silent background.
 	'FINAL_MP4_WITH_AUDIO_FILENAME':	r'D:\ssTEST\slideshow.FINAL_MP4_WITH_AUDIO_FILENAME.mp4',		# the filename of the FINAL slideshow .mp4

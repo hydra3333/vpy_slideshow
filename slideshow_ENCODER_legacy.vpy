@@ -13,7 +13,7 @@ from pathlib import Path, PureWindowsPath
 import shutil
 import subprocess
 import datetime
-from datetime import datetime, date, time, timezone
+#from datetime import datetime, date, time, timezone
 from fractions import Fraction
 from ctypes import *		# for mediainfo ... load via ctypes.CDLL(r'.\MediaInfo.dll')
 from typing import Union	# for mediainfo
@@ -212,13 +212,13 @@ for v in vs_transitions.Direction:
 def print_DEBUG(*args, **kwargs):	# PRINT TO stderr
 	# per https://stackoverflow.com/questions/5574702/how-do-i-print-to-stderr-in-python
 	if A_DEBUG_IS_ON:
-		right_now = datetime.now().strftime('%Y-%m-%d.%H:%M:%S.%f')
+		right_now = datetime.datetime.now().strftime('%Y-%m-%d.%H:%M:%S.%f')
 		print(f'{right_now} DEBUG:', *args, **kwargs, file=sys.stderr, flush=True)
 
 ###
 def print_NORMAL(*args, **kwargs):	# PRINT TO stderr
 	# per https://stackoverflow.com/questions/5574702/how-do-i-print-to-stderr-in-python
-	right_now = datetime.now().strftime('%Y-%m-%d.%H:%M:%S.%f')
+	right_now = datetime.datetime.now().strftime('%Y-%m-%d.%H:%M:%S.%f')
 	print(f'{right_now}', *args, **kwargs, file=sys.stderr, flush=True)
 
 
