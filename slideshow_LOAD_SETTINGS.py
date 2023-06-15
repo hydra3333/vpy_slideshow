@@ -155,17 +155,23 @@ def reconstruct_full_directory_and_filename(incoming, default):
         directory = incoming_directory or default_directory
         filename = incoming_filename or default_filename
         extension = incoming_extension or default_extension
-        return os.path.normpath(os.path.join(directory, filename + extension))
+        outgoing = os.path.normpath(os.path.join(directory, filename + extension))
     else:
-        return os.path.normpath(default_abs_path)
+        outgoing = os.path.normpath(default_abs_path)
+	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
+	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_and_filename: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
+	return outgoing
 
 def reconstruct_full_directory_only(incoming, default):
 	# default is assumed to be a directory, any text in it treated as that and not a filename
     if incoming:
-        return os.path.normpath(incoming)
+        outgoing = os.path.normpath(incoming)
     else:
         default_abs_path = os.path.abspath(default)
-        return os.path.normpath(default_abs_path)
+        outgoing = os.path.normpath(default_abs_path)
+	outgoing = 
+	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
+	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_only: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
 
 def create_py_file_from_specially_formatted_list(dot_py_filename, specially_formatted_list):
 	# a dict may contain strings defined like r''
