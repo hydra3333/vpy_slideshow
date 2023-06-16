@@ -201,11 +201,21 @@ def load_settings():
 	DURATION_MAX_VIDEO_SEC						= float(7200.0)
 	DENOISE_SMALL_SIZE_VIDEOS					= True
 
-	TARGET_WIDTH								= int(1920)		# ; "target_width" an integer; set for hd; do not change unless a dire emergency = .
-	TARGET_HEIGHT								= int(1080)		# ; "target_height" an integer; set for hd; do not change unless a dire emergency = .
+	valid_TARGET_RESOLUTION_DICT				=	{	r'1080p'.lower():	{ 'WIDTH': int(1920), 'HEIGHT': int(1080), 'BITRATE': r'4.5M' },
+														r'4k'.lower():		{ 'WIDTH': int(3840), 'HEIGHT': int(2160), 'BITRATE': r'12M' },
+														r'2160p'.lower():	{ 'WIDTH': int(3840), 'HEIGHT': int(2160), 'BITRATE': r'12M' }
+													}
+	TARGET_RESOLUTION							= list(valid_TARGET_RESOLUTION_DICT.keys())[0]	# the first key in that dict
+	TARGET_WIDTH 								= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['WIDTH']
+	TARGET_HEIGHT	 							= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['HEIGHT']
+	TARGET_VIDEO_BITRATE						= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['BITRATE']		# 4.5M is ok (HQ) for h.264 1080p25 slideshow material ... dunno about 2160p, web say 25M whcih is FAR too high to be handy.
+	
+	#TARGET_WIDTH								= int(1920)		# ; "target_width" an integer; set for hd; do not change unless a dire emergency = .
+	#TARGET_HEIGHT								= int(1080)		# ; "target_height" an integer; set for hd; do not change unless a dire emergency = .
+	#TARGET_VIDEO_BITRATE						= r'4.5M'		# 4.5M is ok (HQ) for h.264 1080p25 slideshow material
+
 	TARGET_FPSNUM								= int(25)		# ; "target_fpsnum" an integer; set for pal = .
 	TARGET_FPSDEN								= int(1)		# ; "target_fpsden" an integer; set for pal = .
-	TARGET_VIDEO_BITRATE						= r'4.5M'		# 4.5M is ok (HQ) for h.264 1080p25 slideshow material
 
 	TARGET_BACKGROUND_AUDIO_FREQUENCY			= int(48000) 
 	TARGET_BACKGROUND_AUDIO_CHANNELS			= int(2) 
@@ -317,6 +327,8 @@ def load_settings():
 		'DURATION_MAX_VIDEO_SEC':							DURATION_MAX_VIDEO_SEC,
 		'DENOISE_SMALL_SIZE_VIDEOS':						DENOISE_SMALL_SIZE_VIDEOS,
 
+		'valid_TARGET_RESOLUTION_DICT':						valid_TARGET_RESOLUTION_DICT,
+		'TARGET_RESOLUTION':								TARGET_RESOLUTION,
 		'TARGET_WIDTH':										TARGET_WIDTH,
 		'TARGET_HEIGHT':									TARGET_HEIGHT,
 		'TARGET_FPSNUM':									TARGET_FPSNUM,
@@ -432,6 +444,9 @@ def load_settings():
 	# Similar to the dict.update method, if both dictionaries has the same key with different values,
 	# then the final output will contain the value of the second dictionary. 
 	
+	# asssume they may have mucked with valid_TARGET_RESOLUTION_DICT ... remove it from user_specified_settings_dict just in case
+	if 'valid_TARGET_RESOLUTION_DICT' in user_specified_settings_dict: del user_specified_settings_dict['valid_TARGET_RESOLUTION_DICT']
+	
 	final_settings_dict = {**default_settings_dict, **user_specified_settings_dict}	
 	
 	# FOR NOW, NOT USING THIS METHOD:
@@ -485,8 +500,25 @@ def load_settings():
 
 	BACKGROUND_AUDIO_INPUT_FOLDER = UTIL.reconstruct_full_directory_only(final_settings_dict['BACKGROUND_AUDIO_INPUT_FOLDER'], BACKGROUND_AUDIO_INPUT_FOLDER)	# re-default it if user mucked it up
 
+	# check target resolution and reset if necessary, then store ither the resets or the new values based on the specified TARGET_RESOLUTION
+	final_settings_dict['TARGET_RESOLUTION'] = final_settings_dict['TARGET_RESOLUTION'].lower()
+	if final_settings_dict['TARGET_RESOLUTION'] not in valid_TARGET_RESOLUTION_DICT:
+		TARGET_RESOLUTION		= list(valid_TARGET_RESOLUTION_DICT.keys())[0]	# the first key in that dict
+		TARGET_WIDTH 			= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['WIDTH']
+		TARGET_HEIGHT	 		= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['HEIGHT']
+		TARGET_VIDEO_BITRATE	= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['BITRATE']
+		print(f'load_settings: WARNING: TARGET_RESOLUTION "{final_settings_dict["TARGET_RESOLUTION"]}" not one of {valid_TARGET_RESOLUTION_DICT}, resetting to "{TARGET_RESOLUTION}"',flush=True,file=sys.stderr)
+		final_settings_dict['TARGET_RESOLUTION'] = TARGET_RESOLUTION
+	TARGET_RESOLUTION			= final_settings_dict['TARGET_RESOLUTION']						# grab the specified TARGET_RESOLUTION
+	TARGET_WIDTH 				= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['WIDTH']		# based on specified TARGET_RESOLUTION
+	TARGET_HEIGHT	 			= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['HEIGHT']		# based on specified TARGET_RESOLUTION
+	TARGET_VIDEO_BITRATE		= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['BITRATE']	# based on specified TARGET_RESOLUTION
+	final_settings_dict['TARGET_WIDTH'] = TARGET_WIDTH											# poke back the right value based on specified TARGET_RESOLUTION
+	final_settings_dict['TARGET_HEIGHT'] = TARGET_HEIGHT										# poke back the right value based on specified TARGET_RESOLUTION
+	final_settings_dict['TARGET_VIDEO_BITRATE'] = TARGET_VIDEO_BITRATE							# poke back the right value based on specified TARGET_RESOLUTION
+
 	if final_settings_dict['FFMPEG_ENCODER'].lower() not in valid_FFMPEG_ENCODER:
-		if UTIL.DEBUG:	print(f'load_settings: WARNING: FFMPEG_ENCODER "{final_settings_dict["FMPEG_ENCODER"]}" not one of {valid_FFMPEG_ENCODER}, defaulting to "{FFMPEG_ENCODER}"',flush=True,file=sys.stderr)
+		print(f'load_settings: WARNING: FFMPEG_ENCODER "{final_settings_dict["FMPEG_ENCODER"]}" not one of {valid_FFMPEG_ENCODER}, defaulting to "{FFMPEG_ENCODER}"',flush=True,file=sys.stderr)
 		final_settings_dict['FFMPEG_ENCODER'] = valid_FFMPEG_ENCODER[0]
 	FFMPEG_ENCODER = final_settings_dict['FFMPEG_ENCODER']
 
@@ -585,6 +617,7 @@ def load_settings():
 							'TARGET_COLOR_TRANSFER_I' :			final_settings_dict['TARGET_COLOR_TRANSFER_I'],
 							'TARGET_COLOR_PRIMARIES_I' :		final_settings_dict['TARGET_COLOR_PRIMARIES_I'],
 							'TARGET_COLOR_RANGE_I' :			final_settings_dict['TARGET_COLOR_RANGE_I'],
+							'TARGET_RESOLUTION':				final_settings_dict['TARGET_RESOLUTION'],
 							'TARGET_WIDTH' :					final_settings_dict['TARGET_WIDTH'],
 							'TARGET_HEIGHT' :					final_settings_dict['TARGET_HEIGHT'],
 							'TARGET_FPSNUM' :					final_settings_dict['TARGET_FPSNUM'],
@@ -704,6 +737,7 @@ def load_settings():
 										[ 'FFPROBE_PATH',								FFPROBE_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'VSPIPE_PATH',								VSPIPE_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'FFMPEG_ENCODER',								FFMPEG_ENCODER,								f'Please leave this alone unless really confident. One of {valid_FFMPEG_ENCODER}. h264_nvenc only works on "nvidia 2060 Super" upward.' ],
+										[ 'TARGET_RESOLUTION',							TARGET_RESOLUTION,							f'eg 1080p : One of {[k for k in valid_TARGET_RESOLUTION_DICT.keys()]} only.' ],
 										[ 'TARGET_VIDEO_BITRATE',						TARGET_VIDEO_BITRATE,						f'Please leave this alone unless really confident. 4.5M is ok (HQ) for h.264 1080p25 slideshow material.' ],
 										[ 'slideshow_CONTROLLER_path',					slideshow_CONTROLLER_path,					r'Please leave this alone unless really confident' ],
 										[ 'slideshow_LOAD_SETTINGS_path',				slideshow_LOAD_SETTINGS_path,				r'Please leave this alone unless really confident' ],
