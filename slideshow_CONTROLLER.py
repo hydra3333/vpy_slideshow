@@ -1115,18 +1115,18 @@ if __name__ == "__main__":
 							'-dpb_size', '0', 
 							'-bf:v', '3', 
 							'-b_ref_mode:v', '0', 
+					# https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new
 					# https://www.reddit.com/r/ffmpeg/comments/xtl43y/hq_ffmpeg_encoding_with_gpu_nvenc_part_iii/
-					#
 					# NVIDIA Presets v2.0:									https://developer.download.nvidia.com/video/gputechconf/gtc/2020/presentations/s21337-nvidia-video-technologies-video-codec-and-optical-flow-sdk.pdf
 					#	P1 (highest performance) to P7 (highest quality)	https://developer.nvidia.com/blog/introducing-video-codec-sdk-10-presets/
 					# 	Rate Control Mode: Constant QP, CBR, VBR
 							'-rc:v', 'vbr', 		# this is what the nvidia documentation says and ffmpeg exposes for nvidia PRESETS v2.0 https://developer.download.nvidia.com/video/gputechconf/gtc/2020/presentations/s21337-nvidia-video-technologies-video-codec-and-optical-flow-sdk.pdf
 					#
 					# ONE OR THE OTHER NOT BOTH OF THESE
-							'-cq:v', '22', 			# for use with CQ -b:v 0 ... uses CRF so that we do not have to guess bitrates	# Set target quality level (0 to 51, 0 means automatic) for constant quality mode in VBR rate control (from 0 to 51) (default 0)
-							'-b:v', '0 ',			# nominated CQ target bitrate see -cq:v 20 ... apparently this is REQUIRED for -cq to work
-							#'-cq:v', '0', 			# for use with non-CQ -b:v 4M ... # Set target quality level (0 to 51, 0 means automatic) for constant quality mode in VBR rate control (from 0 to 51) (default 0)
-							#'-b:v', '4M', 			# 4M for 1080p ... nominated non-CQ target bitrate see -cq:v 0
+							#'-cq:v', '24', 		# for use with CQ -b:v 0 ... uses CRF so that we do not have to guess bitrates # circa double filesize of '-b:v', '5M' !!	# Set target quality level (0 to 51, 0 means automatic) for constant quality mode in VBR rate control (from 0 to 51) (default 0)
+							#'-b:v', '0',			# nominated CQ target bitrate see -cq:v 20 ... apparently this is REQUIRED for -cq to work
+							'-cq:v', '0', 			# for use with non-CQ -b:v 4M ... # Set target quality level (0 to 51, 0 means automatic) for constant quality mode in VBR rate control (from 0 to 51) (default 0)
+							'-b:v', '5M', 			# 5M for 1080p ... nominated non-CQ target bitrate see -cq:v 0
 					#
 							'-tune', 'hq',
 							'-minrate:v', '500k', 
