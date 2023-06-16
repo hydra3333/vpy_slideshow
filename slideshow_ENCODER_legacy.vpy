@@ -1,3 +1,11 @@
+# 1.	Modifying the sys.path list in a module DOES NOT not affect the sys.path of other modules or the main program.
+# 2.	Modifying the sys.path list in the MAIN PROGRAM WILL affect the search path for	all modules imported by that program.
+# Ensure we can import modules from ".\" by adding the current default folder to the python path.
+# (tried using just PYTHONPATH environment variable but it was unreliable)
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+import slideshow_GLOBAL_UTILITIES_AND_VARIABLES as UTIL	# define utilities and make global variables available to everyone
+
 import vapoursynth as vs
 from vapoursynth import core
 core = vs.core
@@ -51,10 +59,6 @@ from PIL.ExifTags import TAGS
 
 import pydub
 from pydub import AudioSegment
-
-# Ensure we can import modules from ".\" by adding the current default folder to the python path.
-# (tried using just PYTHONPATH environment variable but it was unreliable)
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 CDLL(r'MediaInfo.dll')				# note the hard-coded folder	# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
 from MediaInfoDLL3 import MediaInfo, Stream, Info, InfoOption		# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
