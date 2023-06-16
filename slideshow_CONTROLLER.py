@@ -2,16 +2,16 @@
 # 2.	Modifying the sys.path list in the MAIN PROGRAM WILL affect the search path for	all modules imported by that program.
 # Ensure we can import modules from ".\" by adding the current default folder to the python path.
 # (tried using just PYTHONPATH environment variable but it was unreliable)
+import sys
+import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-import slideshow_GLOBAL_UTILITIES_AND_VARIABLES as UTIL	# define utilities and make global variables available to everyone
+import slideshow_GLOBAL_UTILITIES_AND_VARIABLES as UTIL	# define utilities and make raw (defaulted) global variables available to everyone
 
 import vapoursynth as vs
 from vapoursynth import core
 core = vs.core
 #core.num_threads = 1
-import sys
-import os
 import multiprocessing
 import importlib
 import re
@@ -164,8 +164,8 @@ def find_all_chunks():
 	TOLERANCE_FINAL_CHUNK = max(1, int(SETTINGS_DICT['MAX_FILES_PER_CHUNK'] * (float(SETTINGS_DICT['TOLERANCE_PERCENT_FINAL_CHUNK'])/100.0)))
 
 	print(f"CONTROLLER: Commencing assigning files into chunks for processing usng:",flush=True)
-	print(f"{objPrettyPrint.pformat(SETTINGS_DICT['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS'])}",flush=True)
-	print(f"{objPrettyPrint.pformat(SETTINGS_DICT['EXTENSIONS'])}",flush=True)
+	print(f"{UTIL.objPrettyPrint.pformat(SETTINGS_DICT['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS'])}",flush=True)
+	print(f"{UTIL.objPrettyPrint.pformat(SETTINGS_DICT['EXTENSIONS'])}",flush=True)
 	print(f"RECURSIVE={SETTINGS_DICT['RECURSIVE']}",flush=True)
 	if UTIL.DEBUG:
 		print(	f"DEBUG: find_all_chunks: " +
@@ -246,15 +246,15 @@ def find_all_chunks():
 	chunk_count = len(chunks)
 
 	# OK lets print the chunks tree
-	if UTIL.DEBUG:	print(f"DEBUG: find_all_chunks: Chunks tree contains {count_of_files} files:\n{objPrettyPrint.pformat(chunks)}",flush=True)
+	if UTIL.DEBUG:	print(f"DEBUG: find_all_chunks: Chunks tree contains {count_of_files} files:\n{UTIL.objPrettyPrint.pformat(chunks)}",flush=True)
 
 	# CHECK the chunks tree
-	if UTIL.DEBUG:	print(f"DEBUG: find_all_chunks: Chunks tree contains {count_of_files} files:\n{objPrettyPrint.pformat(chunks)}",flush=True)
+	if UTIL.DEBUG:	print(f"DEBUG: find_all_chunks: Chunks tree contains {count_of_files} files:\n{UTIL.objPrettyPrint.pformat(chunks)}",flush=True)
 	for i in range(0,chunk_count):	# i.e. 0 to (chunk_count-1)
 		if UTIL.DEBUG:
 			print(f'DEBUG: find_all_chunks: About to check-print data for chunks[{i}] : chunks[{i}]["num_files"] and chunks[{i}]["file_list"]:',flush=True)
 			print(f'DEBUG:find_all_chunks: chunks[{i}]["num_files"] = {chunks[str(i)]["num_files"]}',flush=True)
-			print(f'DEBUG:find_all_chunks:  chunks[{i}]["file_list"] = \n{objPrettyPrint.pformat(chunks[str(i)]["file_list"])}',flush=True)
+			print(f'DEBUG:find_all_chunks:  chunks[{i}]["file_list"] = \n{UTIL.objPrettyPrint.pformat(chunks[str(i)]["file_list"])}',flush=True)
 		num_files = chunks[str(i)]["num_files"]
 		file_list = chunks[str(i)]["file_list"]
 		for j in range(0,num_files):
@@ -279,27 +279,36 @@ def audio_standardize_and_import_file(audio_filename, headroom_db, ignore_error_
 	if os.path.exists(temporary_audio_filename):
 		os.remove(temporary_audio_filename)
 
-	loglevel = 'warning'
 	if UTIL.DEBUG:
+		loglevel = r'verbose'
+		benchmark = r'-benchmark'
+		stats = r'-stats'
+	else:
 		loglevel = 'info'
+		benchmark = r''
+		stats = r'-nostats'
+
 	ffmpeg_commandline = [	UTIL.FFMPEG_EXE,
 							'-hide_banner', 
 							'-loglevel', loglevel, 
-							'-nostats', 
+							stats, 
+							benchmark,
+							'-threads', str(UTIL.NUM_THREADS_FOR_FFMPEG_DECODER),
 							'-i', audio_filename,
 							'-vn',
-							'-af', f'ebur128=peak=true:target={headroom_db}:dualmono=true',	# this normalizes audio using industry standard ebur128; it takes a while
+							'-af', f'ebur128=peak=true:target={headroom_db}:dualmono=true',	# this normalizes audio using industry standard ebur128; ffmpeg takes a while and it may not even work
 							'-acodec', temporary_background_audio_codec,
+							'-threads', str(UTIL.NUM_THREADS_FOR_FFMPEG_ENCODER),
 							'-ac', str(target_background_audio_channels),
 							'-ar', str(target_background_audio_frequency),
-							'-y', temporary_audio_filename
+							'-y', temporary_audio_filename,
 							]
 	print(f"CONTROLLER: audio_standardize_and_import_file attempting to standardize audio using {ffmpeg_commandline}",flush=True)
 
 	if ignore_error_converting:
 		result = subprocess.run(ffmpeg_commandline, check=False)
 		if result.returncode != 0:
-			print(f"CONTROLLER: WARNING: audio_standardize_and_import_file: ignoring an audio file due to Unexpected error from subprocess.run\n{objPrettyPrint.pformat(ffmpeg_commandline)}",flush=True,file=sys.stderr)
+			print(f"CONTROLLER: WARNING: audio_standardize_and_import_file: ignoring an audio file due to Unexpected error from subprocess.run\n{UTIL.objPrettyPrint.pformat(ffmpeg_commandline)}",flush=True,file=sys.stderr)
 			return None
 	else:
 		# this will crash if there's an error
@@ -413,28 +422,40 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 		with open(chunk_json_filename, 'w') as fp:
 			json.dump(individual_chunk_dict, fp, indent=4)
 	except Exception as e:
-		print(f"CONTROLLER: ERROR: dumping current chunk to JSON file: '{chunk_json_filename}' for encoder, chunk_id={individual_chunk_id}, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}\n{str(e)}",flush=True,file=sys.stderr)
+		print(f"CONTROLLER: ERROR: dumping current chunk to JSON file: '{chunk_json_filename}' for encoder, chunk_id={individual_chunk_id}, individual_chunk_dict=\n{UTIL.objPrettyPrint.pformat(individual_chunk_dict)}\n{str(e)}",flush=True,file=sys.stderr)
 		sys.exit(1)	
-	print(f"CONTROLLER: Created fixed-filename chunk file for encoder to consume: '{chunk_json_filename}' listing {ALL_CHUNKS[str(individual_chunk_id)]['num_files']} files, individual_chunk_dict=\n{objPrettyPrint.pformat(individual_chunk_dict)}",flush=True)
+	print(f"CONTROLLER: Created fixed-filename chunk file for encoder to consume: '{chunk_json_filename}' listing {ALL_CHUNKS[str(individual_chunk_id)]['num_files']} files, individual_chunk_dict=\n{UTIL.objPrettyPrint.pformat(individual_chunk_dict)}",flush=True)
 
 	# Define the commandlines for the subprocesses forming the ENCODER
+	if UTIL.DEBUG:
+		loglevel = r'verbose'
+		benchmark = r'-benchmark'
+		stats = r'-stats'
+	else:
+		loglevel = 'info'
+		benchmark = r''
+		stats = r'-stats'
+
 	vspipe_commandline = [ UTIL.VSPIPE_EXE, '--progress', '--container', 'y4m', slideshow_ENCODER_legacy_path, '-' ]
 	ffmpeg_commandline = [ UTIL.FFMPEG_EXE,
 							'-hide_banner', 
-							'-loglevel', 'info', 
-							'-nostats', 
+							'-loglevel', loglevel, 
+							stats, 
+							benchmark,
 							'-colorspace', 'bt709', 
 							'-color_primaries', 'bt709', 
 							'-color_trc', 'bt709', 
 							'-color_range', 'pc',
+							'-threads', str(UTIL.NUM_THREADS_FOR_FFMPEG_DECODER),
 							'-f', 'yuv4mpegpipe', 
 							'-i', 'pipe:',
 							'-probesize', '200M', 
 							'-analyzeduration', '200M',
 							'-sws_flags', 'lanczos+accurate_rnd+full_chroma_int+full_chroma_inp',
 							'-filter_complex', 'format=yuv420p,setdar=16/9',
-							'-c:v', 'ffv1', '-level', '3', '-coder', '1', '-context', '1', '-slicecrc', '1',
 							'-an',
+							'-threads', str(UTIL.NUM_THREADS_FOR_FFMPEG_ENCODER),
+							'-c:v', 'ffv1', '-level', '3', '-coder', '1', '-context', '1', '-slicecrc', '1',
 							'-y', proposed_ffv1_mkv_filename
 							]
 	# this vspipe commandline is for DEBUGGING only
@@ -448,20 +469,20 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 	
 	if piping_method == 1:	# this loses stdout from ffmpeg
 		# stderr from process_ffmpeg works OK.  stdout from ffmpeg gets lost.
-		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, simple Popens, losing ffmpeg stdout?, using commandlines:\n{vspipe_commandline}\n{objPrettyPrint.pformat(ffmpeg_commandline)}",flush=True)
+		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, simple Popens, losing ffmpeg stdout?, using commandlines:\n\n{vspipe_commandline}\n{UTIL.objPrettyPrint.pformat(ffmpeg_commandline)}\n",flush=True)
 		process_vspipe = subprocess.Popen( vspipe_commandline, stdout=subprocess.PIPE)
 		process_ffmpeg = subprocess.Popen( ffmpeg_commandline, stdin=process_vspipe.stdout)
 		process_ffmpeg.communicate()
 	elif piping_method == 2:	# this method DOES NOT WORK because subprocess.run hates the pipe symbol
 		# Execute the command using subprocess.run
 		vspipe_pipe_ffmpeg_commandline = vspipe_commandline + [r' | '] + ffmpeg_commandline
-		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}",flush=True)
+		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n\n{UTIL.objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}\n",flush=True)
 		result = subprocess.run(vspipe_pipe_ffmpeg_commandline, shell=True)
 		if result.returncode != 0:
 			print(f"CONTROLLER: ERROR RUNNING ENCODER VSPIPE/FFMPEG via piping_method={piping_method} subprocess.run, Command execution failed with exit status: {result.returncode}",flush=True)
 			sys.exit(1)
 		else:
-			print(f"CONTROLLER: Returned successfully from the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}",flush=True)
+			print(f"CONTROLLER: Returned successfully from the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n\n{UTIL.objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}\n",flush=True)
 	elif piping_method == 3:	# less control but you see everything
 		# Execute the command using subprocess.run but using a string not a list
 		def command_list_to_command_string(command_list):
@@ -480,13 +501,13 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 		vspipe_cmd = command_list_to_command_string(vspipe_commandline)
 		ffmpeg_cmd = command_list_to_command_string(ffmpeg_commandline)
 		vspipe_pipe_ffmpeg_commandline = vspipe_cmd + r' | ' + ffmpeg_cmd
-		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}",flush=True)
+		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n\n{UTIL.objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}\n",flush=True)
 		result = subprocess.run(vspipe_pipe_ffmpeg_commandline, shell=True)
 		if result.returncode != 0:
 			print(f"CONTROLLER: ERROR RUNNING ENCODER VSPIPE/FFMPEG via piping_method={piping_method} subprocess.run, Command execution failed with exit status: {result.returncode}",flush=True)
 			sys.exit(1)
 		else:
-			print(f"CONTROLLER: Returned successfully from the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}",flush=True)
+			print(f"CONTROLLER: Returned successfully from the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n\n{UTIL.objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}\n",flush=True)
 	elif piping_method == 4:
 		# Execute the command using os.system
 		def command_list_to_command_string(command_list):
@@ -505,15 +526,15 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 		vspipe_cmd = command_list_to_command_string(vspipe_commandline)
 		ffmpeg_cmd = command_list_to_command_string(ffmpeg_commandline)
 		vspipe_pipe_ffmpeg_commandline = vspipe_cmd + r' | ' + ffmpeg_cmd
-		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n{objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}",flush=True)
+		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, subprocess.run, with one commandline:\n\n{UTIL.objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}\n",flush=True)
 		exit_status = os.system(vspipe_pipe_ffmpeg_commandline)	# os.system fails to run this even though the string works in a dos box
 		if exit_status != 0:
 			print(f"CONTROLLER: ERROR RUNNING ENCODER VSPIPE/FFMPEG via piping_method={piping_method} os.system, Command execution failed with exit status: {exit_status}",flush=True)
 			sys.exit(1)
 		else:
-			print(f"CONTROLLER: Returned successfully from the ENCODER via piping_method={piping_method}, os.system, with one commandline:\n{objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}",flush=True)
+			print(f"CONTROLLER: Returned successfully from the ENCODER via piping_method={piping_method}, os.system, with one commandline:\n{UTIL.objPrettyPrint.pformat(vspipe_pipe_ffmpeg_commandline)}\n",flush=True)
 	elif piping_method == 5:	# non-blocking reads, works fine as long as nothing goes wrong.
-		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, non=blocking reads, using commandlines:\n{objPrettyPrint.pformat(vspipe_commandline)}\n{objPrettyPrint.pformat(ffmpeg_commandline)}",flush=True)
+		print(f"CONTROLLER: Running the ENCODER via piping_method={piping_method}, non=blocking reads, using commandlines:\n\n{UTIL.objPrettyPrint.pformat(vspipe_commandline)}\n\n{UTIL.objPrettyPrint.pformat(ffmpeg_commandline)}\n",flush=True)
 		try:	
 			# Run the commands in subprocesses for the ENCODER
 			process1 = subprocess.Popen(vspipe_commandline, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -628,7 +649,7 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 		with open(chunk_json_filename, 'r') as fp:
 			updated_individual_chunk_dict = json.load(fp)
 	except Exception as e:
-		print(f"CONTROLLER: ERROR: CONTROLLER: loading updated current chunk from JSON file: '{chunk_json_filename}' from encoder, chunk_id={individual_chunk_id}, related to individual_chunk_dict=\nobjPrettyPrint.pformat(individual_chunk_dict)\n{str(e)}",flush=True,file=sys.stderr)
+		print(f"CONTROLLER: ERROR: CONTROLLER: loading updated current chunk from JSON file: '{chunk_json_filename}' from encoder, chunk_id={individual_chunk_id}, related to individual_chunk_dict=\nUTIL.objPrettyPrint.pformat(individual_chunk_dict)\n{str(e)}",flush=True,file=sys.stderr)
 		sys.exit(1)	
 	print(f"CONTROLLER: Loaded updated current chunk from ENCODER-updated JSON file: '{chunk_json_filename}'",flush=True)
 	if (updated_individual_chunk_dict['chunk_id'] !=  individual_chunk_dict['chunk_id']) or (updated_individual_chunk_dict['chunk_id'] != individual_chunk_id):
@@ -663,11 +684,11 @@ if __name__ == "__main__":
 	UTIL.VSPIPE_EXE = SETTINGS_DICT['VSPIPE_PATH']
 
 	if UTIL.DEBUG:
-		print(f"DEBUG: slideshow_CONTROLLER: DEBUG=UTIL.DEBUG}",flush=True)
-		print(f"DEBUG: slideshow_CONTROLLER: USER_SPECIFIED_SETTINGS_DICT=\n{objPrettyPrint.pformat(USER_SPECIFIED_SETTINGS_DICT)}",flush=True)
-		print(f"DEBUG: slideshow_CONTROLLER: SETTINGS_DICT=\n{objPrettyPrint.pformat(SETTINGS_DICT)}",flush=True)
-		print(f"DEBUG: slideshow_CONTROLLER: OLD_INI_DICT=\n{objPrettyPrint.pformat(OLD_INI_DICT)}",flush=True)
-		print(f"DEBUG: slideshow_CONTROLLER: OLD_CALC_INI_DICT=\n{objPrettyPrint.pformat(OLD_CALC_INI_DICT)}",flush=True)
+		print(f"DEBUG: slideshow_CONTROLLER: DEBUG={UTIL.DEBUG}",flush=True)
+		print(f"DEBUG: slideshow_CONTROLLER: USER_SPECIFIED_SETTINGS_DICT=\n{UTIL.objPrettyPrint.pformat(USER_SPECIFIED_SETTINGS_DICT)}",flush=True)
+		print(f"DEBUG: slideshow_CONTROLLER: SETTINGS_DICT=\n{UTIL.objPrettyPrint.pformat(SETTINGS_DICT)}",flush=True)
+		print(f"DEBUG: slideshow_CONTROLLER: OLD_INI_DICT=\n{UTIL.objPrettyPrint.pformat(OLD_INI_DICT)}",flush=True)
+		print(f"DEBUG: slideshow_CONTROLLER: OLD_CALC_INI_DICT=\n{UTIL.objPrettyPrint.pformat(OLD_CALC_INI_DICT)}",flush=True)
 
 	##########################################################################################################################################
 	##########################################################################################################################################
@@ -693,7 +714,7 @@ if __name__ == "__main__":
 	
 	# Locate all openable files and put them into chunks in a dict, including { proposed filename for the encoded chunk, first/last frames, number of frames in chunk } 
 	ALL_CHUNKS_COUNT, ALL_CHUNKS_COUNT_OF_FILES, ALL_CHUNKS = find_all_chunks()	# it uses settings in SETTINGS_DICT to do its thing
-	if UTIL.DEBUG:	print(f"DEBUG: retrieved ALL_CHUNKS tree: chunks: {ALL_CHUNKS_COUNT} files: {ALL_CHUNKS_COUNT_OF_FILES} dict:\n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
+	if UTIL.DEBUG:	print(f"DEBUG: retrieved ALL_CHUNKS tree: chunks: {ALL_CHUNKS_COUNT} files: {ALL_CHUNKS_COUNT_OF_FILES} dict:\n{UTIL.objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
 
 	# create .JSON file containing the ALL_CHUNKS  dict. Note the start/stop frames etc are yet to be updated by the encoder
 	try:
@@ -747,7 +768,7 @@ if __name__ == "__main__":
 
 	if UTIL.DEBUG:
 		print(f'CONTROLLER: Finished INTERIM ENCODING OF CHUNKS INTO INTERIM FFV1 VIDEO FILES',flush=True)
-		print(f"CONTROLLER: After updating encoder added snippets into each chunk and controller UPDATING chunk info into ALL_CHUNKS, the new ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
+		print(f"CONTROLLER: After updating encoder added snippets into each chunk and controller UPDATING chunk info into ALL_CHUNKS, the new ALL_CHUNKS tree is:\n{UTIL.objPrettyPrint.pformat(ALL_CHUNKS)}",flush=True)
 
 	##########################################################################################################################################
 	##########################################################################################################################################
@@ -772,7 +793,7 @@ if __name__ == "__main__":
 	start_frame_num_of_chunk_in_final_video = 0
 	end_frame_num_of_chunk_in_final_video = 0
 	
-	if UTIL.DEBUG: print(f"{'#'*100}\nDEBUG: Start calculate start/end final_video based frame numbers for all chunks and their snippets, incoming ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}\n{'#'*100}",flush=True)
+	if UTIL.DEBUG: print(f"{'#'*100}\nDEBUG: Start calculate start/end final_video based frame numbers for all chunks and their snippets, incoming ALL_CHUNKS tree is:\n{UTIL.objPrettyPrint.pformat(ALL_CHUNKS)}\n{'#'*100}",flush=True)
 
 	for individual_chunk_id in range(0,ALL_CHUNKS_COUNT):	# 0 to (ALL_CHUNKS_COUNT - 1)
 		seq_start_frame_num = seq_previous_ending_frame_num + 1		# base 0, this is now the start_frame_num in the full final video
@@ -803,7 +824,7 @@ if __name__ == "__main__":
 	end_frame_num_of_final_video = end_frame_num_of_chunk_in_final_video
 
 
-	if UTIL.DEBUG: print(f"{'*'*100}\nDEBUG: Finished calculate start/end final_video based frame numbers for all chunks and their snippets, outgoing ALL_CHUNKS tree is:\n{objPrettyPrint.pformat(ALL_CHUNKS)}\n{'*'*100}",flush=True)
+	if UTIL.DEBUG: print(f"{'*'*100}\nDEBUG: Finished calculate start/end final_video based frame numbers for all chunks and their snippets, outgoing ALL_CHUNKS tree is:\n{UTIL.objPrettyPrint.pformat(ALL_CHUNKS)}\n{'*'*100}",flush=True)
 	
 	##########################################################################################################################################
 	##########################################################################################################################################
@@ -980,7 +1001,7 @@ if __name__ == "__main__":
 
 	if UTIL.DEBUG:
 		print(f"{100*'-'}",flush=True)
-		print(f"DEBUG: CONTROLLER: FINISHED SNIPPET PROCESSING. SUMMARY:\n{objPrettyPrint.pformat(snippet_processing_summary)}",flush=True)
+		print(f"DEBUG: CONTROLLER: FINISHED SNIPPET PROCESSING. SUMMARY:\n{UTIL.objPrettyPrint.pformat(snippet_processing_summary)}",flush=True)
 		print(f"{100*'-'}",flush=True)
 
 	# OK, by now we have a standardized background_audio in 'background_audio'
@@ -1031,26 +1052,38 @@ if __name__ == "__main__":
 	#	temporary_ffmpeg_concat_list_filename				the concat list of videos to be concatenated and transcoded
 	#	background_audio_with_overlayed_snippets_filename	the background audio with video snippets audio overlayed onto it the final format we need
 	# Lets transcode/mux them together.
+	if UTIL.DEBUG:
+		loglevel = r'verbose'
+		benchmark = r'-benchmark'
+		stats = r'-stats'
+	else:
+		loglevel = 'info'
+		benchmark = r''
+		stats = r'-stats'
+
 	final_mp4_with_audio_filename = SETTINGS_DICT['FINAL_MP4_WITH_AUDIO_FILENAME']
 	ffmpeg_commandline_libx264 = [
 							UTIL.FFMPEG_EXE,
 							'-hide_banner', 
-							'-loglevel', 'info', 
-							'-stats', 
+							'-loglevel', loglevel, 
+							stats, 
+							benchmark,
+							'-threads', str(UTIL.NUM_THREADS_FOR_FFMPEG_DECODER),
 							'-i', background_audio_with_overlayed_snippets_filename,
 							'-f', 'concat', '-safe', '0', '-i', temporary_ffmpeg_concat_list_filename,
 							'-sws_flags', 'lanczos+accurate_rnd+full_chroma_int+full_chroma_inp',
 							'-filter_complex', 'format=yuv420p,setdar=16/9',
 							'-strict', 'experimental',
 							'-c:a', 'copy',
+							'-threads', str(UTIL.NUM_THREADS_FOR_FFMPEG_ENCODER),
 							'-c:v', 'libx264',
 							'-preset', 'veryslow',
-							'-crf', '21', 
-							'-refs', '3',  			# Set the number of reference frames to 3 (it used be 16 by default)
-							#'-b:v', '5M', 			# 5M target bitrate instead of crf 22
-							'-minrate:v', '1M', 
-							'-maxrate:v', '12M', 
-							'-bufsize', '12M',
+							'-refs', '3',  			# Set the number of reference frames to 3 SO THAT THE RESULTING MP4 IS TV COMPATIBLE !!! (it is 16 by default, which will not play on TVs)
+							'-crf', '22', 			# use CRF so that we do not have to guess bitrates
+							#'-b:v', '5M', 			# 5M target bitrate instead of crf 21
+							'-minrate:v', '500k', 
+							'-maxrate:v', '20M', 
+							'-bufsize', '20M',
 							'-profile:v', 'high',
 							'-level', '5.1',		# we are only 1080p so 5.1 is enough # H.264 Maximum supported bitrate: Level 5.1: 50 Mbps, Level 5.2: 62.5 Mbps
 							'-movflags', '+faststart+write_colr',
@@ -1059,14 +1092,16 @@ if __name__ == "__main__":
 	ffmpeg_commandline_h264_nvenc = [		# h264_nvenc ... has parameters ONLY for use with an nvidia 2060plus or higher video encoding card
 							UTIL.FFMPEG_EXE,
 							'-hide_banner', 
-							'-loglevel', 'info', 
-							'-stats', 
+							'-loglevel', loglevel, 
+							stats, 
+							'-threads', str(UTIL.NUM_THREADS_FOR_FFMPEG_DECODER),
 							'-i', background_audio_with_overlayed_snippets_filename,
 							'-f', 'concat', '-safe', '0', '-i', temporary_ffmpeg_concat_list_filename,
 							'-sws_flags', 'lanczos+accurate_rnd+full_chroma_int+full_chroma_inp',
 							'-filter_complex', 'format=yuv420p,setdar=16/9',
 							'-strict', 'experimental',
 							'-c:a', 'copy',
+							'-threads', str(UTIL.NUM_THREADS_FOR_FFMPEG_ENCODER),
 							'-c:v', 'h264_nvenc', 
 							'-pix_fmt', 'nv12', 
 							'-preset', 'p7', 
@@ -1080,24 +1115,38 @@ if __name__ == "__main__":
 							'-dpb_size', '0', 
 							'-bf:v', '3', 
 							'-b_ref_mode:v', '0', 
-							'-rc:v', 'vbr', 
-							'-cq:v', '0', 
-							'-b:v', '4M', 			# 5M target bitrate
-							'-minrate:v', '1M', 
-							'-maxrate:v', '12M', 
-							'-bufsize', '12M',
+					# https://www.reddit.com/r/ffmpeg/comments/xtl43y/hq_ffmpeg_encoding_with_gpu_nvenc_part_iii/
+					#
+					# NVIDIA Presets v2.0:									https://developer.download.nvidia.com/video/gputechconf/gtc/2020/presentations/s21337-nvidia-video-technologies-video-codec-and-optical-flow-sdk.pdf
+					#	P1 (highest performance) to P7 (highest quality)	https://developer.nvidia.com/blog/introducing-video-codec-sdk-10-presets/
+					# 	Rate Control Mode: Constant QP, CBR, VBR
+							'-rc:v', 'vbr', 		# this is what the nvidia documentation says and ffmpeg exposes for nvidia PRESETS v2.0 https://developer.download.nvidia.com/video/gputechconf/gtc/2020/presentations/s21337-nvidia-video-technologies-video-codec-and-optical-flow-sdk.pdf
+					#
+					# ONE OR THE OTHER NOT BOTH OF THESE
+							'-cq:v', '22', 			# for use with CQ -b:v 0 ... uses CRF so that we do not have to guess bitrates	# Set target quality level (0 to 51, 0 means automatic) for constant quality mode in VBR rate control (from 0 to 51) (default 0)
+							'-b:v', '0 ',			# nominated CQ target bitrate see -cq:v 20 ... apparently this is REQUIRED for -cq to work
+							#'-cq:v', '0', 			# for use with non-CQ -b:v 4M ... # Set target quality level (0 to 51, 0 means automatic) for constant quality mode in VBR rate control (from 0 to 51) (default 0)
+							#'-b:v', '4M', 			# 4M for 1080p ... nominated non-CQ target bitrate see -cq:v 0
+					#
+							'-tune', 'hq',
+							'-minrate:v', '500k', 
+							'-maxrate:v', '20M', 
+							'-bufsize', '20M',
 							'-profile:v', 'high',
 							'-level', '5.1',		# we are only 1080p so 5.1 is enough# H.264 Maximum supported bitrate: Level 5.1: 50 Mbps, Level 5.2: 62.5 Mbps
 							'-movflags', '+faststart+write_colr',
 							'-y', final_mp4_with_audio_filename,
 							]
 
-	#ffmpeg_commandline = ffmpeg_commandline_libx264
-	ffmpeg_commandline = ffmpeg_commandline_h264_nvenc
-	
-	print(f"CONTROLLER: START FFMPEG CONATENATE/TRANSCODE INTERIM VIDEOS AND MUX AUDIO IN ONE GO. FFMPEG command:\n{objPrettyPrint.pformat(ffmpeg_commandline)}",flush=True)
+	ffmpeg_commandline = ffmpeg_commandline_libx264		# the default if nothing is in SETTINGS_DICT or it is not recognised
+	try:
+		if SETTINGS_DICT["FFMPEG_ENCODER"] == "libx264":	ffmpeg_commandline = ffmpeg_commandline_libx264
+		if SETTINGS_DICT["FFMPEG_ENCODER"] == "h264_nvenc":	ffmpeg_commandline = ffmpeg_commandline_h264_nvenc
+	except:
+		pass	# ignore no key found exception for SETTINGS_DICT["FFMPEG_ENCODER"] 
+	print(f"CONTROLLER: START FFMPEG CONATENATE/TRANSCODE INTERIM VIDEOS AND MUX AUDIO IN ONE GO. FFMPEG command:\n{UTIL.objPrettyPrint.pformat(ffmpeg_commandline)}",flush=True)
 	subprocess.run(ffmpeg_commandline, check=True)
-	print(f'CONTROLLER: FINISHED CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO MP4 AND AT SAME TIME MUX WITH BACKGROUND AUDIO\nFinal Slideshow={objPrettyPrint.pformat(final_mp4_with_audio_filename)}',flush=True)
+	print(f'CONTROLLER: FINISHED CONCATENATE/TRANSCODE INTERIM FFV1 VIDEO FILES INTO ONE VIDEO MP4 AND AT SAME TIME MUX WITH BACKGROUND AUDIO\nFinal Slideshow={UTIL.objPrettyPrint.pformat(final_mp4_with_audio_filename)}',flush=True)
 	print(f"{100*'-'}",flush=True)
 	
 	##########################################################################################################################################

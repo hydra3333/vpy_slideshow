@@ -2,6 +2,8 @@
 # 2.	Modifying the sys.path list in the MAIN PROGRAM WILL affect the search path for	all modules imported by that program.
 # Ensure we can import modules from ".\" by adding the current default folder to the python path.
 # (tried using just PYTHONPATH environment variable but it was unreliable)
+import sys
+import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import slideshow_GLOBAL_UTILITIES_AND_VARIABLES as UTIL	# define utilities and make global variables available to everyone
@@ -10,8 +12,6 @@ import vapoursynth as vs
 from vapoursynth import core
 core = vs.core
 #core.num_threads = 1
-import sys
-import os
 import importlib
 import re
 import argparse

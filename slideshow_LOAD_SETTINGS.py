@@ -2,6 +2,8 @@
 # 2.	Modifying the sys.path list in the MAIN PROGRAM WILL affect the search path for	all modules imported by that program.
 # Ensure we can import modules from ".\" by adding the current default folder to the python path.
 # (tried using just PYTHONPATH environment variable but it was unreliable)
+import sys
+import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import slideshow_GLOBAL_UTILITIES_AND_VARIABLES as UTIL	# define utilities and make global variables available to everyone
@@ -10,8 +12,6 @@ import vapoursynth as vs
 from vapoursynth import core
 core = vs.core
 #core.num_threads = 1
-import sys
-import os
 import multiprocessing
 import importlib
 import re
@@ -177,13 +177,15 @@ def load_settings():
 
 	FINAL_MP4_WITH_AUDIO_FILENAME				= UTIL.fully_qualified_filename(r'.\slideshow.FINAL_MP4_WITH_AUDIO_FILENAME.mp4')
 
-	MAX_FILES_PER_CHUNK							= int(100)
+	MAX_FILES_PER_CHUNK							= int(150)		#this is a bit slower than 100, but it causes less "no transition" which occurs between encoded chunks
 	TOLERANCE_PERCENT_FINAL_CHUNK				= int(20)
 	RECURSIVE									= True
 	DEBUG										= UTIL.DEBUG
 	FFMPEG_PATH									= UTIL.fully_qualified_filename(os.path.join(r'.\Vapoursynth_x64', r'ffmpeg.exe'))
 	FFPROBE_PATH								= UTIL.fully_qualified_filename(os.path.join(r'.\Vapoursynth_x64', r'ffprobe.exe'))
 	VSPIPE_PATH									= UTIL.fully_qualified_filename(os.path.join(r'.\Vapoursynth_x64', r'vspipe.exe'))
+	valid_FFMPEG_ENCODER						= [r'libx264'.lower() , r'h264_nvenc'.lower()]
+	FFMPEG_ENCODER								= valid_FFMPEG_ENCODER[0]
 	
 	slideshow_CONTROLLER_path					= UTIL.fully_qualified_filename(os.path.join(r'.\slideshow_CONTROLLER.py'))
 	slideshow_LOAD_SETTINGS_path				= UTIL.fully_qualified_filename(os.path.join(r'.\slideshow_LOAD_SETTINGS.py'))
@@ -298,6 +300,7 @@ def load_settings():
 		'FFMPEG_PATH':										FFMPEG_PATH,
 		'FFPROBE_PATH':										FFPROBE_PATH,
 		'VSPIPE_PATH':										VSPIPE_PATH,
+		'FFMPEG_ENCODER':									FFMPEG_ENCODER,
 		'slideshow_CONTROLLER_path':						slideshow_CONTROLLER_path,
 		'slideshow_LOAD_SETTINGS_path':						slideshow_LOAD_SETTINGS_path,
 		'slideshow_ENCODER_legacy_path':					slideshow_ENCODER_legacy_path,
@@ -463,7 +466,6 @@ def load_settings():
 	final_settings_dict['slideshow_LOAD_SETTINGS_path'] = UTIL.fully_qualified_filename(final_settings_dict['slideshow_LOAD_SETTINGS_path'])
 	final_settings_dict['slideshow_ENCODER_legacy_path'] = UTIL.fully_qualified_filename(final_settings_dict['slideshow_ENCODER_legacy_path'])
 
-
 	# NOW WE NEED TO RECONSTRUCT THINGS WHICH BELONG IN THE TEMPORARY FOLDER
 	TEMP_FOLDER = UTIL.reconstruct_full_directory_only(final_settings_dict['TEMP_FOLDER'], final_settings_dict['TEMP_FOLDER'])
 
@@ -478,6 +480,11 @@ def load_settings():
 	TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME = UTIL.reconstruct_full_directory_and_filename( final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'])	# cater for any missing folder
 
 	BACKGROUND_AUDIO_INPUT_FOLDER = UTIL.reconstruct_full_directory_only(final_settings_dict['BACKGROUND_AUDIO_INPUT_FOLDER'], BACKGROUND_AUDIO_INPUT_FOLDER)	# re-default it if user mucked it up
+
+	if final_settings_dict['FFMPEG_ENCODER'].lower() not in valid_FFMPEG_ENCODER:
+		if UTIL.DEBUG:	print(f'load_settings: WARNING: FFMPEG_ENCODER "{final_settings_dict["FMPEG_ENCODER"]}" not one of {valid_FFMPEG_ENCODER}, defaulting to "{FFMPEG_ENCODER}"',flush=True,file=sys.stderr)
+		final_settings_dict['FFMPEG_ENCODER'] = valid_FFMPEG_ENCODER[0]
+	FFMPEG_ENCODER = final_settings_dict['FFMPEG_ENCODER']
 
 	# put the new RECONSTRUCTED back into the merged dict as well
 	final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'] = CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT
@@ -614,13 +621,14 @@ def load_settings():
 	
 	# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 	# for good measure, poke the final dict into GLOBAL_UTILITIES_AND_VARIABLES as UTIL so that everyne can access it directly if need be
-	UTIL.DEBUG.final_settings_dict =  final_settings_dict
+	UTIL.SETTINGS_DICT =  final_settings_dict
 	# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 	#######################################################################################################################################
 	#######################################################################################################################################
 
-	# now save debug versions of those dicts
+	# re-Save DEBUG versions of those dicts. Do not care if we do it multiple time.  
+	# We only load (a) once in the controller (2) once every time the encoder is run with debug on.
 	if UTIL.DEBUG:
 		try:
 			f_debug = UTIL.fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.user_settings.JSON'))
@@ -665,7 +673,7 @@ def load_settings():
 	#######################################################################################################################################
 	#######################################################################################################################################
 	
-	# if the initial settings do not exist, createa template then exit immediately.
+	# if the initial settings do not exist, create a raw template then exit immediately.
 	
 	if not os.path.exists(SLIDESHOW_SETTINGS_MODULE_FILENAME):
 		specially_formatted_settings_list =	[
@@ -690,6 +698,7 @@ def load_settings():
 										[ 'FFMPEG_PATH',								FFMPEG_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'FFPROBE_PATH',								FFPROBE_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'VSPIPE_PATH',								VSPIPE_PATH,								r'Please leave this alone unless really confident' ],
+										[ 'FFMPEG_ENCODER',								FFMPEG_ENCODER,								f'Please leave this alone unless really confident. One of {valid_FFMPEG_ENCODER}. h264_nvenc only works on "nvidia 2060 Super" upward.' ],
 										[ 'slideshow_CONTROLLER_path',					slideshow_CONTROLLER_path,					r'Please leave this alone unless really confident' ],
 										[ 'slideshow_LOAD_SETTINGS_path',				slideshow_LOAD_SETTINGS_path,				r'Please leave this alone unless really confident' ],
 										[ 'slideshow_ENCODER_legacy_path',				slideshow_ENCODER_legacy_path,				r'Please leave this alone unless really confident' ],

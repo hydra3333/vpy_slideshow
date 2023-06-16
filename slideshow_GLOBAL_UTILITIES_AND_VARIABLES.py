@@ -33,6 +33,8 @@
 # 2.	Modifying the sys.path list in the MAIN PROGRAM WILL affect the search path for	all modules imported by that program.
 # Ensure we can import modules from ".\" by adding the current default folder to the python path.
 # (tried using just PYTHONPATH environment variable but it was unreliable)
+import sys
+import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 #import slideshow_GLOBAL_UTILITIES_AND_VARIABLES as UTIL	# define utilities and make global variables available to everyone ... DO NOT IMPORT ITSELF
@@ -41,8 +43,6 @@ import vapoursynth as vs
 from vapoursynth import core
 core = vs.core
 #core.num_threads = 1
-import sys
-import os
 import multiprocessing
 import importlib
 import re
@@ -106,10 +106,15 @@ from MediaInfoDLL3 import MediaInfo, Stream, Info, InfoOption		# per https://for
 
 # Global Variables 
 DEBUG = False
+SETTINGS_DICT = {}
+
 TERMINAL_WIDTH = 250
 NUM_CORES = multiprocessing.cpu_count()
-NUM_THREADS_FOR_FFMPEG_DIVISOR = 4	 														# for calculating number of threads ffmpeg is allowed 
-NUM_THREADS_FOR_FFMPEG = min(8, max(1, int(NUM_CORES // NUM_THREADS_FOR_FFMPEG_DIVISOR))	# of physical+hyperthreading cores (limit: 1 to 8 cores)
+NUM_THREADS_FOR_FFMPEG_DIVISOR = 3	 																# for calculating number of threads ffmpeg is allowed 
+NUM_THREADS_FOR_FFMPEG = min(8, max(1, int(NUM_CORES // NUM_THREADS_FOR_FFMPEG_DIVISOR)))			# of physical+hyperthreading cores (limit: 1 to 8 cores)
+
+NUM_THREADS_FOR_FFMPEG_DECODER = min(8, max(1, int(NUM_THREADS_FOR_FFMPEG // 4)))					# 1/4 of cores for ffmpeg go to decoder
+NUM_THREADS_FOR_FFMPEG_ENCODER = max(1, (NUM_THREADS_FOR_FFMPEG - NUM_THREADS_FOR_FFMPEG_DECODER))	# 3/4 or cores for ffmpeg go to encoder
 
 FFMPEG_EXE	= 'FFMPEG_EXE_HAS_NOT_BEEN_SET_INTO_slideshow_GLOBAL_UTILITIES'				# assume set globally before calling this, so intiialize to failing value
 FFPROBE_EXE	= 'FFPROBE_EXE_HAS_NOT_BEEN_SET_INTO_slideshow_GLOBAL_UTILITIES'				# assume set globally before calling this, so intiialize to failing value
@@ -139,7 +144,7 @@ def normalize_path(path):
 	# Add double backslashes before any single backslashes
 	for i in range(0,20):
 		path = path.replace(r2, r1)
-	if UTIL.DEBUG:	print(f"DEBUG: normalize_path: outgoing path='{path}'",flush=True,file=sys.stderr)
+	if DEBUG:	print(f"DEBUG: normalize_path: outgoing path='{path}'",flush=True,file=sys.stderr)
 	return path
 
 #
@@ -176,7 +181,7 @@ def reconstruct_full_directory_only(incoming, default):
 		default_abs_path = os.path.abspath(default) + '\\' if not default.endswith('\\') else ''
 		outgoing = os.path.normpath(default_abs_path)
 	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
-	if UTIL.DEBUG:	print(f"DEBUG: reconstruct_full_directory_only: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
+	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_only: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
 	return outgoing
 
 #
@@ -197,7 +202,7 @@ def reconstruct_full_directory_and_filename(incoming, default_path, default_file
 	else:
 		outgoing = os.path.normpath(default_abs_path)
 	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
-	if UTIL.DEBUG:	print(f"DEBUG: reconstruct_full_directory_and_filename: incoming='{incoming}' default_path='{default_path}' default_filename='{default_filename}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
+	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_and_filename: incoming='{incoming}' default_path='{default_path}' default_filename='{default_filename}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
 	return outgoing
 
 #
@@ -214,6 +219,7 @@ def get_random_ffindex_filename(path):
 	# use the filename component of the incoming path and create a random fully qualified path into the temp folder
 	# there is a significant to 100% chance of home picture/video filenames in directory trees being non-unique
 	# apparently uuid4 has a good chance of returning a unique string
+	global SETTINGS_DICT	# not set, just flagging that slideshow_LOAD_SETTINGS would have poked it into UTIL by now
 	f = fully_qualified_filename(os.path.join(SETTINGS_DICT['TEMP_FOLDER'], os.path.basename(path) + r'_' + str(uuid.uuid4()) + r'.ffindex'))
 	return f
 
@@ -297,7 +303,7 @@ def video_mediainfo_value(stream:int, track:int, param:str, path: Union[Path,str
 #
 def video_extract_metadata_via_MEDIAINFO(file_path):
 	global MI
-	if UTIL.DEBUG: print(f"DEBUG: video_extract_metadata_via_MEDIAINFO: entered with file_path='{file_path}'.",flush=True)
+	if DEBUG: print(f"DEBUG: video_extract_metadata_via_MEDIAINFO: entered with file_path='{file_path}'.",flush=True)
 	# ALWAYS include Width, Height, Rotation, Encoded_Date
 	mi_video_params_1 = [
 		'Format',                                        # : Format used
@@ -360,7 +366,7 @@ def video_extract_metadata_via_MEDIAINFO(file_path):
 		video_mediainfo_value_worker
 		mi_dict[param] = value	# any of str, bool, int, float, etc
 	MI.Close()
-	if UTIL.DEBUG: print(f"Extracted MediaInfo metadata for file_path='{file_path}'\n{objPrettyPrint.pformat(mi_dict)}",flush=True)
+	if DEBUG: print(f"Extracted MediaInfo metadata for file_path='{file_path}'\n{objPrettyPrint.pformat(mi_dict)}",flush=True)
 	
 	# Example dates from mediainfo:	'Recorded_Date': None, 'Encoded_Date': '2016-10-22 02:46:59 UTC'
 	try:
