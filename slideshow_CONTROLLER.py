@@ -1079,8 +1079,8 @@ if __name__ == "__main__":
 							'-c:v', 'libx264',
 							'-preset', 'veryslow',
 							'-refs', '3',  			# Set the number of reference frames to 3 SO THAT THE RESULTING MP4 IS TV COMPATIBLE !!! (it is 16 by default, which will not play on TVs)
-							'-crf', '22', 			# use CRF so that we do not have to guess bitrates
-							#'-b:v', '5M', 			# 5M target bitrate instead of crf 21
+							#'-crf', '22', 			# use CRF so that we do not have to guess bitrates
+							'-b:v', SETTINGS_DICT['TARGET_VIDEO_BITRATE'], 			# 4.5M is ok (HQ) for h.264 1080p25 slideshow material; instead of crf 22
 							'-minrate:v', '500k', 
 							'-maxrate:v', '20M', 
 							'-bufsize', '20M',
@@ -1126,7 +1126,7 @@ if __name__ == "__main__":
 							#'-cq:v', '24', 		# for use with CQ -b:v 0 ... uses CRF so that we do not have to guess bitrates # circa double filesize of '-b:v', '5M' !!	# Set target quality level (0 to 51, 0 means automatic) for constant quality mode in VBR rate control (from 0 to 51) (default 0)
 							#'-b:v', '0',			# nominated CQ target bitrate see -cq:v 20 ... apparently this is REQUIRED for -cq to work
 							'-cq:v', '0', 			# for use with non-CQ -b:v 4M ... # Set target quality level (0 to 51, 0 means automatic) for constant quality mode in VBR rate control (from 0 to 51) (default 0)
-							'-b:v', '5M', 			# 5M for 1080p ... nominated non-CQ target bitrate see -cq:v 0
+							'-b:v', SETTINGS_DICT['TARGET_VIDEO_BITRATE'],			# 4.5M is ok (HQ) for h.264 1080p25 slideshow material ... nominated non-CQ target bitrate see -cq:v 0
 					#
 							'-tune', 'hq',
 							'-minrate:v', '500k', 

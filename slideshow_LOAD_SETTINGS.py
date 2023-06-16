@@ -205,6 +205,8 @@ def load_settings():
 	TARGET_HEIGHT								= int(1080)		# ; "target_height" an integer; set for hd; do not change unless a dire emergency = .
 	TARGET_FPSNUM								= int(25)		# ; "target_fpsnum" an integer; set for pal = .
 	TARGET_FPSDEN								= int(1)		# ; "target_fpsden" an integer; set for pal = .
+	TARGET_VIDEO_BITRATE						= r'4.5M'		# 4.5M is ok (HQ) for h.264 1080p25 slideshow material
+
 	TARGET_BACKGROUND_AUDIO_FREQUENCY			= int(48000) 
 	TARGET_BACKGROUND_AUDIO_CHANNELS			= int(2) 
 	TARGET_BACKGROUND_AUDIO_BYTEDEPTH			= int(2)		# 2 ; bytes not bits, 2 byte = 16 bit to match pcm_s16le
@@ -319,6 +321,8 @@ def load_settings():
 		'TARGET_HEIGHT':									TARGET_HEIGHT,
 		'TARGET_FPSNUM':									TARGET_FPSNUM,
 		'TARGET_FPSDEN':									TARGET_FPSDEN,
+		'TARGET_VIDEO_BITRATE':								TARGET_VIDEO_BITRATE,
+
 		'TARGET_BACKGROUND_AUDIO_FREQUENCY':				TARGET_BACKGROUND_AUDIO_FREQUENCY,
 		'TARGET_BACKGROUND_AUDIO_CHANNELS':					TARGET_BACKGROUND_AUDIO_CHANNELS,
 		'TARGET_BACKGROUND_AUDIO_BYTEDEPTH':				TARGET_BACKGROUND_AUDIO_BYTEDEPTH,
@@ -585,6 +589,7 @@ def load_settings():
 							'TARGET_HEIGHT' :					final_settings_dict['TARGET_HEIGHT'],
 							'TARGET_FPSNUM' :					final_settings_dict['TARGET_FPSNUM'],
 							'TARGET_FPSDEN' :					final_settings_dict['TARGET_FPSDEN'],
+							'TARGET_VIDEO_BITRATE':				final_settings_dict['TARGET_VIDEO_BITRATE'],
 							'UPSIZE_KERNEL' :					final_settings_dict['UPSIZE_KERNEL'],
 							'DOWNSIZE_KERNEL' :					final_settings_dict['DOWNSIZE_KERNEL'],
 							'BOX' :								final_settings_dict['BOX'],
@@ -699,6 +704,7 @@ def load_settings():
 										[ 'FFPROBE_PATH',								FFPROBE_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'VSPIPE_PATH',								VSPIPE_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'FFMPEG_ENCODER',								FFMPEG_ENCODER,								f'Please leave this alone unless really confident. One of {valid_FFMPEG_ENCODER}. h264_nvenc only works on "nvidia 2060 Super" upward.' ],
+										[ 'TARGET_VIDEO_BITRATE',						TARGET_VIDEO_BITRATE,						f'Please leave this alone unless really confident. 4.5M is ok (HQ) for h.264 1080p25 slideshow material.' ],
 										[ 'slideshow_CONTROLLER_path',					slideshow_CONTROLLER_path,					r'Please leave this alone unless really confident' ],
 										[ 'slideshow_LOAD_SETTINGS_path',				slideshow_LOAD_SETTINGS_path,				r'Please leave this alone unless really confident' ],
 										[ 'slideshow_ENCODER_legacy_path',				slideshow_ENCODER_legacy_path,				r'Please leave this alone unless really confident' ],
