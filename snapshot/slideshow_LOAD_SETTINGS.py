@@ -2,14 +2,17 @@
 # 2.	Modifying the sys.path list in the MAIN PROGRAM WILL affect the search path for	all modules imported by that program.
 # Ensure we can import modules from ".\" by adding the current default folder to the python path.
 # (tried using just PYTHONPATH environment variable but it was unreliable)
+import sys
+import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+import slideshow_GLOBAL_UTILITIES_AND_VARIABLES as UTIL	# define utilities and make global variables available to everyone
 
 import vapoursynth as vs
 from vapoursynth import core
 core = vs.core
 #core.num_threads = 1
-import sys
-import os
+import multiprocessing
 import importlib
 import re
 import argparse
@@ -62,13 +65,7 @@ num_unreachable_objects = gc.collect()	# collect straight away
 #from MediaInfoDLL3 import MediaInfo, Stream, Info, InfoOption		# per https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio#post2678372
 ##from MediaInfoDLL3 import *											# per https://github.com/MediaArea/MediaInfoLib/blob/master/Source/Example/HowToUse_Dll3.py
 
-global DEBUG
-DEBUG = False
-
-global TERMINAL_WIDTH					# for use by PrettyPrinter
-TERMINAL_WIDTH = 250
-global objPrettyPrint
-objPrettyPrint = pprint.PrettyPrinter(width=TERMINAL_WIDTH, compact=False, sort_dicts=False)	# facilitates formatting and printing of text and dicts etc
+UTIL.DEBUG = False
 
 ### ********** end of common header ********** 
 #global MI
@@ -98,107 +95,6 @@ def check_folder_exists_3333(folder, text):
 		print(f"load_settings: ERROR: the specified {text} folder does not exist: '{folder}' does not exist",flush=True,file=sys.stderr)
 		sys.exit(1)
 	return
-
-def normalize_path(path):
-	#if DEBUG:	print(f"DEBUG: normalize_path:  incoming path='{path}'",flush=True,file=sys.stderr)
-	# Replace single backslashes with double backslashes
-	path = path.rstrip(os.linesep).strip('\r').strip('\n').strip()
-	r1 = r'\\'
-	r2 = r1 + r1
-	r4 = r2 + r2
-	path = path.replace(r1, r4)
-	# Add double backslashes before any single backslashes
-	for i in range(0,20):
-		path = path.replace(r2, r1)
-	if DEBUG:	print(f"DEBUG: normalize_path: outgoing path='{path}'",flush=True,file=sys.stderr)
-	return path
-
-def fully_qualified_directory_no_trailing_backslash(directory_name):
-	# make into a fully qualified directory string stripped and without a trailing backslash
-	# also remove extraneous backslashes which get added by things like abspath
-	new_directory_name = os.path.abspath(directory_name).rstrip(os.linesep).strip('\r').strip('\n').strip()
-	if directory_name[-1:] == (r'\ '.strip()):		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
-		new_directory_name = directory_name[:-1]	# remove any trailing backslash
-	new_directory_name = normalize_path(new_directory_name)
-	return new_directory_name
-
-def fully_qualified_filename(file_name):
-	# Make into a fully qualified filename string using double backslashes
-	# to later print/write with double backslashes use eg
-	#	converted_string = fully_qualified_filename('D:\\a\\b\\\\c\\\\\\d\\e\\f\\filename.txt')
-	#	print(repr(converted_string),flush=True,file=sys.stderr)
-	# yields 'D:\\a\\b\\c\\d\\e\\f\\filename.txt'
-	new_file_name = os.path.abspath(file_name).rstrip(os.linesep).strip('\r').strip('\n').strip()
-	if new_file_name.endswith('\\'):
-		new_file_name = new_file_name[:-1]  # Remove trailing backslash
-	new_file_name = normalize_path(new_file_name)
-	return new_file_name
-
-def fully_qualified_filename(file_name):
-	# Make into a fully qualified filename string using double backslashes
-	# to later print/write with double backslashes use eg
-	#	converted_string = fully_qualified_filename('D:\\a\\b\\\\c\\\\\\d\\e\\f\\filename.txt')
-	#	print(repr(converted_string))
-	# yields 'D:\\a\\b\\c\\d\\e\\f\\filename.txt'
-	new_file_name = os.path.abspath(file_name).rstrip(os.linesep).strip('\r').strip('\n').strip()
-	if new_file_name.endswith('\\'):
-		new_file_name = new_file_name[:-1]  # Remove trailing backslash
-	new_file_name = normalize_path(new_file_name)
-	return new_file_name
-
-def reconstruct_full_directory_only(incoming, default):
-	# default is assumed to be a directory, any text in it treated as that and not a filename
-	if incoming:
-		#outgoing = os.path.normpath(incoming + '\\' if not incoming.endswith('\\') else '')
-		incoming_abspath = os.path.abspath(incoming) + '\\' if not incoming.endswith('\\') else ''
-		outgoing = os.path.normpath(incoming_abspath)
-	else:
-		default_abs_path = os.path.abspath(default) + '\\' if not default.endswith('\\') else ''
-		outgoing = os.path.normpath(default_abs_path)
-	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
-	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_only: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
-	return outgoing
-
-def reconstruct_full_directory_and_filename(incoming, default_path, default_filename):
-	# default is assumed to be a filename, any text in it treated as that and not a directory unless ending in \ (repr='\\')
-	default_directory = reconstruct_full_directory_only(default_path, default_path)
-	#print(f"{20*'%'}  reconstruct_full_directory_and_filename: incoming='{incoming}' default_path='{default_path}' default_filename='{default_filename}' default_directory='{default_directory}' default_filename='{default_filename}'",flush=True,file=sys.stderr)
-	default_filename, default_extension = os.path.splitext(default_filename)
-	if incoming:
-		incoming_directory, incoming_filename = os.path.split(incoming)
-		if incoming_directory:
-			incoming_directory = reconstruct_full_directory_only(incoming_directory, incoming_directory)
-		incoming_filename, incoming_extension = os.path.splitext(incoming_filename)
-		directory = incoming_directory or default_directory
-		filename = incoming_filename or default_filename
-		extension = incoming_extension or default_extension
-		outgoing = os.path.normpath(os.path.join(directory, filename + extension))
-	else:
-		outgoing = os.path.normpath(default_abs_path)
-	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
-	if DEBUG:	print(f"DEBUG: reconstruct_full_directory_and_filename: incoming='{incoming}' default_path='{default_path}' default_filename='{default_filename}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
-	return outgoing
-
-def old__bad_reconstruct_full_directory_and_filename(incoming, default):
-	# default is assumed to be a filename, any text in it treated as that and not a directory unless ending in \ (repr='\\')
-	default_abs_path = os.path.abspath(default)
-	default_directory, default_filename = os.path.split(default_abs_path)
-	print(f"{20*'%'}  econstruct_full_directory_and_filename: incoming='{incoming}' default='{default}' default_abs_path='{default_abs_path}' default_directory='{default_directory}' default_filename='{default_filename}'",flush=True,file=sys.stderr)
-	default_directory = os.path.abspath(default_directory) + '\\' if not default_directory.endswith('\\') else ''
-	default_filename, default_extension = os.path.splitext(default_filename)
-	if incoming:
-		incoming_directory, incoming_filename = os.path.split(incoming)
-		incoming_directory = os.path.abspath(incoming_directory) + '\\' if not incoming_directory.endswith('\\') else ''
-		incoming_filename, incoming_extension = os.path.splitext(incoming_filename)
-		directory = incoming_directory or default_directory
-		filename = incoming_filename or default_filename
-		extension = incoming_extension or default_extension
-		outgoing = os.path.normpath(os.path.join(directory, filename + extension))
-	else:
-		outgoing = os.path.normpath(default_abs_path)
-	# CRIICAL NOTE:  file=sys.stderr MUST be used in slideshow_LOAD_SETTINGS and not in slideshow_CONTROLLER !!
-	if DEBUG:	print(f"DEBUG: old__bad_reconstruct_full_directory_and_filename: incoming='{incoming}' default='{default}' outgoing='{outgoing}'",flush=True,file=sys.stderr)
-	return outgoing
 
 def create_py_file_from_specially_formatted_list(dot_py_filename, specially_formatted_list):
 	# a dict may contain strings defined like r''
@@ -237,17 +133,16 @@ def load_settings():
 	# Settings_filename is always "fixed" in the same place as the script is run from, 
 	# A dict is returned with all of the settings in it.
 	# Missing values are defaulted here, yielding calculated ones as well.
-	global DEBUG
 	
-	if DEBUG:	print(f'DEBUG: at top of load_settings DEBUG={DEBUG}',flush=True,file=sys.stderr)
+	if UTIL.DEBUG:	print(f'DEBUG: at top of load_settings DEBUG={UTIL.DEBUG}',flush=True,file=sys.stderr)
 
 	# This is ALWAYS a fixed filename in the current default folder !!!
 
 	SLIDESHOW_SETTINGS_MODULE_NAME				= 'SLIDESHOW_SETTINGS'.lower()	# SLIDESHOW_SETTINGS.py
-	SLIDESHOW_SETTINGS_MODULE_FILENAME			= fully_qualified_filename(os.path.join(r'.', SLIDESHOW_SETTINGS_MODULE_NAME + '.py'))
+	SLIDESHOW_SETTINGS_MODULE_FILENAME			= UTIL.fully_qualified_filename(os.path.join(r'.', SLIDESHOW_SETTINGS_MODULE_NAME + '.py'))
 
-	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS	= [ fully_qualified_directory_no_trailing_backslash(r'.') ]
-	TEMP_FOLDER									= fully_qualified_directory_no_trailing_backslash(r'.\TEMP')				# TEMP_FOLDER
+	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS	= [ UTIL.fully_qualified_directory_no_trailing_backslash(r'.') ]
+	TEMP_FOLDER									= UTIL.fully_qualified_directory_no_trailing_backslash(r'.\TEMP')				# TEMP_FOLDER
 	PIC_EXTENSIONS								= [ r'.png', r'.jpg', r'.jpeg', r'.gif' ]
 	VID_EXTENSIONS								= [ r'.mp4', r'.mpeg4', r'.mpg', r'.mpeg', r'.avi', r'.mjpeg', r'.3gp', r'.mov' ]
 	EEK_EXTENSIONS								= [ r'.m2ts' ]
@@ -280,19 +175,19 @@ def load_settings():
 
 	# 5. the CONTROLLER does Final muxing of the interim video .mp4 and the interim background_audio_post_snippet_editing
 
-	FINAL_MP4_WITH_AUDIO_FILENAME				= fully_qualified_filename(r'.\slideshow.FINAL_MP4_WITH_AUDIO_FILENAME.mp4')
+	FINAL_MP4_WITH_AUDIO_FILENAME				= UTIL.fully_qualified_filename(r'.\slideshow.FINAL_MP4_WITH_AUDIO_FILENAME.mp4')
 
-	MAX_FILES_PER_CHUNK							= int(100)
+	MAX_FILES_PER_CHUNK							= int(150)		#this is a bit slower than 100, but it causes less "no transition" which occurs between encoded chunks
 	TOLERANCE_PERCENT_FINAL_CHUNK				= int(20)
 	RECURSIVE									= True
-	DEBUG										= False if DEBUG==False else True
-	FFMPEG_PATH									= fully_qualified_filename(os.path.join(r'.\Vapoursynth_x64', r'ffmpeg.exe'))
-	FFPROBE_PATH								= fully_qualified_filename(os.path.join(r'.\Vapoursynth_x64', r'ffprobe.exe'))
-	VSPIPE_PATH									= fully_qualified_filename(os.path.join(r'.\Vapoursynth_x64', r'vspipe.exe'))
+	DEBUG										= UTIL.DEBUG
+	FFMPEG_PATH									= UTIL.fully_qualified_filename(os.path.join(r'.\Vapoursynth_x64', r'ffmpeg.exe'))
+	FFPROBE_PATH								= UTIL.fully_qualified_filename(os.path.join(r'.\Vapoursynth_x64', r'ffprobe.exe'))
+	VSPIPE_PATH									= UTIL.fully_qualified_filename(os.path.join(r'.\Vapoursynth_x64', r'vspipe.exe'))
 	
-	slideshow_CONTROLLER_path					= fully_qualified_filename(os.path.join(r'.\slideshow_CONTROLLER.py'))
-	slideshow_LOAD_SETTINGS_path				= fully_qualified_filename(os.path.join(r'.\slideshow_LOAD_SETTINGS.py'))
-	slideshow_ENCODER_legacy_path				= fully_qualified_filename(os.path.join(r'.\slideshow_ENCODER_legacy.vpy'))
+	slideshow_CONTROLLER_path					= UTIL.fully_qualified_filename(os.path.join(r'.\slideshow_CONTROLLER.py'))
+	slideshow_LOAD_SETTINGS_path				= UTIL.fully_qualified_filename(os.path.join(r'.\slideshow_LOAD_SETTINGS.py'))
+	slideshow_ENCODER_legacy_path				= UTIL.fully_qualified_filename(os.path.join(r'.\slideshow_ENCODER_legacy.vpy'))
 
 	SUBTITLE_DEPTH								= int(0)
 	SUBTITLE_FONTSIZE							= int(18)
@@ -476,7 +371,7 @@ def load_settings():
 		'TARGET_COLOR_RANGE_I_ZIMG':						TARGET_COLOR_RANGE_I_ZIMG,	# CALCULATED LATER # = if something, calculated
 	}
 
-	if DEBUG:	print(f'DEBUG: created default_settings_dict=\n{objPrettyPrint.pformat(default_settings_dict)}',flush=True,file=sys.stderr)
+	if UTIL.DEBUG:	print(f'DEBUG: created default_settings_dict=\n{UTIL.objPrettyPrint.pformat(default_settings_dict)}',flush=True,file=sys.stderr)
 
 	#######################################################################################################################################
 	#######################################################################################################################################
@@ -485,10 +380,10 @@ def load_settings():
 	
 	if os.path.exists(SLIDESHOW_SETTINGS_MODULE_FILENAME):
 		if SLIDESHOW_SETTINGS_MODULE_NAME not in sys.modules:
-			if DEBUG:	print(f'DEBUG: SLIDESHOW_SETTINGS_MODULE_NAME not in sys.modules',flush=True,file=sys.stderr)
+			if UTIL.DEBUG:	print(f'DEBUG: SLIDESHOW_SETTINGS_MODULE_NAME not in sys.modules',flush=True,file=sys.stderr)
 			# Import the module dynamically, if it is not done already
 			try:
-				if DEBUG:	print(f'DEBUG: importing SLIDESHOW_SETTINGS_MODULE_NAME={SLIDESHOW_SETTINGS_MODULE_NAME} dynamically',flush=True,file=sys.stderr)
+				if UTIL.DEBUG:	print(f'DEBUG: importing SLIDESHOW_SETTINGS_MODULE_NAME={SLIDESHOW_SETTINGS_MODULE_NAME} dynamically',flush=True,file=sys.stderr)
 				#importlib.invalidate_caches()
 				SETTINGS_MODULE = importlib.import_module(SLIDESHOW_SETTINGS_MODULE_NAME)
 			except ImportError as e:
@@ -499,10 +394,10 @@ def load_settings():
 				print(f"load_settings: ERROR: Exception, failed to dynamically import user specified Settings from import module: '{SLIDESHOW_SETTINGS_MODULE_NAME}'\n{str(e)}",flush=True,file=sys.stderr)
 				sys.exit(1)	
 		else:
-			if DEBUG:	print(f'DEBUG: SLIDESHOW_SETTINGS_MODULE_NAME IS in sys.modules',flush=True,file=sys.stderr)
+			if UTIL.DEBUG:	print(f'DEBUG: SLIDESHOW_SETTINGS_MODULE_NAME IS in sys.modules',flush=True,file=sys.stderr)
 			# Reload the module since it had been dynamically loaded already ... remember, global variables in thee module are not scrubbed by reloading
 			try:
-				if DEBUG:	print(f'DEBUG: reloading SETTINGS_MODULE={SETTINGS_MODULE} ',flush=True,file=sys.stderr)
+				if UTIL.DEBUG:	print(f'DEBUG: reloading SETTINGS_MODULE={SETTINGS_MODULE} ',flush=True,file=sys.stderr)
 				#importlib.invalidate_caches()
 				importlib.reload(SETTINGS_MODULE)
 			except Exception as e:
@@ -515,10 +410,10 @@ def load_settings():
 	#print(f'DEBUG: after import slideshow_settings.py static',flush=True,file=sys.stderr)
 
 	# retrieve the settigns from SLIDESHOW_SETTINGS_MODULE_NAME (SLIDESHOW_SETTINGS.py)
-	if DEBUG:	print(f"DEBUG: Attempting to load user_specified_settings_dict = SETTINGS_MODULE.settings'",flush=True,file=sys.stderr)
+	if UTIL.DEBUG:	print(f"DEBUG: Attempting to load user_specified_settings_dict = SETTINGS_MODULE.settings'",flush=True,file=sys.stderr)
 	try:
 		user_specified_settings_dict = SETTINGS_MODULE.settings
-		print(f'Successfully loaded user_specified_settings_dict=\n{objPrettyPrint.pformat(user_specified_settings_dict)}',flush=True,file=sys.stderr)
+		print(f'Successfully loaded user_specified_settings_dict=\n{UTIL.objPrettyPrint.pformat(user_specified_settings_dict)}',flush=True,file=sys.stderr)
 	except Exception as e:
 		user_specified_settings_dict = {}
 		print(f"load_settings: WARNING: Exception, could not import 'user_specified_settings' '{SLIDESHOW_SETTINGS_MODULE_FILENAME}'",flush=True,file=sys.stderr)
@@ -537,7 +432,10 @@ def load_settings():
 	#		final_settings_dict = default_settings_dict
 	#		final_settings_dict.update(user_specified)	# updates a dictiony in-place
 
-	if final_settings_dict['DEBUG']: DEBUG = True
+	# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	UTIL.DEBUG =  final_settings_dict['DEBUG']	# RESET everywhere
+	DEBUG = UTIL.DEBUG		# RESET fo this module's dicts
+	# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 	#######################################################################################################################################
 	#######################################################################################################################################
@@ -550,36 +448,36 @@ def load_settings():
 	
 	ddl_fully_qualified = []									
 	for ddl in final_settings_dict['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS']:
-		ddl_fully_qualified.append(fully_qualified_directory_no_trailing_backslash(ddl))
+		ddl_fully_qualified.append(UTIL.fully_qualified_directory_no_trailing_backslash(ddl))
 	final_settings_dict['ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS'] = ddl_fully_qualified
 	#
 	final_settings_dict['SLIDESHOW_SETTINGS_MODULE_NAME'] = final_settings_dict['SLIDESHOW_SETTINGS_MODULE_NAME']
-	final_settings_dict['SLIDESHOW_SETTINGS_MODULE_FILENAME'] = fully_qualified_filename(final_settings_dict['SLIDESHOW_SETTINGS_MODULE_FILENAME'])
+	final_settings_dict['SLIDESHOW_SETTINGS_MODULE_FILENAME'] = UTIL.fully_qualified_filename(final_settings_dict['SLIDESHOW_SETTINGS_MODULE_FILENAME'])
 	
-	final_settings_dict['FINAL_MP4_WITH_AUDIO_FILENAME'] = fully_qualified_filename(final_settings_dict['FINAL_MP4_WITH_AUDIO_FILENAME'])
+	final_settings_dict['FINAL_MP4_WITH_AUDIO_FILENAME'] = UTIL.fully_qualified_filename(final_settings_dict['FINAL_MP4_WITH_AUDIO_FILENAME'])
 
-	final_settings_dict['FFMPEG_PATH'] = fully_qualified_filename(final_settings_dict['FFMPEG_PATH'])
-	final_settings_dict['FFPROBE_PATH'] = fully_qualified_filename(final_settings_dict['FFPROBE_PATH'])
-	final_settings_dict['VSPIPE_PATH'] = fully_qualified_filename(final_settings_dict['VSPIPE_PATH'])
-	final_settings_dict['slideshow_CONTROLLER_path'] = fully_qualified_filename(final_settings_dict['slideshow_CONTROLLER_path'])
-	final_settings_dict['slideshow_LOAD_SETTINGS_path'] = fully_qualified_filename(final_settings_dict['slideshow_LOAD_SETTINGS_path'])
-	final_settings_dict['slideshow_ENCODER_legacy_path'] = fully_qualified_filename(final_settings_dict['slideshow_ENCODER_legacy_path'])
+	final_settings_dict['FFMPEG_PATH'] = UTIL.fully_qualified_filename(final_settings_dict['FFMPEG_PATH'])
+	final_settings_dict['FFPROBE_PATH'] = UTIL.fully_qualified_filename(final_settings_dict['FFPROBE_PATH'])
+	final_settings_dict['VSPIPE_PATH'] = UTIL.fully_qualified_filename(final_settings_dict['VSPIPE_PATH'])
+	final_settings_dict['slideshow_CONTROLLER_path'] = UTIL.fully_qualified_filename(final_settings_dict['slideshow_CONTROLLER_path'])
+	final_settings_dict['slideshow_LOAD_SETTINGS_path'] = UTIL.fully_qualified_filename(final_settings_dict['slideshow_LOAD_SETTINGS_path'])
+	final_settings_dict['slideshow_ENCODER_legacy_path'] = UTIL.fully_qualified_filename(final_settings_dict['slideshow_ENCODER_legacy_path'])
 
 
 	# NOW WE NEED TO RECONSTRUCT THINGS WHICH BELONG IN THE TEMPORARY FOLDER
-	TEMP_FOLDER = reconstruct_full_directory_only(final_settings_dict['TEMP_FOLDER'], final_settings_dict['TEMP_FOLDER'])
+	TEMP_FOLDER = UTIL.reconstruct_full_directory_only(final_settings_dict['TEMP_FOLDER'], final_settings_dict['TEMP_FOLDER'])
 
 	# put the new RECONSTRUCTED items (from the merged dict) back into the variables for use when later creating dict specially_formatted_settings_list 
-	CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT = reconstruct_full_directory_and_filename( final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'])	# cater for any missing folder
-	SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT = reconstruct_full_directory_and_filename( final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'])	# cater for any missing folder
-	CHUNK_ENCODED_FFV1_FILENAME_BASE = reconstruct_full_directory_and_filename( final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'])	# cater for any missing folder
-	CURRENT_CHUNK_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['CURRENT_CHUNK_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['CURRENT_CHUNK_FILENAME'])	# cater for any missing folder
-	CURRENT_SNIPPETS_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['CURRENT_SNIPPETS_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['CURRENT_SNIPPETS_FILENAME'])	# cater for any missing folder
-	BACKGROUND_AUDIO_WITH_OVERLAYED_SNIPPETS_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAYED_SNIPPETS_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAYED_SNIPPETS_FILENAME'])	# cater for any missing folder
-	TEMPORARY_AUDIO_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['TEMPORARY_AUDIO_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['TEMPORARY_AUDIO_FILENAME'])	# cater for any missing folder
-	TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME = reconstruct_full_directory_and_filename( final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'])	# cater for any missing folder
+	CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT = UTIL.reconstruct_full_directory_and_filename( final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'])	# cater for any missing folder
+	SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT = UTIL.reconstruct_full_directory_and_filename( final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['SNIPPETS_FILENAME_FOR_ALL_SNIPPETS_DICT'])	# cater for any missing folder
+	CHUNK_ENCODED_FFV1_FILENAME_BASE = UTIL.reconstruct_full_directory_and_filename( final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['CHUNK_ENCODED_FFV1_FILENAME_BASE'])	# cater for any missing folder
+	CURRENT_CHUNK_FILENAME = UTIL.reconstruct_full_directory_and_filename( final_settings_dict['CURRENT_CHUNK_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['CURRENT_CHUNK_FILENAME'])	# cater for any missing folder
+	CURRENT_SNIPPETS_FILENAME = UTIL.reconstruct_full_directory_and_filename( final_settings_dict['CURRENT_SNIPPETS_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['CURRENT_SNIPPETS_FILENAME'])	# cater for any missing folder
+	BACKGROUND_AUDIO_WITH_OVERLAYED_SNIPPETS_FILENAME = UTIL.reconstruct_full_directory_and_filename( final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAYED_SNIPPETS_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['BACKGROUND_AUDIO_WITH_OVERLAYED_SNIPPETS_FILENAME'])	# cater for any missing folder
+	TEMPORARY_AUDIO_FILENAME = UTIL.reconstruct_full_directory_and_filename( final_settings_dict['TEMPORARY_AUDIO_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['TEMPORARY_AUDIO_FILENAME'])	# cater for any missing folder
+	TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME = UTIL.reconstruct_full_directory_and_filename( final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'], default_path=TEMP_FOLDER, default_filename=final_settings_dict['TEMPORARY_FFMPEG_CONCAT_LIST_FILENAME'])	# cater for any missing folder
 
-	BACKGROUND_AUDIO_INPUT_FOLDER = reconstruct_full_directory_only(final_settings_dict['BACKGROUND_AUDIO_INPUT_FOLDER'], BACKGROUND_AUDIO_INPUT_FOLDER)	# re-default it if user mucked it up
+	BACKGROUND_AUDIO_INPUT_FOLDER = UTIL.reconstruct_full_directory_only(final_settings_dict['BACKGROUND_AUDIO_INPUT_FOLDER'], BACKGROUND_AUDIO_INPUT_FOLDER)	# re-default it if user mucked it up
 
 	# put the new RECONSTRUCTED back into the merged dict as well
 	final_settings_dict['CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT'] = CHUNKS_FILENAME_FOR_ALL_CHUNKS_DICT
@@ -593,7 +491,7 @@ def load_settings():
 
 	final_settings_dict['BACKGROUND_AUDIO_INPUT_FOLDER'] = BACKGROUND_AUDIO_INPUT_FOLDER
 
-	if DEBUG:	print(f'load_settings: After folders RECONSTRUCTION final_settings_dict=\n"{objPrettyPrint.pformat(final_settings_dict)}"',flush=True,file=sys.stderr)
+	if UTIL.DEBUG:	print(f'load_settings: After folders RECONSTRUCTION final_settings_dict=\n"{UTIL.objPrettyPrint.pformat(final_settings_dict)}"',flush=True,file=sys.stderr)
 
 	# check the folders which should exist do exist
 	# 1. check the folders in this LIST
@@ -713,14 +611,19 @@ def load_settings():
 
 	# MAP that back into something compatible with OLD '_ini_values[self._ini_section_name]["SETTING_NAME"]'
 	old_ini_dict = { final_settings_dict['_INI_SECTION_NAME']: old_calc_ini_dict }
+	
+	# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	# for good measure, poke the final dict into GLOBAL_UTILITIES_AND_VARIABLES as UTIL so that everyne can access it directly if need be
+	UTIL.SETTINGS_DICT =  final_settings_dict
+	# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 	#######################################################################################################################################
 	#######################################################################################################################################
 
 	# now save debug versions of those dicts
-	if DEBUG:
+	if UTIL.DEBUG:
 		try:
-			f_debug = fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.user_settings.JSON'))
+			f_debug = UTIL.fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.user_settings.JSON'))
 			with open(f_debug, 'w') as fp:
 				json.dump(user_specified_settings_dict, fp, indent=4)
 		except Exception as e:
@@ -728,7 +631,7 @@ def load_settings():
 			sys.exit(1)	
 		#
 		try:
-			f_debug = fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.default_settings.JSON'))
+			f_debug = UTIL.fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.default_settings.JSON'))
 			with open(f_debug, 'w') as fp:
 				json.dump(default_settings_dict, fp, indent=4)
 		except Exception as e:
@@ -736,7 +639,7 @@ def load_settings():
 			sys.exit(1)	
 		#
 		try:
-			f_debug = fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.final_settings.JSON'))
+			f_debug = UTIL.fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.final_settings.JSON'))
 			with open(f_debug, 'w') as fp:
 				json.dump(final_settings_dict, fp, indent=4)
 		except Exception as e:
@@ -744,7 +647,7 @@ def load_settings():
 			sys.exit(1)	
 		#
 		try:
-			f_debug = fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.old_ini_dict.JSON'))
+			f_debug = UTIL.fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.old_ini_dict.JSON'))
 			with open(f_debug, 'w') as fp:
 				json.dump(old_ini_dict, fp, indent=4)
 		except Exception as e:
@@ -752,7 +655,7 @@ def load_settings():
 			sys.exit(1)	
 		#
 		try:
-			f_debug = fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.old_calc_ini_dict.JSON'))
+			f_debug = UTIL.fully_qualified_filename(os.path.join(TEMP_FOLDER, SLIDESHOW_SETTINGS_MODULE_NAME + r'.DEBUG.old_calc_ini_dict.JSON'))
 			with open(f_debug, 'w') as fp:
 				json.dump(old_calc_ini_dict, fp, indent=4)
 		except Exception as e:
@@ -761,6 +664,8 @@ def load_settings():
 
 	#######################################################################################################################################
 	#######################################################################################################################################
+	
+	# if the initial settings do not exist, createa template then exit immediately.
 	
 	if not os.path.exists(SLIDESHOW_SETTINGS_MODULE_FILENAME):
 		specially_formatted_settings_list =	[
@@ -789,7 +694,7 @@ def load_settings():
 										[ 'slideshow_LOAD_SETTINGS_path',				slideshow_LOAD_SETTINGS_path,				r'Please leave this alone unless really confident' ],
 										[ 'slideshow_ENCODER_legacy_path',				slideshow_ENCODER_legacy_path,				r'Please leave this alone unless really confident' ],
 									]	
-		if DEBUG:	print(f'DEBUG: specially_formatted_settings_list=\n{objPrettyPrint.pformat(specially_formatted_settings_list)}',flush=True,file=sys.stderr)
+		if UTIL.DEBUG:	print(f'DEBUG: specially_formatted_settings_list=\n{UTIL.objPrettyPrint.pformat(specially_formatted_settings_list)}',flush=True,file=sys.stderr)
 		print(f"load_settings: ERROR: File '{SLIDESHOW_SETTINGS_MODULE_FILENAME}' does not exist, creating it with template settings... you MUST edit it now ...",flush=True,file=sys.stderr)
 		create_py_file_from_specially_formatted_list(SLIDESHOW_SETTINGS_MODULE_FILENAME, specially_formatted_settings_list)
 		sys.exit(1)
