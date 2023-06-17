@@ -12,6 +12,17 @@ https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dim
 \_AI\_ has much better and elegant code which works with audio ... consider looking for that on GITHUB.    
 ___
 
+
+### Limitations
+
+The process is quite slow, so we automatically encode 150 pics/videos or so 
+at a time in `chunks` and concatenate them at the end.    
+
+We're OK for a thousand or so images/videos in a directory tree per slideshow.
+
+The background audio is not looped, if it is shorter than the resulting slideshow video then there will be silence at the end.
+You can easily add more background audio, it's up to you, background audio is auto-trimmed to the duration of the slideshow video.
+
 ### Portabe "Installation" (x64 only)
 
 It's portable. Stuff all goes into the folder tree which you create first.    
@@ -107,15 +118,15 @@ Look for and change the settings you need. Please be careful or you will have to
 
 **Optionally:**    
 - `RECURSIVE` - whether to recurse into the subfolders of `ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS`
-- `TARGET_RESOLUTION` - HD `1080p_pal` is the sweet spot, testing shows. If in NTSC land try `1080p_ntsc` to get 29.976 framerate
-- `TARGET_VIDEO_BITRATE` ... the defaults are good, use one of them matching `TARGET_RESOLUTION`
+- `TARGET_RESOLUTION` - `HD 1080p` is the sweet spot, testing shows. PAL `1080p_pal`, or in NTSC land `1080p_ntsc` to get 29.976 framerate
+- `TARGET_VIDEO_BITRATE` ... the defaults are close enough, use one of them matching `TARGET_RESOLUTION`
 - `DURATION_PIC_SEC` - in seconds, duration that each pic is displayed in the slideshow
 - `DURATION_MAX_VIDEO_SEC`- in seconds, maximum duration a video clip to be shown in the slideshow (trimmed to this)
 - `TEMP_FOLDER` - point to a folder on a disk with plenty of free disk space 
 - `SUBTITLE_DEPTH` - you  can have subtitles of the folder containing each pic/image
 - `MAX_FILES_PER_CHUNK` ... more than 150 files encoded at one will slow the process to a crawl, like 2 day execution times or worse ... 50 to 150 is "doable"
 
-**_Don't touch any of the other settings unless you're prepared to fix things.**    
+**Don't touch any of the other settings unless you're prepared to fix things.**    
 
 Here's an example of settings with edits already made:   
 ```
