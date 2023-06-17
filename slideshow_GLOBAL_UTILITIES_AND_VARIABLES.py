@@ -150,8 +150,8 @@ mi_video_params = [
 	'FrameRate_Den',                                 # : Frames per second, denominator
 	'FrameCount',                                    # : Number of frames
 	#
-	'Recorded_Date',								 # : Time/date/year that the recording began ... this can be None so use Encoded_Date instead
-	'Encoded_Date',									 # : Time/date/year that the encoding of this content was completed
+	'Recorded_Date',								 # : Time/date/year that the recording began ... this can be None so use Encoded_Date instead. this can be None so use Encoded_Date instead. date_recorded = datetime.strptime(mi_dict["Recorded_Date"], "%Y-%m-%d %H:%M:%S UTC")
+	'Encoded_Date',									 # : Time/date/year that the encoding of this content was completed. date_encoded = datetime.strptime(mi_dict["Encoded_Date"], "%Y-%m-%d %H:%M:%S UTC")
 	#
 	'FrameRate_Mode',								 # : Frame rate mode (CFR, VFR)
 	'FrameRate_Minimum',							 # : Minimum Frames per second
