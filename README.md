@@ -1,11 +1,11 @@
 # Q'N Auto Slideshow Creator for Windows   
 
-#### Download / Setup / Configure then Fire-and-wait-a-long-time   
-#### A python3/vapoursynth script using ffmpeg to   
-#### to create a 'HD' .mp4 slideshow   
-#### from images and video clips in specified folders   
-#### with background audio from a noninate folder of audio files   
-#### with video clip auidio overlyed on the background audio   
+Download / Setup / Configure then Fire-and-wait-a-long-time.    
+
+A python3/vapoursynth script using ffmpeg to create a 'HD' .mp4 slideshow
+from images and video clips in specified folders,
+with background audio from a nominated folder of audio files, 
+with video audio overlyed on the background audio.
 
 ___
 ### \_AI\_ has much better and elegant code which works with audio   
