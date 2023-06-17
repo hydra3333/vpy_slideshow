@@ -26,7 +26,9 @@ although the number really is up to you. Recommend you estimate the duration as 
 (3 seconds per pic) although videos clip durations will affect estimate a fair bit.    
 
 Attempting `4k` resolutions requires really **huge** amounts of temporary disk space and **very long** encode times... _c'est la vie_.
-Testing shows `4k` slideshows of home pictures does not appear any better (and sometimes worse) than `1080p` on a TV.    
+Testing shows `4k` slideshows of home pictures does not appear any better (and sometimes worse) than `1080p` on a TV.   
+
+The legacy encoder logic does not handle 576p nor 480p resolutions (Anamorphic).
 
 If you wanted a .mpg file to burn to DVD then use another tool, eg FFmpeg, to convert (transcode)
 the final mp4. It's easy enough.    
@@ -174,92 +176,42 @@ settings = {
 
 ## Starting the slideshow process    
 
+1. If it already exists (eg in a re-run), delete the file you specified in `FINAL_MP4_WITH_AUDIO_FILENAME`   
+
+2. In File Explorer, double-click on `QN_Auto_Slideshow_Creator_for_Windows.bat` and it will yield a pop-up dos box
+with bunch of messages to ignore.    
+
+3. Let it run. It will take a long time, showing unintelligible log messages qas it goes.
+
+4. If the final messages in the pop-up dos box look like an error, examine the final messages ... since there
+is likely an error in your edits to `slideshow_settings.py`.    
+
+5. You can safely close the pop-up dos box after it's completed.    
+
+6. Locate try to play the file you specified in `FINAL_MP4_WITH_AUDIO_FILENAME`   
+
+7. If it failed, look for and delete all temporary files in the folder you specified in `TEMP_FOLDER`
 
 
+## Re-running the slideshow process    
 
+OK, you created a slideshow and want to create another.    
 
+So, re-edit `slideshow_settings.py` and make required changes, specifically to use new inputs/output:
+- `ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS` - specify one or more quoted and comma separated Folder names of pics/videos
+- `FINAL_MP4_WITH_AUDIO_FILENAME` - specify the directory and filename of the FINAL slideshow .mp4    
 
+Then refer above to **Starting the slideshow process**
 
-
-
-
-
-#### Configuration and Running Option 1 - editing `vpy_slideshow.bat`   
-
-In your favourite text editor (notepad++ ?) edit file `vpy_slideshow.bat`.   
-Don't be afraid, it's easy.   
-Find the area that looks a bit like this:   
-```
-set "output_mp4_file=%vs_CD%vpy_slideshow.2005-2006.mp4"
-DEL "%ini_file%">NUL 2>&1
-IF NOT EXIST "%ini_file%" (
-	echo [slideshow]>>"%ini_file%"
-	echo directory_list = ['G:\\DVD\\PAT-SLIDESHOWS\\2005', 'G:\\DVD\\PAT-SLIDESHOWS\\2006' ]>>"%ini_file%"
-	echo temp_directory_list = ['.\\temp',]>>"%ini_file%"
-	REM echo temp_directory_list = ['D:\\TEMP',]>>"%ini_file%"
-	echo recursive = True>>"%ini_file%"
-	echo duration_pic_sec = 4.0>>"%ini_file%"
-	echo duration_max_video_sec = 15.0>>"%ini_file%"
-	echo duration_crossfade_secs = 0.5>>"%ini_file%"
-	echo subtitle_depth = 3>>"%ini_file%"
-	echo debug_mode = False>>"%ini_file%"
-	echo silent_mode = False>>"%ini_file%"
-	echo crossfade_type = random>>"%ini_file%"
-	echo crossfade_direction = left>>"%ini_file%"
-	type "%ini_file%"
-)
-```
-Notice a REM statement means that line is "commented out" and thus does not have any effect.   
-Change values as you see fit. 
-
-_At a minimum:_   
-Change the filename of the HD .mp4 file that will be created from `vpy_slideshow.1TEST.mp4` to whatever you like.   
-Change `directory_list` to whatever directory is at the top of a directory tree containing your images/videos; you can specify multiple directory trees; notice **double-backslashes are mandatory or a result may not happen**.   
-
-_Optionally:_   
-You can leave `temp_directory_list` alone or change it to another directory where scratch files can temporarily go.   
-Then,   
-`recursive` to False if you only want to processs the one folder and not all its subfolders.   
-`duration_pic_sec` to how long each image gets displayed (including transitions).   
-`duration_max_video_sec` to the maximum time you wish a video to be shown in the slideshow (from its start).   
-`duration_crossfade_secs` to the time a transition change takes (1/2 a second is about right).   
-`subtitle_depth` to the subtitling depth of each image/video (how many directory tree names and the filename); Set to 0 to disable.   
-`crossfade_type` to one of the values shown; `random` is usually a good choise.   
-`crossfade_direction` for `curtain_` type crossfades use horizintal or vertical, for the rest of the types use one of left,right,up,down.   
-
-Save the changes to you made to `vpy_slideshow.bat`.   
-
-Double-click on `vpy_slideshow.bat` and wait a very long time.   
-
-At the end you'll see 2 new files   
-(a) a .mp4 mainly for use on PCs and with casting, and   
-(b) a .mpg which can be burned to DVD.   
-There's no audio.  Another day we may add a facility to add audio, but not yet.   
-
-#### Configuration and Running Option 2 - editing `SLIDESHOW_PARAMETERS.ini`   
-
-In your favourite text editor (notepad++ ?) edit file `SLIDESHOW_PARAMETERS.ini`.  
-Don't be afraid, it's easy. There's an explanation of each parameter in the file just above its setting.   
-A bit like option 1, change the parameters to suit yourself, then save your changes.   
-Remember, double-backslashes are **mandatory** or a result may not happen.   
-Locate file `run_slideshow_from_ini_settings.bat` an double-click on it and wait a very long time. Check for error messages in case you accidentally edited something incorrectly.   
-
-At the end you'll see 2 new files   
-(a) a .mp4 mainly for use on PCs and with casting, and   
-(b) a .mpg which can be burned to DVD.   
-The output .mp4 and .mpg filenames are "fixed" and will be over-written the next time you run it via this option.   
-There's no audio.  Another day we may add a facility to add audio, but not yet.   
-
-#### Configuration and Running Option 3 - editing `SLIDESHOW_PARAMETERS.ini` and rolling your own   
-
-Like Option 2, edit file `SLIDESHOW_PARAMETERS.ini` and save your changes.   
-Look at file `run_slideshow_from_ini_settings.bat` as a template, to create your own `.bat` with your own ffmpeg settings etc.   
-Run your own `.bat`.   
 
 ___
-### of no possible interest to anyone
+## of no possible interest to anyone
 
-I ran the 'show_unique_properties' thing over our archive of home pics and videos, and found a variety of cameras used. Each camera probably had its own issues with, and settings for, video and image properties.
+I ran a 'show_unique_properties' thing over our archive of home pics and videos, and found a variety of cameras used. 
+Each camera probably had its own issues with, and settings for, video and image properties and metadata.
+Yes, testing indicated they were all different.  
+
+`Q'N Auto Slideshow Creator for Windows` handles all that (mostly).    
 
 ```
  'EXIF_Model': '',
