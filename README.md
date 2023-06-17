@@ -68,11 +68,11 @@ Download the ubuquitous `wget.exe` with this link https://eternallybored.org/mis
 also save it into the fresh new directory you created above.  
 
 **Notes:**    
-Wget will be used to download stuff like portable Python, portable VapourSynth, a recent ffmpeg build,
+- `wget.exe` will be used to download stuff like portable Python, portable VapourSynth, a recent ffmpeg build,
 and the other files necessary to make a slideshow.    
-If you don't download wget into the same directory as `Setup.bat` the Setup Process will fail.    
-Nothing gets "installed", everything is just all files in the directory tree.    
-_More gobbledygook:_ ... except for the pip module installs ... pip puts bits of them (eg dependencies which get collected) 
+- If you don't download `wget.exe` into the same directory as `Setup.bat` the Setup Process will fail.    
+- Nothing gets "installed", everything is just all files in the directory tree.    
+- _More gobbledygook:_ ... except for the pip module installs ... pip puts bits of them (eg dependencies which get collected) 
 in your username's temporary folder, i.e. something like `C:\Users\your_username\AppData\Local\Temp`,
 instead of where we tell pip to install the module for which the pip "collecting process" is occurring. "A choice
 of one", so we just live with it.    
