@@ -87,16 +87,79 @@ Per the install example, something like this is good: `D:\QN_Auto_Slideshow_Crea
 Copy any audio files to that folder.  Uplifting type background instrumental music is good, even classical :)    
 Rename the copied files to your liking, since they will be read in alphabetical order into one background audio track.
 
-### 2. Create and edit Configuration file `slideshow_settings.py`    
+#### 2. Create and edit Configuration file `slideshow_settings.py`    
 
-A Configuration file tells your requirements to the process.    
+Configuration file `slideshow_settings.py` tells your requirements to the process.    
 
 In File Explorer, double-click on `QN_Auto_Slideshow_Creator_for_Windows.bat` and it will yield a pop-up dos box
-with bunch of messages to ignore, and also generate a template file called `slideshow_settings.py`.
-This is a once-off thing, unless you delete `slideshow_settings.py` to start afresh.    
+with bunch of messages to ignore, and also generate a template file called `slideshow_settings.py`.    
+That is a once-off thing, unless you delete `slideshow_settings.py` to start afresh.    
 You can safely close the pop-up dos box after it's completed.    
 
-OK !  Using your favourite text editor, eg Notepad, edit `slideshow_settings.py` and make some changes. 
+Now, using your favourite text editor, eg Notepad, edit `slideshow_settings.py` and make required changes.   
+Syntax is critical, all command and matching quotes etc must be **perect** or the process will fail.    
+Look for and change the settings you need. Please be careful or you will have to re-edit ;)    
+At a minimum:
+- `ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS` - specify one or more quoted and comma separated Folder names of pics/videos
+- `BACKGROUND_AUDIO_INPUT_FOLDER` - specify a Folder containing audio files (in sequence) to make an audio background track (it is not looped if too short). No files in folder = silent background
+- `FINAL_MP4_WITH_AUDIO_FILENAME` - specify the directory and filename of the FINAL slideshow .mp4
+Optionally:    
+- `RECURSIVE` - whether to recurse into the subfolders of `ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS`
+- `TARGET_RESOLUTION` - HD `1080p_pal` is the sweet spot, testing shows. If in NTSC land try `1080p_ntsc` to get 29.976 framerate
+- `TEMP_FOLDER` - point to a folder on a disk with plenty of free disk space
+Don't touch: 
+- `MAX_FILES_PER_CHUNK` ... more than 150 files encoded at one will slow the process to a crawl, like 2 day execution times or worse ... 50 to 150 is "doable"
+- FFMPEG_PATH
+- FFPROBE_PATH
+- VSPIPE_PATH
+- FFMPEG_ENCODER ... the other encoder _only_ works if you have an nvidia h.264 hardware encoder in an `RTX 2060 Super` or better video card
+- FFMPEG_PATH
+- FFMPEG_PATH
+- FFMPEG_PATH
+
+
+Here's an example of one with edits already made:   
+```
+settings = {
+	'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS':	[
+													r'H:\our_home_pics\1994',
+													r'H:\our_home_pics\1995',
+												],	# a list, one or more folders to look in for slideshow pics/videos. the r in front of the string is CRITICAL
+	'RECURSIVE':	True,		# case sensitive: whether to recurse the source folder(s) looking for slideshow pics/videos
+	'TEMP_FOLDER':	r'D:\QN_Auto_Slideshow_Creator_for_Windows\TEMP',		# folder where temporary files go; USE A DISK WITH LOTS OF SPARE DISK SPACE - CIRCA 6 GB PER 100 PICS/VIDEOS
+	'BACKGROUND_AUDIO_INPUT_FOLDER':	r'H:\some_existing_directory\BACKGROUND_AUDIO_INPUT_FOLDER',		# Folder containing audio files (in sequence) to make an audio background track (it is not looped if too short). No files = silent background.
+	'FINAL_MP4_WITH_AUDIO_FILENAME':	r'D:\some_existing_directory\slideshow_1994_1995.mp4',		# the filename of the FINAL slideshow .mp4
+	'SUBTITLE_DEPTH':	0,		# how many folders deep to display in subtitles; use 0 for no subtitling
+	'SUBTITLE_FONTSIZE':	18,		# fontsize for subtitles, leave this alone unless confident
+	'SUBTITLE_FONTSCALE':	1.0,		# fontscale for subtitles, leave this alone unless confident
+	'DURATION_PIC_SEC':	3.0,		# in seconds, duration each pic is shown in the slideshow
+	'DURATION_CROSSFADE_SECS':	0.5,		# in seconds duration crossfade between pic, leave this alone unless confident
+	'CROSSFADE_TYPE':	'random',		# random is a good choice, leave this alone unless confident
+	'CROSSFADE_DIRECTION':	'left',		# Please leave this alone unless really confident
+	'DURATION_MAX_VIDEO_SEC':	7200.0,		# in seconds, maximum duration each video clip is shown in the slideshow
+	'TARGET_AUDIO_BACKGROUND_NORMALIZE_HEADROOM_DB':	-18,		# normalize background audio to this maximum db
+	'TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY':	-30,		# how many DB to reduce backround audio during video clip audio overlay
+	'TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB':	-12,		# normalize video clip audio to this maximum db; camera vids are quieter so gain them
+	'MAX_FILES_PER_CHUNK':	150,		# how many images/videos to process in each chunk (more=slower)
+	'DEBUG':	False,		# see and regret seeing, ginormous debug output
+	'FFMPEG_PATH':	r'D:\ssTEST\Vapoursynth_x64\ffmpeg.exe',		# Please leave this alone unless really confident
+	'FFPROBE_PATH':	r'D:\ssTEST\Vapoursynth_x64\ffprobe.exe',		# Please leave this alone unless really confident
+	'VSPIPE_PATH':	r'D:\ssTEST\Vapoursynth_x64\vspipe.exe',		# Please leave this alone unless really confident
+	'FFMPEG_ENCODER':	'libx264',		# Please leave this alone unless really confident. One of ['libx264', 'h264_nvenc']. h264_nvenc only works on "nvidia 2060 Super" upward.
+	'TARGET_RESOLUTION':	'1080p_pal',		# eg 1080p : One of ['1080p_pal', '4k_pal', '2160p_pal', '1080p_ntsc', '4k_ntsc', '2160p_ntsc'] only. Others result in broken aspect ratios.
+	'TARGET_VIDEO_BITRATE':	'4.5M',		# eg 4.5M : [{'1080p_pal': '4.5M'}, {'4k_pal': '15M'}, {'2160p_pal': '15M'}, {'1080p_ntsc': '4.5M'}, {'4k_ntsc': '15M'}, {'2160p_ntsc': '15M'}]
+	'slideshow_CONTROLLER_path':	r'D:\ssTEST\slideshow_CONTROLLER.py',		# Please leave this alone unless really confident
+	'slideshow_LOAD_SETTINGS_path':	r'D:\ssTEST\slideshow_LOAD_SETTINGS.py',		# Please leave this alone unless really confident
+	'slideshow_ENCODER_legacy_path':	r'D:\ssTEST\slideshow_ENCODER_legacy.vpy',		# Please leave this alone unless really confident
+}
+```
+
+
+
+
+
+
+
 
 
 We're OK for a thousand or so images/videos in a directory tree per run; doing that manually with a gui tool may be somewhat tedious, especially if you need to rearrange files and re-run.  
