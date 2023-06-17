@@ -25,6 +25,9 @@ We're good for 1,000 or so images/videos in a set of directory trees per slidesh
 although the number really is up to you. Recommend you estimate the duration as `num_pics_and_images * 3` 
 (3 seconds per pic) although videos clip durations will throw that estimate out a fair bit.    
 
+Attempting `4k` resolutions requires really **huge** amounts of temporary disk space and **very long** encode times... _c'est la vie_.
+Testing shows `4k` slideshows of home pictures does not appear any better (and sometimes worse) than `1080p` on a TV.    
+
 ### Portable "Installation" (x64 only)
 
 It's portable. Stuff all goes into the folder tree which you create first.    
