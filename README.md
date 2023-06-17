@@ -34,7 +34,8 @@ Later, once installed and configured, you may choose to re-configure to use a te
 Many people are wary of downloading exe files etc.   So am I.    
 If you are as well, look in the file `Setup.bat` to see what needs downloading and unzipping and placed where;
 and what `portable pip` and `vsrepo` commands you could do yourself in a dos window when cd'd into the right directories.   
-Good luck with trying to do it yourself, it's a bit involved. Recommend you just review it and to the Setup thing below.    
+Good luck with trying to do it yourself, it's a bit involved.    
+Recommend you just review it and use the `Setup.bat` thing below.    
 
 #### 2.1 Download the Setup et al
 
@@ -45,7 +46,9 @@ Download `Setup.bat` using this link https://raw.githubusercontent.com/hydra3333
 ... once it is displayed in your browser, "save as" into the fresh new directory you created above.
 
 Download the ubuquitous wget.exe with this link https://eternallybored.org/misc/wget/1.21.3/64/wget.exe and
-save it into the fresh new directory you created above.    
+save it into the fresh new directory you created above.  
+
+***** Notes:  
 Wget will be used to download stuff like portable Python, portable VapourSynth, a recent ffmpeg build,
 and the other files necessary to make a slideshow.    
 If you don't download wget into the same directory as `Setup.bat` the Setup Process will fail.    
