@@ -1,8 +1,0 @@
-{ 
-"var_a" : "Content for variable a", 
-"var_20" : 20, 
-"var_21" : 20.1, 
-"var_true" : true, 
-"var_false" : false, 
-"var_list" : [ false, true, "a", 1, 2, 2.5 ] 
-} 
