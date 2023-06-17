@@ -281,12 +281,12 @@ def audio_standardize_and_import_file(audio_filename, headroom_db, ignore_error_
 
 	if UTIL.DEBUG:
 		loglevel = r'verbose'
-		benchmark = r'-benchmark'
 		stats = r'-stats'
+		benchmark = r'-benchmark'
 	else:
 		loglevel = 'info'
-		benchmark = r''
 		stats = r'-nostats'
+		benchmark = stats	# a hack to workaround ffmpeg rejecting zero length string''
 
 	ffmpeg_commandline = [	UTIL.FFMPEG_EXE,
 							'-hide_banner', 
@@ -429,12 +429,12 @@ def encode_chunk_using_vsipe_ffmpeg(individual_chunk_id):
 	# Define the commandlines for the subprocesses forming the ENCODER
 	if UTIL.DEBUG:
 		loglevel = r'verbose'
-		benchmark = r'-benchmark'
 		stats = r'-stats'
+		benchmark = r'-benchmark'
 	else:
 		loglevel = 'info'
-		benchmark = r''
 		stats = r'-stats'
+		benchmark = stats	# a hack to workaround ffmpeg rejecting zero length string''
 
 	vspipe_commandline = [ UTIL.VSPIPE_EXE, '--progress', '--container', 'y4m', slideshow_ENCODER_legacy_path, '-' ]
 	ffmpeg_commandline = [ UTIL.FFMPEG_EXE,
@@ -1054,12 +1054,12 @@ if __name__ == "__main__":
 	# Lets transcode/mux them together.
 	if UTIL.DEBUG:
 		loglevel = r'verbose'
-		benchmark = r'-benchmark'
 		stats = r'-stats'
+		benchmark = r'-benchmark'
 	else:
 		loglevel = 'info'
-		benchmark = r''
 		stats = r'-stats'
+		benchmark = stats	# a hack to workaround ffmpeg rejecting zero length string''
 
 	final_mp4_with_audio_filename = SETTINGS_DICT['FINAL_MP4_WITH_AUDIO_FILENAME']
 	ffmpeg_commandline_libx264 = [

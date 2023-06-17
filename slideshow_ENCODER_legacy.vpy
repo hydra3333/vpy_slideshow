@@ -1,3 +1,5 @@
+### LEGACY CODE
+
 # 1.	Modifying the sys.path list in a module DOES NOT not affect the sys.path of other modules or the main program.
 # 2.	Modifying the sys.path list in the MAIN PROGRAM WILL affect the search path for	all modules imported by that program.
 # Ensure we can import modules from ".\" by adding the current default folder to the python path.
@@ -72,49 +74,48 @@ TERMINAL_WIDTH = 250
 global objPrettyPrint
 objPrettyPrint = pprint.PrettyPrinter(width=TERMINAL_WIDTH, compact=False, sort_dicts=False)	# facilitates formatting and printing of text and dicts etc
 
-def normalize_path(path):
-	#if DEBUG:	print(f"DEBUG: normalize_path:  incoming path='{path}'",flush=True,file=sys.stderr)
-	# Replace single backslashes with double backslashes
-	path = path.rstrip(os.linesep).strip('\r').strip('\n').strip()
-	r1 = r'\\'
-	r2 = r1 + r1
-	r4 = r2 + r2
-	path = path.replace(r1, r4)
-	# Add double backslashes before any single backslashes
-	for i in range(0,20):
-		path = path.replace(r2, r1)
-	#if DEBUG:	print(f"DEBUG: normalize_path: outgoing path='{path}'",flush=True,file=sys.stderr)
-	return path
+#def UTIL.normalize_path(path):
+#	#if DEBUG:	print(f"DEBUG: UTIL.normalize_path:  incoming path='{path}'",flush=True,file=sys.stderr)
+#	# Replace single backslashes with double backslashes
+#	path = path.rstrip(os.linesep).strip('\r').strip('\n').strip()
+#	r1 = r'\\'
+#	r2 = r1 + r1
+#	r4 = r2 + r2
+#	path = path.replace(r1, r4)
+#	# Add double backslashes before any single backslashes
+#	for i in range(0,20):
+#		path = path.replace(r2, r1)
+#	#if DEBUG:	print(f"DEBUG: UTIL.normalize_path: outgoing path='{path}'",flush=True,file=sys.stderr)
+#	return path
 
 # A Special function needed at the top DEFAULT_INI_FILE_SPECIFYING_PARAMETERS and DEFAULT_DIRECTORY_LIST
-def fully_qualified_directory_no_trailing_backslash(directory_name):
-	# make into a fully qualified directory string stripped and without a trailing backslash
-	# also remove extraneous backslashes which get added by things like abspath
-	new_directory_name = os.path.abspath(directory_name).rstrip(os.linesep).strip('\r').strip('\n').strip()
-	if directory_name[-1:] == (r'\ '.strip()):		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
-		new_directory_name = directory_name[:-1]	# remove any trailing backslash
-	new_directory_name = normalize_path(new_directory_name)
-	return new_directory_name
+#def UTIL.fully_qualified_directory_no_trailing_backslash(directory_name):
+#	# make into a fully qualified directory string stripped and without a trailing backslash
+#	# also remove extraneous backslashes which get added by things like abspath
+#	new_directory_name = os.path.abspath(directory_name).rstrip(os.linesep).strip('\r').strip('\n').strip()
+#	if directory_name[-1:] == (r'\ '.strip()):		# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ IS THE LAST CHARACTER IN THE STRING !
+#		new_directory_name = directory_name[:-1]	# remove any trailing backslash
+#	new_directory_name = UTIL.normalize_path(new_directory_name)
+#	return new_directory_name
 
-
-def fully_qualified_filename(file_name):
-	# Make into a fully qualified filename string using double backslashes
-	# to later print/write with double backslashes use eg
-	#	converted_string = fully_qualified_filename('D:\\a\\b\\\\c\\\\\\d\\e\\f\\filename.txt')
-	#	print(repr(converted_string),flush=True,file=sys.stderr)
-	# yields 'D:\\a\\b\\c\\d\\e\\f\\filename.txt'
-	new_file_name = os.path.abspath(file_name).rstrip(os.linesep).strip('\r').strip('\n').strip()
-	if new_file_name.endswith('\\'):
-		new_file_name = new_file_name[:-1]  # Remove trailing backslash
-	new_file_name = normalize_path(new_file_name)
-	return new_file_name
+#def UTIL.fully_qualified_filename(file_name):
+#	# Make into a fully qualified filename string using double backslashes
+#	# to later print/write with double backslashes use eg
+#	#	converted_string = UTIL.fully_qualified_filename('D:\\a\\b\\\\c\\\\\\d\\e\\f\\filename.txt')
+#	#	print(repr(converted_string),flush=True,file=sys.stderr)
+#	# yields 'D:\\a\\b\\c\\d\\e\\f\\filename.txt'
+#	new_file_name = os.path.abspath(file_name).rstrip(os.linesep).strip('\r').strip('\n').strip()
+#	if new_file_name.endswith('\\'):
+#		new_file_name = new_file_name[:-1]  # Remove trailing backslash
+#	new_file_name = UTIL.normalize_path(new_file_name)
+#	return new_file_name
 
 
 ###
 # Define GLOBALS and initialize them
 #
 global FFMPEG_PATH
-FFMPEG_PATH = ''
+FFMPEG_PATH = 'this_is_set_in_class_settings'
 global IS_DEBUG
 IS_DEBUG = False						# default DEBUG to False
 global IS_DEBUG_SYSTEM_OVERRIDE
@@ -366,13 +367,13 @@ class OBOLETE_legacy_settings:
 	def __init__(self):
 		global IS_DEBUG
 		global A_DEBUG_IS_ON
-		self.DEFAULT_INI_FILE_SPECIFYING_PARAMETERS = fully_qualified_directory_no_trailing_backslash(self._default_ini_file)	# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ is the last character in the string ! So don't put one there.
-		self.ini_file_specifying_parameters = fully_qualified_directory_no_trailing_backslash(self.DEFAULT_INI_FILE_SPECIFYING_PARAMETERS)
+		self.DEFAULT_INI_FILE_SPECIFYING_PARAMETERS = UTIL.fully_qualified_directory_no_trailing_backslash(self._default_ini_file)	# r prefix means the string is treated as a raw string so all escape codes will be ignored. EXCEPT IF THE \ is the last character in the string ! So don't put one there.
+		self.ini_file_specifying_parameters = UTIL.fully_qualified_directory_no_trailing_backslash(self.DEFAULT_INI_FILE_SPECIFYING_PARAMETERS)
 		for ddl in self._pre_default_directories_list:
-			self.DEFAULT_DIRECTORY_LIST.append(fully_qualified_directory_no_trailing_backslash(ddl))			
-		self.DEFAULT_TEMP_DIRECTORY_LIST = [ fully_qualified_directory_no_trailing_backslash(self._default_temp_directory) ]
-		self.DEFAULT_SNIPPETS_FILENAME_PATH_LIST = [ fully_qualified_filename(self._default_snippets_filename_path) ]
-		self.DEFAULT_OUTPUT_MKV_FILENAME_PATH_LIST = [ fully_qualified_filename(self._default_output_mkv_filename_path) ]
+			self.DEFAULT_DIRECTORY_LIST.append(UTIL.fully_qualified_directory_no_trailing_backslash(ddl))			
+		self.DEFAULT_TEMP_DIRECTORY_LIST = [ UTIL.fully_qualified_directory_no_trailing_backslash(self._default_temp_directory) ]
+		self.DEFAULT_SNIPPETS_FILENAME_PATH_LIST = [ UTIL.fully_qualified_filename(self._default_snippets_filename_path) ]
+		self.DEFAULT_OUTPUT_MKV_FILENAME_PATH_LIST = [ UTIL.fully_qualified_filename(self._default_output_mkv_filename_path) ]
 		self._default_ini_values = { 
 							self._ini_section_name : {
 							'; CRITICAL NOTES re "directory_list" and "temp_directory"' : '.',
@@ -519,7 +520,7 @@ class OBOLETE_legacy_settings:
 			###if A_DEBUG_IS_ON: print_DEBUG(f'class settings: read_ini_and_calculate_settings: RAW config .ini read as self._ini_values[self._ini_section_name]["DIRECTORY_LIST"]={self._ini_values[self._ini_section_name]["DIRECTORY_LIST"]}')
 			ddl_fully_qualified = []									# make DIRECTORY_LIST entries all fully qualified and escaped where required
 			for ddl in self._ini_values[self._ini_section_name]["DIRECTORY_LIST"]:
-				ddl_fully_qualified.append(fully_qualified_directory_no_trailing_backslash(ddl))
+				ddl_fully_qualified.append(UTIL.fully_qualified_directory_no_trailing_backslash(ddl))
 			self._ini_values[self._ini_section_name]["DIRECTORY_LIST"]				= ddl_fully_qualified
 
 			###if A_DEBUG_IS_ON: print_DEBUG(f'class settings: read_ini_and_calculate_settings: RAW config .ini read as config.get(self._ini_section_name, "TEMP_DIRECTORY_LIST")={config.get(self._ini_section_name, "TEMP_DIRECTORY_LIST")}')
@@ -527,7 +528,7 @@ class OBOLETE_legacy_settings:
 			###if A_DEBUG_IS_ON: print_DEBUG(f'class settings: read_ini_and_calculate_settings: RAW config .ini read as self._ini_values[self._ini_section_name]["TEMP_DIRECTORY_LIST"]={self._ini_values[self._ini_section_name]["TEMP_DIRECTORY_LIST"]}')
 			td_fully_qualified = []
 			for td in self._ini_values[self._ini_section_name]["TEMP_DIRECTORY_LIST"]:	# should only be 1 in the list. if more then we convert them all but only use the first
-				td_fully_qualified.append(fully_qualified_directory_no_trailing_backslash(td))
+				td_fully_qualified.append(UTIL.fully_qualified_directory_no_trailing_backslash(td))
 			self._ini_values[self._ini_section_name]["TEMP_DIRECTORY_LIST"]			= td_fully_qualified
 
 			###if A_DEBUG_IS_ON: print_DEBUG(f'class settings: read_ini_and_calculate_settings: RAW config .ini read as config.get(self._ini_section_name, "SNIPPETS_FILENAME_PATH_LIST")={config.get(self._ini_section_name, "SNIPPETS_FILENAME_PATH_LIST")}')
@@ -535,7 +536,7 @@ class OBOLETE_legacy_settings:
 			###if A_DEBUG_IS_ON: print_DEBUG(f'class settings: read_ini_and_calculate_settings: RAW config .ini read as self._ini_values[self._ini_section_name]["SNIPPETS_FILENAME_PATH_LIST"]={self._ini_values[self._ini_section_name]["SNIPPETS_FILENAME_PATH_LIST"]}')
 			sfp_fully_qualified = []
 			for sfp in self._ini_values[self._ini_section_name]["SNIPPETS_FILENAME_PATH_LIST"]:	# should only be 1 in the list. if more then we convert them all but only use the first
-				sfp_fully_qualified.append(fully_qualified_filename(sfp))
+				sfp_fully_qualified.append(UTIL.fully_qualified_filename(sfp))
 			self._ini_values[self._ini_section_name]["SNIPPETS_FILENAME_PATH_LIST"]	= sfp_fully_qualified
 
 			###if A_DEBUG_IS_ON: print_DEBUG(f'class settings: read_ini_and_calculate_settings: RAW config .ini read as config.get(self._ini_section_name, "OUTPUT_MKV_FILENAME_PATH_LIST")={config.get(self._ini_section_name, "OUTPUT_MKV_FILENAME_PATH_LIST")}')
@@ -543,7 +544,7 @@ class OBOLETE_legacy_settings:
 			###if A_DEBUG_IS_ON: print_DEBUG(f'class settings: read_ini_and_calculate_settings: RAW config .ini read as self._ini_values[self._ini_section_name]["OUTPUT_MKV_FILENAME_PATH_LIST"]={self._ini_values[self._ini_section_name]["OUTPUT_MKV_FILENAME_PATH_LIST"]}')
 			amf_fully_qualified = []
 			for amf in self._ini_values[self._ini_section_name]["OUTPUT_MKV_FILENAME_PATH_LIST"]:	# should only be 1 in the list. if more then we convert them all but only use the first
-				amf_fully_qualified.append(fully_qualified_filename(amf))
+				amf_fully_qualified.append(UTIL.fully_qualified_filename(amf))
 			self._ini_values[self._ini_section_name]["OUTPUT_MKV_FILENAME_PATH_LIST"]	= amf_fully_qualified
 
 			self._ini_values[self._ini_section_name]["RECURSIVE"]					= config.getboolean(self._ini_section_name, 'RECURSIVE')
@@ -736,6 +737,8 @@ class OBOLETE_legacy_settings:
 
 ###
 def get_mediainfo_specs(path: Union[Path,str]):
+# THIS IS A CUSTOM FUNCTION 
+# WHICH DOES ADDITIONAL THINGS WITH RETURNED VALUES BESIDE RETRIEVING THEM
 	mi_video_params = [
 	'Format',                                        # : Format used
 	'Format/String',                                 # : Format used + additional features
@@ -760,6 +763,9 @@ def get_mediainfo_specs(path: Union[Path,str]):
 	'FrameRate_Num',                                 # : Frames per second, numerator
 	'FrameRate_Den',                                 # : Frames per second, denominator
 	'FrameCount',                                    # : Number of frames
+	#
+	'Recorded_Date',								 # : Time/date/year that the recording began ... this can be None so use Encoded_Date instead. date_recorded = datetime.strptime(mi_dict["Recorded_Date"], "%Y-%m-%d %H:%M:%S UTC")
+	'Encoded_Date',									 # : Time/date/year that the encoding of this content was completed. date_encoded = datetime.strptime(mi_dict["Encoded_Date"], "%Y-%m-%d %H:%M:%S UTC")
 	#
 	'FrameRate_Mode',								 # : Frame rate mode (CFR, VFR)
 	'FrameRate_Minimum',							 # : Minimum Frames per second
@@ -2819,7 +2825,7 @@ prior_clip_for_crossfade = crossfade_blank_clip
 #++++++++++++++++++++
 
 
-CURRENT_CHUNK_FILENAME = fully_qualified_filename(objSettings.SETTINGS_DICT['CURRENT_CHUNK_FILENAME'])
+CURRENT_CHUNK_FILENAME = UTIL.fully_qualified_filename(objSettings.SETTINGS_DICT['CURRENT_CHUNK_FILENAME'])
 if not os.path.exists(CURRENT_CHUNK_FILENAME):
 	raise ValueError(f'ERROR: Incoming current chunk JSON-file "{CURRENT_CHUNK_FILENAME}" not found !')
 
@@ -2833,8 +2839,8 @@ print_NORMAL(f'ENCODER (legacy): Loaded incoming current chunk JSON file: "{CURR
 # OK we have retrieved a chunk dict, telling us what to encode.  It has this format:
 #	{	
 #		'chunk_id': chunk_id,
-#		'chunk_fixed_json_filename' :				fully_qualified_filename(SETTINGS_DICT['CURRENT_CHUNK_FILENAME']),		# always the same fixed filename
-#		'proposed_ffv1_mkv_filename' :				fully_qualified_filename(SETTINGS_DICT['CHUNK_ENCODED_FFV1_FILENAME_BASE'] + str(chunk_id).zfill(5) + r'.mkv'),	# filename related to chunk_id
+#		'chunk_fixed_json_filename' :				UTIL.fully_qualified_filename(SETTINGS_DICT['CURRENT_CHUNK_FILENAME']),		# always the same fixed filename
+#		'proposed_ffv1_mkv_filename' :				UTIL.fully_qualified_filename(SETTINGS_DICT['CHUNK_ENCODED_FFV1_FILENAME_BASE'] + str(chunk_id).zfill(5) + r'.mkv'),	# filename related to chunk_id
 #		'num_frames_in_chunk' :						0,	# initialize to 0, filled in by encoder
 #		'start_frame_num_in_chunk':					0,	# initialize to 0, filled in by encoder
 #		'end_frame_num_in_chunk':					0,	# initialize to 0, filled in by encoder
@@ -2879,7 +2885,7 @@ num_files = individual_chunk_dict['num_files']
 print_NORMAL(f'ENCODER (legacy): Start processing {num_files} image/video files, crossfade="{ct}/{cd}" RECURSIVE={objSettings.RECURSIVE} DEBUG_MODE={objSettings.DEBUG_MODE}" \n      with Extensions={objPrettyPrint.pformat(objSettings.EXTENSIONS)}')
 for i in range(0,num_files):	# base 0; 0..(num_files - 1)
 	file_to_process = individual_chunk_dict['file_list'][i]
-	path = Path(fully_qualified_filename(file_to_process))
+	path = Path(UTIL.fully_qualified_filename(file_to_process))
 	
 	if A_DEBUG_IS_ON: print_DEBUG(f'********************************************************************************************************************************************************************************************************************************************************')
 	Count_of_files = Count_of_files + 1
@@ -2927,7 +2933,7 @@ individual_chunk_dict['start_frame_num_in_chunk'] = clips_first_frame_num
 individual_chunk_dict['end_frame_num_in_chunk'] = clips_last_frame_num
 
 # now dump the updated individual_chunk_dict back to disk again so it can be re-read by the controller
-chunk_json_filename = fully_qualified_filename(individual_chunk_dict['chunk_fixed_json_filename'])					# always the same fixed filename
+chunk_json_filename = UTIL.fully_qualified_filename(individual_chunk_dict['chunk_fixed_json_filename'])					# always the same fixed filename
 if A_DEBUG_IS_ON:	print_DEBUG(f"DEBUG: ENCODER: attempting to create updated chunk_json_filename='{chunk_json_filename}' for controller to consume.")
 try:
 	with open(chunk_json_filename, 'w') as fp:
@@ -3007,7 +3013,7 @@ print_NORMAL(f'Done. ENCODER completed.')
 #snippet_data_file_object = open(objSettings.SNIPPETS_FILENAME_PATH_LIST[0] , "w")
 #
 #for Directory in objSettings.DIRECTORY_LIST:
-#	current_Directory = fully_qualified_directory_no_trailing_backslash(Directory)
+#	current_Directory = UTIL.fully_qualified_directory_no_trailing_backslash(Directory)
 #	ct = objSettings.CROSSFADE_TYPE if objSettings.DURATION_CROSSFADE_FRAMES>0 else None
 #	cd = objSettings.CROSSFADE_DIRECTION if objSettings.DURATION_CROSSFADE_FRAMES>0 else None
 #	print_NORMAL(f'Start processing image/video files in "{current_Directory}" crossfade="{ct}/{cd}" RECURSIVE={objSettings.RECURSIVE} DEBUG_MODE={objSettings.DEBUG_MODE} glob_var="{glob_var}" \n      with Extensions={objPrettyPrint.pformat(objSettings.EXTENSIONS)}')
@@ -3030,7 +3036,7 @@ print_NORMAL(f'Done. ENCODER completed.')
 #				clips, snippet_video_frame_number, snippet_num_frames = crossfade_merge(a=clips, b=this_clip, crossfade_duration_frames=objSettings.DURATION_CROSSFADE_FRAMES, crossfade_type=objSettings.CROSSFADE_TYPE, crossfade_direction=objSettings.CROSSFADE_DIRECTION) 
 #				if path.suffix.lower() in objSettings.VID_EXTENSIONS:
 #					# Save snippet info so we can find and use the file's audio later and put it in the right place in the slideshow being created by this script
-#					fully_qualified_path_string = fully_qualified_filename(path)
+#					fully_qualified_path_string = UTIL.fully_qualified_filename(path)
 #					snippet_data_file_object.write(f"{snippet_video_frame_number} {snippet_num_frames} {repr(fully_qualified_path_string)}\n")
 #					snippet_data_file_object.flush()
 #		path = get_path(paths)		# get next path to process in this while loop
