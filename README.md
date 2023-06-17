@@ -7,33 +7,30 @@ from images and video clips in specified folders,
 with background audio from a nominated folder of audio files, 
 with video audio overlyed on the background audio.    
 
-\_AI\_ has much better and elegant code which works with audio ... consider looking for that on GITHUB.    
-
-___
-### Under Development, it works    
-It's a hack-up of good stuff provided earlier by \_AI\_ in thread   
+This is a hack-up of good stuff provided earlier by \_AI\_ in thread   
 https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio 
+\_AI\_ has much better and elegant code which works with audio ... consider looking for that on GITHUB.    
 ___
 
+### Portabe "Installation" (x64 only)
 
-### Portabe Installation (x64 only)
-
-It's portable. Stuff all goes into one folder tree which you create first.    
+It's portable. Stuff all goes into the folder tree which you create first.    
 To uninstall later, just delete the folder.    
 
 Portable Python3 and Portable Vapoursynth (matching versions) and FFmpeg and MediaInfo etc need to
-be downloaded into the folder tree and a bunch of dependencies "portable installled" into there as well.
+be downloaded into the folder tree and a bunch of dependencies "portable installed" into there as well.
 
 #### 1. Create a fresh new directory   
 
-Create a NEW EMPTY directory somewhere with a LOT of free disk space. Try not to use `C:`.   
-Say, 5Gb free disk space per 100 incoming images/videos, which will be used for temporary working files.   
+Create a new EMPTY directory somewhere on a disk which has a LOT of free disk space. Try not to use `C:`.   
+I will need, say, 5Gb free disk space per 100 pics/videos, which will be used for temporary working files.   
 Later, once installed and configured, you may choose to re-configure to use a temporary folder on another disk.   
 
 **For the purpose of examples below, let's assume you created a new folder called `D:\QN_Auto_Slideshow_Creator_for_Windows`**    
 
-#### 2. Retrieve a fresh copy of the portable stuff
+#### 2. Download a fresh copy of the portable stuff
 
+#### 2.0 A note about security
 Many people are wary of downloading exe files etc.   So am I.    
 If you are as well, look in the file `Setup.bat` to see what needs downloading and unzipping and placed where;
 and what `portable pip` and `vsrepo` commands you could do yourself in a dos window when cd'd into the right directories.   
