@@ -48,7 +48,7 @@ Download `Setup.bat` using this link https://raw.githubusercontent.com/hydra3333
 Download the ubuquitous wget.exe with this link https://eternallybored.org/misc/wget/1.21.3/64/wget.exe and
 save it into the fresh new directory you created above.  
 
-***** Notes:  
+**Notes:**    
 Wget will be used to download stuff like portable Python, portable VapourSynth, a recent ffmpeg build,
 and the other files necessary to make a slideshow.    
 If you don't download wget into the same directory as `Setup.bat` the Setup Process will fail.    
