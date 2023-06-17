@@ -7,7 +7,7 @@ from images and video clips in specified folders,
 with background audio from a nominated folder of audio files, 
 with video audio overlyed on the background audio.    
 
-** \_AI\_ has much better and elegant code which works with audio ... look for that on GITHUB **    
+\_AI\_ has much better and elegant code which works with audio ... consider looking for that on GITHUB.    
 
 ___
 ### Under Development, it works    
@@ -18,26 +18,28 @@ ___
 
 ### Portabe Installation (x64 only)
 
-It's portable.   
-Stuff all goes into one folder tree you create first.    
+It's portable. Stuff all goes into one folder tree which you create first.    
 To uninstall later, just delete the folder.    
 
-Portable Python3 and Portable Vapoursynth (matching versions) and FFmpeg and MediaInfo etc etc etc need to
+Portable Python3 and Portable Vapoursynth (matching versions) and FFmpeg and MediaInfo etc need to
 be downloaded into the folder tree and a bunch of dependencies "portable installled" into there as well.
 
 #### 1. Create a fresh new directory   
+
 Create a NEW EMPTY directory somewhere with a LOT of free disk space. Try not to use `C:`.   
 Say, 5Gb free disk space per 100 incoming images/videos, which will be used for temporary working files.   
 Later, once installed and configured, you may choose to re-configure to use a temporary folder on another disk.   
 
 **For the purpose of examples below, let's assume you created a new folder called `D:\QN_Auto_Slideshow_Creator_for_Windows`**    
 
-#### 2. Create a fresh install of portable Python and portable Vapoursynth and pip dependencies and VSREPO dependencues
+#### 2. Retrieve a fresh copy of the portable stuff
 
 Many people are wary of downloading exe files etc.   So am I.    
 If you are as well, look in the file `Setup.bat` to see what needs downloading and unzipping and placed where;
 and what `portable pip` and `vsrepo` commands you could do yourself in a dos window when cd'd into the right directories.   
 Good luck with trying to do it yourself, it's a bit involved. Recommend you just review it and to the Setup thing below.    
+
+#### 2.1 Download the Setup et al
 
 Look at this url in a browser: https://github.com/hydra3333/vpy_slideshow   
 Notice file `Setup.bat`   
@@ -56,6 +58,8 @@ Some gobbledygook: ... except for the pip module installs ... pip puts bits of t
 in your username's temporary folder, i.e. something like `C:\Users\your_username\AppData\Local\Temp`,
 instead of where we tell pip to install the module for which the pip "collecting process" is occurring. "A choice
 of one", so we just live with it.    
+
+#### 2.1 Run Setup et al
 
 Now that you have downloaded `Setup.bat`, in File Explorer double-click on `Setup.bat` to run it.
 A DOS window should pop up showing all the downloads and pip's and vsrepo's and unzips as they happen.   
