@@ -22,11 +22,10 @@ The background audio is not looped, if it is shorter than the resulting slidesho
 You can easily add more background audio, it's up to you, background audio is auto-trimmed to the duration of the slideshow video.
 
 We're good for 1,000 or so images/videos in a set of directory trees per slideshow, perhaps 5,000 max,
-although the number really is up to you.    
-Recommend you estimate the duration as `num_pics_and_images * 3` 
-(3 seconds per pic, although videos clip durations will throw that estimate out a fair bit).    
+although the number really is up to you. Recommend you estimate the duration as `num_pics_and_images * 3` 
+(3 seconds per pic) although videos clip durations will throw that estimate out a fair bit.    
 
-### Portabe "Installation" (x64 only)
+### Portable "Installation" (x64 only)
 
 It's portable. Stuff all goes into the folder tree which you create first.    
 To uninstall later, just delete the folder.    
