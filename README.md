@@ -13,7 +13,7 @@ https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dim
 ___
 
 
-### Limitations
+## Limitations
 
 The process is quite slow, so we automatically encode 150 pics/videos or so 
 at a time in `chunks` and concatenate them at the end.    
@@ -31,7 +31,7 @@ Testing shows `4k` slideshows of home pictures does not appear any better (and s
 If you wanted a .mpg file to burn to DVD then use another tool, eg FFmpeg, to convert (transcode)
 the final mp4. It's easy enough.    
 
-### Portable "Installation" (x64 only)
+## Portable "Installation" (x64 only)
 
 It's portable. Stuff all goes into the folder tree which you create first.    
 To uninstall later, just delete the folder.    
@@ -39,7 +39,7 @@ To uninstall later, just delete the folder.
 Portable Python3 and Portable Vapoursynth (matching versions) and FFmpeg and MediaInfo etc need to
 be downloaded into the folder tree and a bunch of dependencies "portable installed" into there as well.
 
-#### 1. Create a fresh new directory   
+### 1. Create a fresh new directory   
 
 Create a new EMPTY directory somewhere on a disk which has a LOT of free disk space. Try not to use `C:`.   
 I will need, say, 5 Gb free disk space per 100 pics/videos, which will be used for temporary working files.   
@@ -47,7 +47,7 @@ Later, once installed and configured, you may choose to re-configure to use a te
 
 **For the purpose of examples below, let's assume you created a new folder called `D:\QN_Auto_Slideshow_Creator_for_Windows`**    
 
-#### 2. Download a fresh copy of the portable stuff
+### 2. Download a fresh copy of the portable stuff
 
 #### 2.0 A note about security
 Many people are wary of downloading exe files etc.   So am I.    
@@ -77,7 +77,7 @@ in your username's temporary folder, i.e. something like `C:\Users\your_username
 instead of where we tell pip to install the module for which the pip "collecting process" is occurring. "A choice
 of one", so we just live with it.    
 
-#### 2.1 Run Setup et al
+### 2.1 Run Setup et al
 
 Now that you have downloaded `Setup.bat`, in File Explorer double-click on `Setup.bat` to run it.    
 A DOS window will pop up showing all the downloads and pip's and vsrepo's and unzips as they happen.   
@@ -91,9 +91,9 @@ These give you
 - latest FFmpeg and MedioaInfo exes and MediaInfo dll
 - a few files necessary to run Q'N Auto Slideshow Creator for Windows   
 
-### Preparation then Configuration    
+## Preparation then Configuration    
 
-#### 1. Preparation
+### 1. Preparation
 
 Check your disks and their free disk space.    
 During configuration you may choose to specify a different disk/folder to hold
@@ -106,7 +106,7 @@ Per the install example, something like this is good: `D:\QN_Auto_Slideshow_Crea
 Copy any audio files to that folder.  Uplifting type background instrumental music is good, even classical :)    
 Rename the copied files to your liking, since they will be read in alphabetical order into one background audio track.
 
-#### 2. Create and edit Configuration file `slideshow_settings.py`    
+### 2. Create and edit Configuration file `slideshow_settings.py`    
 
 Configuration file `slideshow_settings.py` tells your requirements to the process.    
 
@@ -171,6 +171,14 @@ settings = {
 	'slideshow_ENCODER_legacy_path':	r'D:\ssTEST\slideshow_ENCODER_legacy.vpy',		# Please leave this alone unless really confident
 }
 ```
+
+## Starting the slideshow process    
+
+
+
+
+
+
 
 
 
