@@ -5,7 +5,7 @@ Download / Setup / Configure then Fire-and-wait-a-long-time.
 A python3/vapoursynth script using ffmpeg to create a 'HD' .mp4 slideshow
 from images and video clips in specified folders,
 with background audio from a nominated folder of audio files, 
-with video audio overlyed on the background audio.    
+with video audio overlayed onto the background audio.    
 
 This is a hack-up of good stuff provided earlier by \_AI\_ in thread   
 https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio 
@@ -79,7 +79,7 @@ Notice file `Setup.bat`
 Download `Setup.bat` using this link https://raw.githubusercontent.com/hydra3333/vpy_slideshow/main/Setup.bat    
 ... once it is displayed in your browser, "save as" into the fresh new directory you created above.
 
-Download the ubuquitous `wget.exe` with this link https://eternallybored.org/misc/wget/1.21.3/64/wget.exe and
+Download the ubiquitous `wget.exe` with this link https://eternallybored.org/misc/wget/1.21.3/64/wget.exe and
 also save it into the fresh new directory you created above.  
 
 **Notes:**    
@@ -103,7 +103,7 @@ These give you
 - portable Vapoursynth x64 (R62 last time I looked, depends on python 3.11.x)   
 - relevant Python x64 pip dependencies   
 - relevant Vapoursynth vsrepo x64 dependencies   
-- latest FFmpeg and MedioaInfo exes and MediaInfo dll
+- latest FFmpeg and MediaInfo exes and MediaInfo dll
 - a few files necessary to run Q'N Auto Slideshow Creator for Windows   
 
 ## Preparation then Configuration    
