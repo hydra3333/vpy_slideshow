@@ -18,10 +18,13 @@ ___
 The process is quite slow, so we automatically encode 150 pics/videos or so 
 at a time in `chunks` and concatenate them at the end.    
 
-We're OK for a thousand or so images/videos in a directory tree per slideshow.
-
 The background audio is not looped, if it is shorter than the resulting slideshow video then there will be silence at the end.
 You can easily add more background audio, it's up to you, background audio is auto-trimmed to the duration of the slideshow video.
+
+We're good for 1,000 or so images/videos in a set of directory trees per slideshow, perhaps 5,000 max,
+although the number really is up to you.    
+Recommend you estimate the duration as `num_pics_and_images * 3` 
+(3 seconds per pic, although videos clip durations will throw that estimate out a fair bit).    
 
 ### Portabe "Installation" (x64 only)
 
@@ -167,13 +170,6 @@ settings = {
 
 
 
-
-
-
-
-
-We're OK for a thousand or so images/videos in a directory tree per run; doing that manually with a gui tool may be somewhat tedious, especially if you need to rearrange files and re-run.  
-This is *VERY SLOW* though; let it run overnight.   
 
 #### Configuration and Running Option 1 - editing `vpy_slideshow.bat`   
 
