@@ -421,6 +421,9 @@ def video_calculate_rotation_flipping(rotation_degrees):
 	# sometimes negative rotation degree values have been seen in the wild, so convert them to positive clockwise rotations.
 	# I have only ever seen video rotations in increments of 90 degrees, however allow for others
 	#
+	# https://www.vapoursynth.com/doc/functions/video/transpose.html
+	# https://www.vapoursynth.com/doc/functions/video/flipvertical_fliphorizontal.html
+	#
 	positive_rotation = (360 + rotation_degrees) % 360	# calculates the positive rotation value in degrees based on a given rotation in degrees.
 	return {
 				'orientation_value': rotation_degrees,
@@ -628,6 +631,8 @@ def image_get_date_recorded_from_exif(image_path, exif_data):
 	return date_recorded
 
 def image_calculate_rotation_flipping(exif_data):
+	# https://www.vapoursynth.com/doc/functions/video/transpose.html
+	# https://www.vapoursynth.com/doc/functions/video/flipvertical_fliphorizontal.html
 	# https://sirv.com/help/articles/rotate-photos-to-be-upright/
 	#	Exif Orientation values 1,3,6,8 have no flipping, 2,4,5,7 involve flipping as well as rotations.
 	#	Orientation Value: 1

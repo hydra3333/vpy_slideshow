@@ -1096,6 +1096,13 @@ def get_clip_specs(clip=None, path=None, ext=None, mediainfo_specs:dict=None, ro
 	# Sometimes, ffms2 delvers content with missing metadata tellng us what the source frame properties are.
 	# Perhaps mediainfo can find out for us.
 	# Experience show usually not though, but it can't hurt to try
+
+	if A_DEBUG_IS_ON: 
+		print_DEBUG(f'\n{100*"?"}\n')
+		print_DEBUG(f'\nget_clip_specs: IN get_clip_specs, BEFORE RESIZING, BEFORE GUESSING: path="{path}"\nclip_specs=\n{UTIL.objPrettyPrint.pformat(clip_specs)}\n')
+		print_DEBUG(f'\nget_clip_specs: IN get_clip_specs, BEFORE RESIZING, BEFORE GUESSING: path="{path}"\nmediainfo_specs=\n{UTIL.objPrettyPrint.pformat(mediainfo_specs)}\n')
+		print_DEBUG(f'\n{100*"?"}\n')
+
 	# **********
 	# Guess the Specs Pass #1 before we resort to total guesses.
 	# **********
@@ -1171,31 +1178,91 @@ def get_clip_specs(clip=None, path=None, ext=None, mediainfo_specs:dict=None, ro
 	
 	# **********
 	# now start making the guessing in pass #1
+
 	if True:
+		# 2023.06.17 make a wild guess if nothing known, i.e bt.709 based
+		if clip_specs["_Matrix"] is None and clip_specs["_Transfer"] is None and clip_specs["_Primaries"] is None and clip_specs["_ColorRange"] is None :
+			# eveything is empty, default to HD BT709 ?
+			#
+			clip_specs["guessed_Matrix"] = True
+			#clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT470_BG
+			#clip_specs["proposed_Matrix"] = mc_bt601
+			clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT709
+			#clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_NCL
+			#clip_specs["proposed_Matrix"] = vs.MatrixCoefficients.MATRIX_BT2020_CL
+			clip_specs["_Matrix"] = clip_specs["proposed_Matrix"] 
+			#
+			clip_specs["guessed_Transfer"] = True
+			#clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT470_BG
+			#clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT601
+			clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT709
+			#clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT470_M
+			#clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT2020_10
+			#clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_BT2020_12
+			#clip_specs["proposed_Transfer"] = vs.TransferCharacteristics.TRANSFER_ST2084
+			clip_specs["_Transfer"] = clip_specs["proposed_Transfer"] 
+			#
+			clip_specs["guessed_Primaries"] = True
+			#clip_specs["proposed_Primaries"] = vs.ColorPrimaries.PRIMARIES_BT470_BG	# for PAL rec.601	https://kdenlive.org/en/project/color-hell-ffmpeg-transcoding-and-preserving-bt-601/
+			#clip_specs["proposed_Primaries"] = vs.ColorPrimaries.PRIMARIES_ST170_M		# for NTSC rec.601	https://kdenlive.org/en/project/color-hell-ffmpeg-transcoding-and-preserving-bt-601/
+			clip_specs["proposed_Primaries"] = vs.ColorPrimaries.PRIMARIES_BT709
+			#clip_specs["proposed_Primaries"] = vs.ColorPrimaries.PRIMARIES_BT2020
+			clip_specs["_Primaries"] = clip_specs["proposed_Primaries"] 
+			#
+			clip_specs["guessed_ColorRange"] = True
+			clip_specs["proposed_ColorRange"] = vs.ColorRange.RANGE_FULL
+			#clip_specs["proposed_ColorRange"] = vs.ColorRange.RANGE_LIMITED
+			clip_specs["_ColorRange"] = clip_specs["proposed_ColorRange"] 
+			#
+			if A_DEBUG_IS_ON: 
+				print_DEBUG(f'\n{100*"?"}\n')
+				print_DEBUG(f'\nget_clip_specs: IN get_clip_specs, BEFORE RESIZING, made a wild guess since nothing known, i.e bt.709 based path="{path}"\nclip_specs=\n{UTIL.objPrettyPrint.pformat(clip_specs)}\n')
+				print_DEBUG(f'\nget_clip_specs: IN get_clip_specs, BEFORE RESIZING, made a wild guess since nothing known, i.e bt.709 based path="{path}"\nmediainfo_specs=\n{UTIL.objPrettyPrint.pformat(mediainfo_specs)}\n')
+				print_DEBUG(f'\n{100*"?"}\n')
+		else:
+				print_DEBUG(f'\n{100*"?"}\n')
+				print_DEBUG(f'\nget_clip_specs: IN get_clip_specs, BEFORE RESIZING, NO wild guess since bits of clip_specs known path="{path}"\nclip_specs=\n{UTIL.objPrettyPrint.pformat(clip_specs)}\n')
+				print_DEBUG(f'\nget_clip_specs: IN get_clip_specs, BEFORE RESIZING, NO wild guess since bits of clip_specs known path="{path}"\nmediainfo_specs=\n{UTIL.objPrettyPrint.pformat(mediainfo_specs)}\n')
+				print_DEBUG(f'\n{100*"?"}\n')
+	
 		if  clip_specs["_Matrix"] == vs.MatrixCoefficients.MATRIX_UNSPECIFIED or clip_specs["_Matrix"] is None:	# _Matrix is usually defined and the rest may not be. (ffms2 seems to usually yield MATRIX_BT470_BG ?)
 			if 'matrix_coefficients' in mediainfo_specs:
 				if mediainfo_specs['matrix_coefficients'] is not None:
 					clip_specs["guessed_Matrix"] = True
 					clip_specs["proposed_Matrix"] = mi_matrix_coefficients_dict[mediainfo_specs['matrix_coefficients']]	# translate to "vs." if possible
 					if A_DEBUG_IS_ON: print_DEBUG(f'get_clip_specs: Guess the Specs Pass #1 translated mediainfo matrix_coefficients "{mediainfo_specs["matrix_coefficients"]}" to "{clip_specs["proposed_Matrix"]}"')
+
 		if  clip_specs["_Transfer"] == vs.TransferCharacteristics.TRANSFER_UNSPECIFIED or clip_specs["_Transfer"] is None:
 			if 'transfer_characteristics' in mediainfo_specs:
 				if mediainfo_specs['transfer_characteristics'] is not None:
 					clip_specs["guessed_Transfer"] = False
 					clip_specs["proposed_Transfer"] = mi_transfer_characteristics_dict[mediainfo_specs['transfer_characteristics']]	# translate to "vs." if possible
 					if A_DEBUG_IS_ON: print_DEBUG(f'get_clip_specs: Guess the Specs Pass #1 translated mediainfo transfer_characteristics "{mediainfo_specs["transfer_characteristics"]}" to "{clip_specs["proposed_Transfer"]}"')
+
 		if  clip_specs["_Primaries"] == vs.ColorPrimaries.PRIMARIES_UNSPECIFIED or clip_specs["_Primaries"] is None:
 			if 'colour_primaries' in mediainfo_specs:
 				if mediainfo_specs['colour_primaries'] is not None:
 					clip_specs["guessed_Primaries"] = True
 					clip_specs["proposed_Primaries"] = mi_color_primaries_dict[mediainfo_specs['colour_primaries']]	# translate to "vs." if possible
 					if A_DEBUG_IS_ON: print_DEBUG(f'get_clip_specs: Guess the Specs Pass #1 translated mediainfo colour_primaries "{mediainfo_specs["colour_primaries"]}" to "{clip_specs["proposed_Primaries"]}"')
+
 		if clip_specs["_ColorRange"] is None:
 			if 'colour_range' in mediainfo_specs:
 				if mediainfo_specs['colour_range'] is not None:
 					clip_specs["guessed_ColorRange"] = True
 					clip_specs["proposed_ColorRange"] = mi_colour_range_dict[mediainfo_specs['colour_range']]	# translate to "vs." if possible
 					if A_DEBUG_IS_ON: print_DEBUG(f'get_clip_specs: Guess the Specs Pass #1 translated mediainfo colour_range "{mediainfo_specs["colour_range"]}" to "{clip_specs["proposed_ColorRange"]}"')
+
+
+
+
+
+
+
+
+
+
+
 
 	# **********
 	# Guess the Specs Pass #2 once we've had a god with medinfo values ..
@@ -1381,14 +1448,6 @@ def get_clip_specs(clip=None, path=None, ext=None, mediainfo_specs:dict=None, ro
 	return clip_specs
 
 ###
-def get_random_ffindex_path(path):
-	# there is a significant to 100% chance of home picture/video filenames in directory trees being non-unique
-	# apparently uuid4 has a good chance of returning a unique string
-	f = objSettings.TEMP_DIRECTORY_LIST[0] + r'\ '.strip() + os.path.basename(path) + r'_' + str(uuid.uuid4()) + r'.ffindex'
-	if A_DEBUG_IS_ON: print_DEBUG(f'get_random_ffindex_path: random ffindex cache path="{f}"')
-	return f
-
-###
 def auto_rotation_value_PIL(path):
 	# A TRICK FOR NEW PLAYERS ... MEDIAINFO YIELDS ROTATION VALUES FOR CLOCKWISE ROTATIONS for videos !!! NOT ANTI-CLOCKWISE like PIL !!!
 	# from PIL import Image, ExifTags, UnidentifiedImageError   # pip install Pillow, or equivalent
@@ -1512,7 +1571,7 @@ def get_clip_from_path_with_VFR_fixed(path, ext, mediainfo_specs):	# opens VID_E
 	if not ext in objSettings.VID_EXTENSIONS:
 		raise ValueError(f'get_clip_from_path_with_VFR_fixed: expected {path} to have extension in {objSettings.VID_EXTENSIONS} ... aborting')
 	try:
-		ffcachefile = get_random_ffindex_path(path)
+		ffcachefile = UTIL.get_random_ffindex_filename(path)
 		if A_DEBUG_IS_ON: print_DEBUG(f'get_clip_from_path_with_VFR_fixed: about to ffms2.Source("{str(path)}", cachefile="{ffcachefile}", fpsnum={objSettings.TARGET_VFR_FPSNUM}, fpsden={objSettings.TARGET_VFR_FPSDEN}')
 		c = core.ffms2.Source(str(path), cachefile=ffcachefile, fpsnum=objSettings.TARGET_VFR_FPSNUM, fpsden=objSettings.TARGET_VFR_FPSDEN)	# force dups and drops to "convert" to VFR
 		last_file_opened_with_ffms2 = True
@@ -1564,7 +1623,7 @@ def get_clip_from_path(path, ext, mediainfo_specs):		# opens VID_EEK_EXTENSIONS 
 		raise ValueError(f'get_clip_from_path: expected {path} to have extension in {objSettings.VID_EEK_EXTENSIONS} ... aborting')
 	if ext in objSettings.VID_EXTENSIONS:
 		try:
-			ffcachefile = get_random_ffindex_path(path)
+			ffcachefile = UTIL.get_random_ffindex_filename(path)
 			if A_DEBUG_IS_ON: print_DEBUG(f'get_clip_from_path: about to ffms2.Source("{str(path)}", cachefile="{ffcachefile}"')
 			c = core.ffms2.Source(str(path), cachefile=ffcachefile)
 			last_file_opened_with_ffms2 = True
@@ -1606,7 +1665,7 @@ def get_clip_from_pic(path, ext):
 	if A_DEBUG_IS_ON: print_DEBUG(f'get_clip_from_path: Entered with path="{path}" ext="{ext}"')
 	if ext in objSettings.PIC_EXTENSIONS:
 		try:
-			ffcachefile = get_random_ffindex_path(path)
+			ffcachefile = UTIL.get_random_ffindex_filename(path)
 			if A_DEBUG_IS_ON: print_DEBUG(f'get_clip_from_pic: about to ffms2.Source("{str(path)}", cachefile="{ffcachefile}"')
 			clip = core.ffms2.Source(str(path), cachefile=ffcachefile)
 			last_file_opened_with_ffms2 = True
@@ -2190,8 +2249,17 @@ def get_clip_2(path):
 	clip = trim_pad_clip_accurately(clip, ext)
 	#+++ NOTE THE TRIM HERE AT THE END OF PIC/VIDEO GETTING/FIXING **********
 	
-	#++++++++++++++++++++
-	# Clip is not yet resized/boxified, so if denoising small sized videos was requested,
+	#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	#
+	# CLIP IS NOT YET RESIZED/BOXIFIED
+	#
+	#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	
+	#so if denoising small sized videos was requested,
 	# go ahead using fixed values for moderate motion-compensation denoising with MDegrain1
 	if ext in objSettings.VID_EEK_EXTENSIONS:
 		if objSettings.DENOISE_SMALL_SIZE_VIDEOS and (clip.width < objSettings.TARGET_WIDTH) and (clip.width < objSettings.TARGET_HEIGHT):
@@ -2204,6 +2272,8 @@ def get_clip_2(path):
 	#++++++++++++++++++++
 	# Apply an auto-rotate if specified in the source file
 	# A TRICK FOR NEW PLAYERS ... MEDIAINFO YIELDS ROTATION VALUES FOR CLOCKWISE ROTATIONS for videos !!! NOT ANTI-CLOCKWISE like PIL !!!
+	# https://www.vapoursynth.com/doc/functions/video/transpose.html
+	# https://www.vapoursynth.com/doc/functions/video/flipvertical_fliphorizontal.html
 	if rotation_degrees is None or rotation_degrees == 0:
 		###if A_DEBUG_IS_ON: print_DEBUG(f'get_clip_2: zero auto-rotation of clip {path}')
 		pass
@@ -2236,6 +2306,7 @@ def get_clip_2(path):
 	#++++++++++++++++++++
 
 	# BY NOW we have clip of a video or a pic, which is at the correct framerate and trimmed/padded to the required length
+	# IT HAS NOT YET BEEN RESIZED, so we can use it to guess colour characteristics
 
 	#++++++++++++++++++++
 	# Double-check and return None if the clip is empty so it can be ignored
@@ -2244,8 +2315,14 @@ def get_clip_2(path):
 		return None
 
 	#++++++++++++++++++++
-	# retieve the clip specs ... if mediainfo has already been done (it was in VID_EXTENSIONS) then re-use it that rathert han re-read the file
+	# retieve the clip specs ... if mediainfo has already been done (it was in VID_EXTENSIONS) then re-use it that rather than re-read the file
 	clip_specs = get_clip_specs(clip, path, ext=ext, mediainfo_specs=mediainfo_specs, rotation_degrees=rotation_degrees, rotation_direction=rotation_direction)	# rotation_degrees, rotation_direction have already been retrieved, pass them along to prevent a double-read
+	
+	if A_DEBUG_IS_ON: 
+		print_DEBUG(f'\n{100*"?"}\n')
+		print_DEBUG(f'\nget_clip: AFTER clip_specs, BEFORE RESIZING, AFTER GUESSING: path="{path}"\nclip_specs=\n{UTIL.objPrettyPrint.pformat(clip_specs)}\n')
+		print_DEBUG(f'\nget_clip: AFTER clip_specs, BEFORE RESIZING, AFTER GUESSING: path="{path}"\nmediainfo_specs=\n{UTIL.objPrettyPrint.pformat(mediainfo_specs)}\n')
+		print_DEBUG(f'\n{100*"?"}\n')
 	
 	#++++++++++++++++++++
 	# SET missing frame properties with guessed values
