@@ -6,7 +6,7 @@ settings = {
 													#r'D:\ssTEST\TEST_VIDS_IMAGES\2022-11-Tasmania\Patricia',
 												],	# a list, one or more folders to look in for slideshow pics/videos. the r in front of the string is CRITICAL
 	'RECURSIVE':	True,		# case sensitive: whether to recurse the source folder(s) looking for slideshow pics/videos
-	'TEMP_FOLDER':	r'G:\ssTEST\TEMP',		# folder where temporary files go; USE A DISK WITH LOTS OF SPARE DISK SPACE - CIRCA 6 GB PER 100 PICS/VIDEOS
+	'TEMP_FOLDER':	r'D:\ssTEST\TEMP',		# folder where temporary files go; USE A DISK WITH LOTS OF SPARE DISK SPACE - CIRCA 6 GB PER 100 PICS/VIDEOS
 	'BACKGROUND_AUDIO_INPUT_FOLDER':	r'D:\ssTEST\BACKGROUND_AUDIO_INPUT_FOLDER',		# Folder containing audio files (in sequence) to make an audio background track (it is not looped if too short). No files = silent background.
 	'FINAL_MP4_WITH_AUDIO_FILENAME':	r'D:\ssTEST\slideshow.FINAL_MP4_WITH_AUDIO.TEST_ONLY.mp4',		# the filename of the FINAL slideshow .mp4
 	#'FINAL_MP4_WITH_AUDIO_FILENAME':	r'D:\ssTEST\slideshow.FINAL_MP4_WITH_AUDIO.Angela.mp4',		# the filename of the FINAL slideshow .mp4
@@ -24,13 +24,13 @@ settings = {
 	'TARGET_AUDIO_BACKGROUND_GAIN_DURING_OVERLAY':	-30,		# how many DB to reduce backround audio during video clip audio overlay
 	'TARGET_AUDIO_SNIPPET_NORMALIZE_HEADROOM_DB':	-12,		# normalize video clip audio to this maximum db; camera vids are quieter so gain them
 	'MAX_FILES_PER_CHUNK':	150,		# how many images/videos to process in each chunk (more=slower)
-	'DEBUG':	True,		# see and regret seeing, ginormous debug output
+	'DEBUG':	False,		# see and regret seeing, ginormous debug output
 	'FFMPEG_PATH':	r'D:\ssTEST\Vapoursynth_x64\ffmpeg.exe',		# Please leave this alone unless really confident
 	'FFPROBE_PATH':	r'D:\ssTEST\Vapoursynth_x64\ffprobe.exe',		# Please leave this alone unless really confident
 	'VSPIPE_PATH':	r'D:\ssTEST\Vapoursynth_x64\vspipe.exe',		# Please leave this alone unless really confident
 	'FFMPEG_ENCODER':	'h264_nvenc',		# Please leave this alone unless really confident. One of ['libx264', 'h264_nvenc']. h264_nvenc only works on "nvidia 2060 Super" upward.
-	'TARGET_RESOLUTION':	'4k',		# eg 1080p : One of ['1080p', '4k', '2160p'] only.
-	#'TARGET_VIDEO_BITRATE':	'4.5M',		# Please leave this alone unless really confident. 4.5M is ok (HQ) for h.264 1080p25 slideshow material.
+	'TARGET_RESOLUTION':	'1080p_pal',		# eg 1080p : One of ['1080p_pal', '576p_pal', '4k_pal', '2160p_pal', '1080p_ntsc', '480p_ntsc', '4k_ntsc', '2160p_ntsc'] only.
+	'TARGET_VIDEO_BITRATE':	'4.5M',		# eg 4.5M : [{'1080p_pal': '4.5M'}, {'576p_pal': '2M'}, {'4k_pal': '15M'}, {'2160p_pal': '15M'}, {'1080p_ntsc': '4.5M'}, {'480p_ntsc': '2M'}, {'4k_ntsc': '15M'}, {'2160p_ntsc': '15M'}]
 	'slideshow_CONTROLLER_path':	r'D:\ssTEST\slideshow_CONTROLLER.py',		# Please leave this alone unless really confident
 	'slideshow_LOAD_SETTINGS_path':	r'D:\ssTEST\slideshow_LOAD_SETTINGS.py',		# Please leave this alone unless really confident
 	'slideshow_ENCODER_legacy_path':	r'D:\ssTEST\slideshow_ENCODER_legacy.vpy',		# Please leave this alone unless really confident
