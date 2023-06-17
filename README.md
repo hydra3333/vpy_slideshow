@@ -99,11 +99,13 @@ You can safely close the pop-up dos box after it's completed.
 Now, using your favourite text editor, eg Notepad, edit `slideshow_settings.py` and make required changes.   
 Syntax is critical, all command and matching quotes etc must be **perect** or the process will fail.    
 Look for and change the settings you need. Please be careful or you will have to re-edit ;)    
+
 **At a minimum:**
 - `ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS` - specify one or more quoted and comma separated Folder names of pics/videos
 - `BACKGROUND_AUDIO_INPUT_FOLDER` - specify a Folder containing audio files (in sequence) to make an audio background track (it is not looped if too short). No files in folder = silent background
 - `FINAL_MP4_WITH_AUDIO_FILENAME` - specify the directory and filename of the FINAL slideshow .mp4    
-_Optionally:_    
+
+**Optionally:**    
 - `RECURSIVE` - whether to recurse into the subfolders of `ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS`
 - `TARGET_RESOLUTION` - HD `1080p_pal` is the sweet spot, testing shows. If in NTSC land try `1080p_ntsc` to get 29.976 framerate
 - `TARGET_VIDEO_BITRATE` ... the defaults are good, use one of them matching `TARGET_RESOLUTION`
@@ -112,10 +114,10 @@ _Optionally:_
 - `TEMP_FOLDER` - point to a folder on a disk with plenty of free disk space 
 - `SUBTITLE_DEPTH` - you  can have subtitles of the folder containing each pic/image
 - `MAX_FILES_PER_CHUNK` ... more than 150 files encoded at one will slow the process to a crawl, like 2 day execution times or worse ... 50 to 150 is "doable"
-_Don't touch any of the rest unless you're prepared to fix things._ 
 
+**_Don't touch any of the other settings unless you're prepared to fix things.**    
 
-Here's an example of one with edits already made:   
+Here's an example of settings with edits already made:   
 ```
 settings = {
 	'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS':	[
