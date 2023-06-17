@@ -201,21 +201,29 @@ def load_settings():
 	DURATION_MAX_VIDEO_SEC						= float(7200.0)
 	DENOISE_SMALL_SIZE_VIDEOS					= True
 
-	valid_TARGET_RESOLUTION_DICT				=	{	r'1080p'.lower():	{ 'WIDTH': int(1920), 'HEIGHT': int(1080), 'BITRATE': r'4.5M' },
-														r'4k'.lower():		{ 'WIDTH': int(3840), 'HEIGHT': int(2160), 'BITRATE': r'12M' },
-														r'2160p'.lower():	{ 'WIDTH': int(3840), 'HEIGHT': int(2160), 'BITRATE': r'12M' }
+	valid_TARGET_RESOLUTION_DICT				=	{	
+														r'1080p_PAL'.lower():	{ 'WIDTH': int(1920), 'HEIGHT': int(1080), 'BITRATE': r'4.5M', 'FRAMERATE_NUMERATOR': int(25),    'FRAMERATE_DENOMINATOR': int(1) },
+														r'576p_PAL'.lower():	{ 'WIDTH': int(720),  'HEIGHT': int(576),  'BITRATE': r'2M',   'FRAMERATE_NUMERATOR': int(25),    'FRAMERATE_DENOMINATOR': int(1) },
+														r'4k_PAL'.lower():		{ 'WIDTH': int(3840), 'HEIGHT': int(2160), 'BITRATE': r'15M',  'FRAMERATE_NUMERATOR': int(25),    'FRAMERATE_DENOMINATOR': int(1) },
+														r'2160p_PAL'.lower():	{ 'WIDTH': int(3840), 'HEIGHT': int(2160), 'BITRATE': r'15M',  'FRAMERATE_NUMERATOR': int(25),    'FRAMERATE_DENOMINATOR': int(1) } ,
+														r'1080p_NTSC'.lower():	{ 'WIDTH': int(1920), 'HEIGHT': int(1080), 'BITRATE': r'4.5M', 'FRAMERATE_NUMERATOR': int(30000), 'FRAMERATE_DENOMINATOR': int(1001) },	# 29.976
+														r'480p_NTSC'.lower():	{ 'WIDTH': int(720),  'HEIGHT': int(480),  'BITRATE': r'2M',   'FRAMERATE_NUMERATOR': int(30000), 'FRAMERATE_DENOMINATOR': int(1001) },	# 29.976
+														r'4k_NTSC'.lower():		{ 'WIDTH': int(3840), 'HEIGHT': int(2160), 'BITRATE': r'15M',  'FRAMERATE_NUMERATOR': int(30000), 'FRAMERATE_DENOMINATOR': int(1001) },	# 29.976
+														r'2160p_NTSC'.lower():	{ 'WIDTH': int(3840), 'HEIGHT': int(2160), 'BITRATE': r'15M',  'FRAMERATE_NUMERATOR': int(30000), 'FRAMERATE_DENOMINATOR': int(1001) },	# 29.976
 													}
-	TARGET_RESOLUTION							= list(valid_TARGET_RESOLUTION_DICT.keys())[0]	# the first key in that dict
+	TARGET_RESOLUTION							= list(valid_TARGET_RESOLUTION_DICT.keys())[0]	# the first key in the dict should be 1080p_PAL :)
 	TARGET_WIDTH 								= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['WIDTH']
 	TARGET_HEIGHT	 							= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['HEIGHT']
 	TARGET_VIDEO_BITRATE						= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['BITRATE']		# 4.5M is ok (HQ) for h.264 1080p25 slideshow material ... dunno about 2160p, web say 25M whcih is FAR too high to be handy.
+	TARGET_FPSNUM								= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['FRAMERATE_NUMERATOR']
+	TARGET_FPSDEN								= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['FRAMERATE_DENOMINATOR']
 	
 	#TARGET_WIDTH								= int(1920)		# ; "target_width" an integer; set for hd; do not change unless a dire emergency = .
 	#TARGET_HEIGHT								= int(1080)		# ; "target_height" an integer; set for hd; do not change unless a dire emergency = .
 	#TARGET_VIDEO_BITRATE						= r'4.5M'		# 4.5M is ok (HQ) for h.264 1080p25 slideshow material
+	#TARGET_FPSNUM								= int(25)		# ; "target_fpsnum" an integer; set for pal = .
+	#TARGET_FPSDEN								= int(1)		# ; "target_fpsden" an integer; set for pal = .
 
-	TARGET_FPSNUM								= int(25)		# ; "target_fpsnum" an integer; set for pal = .
-	TARGET_FPSDEN								= int(1)		# ; "target_fpsden" an integer; set for pal = .
 
 	TARGET_BACKGROUND_AUDIO_FREQUENCY			= int(48000) 
 	TARGET_BACKGROUND_AUDIO_CHANNELS			= int(2) 
@@ -507,6 +515,8 @@ def load_settings():
 		TARGET_WIDTH 			= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['WIDTH']
 		TARGET_HEIGHT	 		= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['HEIGHT']
 		TARGET_VIDEO_BITRATE	= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['BITRATE']
+		TARGET_FPSNUM			= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['FRAMERATE_NUMERATOR']
+		TARGET_FPSDEN			= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['FRAMERATE_DENOMINATOR']
 		print(f'load_settings: WARNING: TARGET_RESOLUTION "{final_settings_dict["TARGET_RESOLUTION"]}" not one of {valid_TARGET_RESOLUTION_DICT}, resetting to "{TARGET_RESOLUTION}"',flush=True,file=sys.stderr)
 		final_settings_dict['TARGET_RESOLUTION'] = TARGET_RESOLUTION
 	TARGET_RESOLUTION			= final_settings_dict['TARGET_RESOLUTION']						# grab the specified TARGET_RESOLUTION
@@ -516,6 +526,8 @@ def load_settings():
 	final_settings_dict['TARGET_WIDTH'] = TARGET_WIDTH											# poke back the right value based on specified TARGET_RESOLUTION
 	final_settings_dict['TARGET_HEIGHT'] = TARGET_HEIGHT										# poke back the right value based on specified TARGET_RESOLUTION
 	final_settings_dict['TARGET_VIDEO_BITRATE'] = TARGET_VIDEO_BITRATE							# poke back the right value based on specified TARGET_RESOLUTION
+	final_settings_dict['TARGET_FPSNUM'] = TARGET_FPSNUM										# poke back the right value based on specified TARGET_RESOLUTION
+	final_settings_dict['TARGET_FPSDEN'] = TARGET_FPSDEN										# poke back the right value based on specified TARGET_RESOLUTION
 
 	if final_settings_dict['FFMPEG_ENCODER'].lower() not in valid_FFMPEG_ENCODER:
 		print(f'load_settings: WARNING: FFMPEG_ENCODER "{final_settings_dict["FMPEG_ENCODER"]}" not one of {valid_FFMPEG_ENCODER}, defaulting to "{FFMPEG_ENCODER}"',flush=True,file=sys.stderr)
@@ -738,7 +750,7 @@ def load_settings():
 										[ 'VSPIPE_PATH',								VSPIPE_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'FFMPEG_ENCODER',								FFMPEG_ENCODER,								f'Please leave this alone unless really confident. One of {valid_FFMPEG_ENCODER}. h264_nvenc only works on "nvidia 2060 Super" upward.' ],
 										[ 'TARGET_RESOLUTION',							TARGET_RESOLUTION,							f'eg 1080p : One of {[k for k in valid_TARGET_RESOLUTION_DICT.keys()]} only.' ],
-										[ 'TARGET_VIDEO_BITRATE',						TARGET_VIDEO_BITRATE,						f'Please leave this alone unless really confident. 4.5M is ok (HQ) for h.264 1080p25 slideshow material.' ],
+										[ 'TARGET_VIDEO_BITRATE',						TARGET_VIDEO_BITRATE,						f'eg 4.5M : {[{i:valid_TARGET_RESOLUTION_DICT[i]['BITRATE']} for i in valid_TARGET_RESOLUTION_DICT.keys()]}' ],
 										[ 'slideshow_CONTROLLER_path',					slideshow_CONTROLLER_path,					r'Please leave this alone unless really confident' ],
 										[ 'slideshow_LOAD_SETTINGS_path',				slideshow_LOAD_SETTINGS_path,				r'Please leave this alone unless really confident' ],
 										[ 'slideshow_ENCODER_legacy_path',				slideshow_ENCODER_legacy_path,				r'Please leave this alone unless really confident' ],

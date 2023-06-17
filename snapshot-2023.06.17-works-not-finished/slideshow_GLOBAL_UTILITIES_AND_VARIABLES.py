@@ -105,10 +105,9 @@ from MediaInfoDLL3 import MediaInfo, Stream, Info, InfoOption		# per https://for
 # ---------- START GLOBAL VARIABLED WHICH CAN BE SHARED ACROSS MODULES ----------
 
 # Global Variables 
+
 DEBUG = False
 SETTINGS_DICT = {}
-
-TERMINAL_WIDTH = 250
 NUM_CORES = multiprocessing.cpu_count()
 NUM_THREADS_FOR_FFMPEG_DIVISOR = 3	 																# for calculating number of threads ffmpeg is allowed 
 NUM_THREADS_FOR_FFMPEG = min(8, max(1, int(NUM_CORES // NUM_THREADS_FOR_FFMPEG_DIVISOR)))			# of physical+hyperthreading cores (limit: 1 to 8 cores)
@@ -117,13 +116,64 @@ NUM_THREADS_FOR_FFMPEG_DECODER = min(8, max(1, int(NUM_THREADS_FOR_FFMPEG // 4))
 NUM_THREADS_FOR_FFMPEG_ENCODER = max(1, (NUM_THREADS_FOR_FFMPEG - NUM_THREADS_FOR_FFMPEG_DECODER))	# 3/4 or cores for ffmpeg go to encoder
 
 FFMPEG_EXE	= 'FFMPEG_EXE_HAS_NOT_BEEN_SET_INTO_slideshow_GLOBAL_UTILITIES'				# assume set globally before calling this, so intiialize to failing value
-FFPROBE_EXE	= 'FFPROBE_EXE_HAS_NOT_BEEN_SET_INTO_slideshow_GLOBAL_UTILITIES'				# assume set globally before calling this, so intiialize to failing value
+FFPROBE_EXE	= 'FFPROBE_EXE_HAS_NOT_BEEN_SET_INTO_slideshow_GLOBAL_UTILITIES'			# assume set globally before calling this, so intiialize to failing value
 VSPIPE_EXE	= 'VSPIPE_EXE_HAS_NOT_BEEN_SET_INTO_slideshow_GLOBAL_UTILITIES'				# assume set globally before calling this, so intiialize to failing value
 
-# Global external Functions
-objPrettyPrint = pprint.PrettyPrinter(width=TERMINAL_WIDTH, compact=False, sort_dicts=False)	# facilitates formatting and 
-MI = MediaInfo()
+# Global external Functions with associated variables
 
+TERMINAL_WIDTH = 250
+objPrettyPrint = pprint.PrettyPrinter(width=TERMINAL_WIDTH, compact=False, sort_dicts=False)	# facilitates formatting and 
+
+MI = MediaInfo()
+mi_video_params = [
+	'Format',                                        # : Format used
+	'Format/String',                                 # : Format used + additional features
+	'Format_Profile',                                # : Profile of the Format (old XML Profile@Level@Tier format
+	'Format_Level',                                  # : Level of the Format (only MIXML)
+	'Format_Tier',                                   # : Tier of the Format (only MIXML)
+	'HDR_Format',                                    # : Format used
+	'HDR_Format_Version',                            # : Version of this format
+	'HDR_Format_Profile',                            # : Profile of the Format
+	'HDR_Format_Level',                              # : Level of the Format
+	'HDR_Format_Settings',                           # : Settings of the Format
+	'HDR_Format_Compatibility',                      # : Compatibility with some commercial namings
+	'MaxCLL',                                        # : Maximum content light level
+	'MaxFALL',                                       # : Maximum frame average light level
+	'Duration',                                      # : Play time of the stream in ms
+	'Width',                                         # : Width (aperture size if present) in pixel
+	'Height',                                        # : Height in pixel
+	'PixelAspectRatio',                              # : Pixel Aspect ratio
+	'DisplayAspectRatio',                            # : Display Aspect ratio
+	'Rotation',                                      # : Rotation as a real number eg 180.00
+	'FrameRate',                                     # : Frames per second
+	'FrameRate_Num',                                 # : Frames per second, numerator
+	'FrameRate_Den',                                 # : Frames per second, denominator
+	'FrameCount',                                    # : Number of frames
+	#
+	'Recorded_Date',								 # : Time/date/year that the recording began ... this can be None so use Encoded_Date instead
+	'Encoded_Date',									 # : Time/date/year that the encoding of this content was completed
+	#
+	'FrameRate_Mode',								 # : Frame rate mode (CFR, VFR)
+	'FrameRate_Minimum',							 # : Minimum Frames per second
+	'FrameRate_Nominal',							 # : Nominal Frames per second
+	'FrameRate_Maximum',							 # : Maximum Frames per second
+	'FrameRate_Real',								 # : Real (capture) frames per second
+	'ScanType',
+	'ScanOrder',
+	'ScanOrder_Stored',
+	'ScanOrder_StoredDisplayedInverted',
+	#
+	'Standard',                                      # : NTSC or PAL
+	'ColorSpace',                                    # : 
+	'ChromaSubsampling',                             # : 
+	'BitDepth',                                      # : 16/24/32
+	'ScanType',                                      # : 
+	'colour_description_present',                    # : Presence of colour description "Yes" or not "Yes" if not None
+	'colour_range',                                  # : Colour range for YUV colour space
+	'colour_primaries',                              # : Chromaticity coordinates of the source primaries
+	'transfer_characteristics',                      # : Opto-electronic transfer characteristic of the source picture
+	'matrix_coefficients',                           # : Matrix coefficients used in deriving luma and chroma signals from the green, blue, and red primaries
+]
 # ---------- END GLOBAL VARIABLED WHICH CAN BE SHARED ACROSS MODULES ----------
 # ---------- END GLOBAL VARIABLED WHICH CAN BE SHARED ACROSS MODULES ----------
 # ---------- END GLOBAL VARIABLED WHICH CAN BE SHARED ACROSS MODULES ----------
@@ -253,7 +303,7 @@ def get_random_ffindex_filename(path):
 
 def video_mediainfo_value_worker(stream:int, track:int, param:str, path: Union[Path,str]) -> Union[int,float,str]:
 	# Assume MI.Open(str(path)) has already occurred
-	global MI	# use the global, since we re-use it across functions
+	#global MI	# use the global, since we re-use it across functions
 	if not stream in range(0,8):
 		raise ValueError(f'ERROR: video_mediainfo_value_worker: stream must be a Stream attribute: General, Video, Audio, Text, Other, Image, Menu, Max')
 	if not isinstance(track, int) or track<0:
@@ -287,7 +337,7 @@ def video_mediainfo_value(stream:int, track:int, param:str, path: Union[Path,str
 	# A wrapper for video_mediainfo_value_worker, which gets and returns a single parameter
 	# it opens and closes MI, unlike video_mediainfo_value_worker
 	# This function permits video_mediainfo_value_worker to be recycled elsewhere to be called mutiple times per one single MI.open
-	global MI	# use the global, since we re-use it across functions
+	#global MI	# use the global, since we re-use it across functions
 	if not stream in range(0,8):
 		raise ValueError(f'ERROR: video_mediainfo_value: stream must be a Stream attribute: General, Video, Audio, Text, Other, Image, Menu, Max')
 	if not isinstance(track, int) or track<0:
@@ -302,65 +352,18 @@ def video_mediainfo_value(stream:int, track:int, param:str, path: Union[Path,str
 	return val
 #
 def video_extract_metadata_via_MEDIAINFO(file_path):
-	global MI
+	#global MI					# use the global, since we re-use it across functions
+	#global mi_video_params		# use the global, since we re-use it across functions
 	if DEBUG: print(f"DEBUG: video_extract_metadata_via_MEDIAINFO: entered with file_path='{file_path}'.",flush=True)
 	# ALWAYS include Width, Height, Rotation, Encoded_Date
-	mi_video_params_1 = [
-		'Format',                                        # : Format used
-		'Format/String',                                 # : Format used + additional features
-		'Format_Profile',                                # : Profile of the Format (old XML Profile@Level@Tier format
-		'Format_Level',                                  # : Level of the Format (only MIXML)
-		'Format_Tier',                                   # : Tier of the Format (only MIXML)
-		'HDR_Format',                                    # : Format used
-		'HDR_Format_Version',                            # : Version of this format
-		'HDR_Format_Profile',                            # : Profile of the Format
-		'HDR_Format_Level',                              # : Level of the Format
-		'HDR_Format_Settings',                           # : Settings of the Format
-		'HDR_Format_Compatibility',                      # : Compatibility with some commercial namings
-		'MaxCLL',                                        # : Maximum content light level
-		'MaxFALL',                                       # : Maximum frame average light level
-		'Duration',                                      # : Play time of the stream in ms
-		'Width',                                         # : Width (aperture size if present) in pixel
-		'Height',                                        # : Height in pixel
-		'PixelAspectRatio',                              # : Pixel Aspect ratio
-		'DisplayAspectRatio',                            # : Display Aspect ratio
-		'Rotation',                                      # : Rotation as a real number eg 180.00
-		'FrameRate',                                     # : Frames per second
-		'FrameRate_Num',                                 # : Frames per second, numerator
-		'FrameRate_Den',                                 # : Frames per second, denominator
-		'FrameCount',                                    # : Number of frames
-		#
-		'Recorded_Date',								 # : Time/date/year that the recording began ... this can be None so use Encoded_Date instead
-		'Encoded_Date',									 # : Time/date/year that the encoding of this content was completed
-		#
-		'FrameRate_Mode',								 # : Frame rate mode (CFR, VFR)
-		'FrameRate_Minimum',							 # : Minimum Frames per second
-		'FrameRate_Nominal',							 # : Nominal Frames per second
-		'FrameRate_Maximum',							 # : Maximum Frames per second
-		'FrameRate_Real',								 # : Real (capture) frames per second
-		'ScanType',
-		'ScanOrder',
-		'ScanOrder_Stored',
-		'ScanOrder_StoredDisplayedInverted',
-		#
-		'Standard',                                      # : NTSC or PAL
-		'ColorSpace',                                    # : 
-		'ChromaSubsampling',                             # : 
-		'BitDepth',                                      # : 16/24/32
-		'ScanType',                                      # : 
-		'colour_description_present',                    # : Presence of colour description "Yes" or not "Yes" if not None
-		'colour_range',                                  # : Colour range for YUV colour space
-		'colour_primaries',                              # : Chromaticity coordinates of the source primaries
-		'transfer_characteristics',                      # : Opto-electronic transfer characteristic of the source picture
-		'matrix_coefficients',                           # : Matrix coefficients used in deriving luma and chroma signals from the green, blue, and red primaries
-	]
+
 	mi_dict = {}
 	try:
 		MI.Open(str(file_path))
 	except Exception as e:
 		#print(f"video_extract_metadata_via_MEDIAINFO: MediaInfo: Unexpected error getting information from file: '{file_path}'\n{str(e)}",flush=True,file=sys.stderr)
 		return mi_dict
-	for param in mi_video_params_1:
+	for param in mi_video_params:
 		#value = mediainfo_value(Stream.Video, track=0, param=param, path=file_path)	# version: single-value retrieval and lots of open/close
 		value = video_mediainfo_value_worker(Stream.Video, track=0, param=param, path=file_path)
 		video_mediainfo_value_worker
@@ -447,9 +450,13 @@ class ffprobe:
 	# Given the complexities of ffprobe streams and stream IDs (which are unique across video/audio/data streams),
 	# this class makes it easier to find by also storing values for first_video and first_audio.
 	# The native ffprobe tag names go straight into the dict so they always align with ffprobe querying
+	#
+	# For your convenience, it has  found the first video stream for you, eg obj_ffprobe.first_video.get("rotation")
+	#						it also found the first audio stream for you, in obj_ffprobe.first_audio
+	#
 	# Usage:
-	#	obj_ffprobe = ffprobe(file_path)
-	#	print(f'{objPrettyPrint.pformat(obj_ffprobe.dict)}',flush=True)	# to print everything. take care to notice stream indexing to correctly find your video stream metadata
+	#	obj_ffprobe = UTIL.ffprobe(file_path)
+	#	print(f'{objPrettyPrint.pformat(obj_ffprobe.dict)}',flush=True)	# take care to notice STREAM INDEXING to correctly find your specific video stream's metadata
 	#	duration = obj_ffprobe.format_dict.get("duration")
 	#	rotation = obj_ffprobe.first_video.get("rotation")
 	#	r_frame_rate = obj_ffprobe.first_video.get("r_frame_rate")
