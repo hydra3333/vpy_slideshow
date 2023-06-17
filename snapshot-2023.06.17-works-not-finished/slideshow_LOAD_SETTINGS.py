@@ -202,15 +202,18 @@ def load_settings():
 	DENOISE_SMALL_SIZE_VIDEOS					= True
 
 	valid_TARGET_RESOLUTION_DICT				=	{	
+													# These appear to work since the legacy resizing ENCODER logic caters for them.
 														r'1080p_PAL'.lower():	{ 'WIDTH': int(1920), 'HEIGHT': int(1080), 'BITRATE': r'4.5M', 'FRAMERATE_NUMERATOR': int(25),    'FRAMERATE_DENOMINATOR': int(1) },
-														r'576p_PAL'.lower():	{ 'WIDTH': int(720),  'HEIGHT': int(576),  'BITRATE': r'2M',   'FRAMERATE_NUMERATOR': int(25),    'FRAMERATE_DENOMINATOR': int(1) },
 														r'4k_PAL'.lower():		{ 'WIDTH': int(3840), 'HEIGHT': int(2160), 'BITRATE': r'15M',  'FRAMERATE_NUMERATOR': int(25),    'FRAMERATE_DENOMINATOR': int(1) },
 														r'2160p_PAL'.lower():	{ 'WIDTH': int(3840), 'HEIGHT': int(2160), 'BITRATE': r'15M',  'FRAMERATE_NUMERATOR': int(25),    'FRAMERATE_DENOMINATOR': int(1) } ,
 														r'1080p_NTSC'.lower():	{ 'WIDTH': int(1920), 'HEIGHT': int(1080), 'BITRATE': r'4.5M', 'FRAMERATE_NUMERATOR': int(30000), 'FRAMERATE_DENOMINATOR': int(1001) },	# 29.976
-														r'480p_NTSC'.lower():	{ 'WIDTH': int(720),  'HEIGHT': int(480),  'BITRATE': r'2M',   'FRAMERATE_NUMERATOR': int(30000), 'FRAMERATE_DENOMINATOR': int(1001) },	# 29.976
 														r'4k_NTSC'.lower():		{ 'WIDTH': int(3840), 'HEIGHT': int(2160), 'BITRATE': r'15M',  'FRAMERATE_NUMERATOR': int(30000), 'FRAMERATE_DENOMINATOR': int(1001) },	# 29.976
 														r'2160p_NTSC'.lower():	{ 'WIDTH': int(3840), 'HEIGHT': int(2160), 'BITRATE': r'15M',  'FRAMERATE_NUMERATOR': int(30000), 'FRAMERATE_DENOMINATOR': int(1001) },	# 29.976
 													}
+													# These result in broken aspect ratios since the legacy resizing ENCODER logic does not cater for it.
+													#	r'576p_PAL'.lower():	{ 'WIDTH': int(720),  'HEIGHT': int(576),  'BITRATE': r'2M',   'FRAMERATE_NUMERATOR': int(25),    'FRAMERATE_DENOMINATOR': int(1) },
+													#	r'480p_NTSC'.lower():	{ 'WIDTH': int(720),  'HEIGHT': int(480),  'BITRATE': r'2M',   'FRAMERATE_NUMERATOR': int(30000), 'FRAMERATE_DENOMINATOR': int(1001) },	# 29.976
+
 	TARGET_RESOLUTION							= list(valid_TARGET_RESOLUTION_DICT.keys())[0]	# the first key in the dict should be 1080p_PAL :)
 	TARGET_WIDTH 								= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['WIDTH']
 	TARGET_HEIGHT	 							= valid_TARGET_RESOLUTION_DICT[TARGET_RESOLUTION]['HEIGHT']
@@ -751,7 +754,7 @@ def load_settings():
 										[ 'FFPROBE_PATH',								FFPROBE_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'VSPIPE_PATH',								VSPIPE_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'FFMPEG_ENCODER',								FFMPEG_ENCODER,								f'Please leave this alone unless really confident. One of {valid_FFMPEG_ENCODER}. h264_nvenc only works on "nvidia 2060 Super" upward.' ],
-										[ 'TARGET_RESOLUTION',							TARGET_RESOLUTION,							f'eg 1080p : One of {valid_resolutions} only.' ],
+										[ 'TARGET_RESOLUTION',							TARGET_RESOLUTION,							f'eg 1080p : One of {valid_resolutions} only. Others result in broken aspect ratios.' ],
 										[ 'TARGET_VIDEO_BITRATE',						TARGET_VIDEO_BITRATE,						f'eg 4.5M : {valid_bitrates}' ],
 										[ 'slideshow_CONTROLLER_path',					slideshow_CONTROLLER_path,					r'Please leave this alone unless really confident' ],
 										[ 'slideshow_LOAD_SETTINGS_path',				slideshow_LOAD_SETTINGS_path,				r'Please leave this alone unless really confident' ],
