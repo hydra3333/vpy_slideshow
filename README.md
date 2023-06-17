@@ -5,18 +5,15 @@ Download / Setup / Configure then Fire-and-wait-a-long-time.
 A python3/vapoursynth script using ffmpeg to create a 'HD' .mp4 slideshow
 from images and video clips in specified folders,
 with background audio from a nominated folder of audio files, 
-with video audio overlyed on the background audio.
+with video audio overlyed on the background audio.    
+
+** \_AI\_ has much better and elegant code which works with audio ... look for that on GITHUB **    
 
 ___
-### \_AI\_ has much better and elegant code which works with audio   
-#### ... look for that on GITHUB
-___
-
-___
-### under development 
-
-It's a terrible hack-up of good stuff provided earlier by \_AI\_ in thread   
+### Under Development, it works    
+It's a hack-up of good stuff provided earlier by \_AI\_ in thread   
 https://forum.videohelp.com/threads/408230-ffmpeg-avc-from-jpgs-of-arbitrary-dimensions-maintaining-aspect-ratio 
+___
 
 
 ### Portabe Installation (x64 only)
