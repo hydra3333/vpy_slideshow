@@ -726,6 +726,8 @@ def load_settings():
 	# if the initial settings do not exist, create a raw template then exit immediately.
 	
 	if not os.path.exists(SLIDESHOW_SETTINGS_MODULE_FILENAME):
+		valid_resolutions = [k for k in valid_TARGET_RESOLUTION_DICT.keys()]
+		valid_bitrates = [ { i : valid_TARGET_RESOLUTION_DICT[i]["BITRATE"] } for i in valid_TARGET_RESOLUTION_DICT.keys() ]
 		specially_formatted_settings_list =	[
 										[ 'ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS',	ROOT_FOLDER_SOURCES_LIST_FOR_IMAGES_PICS,	r'a list, one or more folders to look in for slideshow pics/videos. the r in front of the string is CRITICAL' ],
 										[ 'RECURSIVE',									RECURSIVE,									r'case sensitive: whether to recurse the source folder(s) looking for slideshow pics/videos' ],
@@ -749,8 +751,8 @@ def load_settings():
 										[ 'FFPROBE_PATH',								FFPROBE_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'VSPIPE_PATH',								VSPIPE_PATH,								r'Please leave this alone unless really confident' ],
 										[ 'FFMPEG_ENCODER',								FFMPEG_ENCODER,								f'Please leave this alone unless really confident. One of {valid_FFMPEG_ENCODER}. h264_nvenc only works on "nvidia 2060 Super" upward.' ],
-										[ 'TARGET_RESOLUTION',							TARGET_RESOLUTION,							f'eg 1080p : One of {[k for k in valid_TARGET_RESOLUTION_DICT.keys()]} only.' ],
-										[ 'TARGET_VIDEO_BITRATE',						TARGET_VIDEO_BITRATE,						f'eg 4.5M : {[{i:valid_TARGET_RESOLUTION_DICT[i]['BITRATE']} for i in valid_TARGET_RESOLUTION_DICT.keys()]}' ],
+										[ 'TARGET_RESOLUTION',							TARGET_RESOLUTION,							f'eg 1080p : One of {valid_resolutions} only.' ],
+										[ 'TARGET_VIDEO_BITRATE',						TARGET_VIDEO_BITRATE,						f'eg 4.5M : {valid_bitrates}' ],
 										[ 'slideshow_CONTROLLER_path',					slideshow_CONTROLLER_path,					r'Please leave this alone unless really confident' ],
 										[ 'slideshow_LOAD_SETTINGS_path',				slideshow_LOAD_SETTINGS_path,				r'Please leave this alone unless really confident' ],
 										[ 'slideshow_ENCODER_legacy_path',				slideshow_ENCODER_legacy_path,				r'Please leave this alone unless really confident' ],
