@@ -33,6 +33,19 @@ The legacy encoder logic does not handle 576p nor 480p resolutions (Anamorphic).
 If you wanted a .mpg file to burn to DVD then use another tool, eg FFmpeg, to convert (transcode)
 the final mp4. It's easy enough.    
 
+# How-to : short version
+
+1. Create a new _empty_ folder on a disk with **lots** of free space
+2. Download `Setup.bat` from https://raw.githubusercontent.com/hydra3333/vpy_slideshow/main/Setup.bat into that folder    
+3. Download `wget.exe` from https://eternallybored.org/misc/wget/1.21.3/64/wget.exe into that folder    
+4. Double-click `Setup.bat` to download and prepare the necessary files
+6. Double-click `QN_Auto_Slideshow_Creator_for_Windows.bat` to create a template `slideshow_settings.py`
+7. Edit `slideshow_settings.py`. Syntax is **critical**. All command and matching quotes etc must be **perfect** or the process will fail. 
+8. Double-click `QN_Auto_Slideshow_Creator_for_Windows.bat` which will consume `slideshow_settings.py` and create the slideshow according to your settings
+9. Look for the resulting slideshow file you specified with settings `FINAL_MP4_WITH_AUDIO_FILENAME`
+
+# How-to : the details
+
 ## Portable "Installation" (x64 only)
 
 It's portable. Stuff all goes into the folder tree which you create first.    
@@ -118,7 +131,7 @@ That is a once-off thing, unless you delete `slideshow_settings.py` to start afr
 You can safely close the pop-up dos box after it's completed.    
 
 Now, using your favourite text editor, eg Notepad, edit `slideshow_settings.py` and make required changes.   
-Syntax is critical, all command and matching quotes etc must be **perect** or the process will fail.    
+Syntax is critical, all command and matching quotes etc must be **perfect** or the process will fail.    
 Look for and change the settings you need. Please be careful or you will have to re-edit ;)    
 
 **At a minimum:**
