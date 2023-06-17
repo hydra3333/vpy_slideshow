@@ -23,7 +23,7 @@ be downloaded into the folder tree and a bunch of dependencies "portable install
 #### 1. Create a fresh new directory   
 
 Create a new EMPTY directory somewhere on a disk which has a LOT of free disk space. Try not to use `C:`.   
-I will need, say, 5Gb free disk space per 100 pics/videos, which will be used for temporary working files.   
+I will need, say, 5 Gb free disk space per 100 pics/videos, which will be used for temporary working files.   
 Later, once installed and configured, you may choose to re-configure to use a temporary folder on another disk.   
 
 **For the purpose of examples below, let's assume you created a new folder called `D:\QN_Auto_Slideshow_Creator_for_Windows`**    
@@ -60,10 +60,10 @@ of one", so we just live with it.
 
 #### 2.1 Run Setup et al
 
-Now that you have downloaded `Setup.bat`, in File Explorer double-click on `Setup.bat` to run it.
-A DOS window should pop up showing all the downloads and pip's and vsrepo's and unzips as they happen.   
+Now that you have downloaded `Setup.bat`, in File Explorer double-click on `Setup.bat` to run it.    
+A DOS window will pop up showing all the downloads and pip's and vsrepo's and unzips as they happen.   
 
-When `Setup.bat` is finished, you can see all of the files in the directory tree in and under the directory you created above.
+When `Setup.bat` is finished, you can see all of the files in the directory tree.    
 These give you   
 - portable Python x64 (3.11.2 last time I looked) ... version has to match the Vapoursynth version requirement   
 - portable Vapoursynth x64 (R62 last time I looked, depends on python 3.11.x)   
@@ -77,8 +77,8 @@ These give you
 #### 1. Preparation
 
 Check your disks and their free disk space.    
-During configuration you may choose to specify a different disk/folder to use for
-the very large set of temporary files, since circa 6Gb per 100 files is required.
+During configuration you may choose to specify a different disk/folder to hold
+the very large set of temporary files ... circa 5 Gb per 100 files will be required.
 
 You need to create a folder somewhere to hold audio files (eg music) you want played
 during the slideshow as "background audio" ... even if you do not want any background audio.   
@@ -87,7 +87,7 @@ Per the install example, something like this is good: `D:\QN_Auto_Slideshow_Crea
 Copy any audio files to that folder.  Uplifting type background instrumental music is good, even classical :)    
 Rename the copied files to your liking, since they will be read in alphabetical order into one background audio track.
 
-### 2. Create and edit a Configuration file    
+### 2. Create and edit Configuration file `slideshow_settings.py`    
 
 A Configuration file tells your requirements to the process.    
 
