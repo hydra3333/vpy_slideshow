@@ -1081,9 +1081,9 @@ if __name__ == "__main__":
 							'-refs', '3',  			# Set the number of reference frames to 3 SO THAT THE RESULTING MP4 IS TV COMPATIBLE !!! (it is 16 by default, which will not play on TVs)
 							#'-crf', '22', 			# use CRF so that we do not have to guess bitrates
 							'-b:v', SETTINGS_DICT['TARGET_VIDEO_BITRATE'], 			# 4.5M is ok (HQ) for h.264 1080p25 slideshow material; instead of crf 22
-							'-minrate:v', '500k', 
-							'-maxrate:v', '20M', 
-							'-bufsize', '20M',
+							'-minrate:v', '500k',	# a fixed minimum for TV compatibility
+							'-maxrate:v', '20M', 	# a fixed ceiling for TV compatibility
+							'-bufsize', '20M',		# a fixed ceiling for TV compatibility
 							'-profile:v', 'high',
 							'-level', '5.1',		# we are only 1080p so 5.1 is enough # H.264 Maximum supported bitrate: Level 5.1: 50 Mbps, Level 5.2: 62.5 Mbps
 							'-movflags', '+faststart+write_colr',
@@ -1129,9 +1129,9 @@ if __name__ == "__main__":
 							'-b:v', SETTINGS_DICT['TARGET_VIDEO_BITRATE'],			# 4.5M is ok (HQ) for h.264 1080p25 slideshow material ... nominated non-CQ target bitrate see -cq:v 0
 					#
 							'-tune', 'hq',
-							'-minrate:v', '500k', 
-							'-maxrate:v', '20M', 
-							'-bufsize', '20M',
+							'-minrate:v', '500k',	# a fixed minimum for TV compatibility
+							'-maxrate:v', '20M', 	# a fixed ceiling for TV compatibility
+							'-bufsize', '20M',		# a fixed ceiling for TV compatibility
 							'-profile:v', 'high',
 							'-level', '5.1',		# we are only 1080p so 5.1 is enough# H.264 Maximum supported bitrate: Level 5.1: 50 Mbps, Level 5.2: 62.5 Mbps
 							'-movflags', '+faststart+write_colr',
